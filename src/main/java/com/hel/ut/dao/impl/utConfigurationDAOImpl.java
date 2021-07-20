@@ -175,7 +175,9 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     public utConfiguration getConfigurationByName(String configName, int orgId) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
         criteria.add(Restrictions.like("configName", configName));
-        criteria.add(Restrictions.eq("orgId", orgId));
+	if(orgId > 0) {
+	    criteria.add(Restrictions.eq("orgId", orgId));
+	}
 	criteria.add(Restrictions.eq("deleted", false));
 
         return (utConfiguration) criteria.uniqueResult();
