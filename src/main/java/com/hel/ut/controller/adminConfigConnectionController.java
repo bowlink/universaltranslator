@@ -1077,132 +1077,214 @@ public class adminConfigConnectionController {
 	String strLine = "";
 	 
 	try {
+	    //Need to check if the connection already exists for the source config and target config
+	    boolean connectionFound = false;
+	    String[] strArrayValues;
+	    String srcOrgName = "";
+	    String srcConfigName = "";
+	    String tgtOrgName = "";
+	    String tgtConfigName = "";
+	    StringBuilder emailBody = new StringBuilder();
 	    
 	    LineNumberReader reader = new LineNumberReader(new InputStreamReader(new FileInputStream("/tmp/"+fileName), "UTF-8"));
-	    String[] strArrayValues;
-	    Integer srcConfigId = 0;
-	    String srcConfigName = "";
-	    String srcOrgName = "";
-	    Integer tgtConfigId = 0;
-	    String tgtConfigName = "";
-	    String tgtOrgName = "";
-	    Integer connectionId = 0;
-	    boolean connectionImportSuccessful = true;
 	    
 	    while (((strLine = reader.readLine()) != null)){
-		strLine = strLine.replace("[", "").replace("]", "");
-		strArrayValues = strLine.split("\\|", -1);
-		
-		if(strArrayValues[0].equals("srcconfig")) {
-		    try {
-			srcConfigName = strArrayValues[1];
-			srcOrgName = strArrayValues[2];
-			srcConfigId = findConnectionConfigDetails(srcConfigName,srcOrgName,1);
-		    }
-		    catch (Exception ex) {
-			connectionImportSuccessful = false;
-			break;
-		    }
-		    
-		    if(srcConfigId == 0) {
-			break;
-		    }
-		}
-		else if(strArrayValues[0].equals("tgtconfig")) {
-		    try {
-			tgtConfigName = strArrayValues[1];
-			tgtOrgName = strArrayValues[2];
-			tgtConfigId = findConnectionConfigDetails(tgtConfigName,tgtOrgName,2);
-		    }
-		    catch (Exception ex) {
-			connectionImportSuccessful = false;
-			break;
-		    }
-		    
-		    if(tgtConfigId == 0) {
-			break;
-		    }
-		}
-		else if(strArrayValues[0].equals("fieldmapping")) {
-		    
-		    if(connectionId == 0 && srcConfigId > 0 && tgtConfigId > 0) {
-			connectionId = processImportConnection(srcConfigId,tgtConfigId);
-		    }
-		    
-		    try {
-			processImportConnectionField(strArrayValues,connectionId,srcConfigId,tgtConfigId);
-		    }
-		    catch (Exception ex) {
-			processImportConnectionError("Adding Fields",connectionId,srcOrgName,tgtOrgName,srcConfigName,tgtConfigName,ex);
-			connectionImportSuccessful = false;
-			break;
-		    }
-		}
+		 strLine = strLine.replace("[", "").replace("]", "");
+		 strArrayValues = strLine.split("\\|", -1);
+		 
+		 if(strArrayValues[0].equals("srcconfig")) {
+		     srcConfigName = strArrayValues[1];
+		     srcOrgName = strArrayValues[2];
+		 }
+		 else if(strArrayValues[0].equals("tgtconfig")) {
+		     tgtConfigName = strArrayValues[1];
+		     tgtOrgName = strArrayValues[2];
+		 }
 	    }
 	    reader.close();
 	    
-	    String emailSubject = "Configuration Import has been Completed";
-	    StringBuilder emailBody = new StringBuilder();
-	    
-	    Organization srcOrgDetails = organizationmanager.getOrganizationByName(srcOrgName).get(0);
-	    Organization tgtOrgDetails = organizationmanager.getOrganizationByName(tgtOrgName).get(0);
-	    
-	    if(srcConfigId == 0) {
-		
-		emailSubject = "Connection Import was Not Successful";
-		
-		emailBody.append("The following connection import has failed.");
-		emailBody.append("<br /><br />");
-		emailBody.append("Organization Name: ").append(srcOrgDetails.getOrgName());
-		emailBody.append("<br />Configuration Name: ").append(srcConfigName);
-		emailBody.append("<br/><br />Reason<br />The source configuration was not found on the system.");
-		
-		mailMessage mail = new mailMessage();
-		mail.settoEmailAddress(myProps.getProperty("admin.email"));
-		mail.setfromEmailAddress("support@health-e-link.net");
-		mail.setmessageSubject(emailSubject);
-		mail.setmessageBody(emailBody.toString());
-		emailMessageManager.sendEmail(mail);
+	    if(!"".equals(srcConfigName) && !"".equals(tgtConfigName)) {
+		connectionFound = checkIfConnectionExists(srcConfigName,tgtConfigName);
 	    }
-	    else if(tgtConfigId == 0) {
+	    
+	    if(!connectionFound) {
+		reader = new LineNumberReader(new InputStreamReader(new FileInputStream("/tmp/"+fileName), "UTF-8"));
+		Integer srcConfigId = 0;
+		Integer tgtConfigId = 0;
+		Integer connectionId = 0;
+		boolean connectionImportSuccessful = true;
+
+		while (((strLine = reader.readLine()) != null)){
+		    strLine = strLine.replace("[", "").replace("]", "");
+		    strArrayValues = strLine.split("\\|", -1);
+
+		    if(strArrayValues[0].equals("srcconfig")) {
+			try {
+			    srcConfigName = strArrayValues[1];
+			    srcOrgName = strArrayValues[2];
+			    srcConfigId = findConnectionConfigDetails(srcConfigName,srcOrgName,1);
+			}
+			catch (Exception ex) {
+			    connectionImportSuccessful = false;
+			    break;
+			}
+
+			if(srcConfigId == 0) {
+			    break;
+			}
+		    }
+		    else if(strArrayValues[0].equals("tgtconfig")) {
+			try {
+			    tgtConfigName = strArrayValues[1];
+			    tgtOrgName = strArrayValues[2];
+			    tgtConfigId = findConnectionConfigDetails(tgtConfigName,tgtOrgName,2);
+			}
+			catch (Exception ex) {
+			    connectionImportSuccessful = false;
+			    break;
+			}
+
+			if(tgtConfigId == 0) {
+			    break;
+			}
+		    }
+		    else if(strArrayValues[0].equals("fieldmapping")) {
+
+			if(connectionId == 0 && srcConfigId > 0 && tgtConfigId > 0) {
+			    connectionId = processImportConnection(srcConfigId,tgtConfigId);
+			}
+
+			try {
+			    processImportConnectionField(strArrayValues,connectionId,srcConfigId,tgtConfigId);
+			}
+			catch (Exception ex) {
+			    processImportConnectionError("Adding Fields",connectionId,srcOrgName,tgtOrgName,srcConfigName,tgtConfigName,ex);
+			    connectionImportSuccessful = false;
+			    break;
+			}
+		    }
+		}
+		reader.close();
+
+		String emailSubject = "Configuration Import has been Completed";
 		
-		emailSubject = "Connection Import was Not Successful";
+		Organization srcOrgDetails = null;
+		Organization tgtOrgDetails = null;
 		
-		emailBody.append("The following connection import has failed.");
-		emailBody.append("<br /><br />");
-		emailBody.append("Organization Name: ").append(tgtOrgDetails.getOrgName());
-		emailBody.append("<br />Configuration Name: ").append(tgtConfigName);
-		emailBody.append("<br/><br />Reason<br />The target configuration was not found on the system.");
+		if(organizationmanager.getOrganizationByName(srcOrgName) != null) {
+		    if(!organizationmanager.getOrganizationByName(srcOrgName).isEmpty()) {
+			srcOrgDetails = organizationmanager.getOrganizationByName(srcOrgName).get(0);
+		    }
+		}
+		if(organizationmanager.getOrganizationByName(tgtOrgName) != null) {
+		    if(!organizationmanager.getOrganizationByName(tgtOrgName).isEmpty()) {
+			tgtOrgDetails = organizationmanager.getOrganizationByName(tgtOrgName).get(0);
+		    }
+		}
 		
-		mailMessage mail = new mailMessage();
-		mail.settoEmailAddress(myProps.getProperty("admin.email"));
-		mail.setfromEmailAddress("support@health-e-link.net");
-		mail.setmessageSubject(emailSubject);
-		mail.setmessageBody(emailBody.toString());
-		emailMessageManager.sendEmail(mail);
+		if(srcOrgDetails == null) {
+		    emailSubject = "Connection Import was Not Successful";
+
+		    emailBody.append("The following source organization was not found.");
+		    emailBody.append("<br /><br />");
+		    emailBody.append("Organization Name: ").append(srcOrgName);
+		    emailBody.append("<br />Configuration Name: ").append(srcConfigName);
+		    emailBody.append("<br/><br />Reason<br />The source organization was not found on the system.");
+
+		    mailMessage mail = new mailMessage();
+		    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+		    mail.setfromEmailAddress("support@health-e-link.net");
+		    mail.setmessageSubject(emailSubject);
+		    mail.setmessageBody(emailBody.toString());
+		    emailMessageManager.sendEmail(mail);
+		}
+		else if(tgtOrgDetails == null) {
+		    emailSubject = "Connection Import was Not Successful";
+
+		    emailBody.append("The following target organization was not found.");
+		    emailBody.append("<br /><br />");
+		    emailBody.append("Organization Name: ").append(tgtOrgName);
+		    emailBody.append("<br />Configuration Name: ").append(tgtConfigName);
+		    emailBody.append("<br/><br />Reason<br />The target organization was not found on the system.");
+
+		    mailMessage mail = new mailMessage();
+		    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+		    mail.setfromEmailAddress("support@health-e-link.net");
+		    mail.setmessageSubject(emailSubject);
+		    mail.setmessageBody(emailBody.toString());
+		    emailMessageManager.sendEmail(mail);
+		}
+		else if(srcConfigId == 0) {
+
+		    emailSubject = "Connection Import was Not Successful";
+
+		    emailBody.append("The following connection import has failed.");
+		    emailBody.append("<br /><br />");
+		    emailBody.append("Organization Name: ").append(srcOrgDetails.getOrgName());
+		    emailBody.append("<br />Configuration Name: ").append(srcConfigName);
+		    emailBody.append("<br/><br />Reason<br />The source configuration was not found on the system.");
+
+		    mailMessage mail = new mailMessage();
+		    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+		    mail.setfromEmailAddress("support@health-e-link.net");
+		    mail.setmessageSubject(emailSubject);
+		    mail.setmessageBody(emailBody.toString());
+		    emailMessageManager.sendEmail(mail);
+		}
+		else if(tgtConfigId == 0) {
+
+		    emailSubject = "Connection Import was Not Successful";
+
+		    emailBody.append("The following connection import has failed.");
+		    emailBody.append("<br /><br />");
+		    emailBody.append("Organization Name: ").append(tgtOrgDetails.getOrgName());
+		    emailBody.append("<br />Configuration Name: ").append(tgtConfigName);
+		    emailBody.append("<br/><br />Reason<br />The target configuration was not found on the system.");
+
+		    mailMessage mail = new mailMessage();
+		    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+		    mail.setfromEmailAddress("support@health-e-link.net");
+		    mail.setmessageSubject(emailSubject);
+		    mail.setmessageBody(emailBody.toString());
+		    emailMessageManager.sendEmail(mail);
+		}
+		else if(connectionImportSuccessful) {
+		    emailBody.append("The following connection import has been completed and is now available.");
+		    emailBody.append("<br /><br />");
+		    emailBody.append("Source Organization Name: ").append(srcOrgDetails.getOrgName());
+		    emailBody.append("<br />Source Configuration Name: ").append(srcConfigName);
+		    emailBody.append("<br /><br />Target Organization Name: ").append(tgtOrgDetails.getOrgName());
+		    emailBody.append("<br />Target Configuration Name: ").append(tgtConfigName);
+		    emailBody.append("<br /><br />Connection Id: ").append(connectionId);
+
+		    //Turn the configuration on
+		    configurationConnection connectionDetails = utconfigurationmanager.getConnection(connectionId);
+		    connectionDetails.setStatus(true);
+		    utconfigurationmanager.updateConnection(connectionDetails);
+
+		    mailMessage mail = new mailMessage();
+		    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+		    mail.setfromEmailAddress("support@health-e-link.net");
+		    mail.setmessageSubject(emailSubject);
+		    mail.setmessageBody(emailBody.toString());
+		    emailMessageManager.sendEmail(mail);
+		}
 	    }
-	    else if(connectionImportSuccessful) {
-		emailBody.append("The following connection import has been completed and is now available.");
+	    else {
+		emailBody.append("The following connection import has failed because a connection already exists for the source and target configuration in the import file.");
 		emailBody.append("<br /><br />");
-		emailBody.append("Source Organization Name: ").append(srcOrgDetails.getOrgName());
+		emailBody.append("Source Organization Name: ").append(srcOrgName);
 		emailBody.append("<br />Source Configuration Name: ").append(srcConfigName);
-		emailBody.append("<br /><br />Target Organization Name: ").append(tgtOrgDetails.getOrgName());
+		emailBody.append("<br /><br />Target Organization Name: ").append(tgtOrgName);
 		emailBody.append("<br />Target Configuration Name: ").append(tgtConfigName);
-		emailBody.append("<br /><br />Connection Id: ").append(connectionId);
-		
-		//Turn the configuration on
-		configurationConnection connectionDetails = utconfigurationmanager.getConnection(connectionId);
-		connectionDetails.setStatus(true);
-		utconfigurationmanager.updateConnection(connectionDetails);
-		
+
 		mailMessage mail = new mailMessage();
 		mail.settoEmailAddress(myProps.getProperty("admin.email"));
 		mail.setfromEmailAddress("support@health-e-link.net");
-		mail.setmessageSubject(emailSubject);
+		mail.setmessageSubject("The imported connection already exists.");
 		mail.setmessageBody(emailBody.toString());
 		emailMessageManager.sendEmail(mail);
 	    }
-	    
 	} catch (FileNotFoundException e) {
 	    Logger.getLogger(transactionInManagerImpl.class.getName()).log(Level.SEVERE, null, e);
 	} catch (IOException e) {
@@ -1346,5 +1428,32 @@ public class adminConfigConnectionController {
 	mail.setmessageSubject(emailSubject);
 	mail.setmessageBody(emailBody.toString());
 	emailMessageManager.sendEmail(mail);
+    }
+    
+    /**
+     * The 'checkIfConnectionExists' method will search the system to make sure the connection between passed in source configuration and target
+     * configuration does not exists.
+     * 
+     * @param srcConfigName 
+     * @param tgtConfigName
+     * 
+     * @return The method will return the source configuration id
+     */
+    public boolean checkIfConnectionExists(String srcConfigName, String tgtConfigName) {
+	
+	boolean connectionExists = false;
+	
+	utConfiguration srcConfigDetails = utconfigurationmanager.getConfigurationByName(srcConfigName,0);
+	utConfiguration tgtConfigDetails = utconfigurationmanager.getConfigurationByName(tgtConfigName,0);
+	
+	if(srcConfigDetails != null && tgtConfigDetails != null) {
+	    List<configurationConnection> srcTgtConnections = utconfigurationmanager.getConnectionsBySrcAndTargetConfigurations(srcConfigDetails.getId(),tgtConfigDetails.getId());
+	    
+	    if(!srcTgtConnections.isEmpty()) {
+		connectionExists = true;
+	    }
+	}
+	
+	return connectionExists;
     }
 }
