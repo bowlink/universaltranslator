@@ -287,16 +287,17 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     /**
      * The 'getTransportFTPDetailsPush' function will return the PUSH FTP details for the passed in transportDetailsId.
      *
-     * @param transportDetailsId The id of the selected transport method
+     * @param transportDetailId
      *
      * @return This function will return the PUSH FTP details
+     * @throws java.lang.Exception
      */
     @Override
     @Transactional(readOnly = true)
     public configurationFTPFields getTransportFTPDetailsPush(int transportDetailId) throws Exception {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFTPFields.class)
-                .add(Restrictions.eq("transportId", transportDetailId))
-                .add(Restrictions.eq("method", 2));
+	.add(Restrictions.eq("transportId", transportDetailId))
+	.add(Restrictions.eq("method", 2));
 
         return (configurationFTPFields) criteria.uniqueResult();
 
@@ -1404,7 +1405,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = true)
     public List<configurationFTPFields> getFTPSourceConfigurations() {
         
-	String sql = "select a.transportId, a.IP as ip, a.directory, a.username, a.password, a.port "
+	String sql = "select a.transportId, a.IP as ip, a.directory, a.username, a.password, a.port, a.protocol "
 	    + "from rel_transportftpdetails a "
 	    + "inner join configurationtransportdetails b on b.id = a.transportId "
 	    + "inner join configurations c on c.id = b.configId "
@@ -1418,9 +1419,9 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     /**
      * The 'getConfigurationFieldsByFieldNo' function will return a list of form fields for the selected configuration and selected Field No
      *
-     * @param configId The id of the selected configuration
-     * @param transporetDetailId The id of the selected transport method
-     * @param fieldNo The integer value of the field you want to return fields
+     * @param fieldId The id of the selected configuration field
+     * @return 
+     * @throws java.lang.Exception
      */
     @SuppressWarnings("unchecked")
     @Override

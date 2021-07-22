@@ -4576,22 +4576,25 @@ public class transactionInManagerImpl implements transactionInManager {
 			    session.setConfig(config);
 
 			    session.connect(); 
-
+			    
 			    channel = session.openChannel("sftp");
+			    channel.connect();
+			    channelSftp = (ChannelSftp) channel;
+			    
 			    channelSftp.cd(ftpConfiguration.getdirectory());
 
 			    Vector filelist = channelSftp.ls(ftpConfiguration.getdirectory());
-
+			    
 			    if(filelist.size() > 0) {
 				for(int i=0; i<filelist.size();i++){
 				    LsEntry entry = (LsEntry) filelist.get(i);
 
 				    if(!entry.getAttrs().isDir()) {
 					boolean fileMoved = false;
-
+					
 				       //Move the file locally
 				       try {
-					   channelSftp.get(entry.getFilename(),fileDropDetails.getDirectory() + entry.getFilename());
+					   channelSftp.get(entry.getFilename(),myProps.getProperty("ut.directory.utRootDir") + fileDropDetails.getDirectory() + entry.getFilename());
 					   fileMoved = true;
 				       }
 				       catch (SftpException e) {
@@ -4708,7 +4711,7 @@ public class transactionInManagerImpl implements transactionInManager {
 					OutputStream outputStream;
 					for(FTPFile file: filelist){
 					    if(file.isFile()) {
-						InputStream inputStream = ftpClient.retrieveFileStream(ftpConfiguration.getdirectory()+"/"+file.getName());
+						InputStream inputStream = ftpClient.retrieveFileStream(myProps.getProperty("ut.directory.utRootDir") + ftpConfiguration.getdirectory()+"/"+file.getName());
 						byte[] buffer = new byte[inputStream.available()];
 						inputStream.read(buffer);
 						
