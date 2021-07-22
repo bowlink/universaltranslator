@@ -2280,12 +2280,15 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			session.connect();
 
 			channel = session.openChannel("sftp");
+			channel.connect();
+			channelSftp = (ChannelSftp) channel;
+			
 			channelSftp.cd(FTPPushDetails.getdirectory());
 
 			String filename = batchDownload.getOutputFileName();
-
-			FileInputStream fis = new FileInputStream(archiveFile);
-
+			
+			FileInputStream fis = new FileInputStream(new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getfileLocation() + filename));
+			
 			try {
 			    channelSftp.put(fis, batchDownload.getOutputFileName());
 
@@ -2306,7 +2309,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			    transactionOutDAO.submitBatchActivityLog(ba);
 
 			    ba = new batchdownloadactivity();
-			    ba.setActivity("FTP Error: " + errors.toString());
+			    ba.setActivity("FTP Error: " + errors.toString().substring(0, 750));
 			    ba.setBatchDownloadId(batchDownload.getId());
 			    transactionOutDAO.submitBatchActivityLog(ba);
 
@@ -2334,7 +2337,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			transactionOutDAO.submitBatchActivityLog(ba);
 
 			ba = new batchdownloadactivity();
-			ba.setActivity("FTP Error: " + errors.toString());
+			ba.setActivity("FTP Error: " + errors.toString().substring(0, 750));
 			ba.setBatchDownloadId(batchDownload.getId());
 			transactionOutDAO.submitBatchActivityLog(ba);
 
@@ -2362,7 +2365,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			transactionOutDAO.submitBatchActivityLog(ba);
 
 			ba = new batchdownloadactivity();
-			ba.setActivity("FTP Error: " + errors.toString());
+			ba.setActivity("FTP Error: " + errors.toString().substring(0, 750));
 			ba.setBatchDownloadId(batchDownload.getId());
 			transactionOutDAO.submitBatchActivityLog(ba);
 
@@ -2387,8 +2390,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		    }
 		}
 		else {
-		    
-		    System.out.println("RUN Target FTP");
 		    
 		    FileInputStream fis = null;
 		    FTPClient ftpClient = new FTPClient();
@@ -2435,8 +2436,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
 				String filename = batchDownload.getOutputFileName();
 
-				fis = new FileInputStream(archiveFile);
-
+				fis = new FileInputStream(new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getfileLocation() + filename));
 				ftpClient.storeFile(filename, fis);
 				ftpClient.logout();
 				ftpClient.disconnect();
@@ -2446,7 +2446,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 				ba.setBatchDownloadId(batchDownload.getId());
 				transactionOutDAO.submitBatchActivityLog(ba);
 			    }
-
 			}
 		    }
 		    catch (IOException e) {
@@ -2495,7 +2494,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		ba.setActivity("Called the REST API Method: " + methodName);
 		ba.setBatchDownloadId(batchDownload.getId());
 		transactionOutDAO.submitBatchActivityLog(ba);
-
 	    }
 	    // REST API VIA DIRECT
 	    else if (transportDetails.gettransportMethodId() == 12) {
@@ -2553,7 +2551,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	    ba.setActivity("Updated batch download batchId:" + batchDownload.getId() + " to statusId:28");
 	    ba.setBatchDownloadId(batchDownload.getId());
 	    transactionOutDAO.submitBatchActivityLog(ba);
-
 	}
 	
 	//Get the batch details again to make sure the status is 28 if so delete all the generated tables
@@ -2582,7 +2579,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		    }
 		}
 	    }
-	    
 	    
 	    //Delete all transaction target tables
 	    transactionOutDAO.deleteBatchDownloadTables(batchDownload.getId());
