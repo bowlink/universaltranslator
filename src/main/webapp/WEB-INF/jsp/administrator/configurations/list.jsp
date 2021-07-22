@@ -207,7 +207,7 @@
 							    <i class="fa fa-cog"></i>
 							</button>
 							<ul class="dropdown-menu pull-right">
-							    <c:if test="${config.type == 1 && config.status == true}">
+							    <c:if test="${config.status == true}">
 								<li>
 								    <a href="javascript:void(0);" class="copyConfig" rel="${config.id}" title="Copy this Configuration">
 									<span class="glyphicon glyphicon-transfer"></span>
