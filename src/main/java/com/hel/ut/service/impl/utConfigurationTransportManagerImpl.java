@@ -30,6 +30,7 @@ import com.hel.ut.service.utConfigurationTransportManager;
 import com.hel.ut.dao.utConfigurationTransportDAO;
 import com.hel.ut.model.configurationCCDElements;
 import com.hel.ut.model.configurationconnectionfieldmappings;
+import com.hel.ut.model.logftpconnectionerrors;
 import com.hel.ut.model.organizationDirectDetails;
 import com.hel.ut.model.utConfiguration;
 import java.io.BufferedReader;
@@ -749,5 +750,15 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
     @Override
     public void executeConfigTransportSQL(String sqlStatement) throws Exception {
 	configurationTransportDAO.executeConfigTransportSQL(sqlStatement);
+    }
+    
+    @Override
+    public void saveFTPConnectionError(logftpconnectionerrors ftpCconnectionError) throws Exception {
+	configurationTransportDAO.saveFTPConnectionError(ftpCconnectionError);
+    }
+    
+    @Override
+    public List<logftpconnectionerrors> findFTPConnectionErrors(Integer ftpConnectionId, String connectionError) throws Exception {
+	return configurationTransportDAO.findFTPConnectionErrors(ftpConnectionId,connectionError);
     }
 }
