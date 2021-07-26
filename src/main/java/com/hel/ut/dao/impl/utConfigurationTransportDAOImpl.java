@@ -26,6 +26,7 @@ import java.util.Iterator;
 import org.springframework.stereotype.Repository;
 import com.hel.ut.dao.utConfigurationTransportDAO;
 import com.hel.ut.model.configurationconnectionfieldmappings;
+import com.hel.ut.model.logftpconnectionerrors;
 import com.hel.ut.model.organizationDirectDetails;
 import com.hel.ut.model.utConfiguration;
 
@@ -260,8 +261,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
      * The 'updateConfigurationFormFields' function will update the configuration form field settings
      *
      * @param formField	object that will hold the form field settings
-     *
-     * @return This function will not return anything
      */
     @Transactional(readOnly = false)
     public void updateConfigurationFormFields(configurationFormFields formField) {
@@ -1405,7 +1404,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = true)
     public List<configurationFTPFields> getFTPSourceConfigurations() {
         
-	String sql = "select a.transportId, a.IP as ip, a.directory, a.username, a.password, a.port, a.protocol "
+	String sql = "select a.id, a.transportId, a.IP as ip, a.directory, a.username, a.password, a.port, a.protocol "
 	    + "from rel_transportftpdetails a "
 	    + "inner join configurationtransportdetails b on b.id = a.transportId "
 	    + "inner join configurations c on c.id = b.configId "
@@ -1471,6 +1470,39 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	    criteria.addOrder(Order.asc("fieldNo"));
 
         return criteria.list();
+    }
+    
+    /**
+     * The 'saveFTPConnectionError' function will save the ftp connection error.
+     *
+     * @param ftpCconnectionError
+     */
+    @Override
+    @Transactional(readOnly = false)
+    public void saveFTPConnectionError(logftpconnectionerrors ftpCconnectionError) {
+        sessionFactory.getCurrentSession().saveOrUpdate(ftpCconnectionError);
+    }
+    
+    /**
+     * 
+     * @param ftpConnectionId
+     * @param connectionError
+     * @return
+     * @throws Exception 
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<logftpconnectionerrors> findFTPConnectionErrors(Integer ftpConnectionId, String connectionError) throws Exception {
+	
+	String sql = "select * "
+	+ "from log_ftpconnectionerrors "
+	+ "where ftpConnectionId = " + ftpConnectionId
+	+ " and connectionError = '" + connectionError + "'"
+	+ " and DATE(dateCreated) =  DATE(NOW())";
+	
+	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(logftpconnectionerrors.class));
+           
+        return query.list();
     }
 }
 
