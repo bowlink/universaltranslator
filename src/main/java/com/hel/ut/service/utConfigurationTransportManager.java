@@ -13,6 +13,7 @@ import com.hel.ut.model.configurationTransportMessageTypes;
 import com.hel.ut.model.configurationWebServiceFields;
 import com.hel.ut.model.configurationWebServiceSenders;
 import com.hel.ut.model.configurationconnectionfieldmappings;
+import com.hel.ut.model.logftpconnectionerrors;
 import com.hel.ut.model.organizationDirectDetails;
 import com.hel.ut.model.utConfiguration;
 
@@ -149,4 +150,8 @@ public interface utConfigurationTransportManager {
     List<configurationconnectionfieldmappings> getTargetConfigurationFieldsToCopy(Integer targetConfigId) throws Exception;
     
     void executeConfigTransportSQL(String sqlStatement) throws Exception;
+    
+    void saveFTPConnectionError(logftpconnectionerrors ftpCconnectionError) throws Exception;
+    
+    List<logftpconnectionerrors> findFTPConnectionErrors(Integer ftpConnectionId, String connectionError) throws Exception;
 }

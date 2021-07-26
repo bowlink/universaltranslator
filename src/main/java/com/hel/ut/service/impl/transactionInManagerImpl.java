@@ -42,6 +42,7 @@ import com.hel.ut.model.custom.batchErrorSummary;
 import com.hel.ut.model.directmessagesin;
 import com.hel.ut.model.generatedActivityReportAgencies;
 import com.hel.ut.model.generatedActivityReports;
+import com.hel.ut.model.logftpconnectionerrors;
 import com.hel.ut.model.lutables.lu_ProcessStatus;
 import com.hel.ut.model.referralActivityExports;
 import com.hel.ut.model.systemSummary;
@@ -111,7 +112,6 @@ import com.registryKit.registry.fileUploads.fileUploadManager;
 import com.registryKit.registry.fileUploads.uploadedFile;
 import com.registryKit.registry.submittedMessages.submittedMessage;
 import com.registryKit.registry.submittedMessages.submittedMessageManager;
-import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -4551,6 +4551,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		if(!"".equals(fileDropDetails.getDirectory())) {
 		    
 		    if("SFTP".equals(ftpConfiguration.getprotocol().trim())) {
+			
 			JSch jSch = new JSch();
 		    
 			Session session = null;
@@ -4558,6 +4559,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			ChannelSftp channelSftp = null;
 
 			try {
+			    
 
 			    //If using Key File do this below
 			    /*
@@ -4566,7 +4568,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			    */
 
 			    session = jSch.getSession(ftpConfiguration.getusername().trim(),ftpConfiguration.getip(),ftpConfiguration.getport());
-
+			    
 			    // Set password here if not using key file
 			    session.setPassword(ftpConfiguration.getpassword().trim());
 
@@ -4598,21 +4600,33 @@ public class transactionInManagerImpl implements transactionInManager {
 					   fileMoved = true;
 				       }
 				       catch (SftpException e) {
-					    StringWriter errors = new StringWriter();
-					    e.printStackTrace(new PrintWriter(errors));
-					    try {
-						String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
-						mailMessage mail = new mailMessage();
-						mail.setfromEmailAddress("support@health-e-link.net");
-						mail.setmessageBody(emailBody);
-						mail.setmessageSubject("Error retriving FTP files" + " " + myProps.getProperty("server.identity"));
-						mail.settoEmailAddress(myProps.getProperty("admin.email"));
-						emailManager.sendEmail(mail);
-					    } catch (Exception ex) {
-						ex.printStackTrace();
-						throw new Exception(ex);
+					    //Check if we need to log an error and send an email
+					    List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),e.getMessage().substring(0,Math.min(e.getMessage().length(), 500)));
+
+					    if(connectionErrors.isEmpty()) {
+						
+						StringWriter errors = new StringWriter();
+						e.printStackTrace(new PrintWriter(errors));
+
+						logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
+						ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
+						ftpConnectionError.setConnectionError(e.getMessage().substring(0, Math.min(e.getMessage().length(), 500)));
+
+						configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
+					   
+						try {
+						     String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
+						     mailMessage mail = new mailMessage();
+						     mail.setfromEmailAddress("support@health-e-link.net");
+						     mail.setmessageBody(emailBody);
+						     mail.setmessageSubject("Error retriving FTP files on " + myProps.getProperty("server.identity"));
+						     mail.settoEmailAddress(myProps.getProperty("admin.email"));
+						     emailManager.sendEmail(mail);
+						 } catch (Exception ex) {
+						     ex.printStackTrace();
+						     throw new Exception(ex);
+						 }
 					    }
-					    e.printStackTrace();
 				       }
 
 				       if(fileMoved) {
@@ -4622,39 +4636,73 @@ public class transactionInManagerImpl implements transactionInManager {
 				}
 			    }
 			} catch (JSchException e) {
-			    StringWriter errors = new StringWriter();
-			    e.printStackTrace(new PrintWriter(errors));
-			    try {
-				String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
-				mailMessage mail = new mailMessage();
-				mail.setfromEmailAddress("support@health-e-link.net");
-				mail.setmessageBody(emailBody);
-				mail.setmessageSubject("Error retriving FTP files" + " " + myProps.getProperty("server.identity"));
-				mail.settoEmailAddress(myProps.getProperty("admin.email"));
-				emailManager.sendEmail(mail);
-			    } catch (Exception ex) {
-				ex.printStackTrace();
-				throw new Exception(ex);
+			    if(channelSftp!=null){
+				channelSftp.disconnect();
+				channelSftp.exit();
 			    }
-			    // TODO Auto-generated catch block
-			    e.printStackTrace();
+			    if(channel!=null) channel.disconnect();
+			    if(session!=null) session.disconnect();
+			    
+			    //Check if we need to log an error and send an email
+			    List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),e.getMessage().substring(0,Math.min(e.getMessage().length(), 500)));
+			    
+			    if(connectionErrors.isEmpty()) {
+				StringWriter errors = new StringWriter();
+				e.printStackTrace(new PrintWriter(errors));
+			    
+				logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
+				ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
+				ftpConnectionError.setConnectionError(e.getMessage().substring(0, Math.min(e.getMessage().length(), 500)));
+				
+				configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
+			    
+				try {
+				    String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
+				    mailMessage mail = new mailMessage();
+				    mail.setfromEmailAddress("support@health-e-link.net");
+				    mail.setmessageBody(emailBody);
+				    mail.setmessageSubject("SFTP connection error on " + myProps.getProperty("server.identity"));
+				    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+				    emailManager.sendEmail(mail);
+				} catch (Exception ex) {
+				    ex.printStackTrace();
+				    throw new Exception(ex);
+				}
+			    }
 			} catch (SftpException e) {
-			    StringWriter errors = new StringWriter();
-			    e.printStackTrace(new PrintWriter(errors));
-			    try {
-				String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
-				mailMessage mail = new mailMessage();
-				mail.setfromEmailAddress("support@health-e-link.net");
-				mail.setmessageBody(emailBody);
-				mail.setmessageSubject("Error retriving FTP files" + " " + myProps.getProperty("server.identity"));
-				mail.settoEmailAddress(myProps.getProperty("admin.email"));
-				emailManager.sendEmail(mail);
-			    } catch (Exception ex) {
-				ex.printStackTrace();
-				throw new Exception(ex);
+			    if(channelSftp!=null){
+				channelSftp.disconnect();
+				channelSftp.exit();
 			    }
-			    // TODO Auto-generated catch block
-			    e.printStackTrace();
+			    if(channel!=null) channel.disconnect();
+			    if(session!=null) session.disconnect();
+			    
+			    //Check if we need to log an error and send an email
+			    List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),e.getMessage().substring(0,Math.min(e.getMessage().length(), 500)));
+			    
+			    if(connectionErrors.isEmpty()) {
+				StringWriter errors = new StringWriter();
+				e.printStackTrace(new PrintWriter(errors));
+			    
+				logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
+				ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
+				ftpConnectionError.setConnectionError(e.getMessage().substring(0, Math.min(e.getMessage().length(), 500)));
+				
+				configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
+
+				try {
+				    String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
+				    mailMessage mail = new mailMessage();
+				    mail.setfromEmailAddress("support@health-e-link.net");
+				    mail.setmessageBody(emailBody);
+				    mail.setmessageSubject("SFTP connection error on " + myProps.getProperty("server.identity"));
+				    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+				    emailManager.sendEmail(mail);
+				} catch (Exception ex) {
+				    ex.printStackTrace();
+				    throw new Exception(ex);
+				}
+			    }
 			}finally{
 			    if(channelSftp!=null){
 				channelSftp.disconnect();
@@ -4673,17 +4721,29 @@ public class transactionInManagerImpl implements transactionInManager {
 			    int replyCode = ftpClient.getReplyCode();
 			    
 			    if (!FTPReply.isPositiveCompletion(replyCode)) {
-				try {
-				    String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Connection Failed<br />";
-				    mailMessage mail = new mailMessage();
-				    mail.setfromEmailAddress("support@health-e-link.net");
-				    mail.setmessageBody(emailBody);
-				    mail.setmessageSubject("FTP Connection Failed " + " " + myProps.getProperty("server.identity"));
-				    mail.settoEmailAddress(myProps.getProperty("admin.email"));
-				    emailManager.sendEmail(mail);
-				} catch (Exception ex) {
-				    ex.printStackTrace();
-				    throw new Exception(ex);
+				
+				//Check if we need to log an error and send an email
+				List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),"FTP Connection Failed");
+			    
+				if(connectionErrors.isEmpty()) {
+				    logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
+				    ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
+				    ftpConnectionError.setConnectionError("FTP Connection Failed");
+
+				    configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
+
+				    try {
+					String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Connection Failed<br />";
+					mailMessage mail = new mailMessage();
+					mail.setfromEmailAddress("support@health-e-link.net");
+					mail.setmessageBody(emailBody);
+					mail.setmessageSubject("FTP Connection Failed " + " " + myProps.getProperty("server.identity"));
+					mail.settoEmailAddress(myProps.getProperty("admin.email"));
+					emailManager.sendEmail(mail);
+				    } catch (Exception ex) {
+					ex.printStackTrace();
+					throw new Exception(ex);
+				    }
 				}
 			    }
 			    else {
@@ -4691,17 +4751,29 @@ public class transactionInManagerImpl implements transactionInManager {
 			    
 				if (!success) {
 				    ftpClient.disconnect();
-				    try {
-					String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Credentials Failed<br />";
-					mailMessage mail = new mailMessage();
-					mail.setfromEmailAddress("support@health-e-link.net");
-					mail.setmessageBody(emailBody);
-					mail.setmessageSubject("FTP Credentials Failed " + " " + myProps.getProperty("server.identity"));
-					mail.settoEmailAddress(myProps.getProperty("admin.email"));
-					emailManager.sendEmail(mail);
-				    } catch (Exception ex) {
-					ex.printStackTrace();
-					throw new Exception(ex);
+				    
+				    //Check if we need to log an error and send an email
+				    List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),"FTP Credentials Failed");
+
+				    if(connectionErrors.isEmpty()) {
+					logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
+					ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
+					ftpConnectionError.setConnectionError("FTP Credentials Failed");
+
+					configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
+					
+					try {
+					    String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Credentials Failed<br />";
+					    mailMessage mail = new mailMessage();
+					    mail.setfromEmailAddress("support@health-e-link.net");
+					    mail.setmessageBody(emailBody);
+					    mail.setmessageSubject("FTP Credentials Failed " + " " + myProps.getProperty("server.identity"));
+					    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+					    emailManager.sendEmail(mail);
+					} catch (Exception ex) {
+					    ex.printStackTrace();
+					    throw new Exception(ex);
+					}
 				    }
 				}
 				else {
@@ -4731,22 +4803,33 @@ public class transactionInManagerImpl implements transactionInManager {
 			    }
 			}
 			catch (IOException e) {
-			    StringWriter errors = new StringWriter();
-			    e.printStackTrace(new PrintWriter(errors));
-			    try {
-				String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
-				mailMessage mail = new mailMessage();
-				mail.setfromEmailAddress("support@health-e-link.net");
-				mail.setmessageBody(emailBody);
-				mail.setmessageSubject("Error retriving FTP files" + " " + myProps.getProperty("server.identity"));
-				mail.settoEmailAddress(myProps.getProperty("admin.email"));
-				emailManager.sendEmail(mail);
-			    } catch (Exception ex) {
-				ex.printStackTrace();
-				throw new Exception(ex);
+			    
+			    //Check if we need to log an error and send an email
+			    List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),e.getMessage().substring(0,Math.min(e.getMessage().length(), 500)));
+			    
+			    if(connectionErrors.isEmpty()) {
+				StringWriter errors = new StringWriter();
+				e.printStackTrace(new PrintWriter(errors));
+			    
+				logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
+				ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
+				ftpConnectionError.setConnectionError(e.getMessage().substring(0, Math.min(e.getMessage().length(), 500)));
+				
+				configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
+			    
+				try {
+				    String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
+				    mailMessage mail = new mailMessage();
+				    mail.setfromEmailAddress("support@health-e-link.net");
+				    mail.setmessageBody(emailBody);
+				    mail.setmessageSubject("Error retriving FTP files" + " " + myProps.getProperty("server.identity"));
+				    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+				    emailManager.sendEmail(mail);
+				} catch (Exception ex) {
+				    ex.printStackTrace();
+				    throw new Exception(ex);
+				}
 			    }
-			    // TODO Auto-generated catch block
-			    e.printStackTrace();
 			}
 		    }
 		}
