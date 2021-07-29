@@ -1498,7 +1498,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	+ "from log_ftpconnectionerrors "
 	+ "where ftpConnectionId = " + ftpConnectionId
 	+ " and connectionError = '" + connectionError + "'"
-	+ " and DATE(dateCreated) =  DATE(NOW())";
+	+ " and DATE(dateCreated) =  DATE(CURRENT_TIMESTAMP)";
 	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(logftpconnectionerrors.class));
            
