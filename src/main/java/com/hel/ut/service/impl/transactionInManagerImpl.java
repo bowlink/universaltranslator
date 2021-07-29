@@ -4560,7 +4560,6 @@ public class transactionInManagerImpl implements transactionInManager {
 
 			try {
 			    
-
 			    //If using Key File do this below
 			    /*
 				String privateKey = "LOCATION OF KEY FILE";
@@ -4603,17 +4602,16 @@ public class transactionInManagerImpl implements transactionInManager {
 					    //Check if we need to log an error and send an email
 					    List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),e.getMessage().substring(0,Math.min(e.getMessage().length(), 500)));
 
+					    logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
+					    ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
+					    ftpConnectionError.setConnectionError(e.getMessage().substring(0, Math.min(e.getMessage().length(), 500)));
+
+					    configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
+					   
 					    if(connectionErrors.isEmpty()) {
-						
 						StringWriter errors = new StringWriter();
 						e.printStackTrace(new PrintWriter(errors));
-
-						logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
-						ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
-						ftpConnectionError.setConnectionError(e.getMessage().substring(0, Math.min(e.getMessage().length(), 500)));
-
-						configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
-					   
+						
 						try {
 						     String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
 						     mailMessage mail = new mailMessage();
@@ -4646,16 +4644,16 @@ public class transactionInManagerImpl implements transactionInManager {
 			    //Check if we need to log an error and send an email
 			    List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),e.getMessage().substring(0,Math.min(e.getMessage().length(), 500)));
 			    
-			    if(connectionErrors.isEmpty()) {
+			    logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
+			    ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
+			    ftpConnectionError.setConnectionError(e.getMessage().substring(0, Math.min(e.getMessage().length(), 500)));
+
+			    configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
+			    
+			     if(connectionErrors.isEmpty()) {
 				StringWriter errors = new StringWriter();
 				e.printStackTrace(new PrintWriter(errors));
-			    
-				logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
-				ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
-				ftpConnectionError.setConnectionError(e.getMessage().substring(0, Math.min(e.getMessage().length(), 500)));
 				
-				configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
-			    
 				try {
 				    String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
 				    mailMessage mail = new mailMessage();
@@ -4680,16 +4678,15 @@ public class transactionInManagerImpl implements transactionInManager {
 			    //Check if we need to log an error and send an email
 			    List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),e.getMessage().substring(0,Math.min(e.getMessage().length(), 500)));
 			    
+			    logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
+			    ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
+			    ftpConnectionError.setConnectionError(e.getMessage().substring(0, Math.min(e.getMessage().length(), 500)));
+
+			    configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
+			    
 			    if(connectionErrors.isEmpty()) {
 				StringWriter errors = new StringWriter();
 				e.printStackTrace(new PrintWriter(errors));
-			    
-				logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
-				ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
-				ftpConnectionError.setConnectionError(e.getMessage().substring(0, Math.min(e.getMessage().length(), 500)));
-				
-				configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
-
 				try {
 				    String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
 				    mailMessage mail = new mailMessage();
@@ -4725,13 +4722,13 @@ public class transactionInManagerImpl implements transactionInManager {
 				//Check if we need to log an error and send an email
 				List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),"FTP Connection Failed");
 			    
+				logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
+				ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
+				ftpConnectionError.setConnectionError("FTP Connection Failed");
+
+				configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
+				
 				if(connectionErrors.isEmpty()) {
-				    logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
-				    ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
-				    ftpConnectionError.setConnectionError("FTP Connection Failed");
-
-				    configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
-
 				    try {
 					String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Connection Failed<br />";
 					mailMessage mail = new mailMessage();
@@ -4755,13 +4752,13 @@ public class transactionInManagerImpl implements transactionInManager {
 				    //Check if we need to log an error and send an email
 				    List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),"FTP Credentials Failed");
 
-				    if(connectionErrors.isEmpty()) {
-					logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
-					ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
-					ftpConnectionError.setConnectionError("FTP Credentials Failed");
+				    logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
+				    ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
+				    ftpConnectionError.setConnectionError("FTP Credentials Failed");
 
-					configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
-					
+				    configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
+				    
+				    if(connectionErrors.isEmpty()) {
 					try {
 					    String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Credentials Failed<br />";
 					    mailMessage mail = new mailMessage();
@@ -4807,15 +4804,15 @@ public class transactionInManagerImpl implements transactionInManager {
 			    //Check if we need to log an error and send an email
 			    List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),e.getMessage().substring(0,Math.min(e.getMessage().length(), 500)));
 			    
+			    logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
+			    ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
+			    ftpConnectionError.setConnectionError(e.getMessage().substring(0, Math.min(e.getMessage().length(), 500)));
+
+			    configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
+			    
 			    if(connectionErrors.isEmpty()) {
 				StringWriter errors = new StringWriter();
 				e.printStackTrace(new PrintWriter(errors));
-			    
-				logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
-				ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
-				ftpConnectionError.setConnectionError(e.getMessage().substring(0, Math.min(e.getMessage().length(), 500)));
-				
-				configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
 			    
 				try {
 				    String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
