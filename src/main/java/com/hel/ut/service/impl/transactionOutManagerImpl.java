@@ -1685,7 +1685,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	    boolean encryptMessage = false;
 	    // we only support base64 for now
 	    if (transportDetails.getEncodingId() == 2) {
-			encryptMessage = true;
+		encryptMessage = true;
 	    }
 	    
 	    //Check to see if the transport type has an uploaded custom XML template to follow
@@ -1704,7 +1704,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	    File generatedFile = new File(generatedFilePath);
 	    
 	    if (generatedFile.exists()) {
-			generatedFile.delete();
+		generatedFile.delete();
 	    }
 	    
 	    //mysql is the fastest way to output a file, but the permissions are tricky we write 
@@ -2219,10 +2219,10 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
 			//Check to see if the target config needs the target file decoded (archivefile is always Base64 encoded)
 			if(transportDetails.getEncodingId() == 1) {
-				File generatedTargetFile = new File(targetFile.getAbsolutePath());
-				String strDecode = filemanager.decodeFileToBase64Binary(generatedTargetFile);
-				String decodeFilePath = targetFile.getAbsolutePath();
-				filemanager.writeFile(decodeFilePath, strDecode);
+			    File generatedTargetFile = new File(targetFile.getAbsolutePath());
+			    String strDecode = filemanager.decodeFileToBase64Binary(generatedTargetFile);
+			    String decodeFilePath = targetFile.getAbsolutePath();
+			    filemanager.writeFile(decodeFilePath, strDecode);
 			}
 
 			ba = new batchdownloadactivity();
@@ -2288,6 +2288,18 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			String filename = batchDownload.getOutputFileName();
 			
 			FileInputStream fis = new FileInputStream(new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getfileLocation() + filename));
+			
+			//Check to see if the target config needs the target file decoded (archivefile is always Base64 encoded)
+			if(transportDetails.getEncodingId() == 1) {
+			    File decodedTargetFile = new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getfileLocation() + "decoded_"+filename);
+			    String strDecode = filemanager.decodeFileToBase64Binary(archiveFile);
+			    String decodeFilePath = decodedTargetFile.getAbsolutePath();
+			    filemanager.writeFile(decodeFilePath, strDecode);
+			    fis = new FileInputStream(new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getfileLocation() + "decoded_"+filename));
+			    
+			    //delete decoded file for ftp
+			    decodedTargetFile.delete();
+			}
 			
 			try {
 			    channelSftp.put(fis, batchDownload.getOutputFileName());
