@@ -11,7 +11,7 @@
         <job>
             <name>CheckForFTPRemoteFiles</name>
             <group>processGroup</group>
-            <description>This process will run every 10 minutes.</description>
+            <description>This process will run every 2 minutes between 7AM and 10PM.</description>
             <job-class>com.hel.ut.jobs.remoteSFTP</job-class>
         </job>
  
@@ -20,7 +20,7 @@
                 <name>CheckForFTPRemoteFilesTrigger</name>
                 <job-name>CheckForFTPRemoteFiles</job-name>
                 <job-group>processGroup</job-group>
-                <cron-expression>0 0/2 * 1/1 * ? *</cron-expression>
+                <cron-expression>0 0/2 6-22 1/1 * ? *</cron-expression>
             </cron>
         </trigger>
     </schedule> 
