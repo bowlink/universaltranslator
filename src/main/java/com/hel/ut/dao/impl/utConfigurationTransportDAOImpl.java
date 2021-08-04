@@ -1384,7 +1384,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	    + "from rel_transportftpdetails a "
 	    + "inner join configurationtransportdetails b on b.id = a.transportId "
 	    + "inner join configurations c on c.id = b.configId "
-	    + "where c.deleted = 0 and c.status = 1 and c.type = 1;";
+	    + "where c.deleted = 0 and c.status = 1 and c.type = 1 order by a.id asc;";
 	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(configurationFTPFields.class));
            
