@@ -33,11 +33,15 @@ import com.hel.ut.model.configurationconnectionfieldmappings;
 import com.hel.ut.model.logftpconnectionerrors;
 import com.hel.ut.model.organizationDirectDetails;
 import com.hel.ut.model.utConfiguration;
+import com.hel.ut.security.decryptObject;
+import com.hel.ut.security.encryptObject;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import javax.annotation.Resource;
 import org.hibernate.Query;
@@ -56,6 +60,8 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
     
     @Resource(name = "myProps")
     private Properties myProps;
+    
+    private String topSecret = "Hello123JavaTomcatMysqlDPHSystem2016";
 
     @Override
     public configurationTransport getTransportDetails(int configId) throws Exception {
@@ -157,7 +163,7 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
 
     @Override
     public List<configurationFTPFields> getTransportFTPDetails(int transportDetailId) throws Exception {
-        return configurationTransportDAO.getTransportFTPDetails(transportDetailId);
+	return configurationTransportDAO.getTransportFTPDetails(transportDetailId);
     }
 
     @Override
@@ -211,11 +217,33 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
                 e.printStackTrace();
                 throw new Exception(e);
             }
-
         }
-
-        configurationTransportDAO.saveTransportFTP(FTPFields);
 	
+	//Encrypt the username and password
+	if(!"".equals(FTPFields.getFTPPassword())) {
+	    Map<String, String> map = new HashMap<>();
+	    map.put("pwd", FTPFields.getFTPPassword());
+	    map.put("topSecret", topSecret);
+
+	    encryptObject encrypt = new encryptObject();
+	    String[] encrypted = encrypt.encryptObject(map);
+
+	    String encryptedPassword = java.net.URLDecoder.decode(encrypted[0],StandardCharsets.UTF_8.name()) + "W5s" + java.net.URLDecoder.decode(encrypted[1],StandardCharsets.UTF_8.name());
+	    
+	    FTPFields.setPassword(encryptedPassword.getBytes());
+	}
+	else {
+	    if(FTPFields.getmethod() == 1) {
+		configurationFTPFields currftpDetails = configurationTransportDAO.getTransportFTPDetailsPull(FTPFields.gettransportId());
+		FTPFields.setPassword(currftpDetails.getPassword());
+	    }
+	    else {
+		configurationFTPFields currftpDetails = configurationTransportDAO.getTransportFTPDetailsPush(FTPFields.gettransportId());
+		FTPFields.setPassword(currftpDetails.getPassword());
+	    }
+	}
+	
+        configurationTransportDAO.saveTransportFTP(FTPFields);
     }
 
     @Override

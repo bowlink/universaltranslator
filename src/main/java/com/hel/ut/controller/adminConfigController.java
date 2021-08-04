@@ -1056,8 +1056,6 @@ public class adminConfigController {
         } else {
             //If the type of utConfiguration is for a source then send to message specs
             if (configurationDetails.getType() == 1) {
-                
-		//Check if passthru
 		if(configurationDetails.getConfigurationType() == 2) {
 		    ModelAndView mav = new ModelAndView(new RedirectView("scheduling"));
 		    return mav;
@@ -1068,8 +1066,6 @@ public class adminConfigController {
 		}
                
             } else {
-		
-		//
 		if(transportDetails.gettransportMethodId() == 8) {
 		    ModelAndView mav = new ModelAndView(new RedirectView("mappings"));
 		    return mav;
@@ -1860,11 +1856,8 @@ public class adminConfigController {
                         defaultValues.put(optionValue, optionDesc);
 
                     }
-
                     translation.setDefaultValues(defaultValues);
                 }
-
-
                 translations.add(translation);
             }
         }
@@ -1990,7 +1983,6 @@ public class adminConfigController {
                 defaultValues.put(optionValue, optionDesc);
 
             }
-
             translation.setDefaultValues(defaultValues);
         }
 	
@@ -2022,14 +2014,20 @@ public class adminConfigController {
 	    @RequestParam(value = "categoryId", required = true) Integer categoryId) throws Exception {
 
 	List<configurationDataTranslations> translations;
-	if(categoryId == 1) {
-	    translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataTranslastions");
-	}
-	else if(categoryId == 2) {
-	    translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPreProcessingTranslastions");
-	}
-	else {
+	
+	if(null == categoryId) {
 	    translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPostProcessingTranslastions");
+	}
+	else switch (categoryId) {
+	    case 1:
+		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataTranslastions");
+		break;
+	    case 2:
+		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPreProcessingTranslastions");
+		break;
+	    default:
+		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPostProcessingTranslastions");
+		break;
 	}
 	
         Iterator<configurationDataTranslations> it = translations.iterator();
@@ -2044,7 +2042,6 @@ public class adminConfigController {
                 translation.setProcessOrder(currProcessOrder - 1);
             }
         }
-
         return 1;
     }
 
@@ -2068,14 +2065,19 @@ public class adminConfigController {
 	    @RequestParam(value = "categoryId", required = true) Integer categoryId) throws Exception {
 
         List<configurationDataTranslations> translations;
-	if(categoryId == 1) {
-	    translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataTranslastions");
-	}
-	else if(categoryId == 2) {
-	    translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPreProcessingTranslastions");
-	}
-	else {
+	if(null == categoryId) {
 	    translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPostProcessingTranslastions");
+	}
+	else switch (categoryId) {
+	    case 1:
+		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataTranslastions");
+		break;
+	    case 2:
+		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPreProcessingTranslastions");
+		break;
+	    default:
+		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPostProcessingTranslastions");
+		break;
 	}
 	
 	Iterator<configurationDataTranslations> it = translations.iterator();
@@ -2092,10 +2094,8 @@ public class adminConfigController {
 		translation.setProcessOrder(newProcessOrder);
 	    }
 	}
-        
         return 1;
     }
-
 
     /**
      * The '/scheduling' GET request will display the scheduling page for the selected transport Method
@@ -2161,7 +2161,6 @@ public class adminConfigController {
 	else {
 	    mav.addObject("lastConfigUpdate", dft.parse(requiredFormat.format(configurationDetails.getDateCreated())));
 	}
-	
         return mav;
     }
 
@@ -2197,7 +2196,8 @@ public class adminConfigController {
             scheduleDetails.setnewfileCheck(0);
             scheduleDetails.setprocessingDay(0);
             scheduleDetails.setprocessingTime(0);
-        } //Daily
+        } 
+	//Daily
         else if (scheduleDetails.gettype() == 2) {
             scheduleDetails.setprocessingDay(0);
             if (scheduleDetails.getprocessingType() == 1) {
@@ -2205,12 +2205,14 @@ public class adminConfigController {
             } else {
                 scheduleDetails.setprocessingTime(0);
             }
-        } //Weekly
+        } 
+	//Weekly
         else if (scheduleDetails.gettype() == 3) {
             scheduleDetails.setprocessingType(0);
             scheduleDetails.setnewfileCheck(0);
-        } //Monthly
-        else if (scheduleDetails.gettype() == 3) {
+        } 
+	//Monthly
+        else if (scheduleDetails.gettype() == 4) {
             scheduleDetails.setprocessingType(0);
             scheduleDetails.setnewfileCheck(0);
             scheduleDetails.setprocessingDay(0);
@@ -2268,6 +2270,9 @@ public class adminConfigController {
 
     /**
      * The '/HL7' GET request will display the HL7 customization form.
+     * @param session
+     * @return 
+     * @throws java.lang.Exception 
      */
     @RequestMapping(value = "/HL7", method = RequestMethod.GET)
     public ModelAndView getHL7Form(HttpSession session) throws Exception {
@@ -2407,6 +2412,7 @@ public class adminConfigController {
      * The '/HL7' POST request save all the hl7 custom settings
      * @param HL7Details
      * @param redirectAttr
+     * @param authentication
      * @return 
      * @throws java.lang.Exception
      */
@@ -3003,7 +3009,6 @@ public class adminConfigController {
         return mav;
     }
     
-    
     /**
      * The 'copyConfiguration.do' method will copy the selected utConfiguration.
      * @param configId
@@ -3413,7 +3418,6 @@ public class adminConfigController {
 
         return mav;
     }
-    
     
     /**
      * 
@@ -3853,7 +3857,6 @@ public class adminConfigController {
 	PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(configDetailFile, true)));
 	out.println("<html><body>");
 	
-	
 	reportBody.append(utconfigurationmanager.printDetailsSection(configDetails,orgDetails,siteTimeZone));
 	//reportBody.append(utconfigurationmanager.printConfigurationNotesSection(configDetails,siteTimeZone));
 	reportBody.append(utconfigurationmanager.printTransportMethodSection(configDetails));
@@ -4004,8 +4007,7 @@ public class adminConfigController {
 	
 	try {
 	    utConfiguration configDetails = utconfigurationmanager.getConfigurationById(configId);
-	    Organization orgDetails = organizationmanager.getOrganizationById(configDetails.getorgId());
-
+	    
 	    DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
 	    Date date = new Date();
 
@@ -4027,8 +4029,6 @@ public class adminConfigController {
 	    List<configurationFormFields> fields = utconfigurationTransportManager.getConfigurationFields(configDetails.getId(), transportDetails.getId());
 
 	    List<validationType> validations = messagetypemanager.getValidationTypes1();
-
-	    StringBuilder exportRow = new StringBuilder();
 
 	    String required = "";
 	    String usefield = "Y";
@@ -4097,7 +4097,6 @@ public class adminConfigController {
 			currentRow.createCell(cellNum).setCellValue(usefield);
 			cellNum++;
 			currentRow.createCell(cellNum).setCellValue(validationValue);
-
 		    }
 		}
 	    }
@@ -4109,16 +4108,15 @@ public class adminConfigController {
 	    }
 	}
 	catch (Exception ex) {
-	    //we notify admin
 	    mailMessage mail = new mailMessage();
 	    mail.settoEmailAddress(myProps.getProperty("admin.email"));
 	    mail.setfromEmailAddress("support@health-e-link.net");
 	    mail.setmessageSubject("Error creating template from config field settings - " + " " + myProps.getProperty("server.identity"));
 	    StringBuilder emailBody = new StringBuilder();
 	    emailBody.append("There was an error creating a template from the configuration field settings page.");
-	    emailBody.append("<br/>Configuration Id: " + configId);
-	    emailBody.append("<br/><br/>" + ex.getMessage());
-	    emailBody.append("<br/><br/>" + ex.getStackTrace());
+	    emailBody.append("<br/>Configuration Id: ").append(configId);
+	    emailBody.append("<br/><br/>").append(ex.getMessage());
+	    emailBody.append("<br/><br/>").append(ex.getStackTrace());
 	    mail.setmessageBody(emailBody.toString());
 	    emailMessageManager.sendEmail(mail);
 	    fileName = "";
@@ -4160,8 +4158,6 @@ public class adminConfigController {
 	
 	try {
 	    utConfiguration configDetails = utconfigurationmanager.getConfigurationById(configId);
-	    Organization orgDetails = organizationmanager.getOrganizationById(configDetails.getorgId());
-
 	    DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
 	    Date date = new Date();
 
@@ -4183,8 +4179,6 @@ public class adminConfigController {
 	    List<configurationFormFields> fields = utconfigurationTransportManager.getConfigurationFields(configDetails.getId(), transportDetails.getId());
 
 	    List<validationType> validations = messagetypemanager.getValidationTypes1();
-
-	    StringBuilder exportRow = new StringBuilder();
 
 	    String required = "";
 	    String usefield = "Y";
@@ -4297,16 +4291,15 @@ public class adminConfigController {
 	    }
 	}
 	catch (Exception ex) {
-	    //we notify admin
 	    mailMessage mail = new mailMessage();
 	    mail.settoEmailAddress(myProps.getProperty("admin.email"));
 	    mail.setfromEmailAddress("support@health-e-link.net");
 	    mail.setmessageSubject("Error creating template from config field settings - " + " " + myProps.getProperty("server.identity"));
 	    StringBuilder emailBody = new StringBuilder();
 	    emailBody.append("There was an error creating a template from the configuration field settings page.");
-	    emailBody.append("<br/>Configuration Id: " + configId);
-	    emailBody.append("<br/><br/>" + ex.getMessage());
-	    emailBody.append("<br/><br/>" + ex.getStackTrace());
+	    emailBody.append("<br/>Configuration Id: ").append(configId);
+	    emailBody.append("<br/><br/>").append(ex.getMessage());
+	    emailBody.append("<br/><br/>").append(ex.getStackTrace());
 	    mail.setmessageBody(emailBody.toString());
 	    emailMessageManager.sendEmail(mail);
 	    fileName = "";
@@ -4324,7 +4317,6 @@ public class adminConfigController {
     @RequestMapping(value = "/deleteCrosswalk.do", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
     Integer deleteCrosswalk(@RequestParam(value = "cwId", required = true) Integer cwId) throws Exception {
-
 	 messagetypemanager.deleteCrosswalk(cwId);
 	 return 1;
     }
@@ -4332,6 +4324,7 @@ public class adminConfigController {
     /**
      * The '/notes' GET request will display all the notes for a configuration
      *
+     * @param session
      * @return	The utConfiguration note list
      *
      * @Objects	(1) An object containing all the found configuration notes
@@ -4411,8 +4404,7 @@ public class adminConfigController {
      * @throws java.lang.Exception
      */
     @RequestMapping(value = "/newConfigurationNote", method = RequestMethod.GET)
-    public @ResponseBody
-    ModelAndView newConfigurationNote(Authentication authentication, @RequestParam(value = "configId", required = true) Integer configId) throws Exception {
+    public @ResponseBody ModelAndView newConfigurationNote(Authentication authentication, @RequestParam(value = "configId", required = true) Integer configId) throws Exception {
 	
         ModelAndView mav = new ModelAndView();
         mav.setViewName("/administrator/configurations/notes/noteDetails");
@@ -4437,8 +4429,7 @@ public class adminConfigController {
      * @throws java.lang.Exception
      */
     @RequestMapping(value = "/editConfigurationNote", method = RequestMethod.GET)
-    public @ResponseBody
-    ModelAndView editConfigurationNote(@RequestParam(value = "noteId", required = true) Integer noteId) throws Exception {
+    public @ResponseBody ModelAndView editConfigurationNote(@RequestParam(value = "noteId", required = true) Integer noteId) throws Exception {
 	
         ModelAndView mav = new ModelAndView();
         mav.setViewName("/administrator/configurations/notes/noteDetails");
@@ -4457,8 +4448,7 @@ public class adminConfigController {
      * @throws java.lang.Exception
      */
     @RequestMapping(value = "/deleteConfigurationNote.do", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody
-    Integer deleteConfigurationNote(@RequestParam(value = "noteId", required = true) Integer noteId) throws Exception {
+    public @ResponseBody Integer deleteConfigurationNote(@RequestParam(value = "noteId", required = true) Integer noteId) throws Exception {
 	 utconfigurationmanager.deletConfigurationNote(noteId);
 	 return 1;
     }
@@ -4469,6 +4459,7 @@ public class adminConfigController {
      * @param session
      * @param configurationNote	
      * @param redirectAttr	
+     * @return 	
      * @throws Exception
      */
     @RequestMapping(value = "/newConfigurationNote", method = RequestMethod.POST)
@@ -4487,6 +4478,7 @@ public class adminConfigController {
      * @param session
      * @param configurationNote	
      * @param redirectAttr	
+     * @return 	
      * @throws Exception
      */
     @RequestMapping(value = "/editConfigurationNote", method = RequestMethod.POST)
@@ -4511,8 +4503,7 @@ public class adminConfigController {
      * @throws Exception 
      */
     @RequestMapping(value = "/crosswalksExcelFileDownload", method = RequestMethod.GET)
-    @ResponseBody
-    public String crosswalksExcelFileDownload(@RequestParam(value = "configId", required = true) Integer configId, 
+    @ResponseBody public String crosswalksExcelFileDownload(@RequestParam(value = "configId", required = true) Integer configId, 
 	@RequestParam(value = "fileName", required = true) String fileName, 
 	@RequestParam(value = "fileType", required = true) Integer fileType, 
 	@RequestParam(value = "inUseOnly", required = false) boolean inUseOnly, 
@@ -4889,7 +4880,7 @@ public class adminConfigController {
 	//Delete the file
 	configExportFile.delete();
 
-	 // close stream and return to view
+	// close stream and return to view
 	response.flushBuffer();
     } 
     
@@ -4982,7 +4973,6 @@ public class adminConfigController {
 	String strLine = "";
 	 
 	try {
-	    
 	    LineNumberReader reader = new LineNumberReader(new InputStreamReader(new FileInputStream("/tmp/"+fileName), "UTF-8"));
 	    String[] strArrayValues;
 	    Integer orgId = 0;
@@ -5457,7 +5447,8 @@ public class adminConfigController {
 	newFTP.setip(strArrayValues[2]);
 	newFTP.setdirectory(strArrayValues[3]);
 	newFTP.setusername(strArrayValues[4]);
-	newFTP.setpassword(strArrayValues[5]);
+	//Password is not saved so it can be entered manually in order to encrypt it
+	//newFTP.setPassword();
 	newFTP.setmethod(Integer.parseInt(strArrayValues[6]));
 	newFTP.setport(Integer.parseInt(strArrayValues[7]));
 	newFTP.setprotocol(strArrayValues[8]);
