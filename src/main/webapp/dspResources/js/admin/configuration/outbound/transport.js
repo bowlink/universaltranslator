@@ -343,15 +343,14 @@ function checkFormFields() {
 	//Check FTP Get Fields
 	var getFieldsEntered = 0;
 
-	if ($('#ip1').val() !== "" || $('#username1').val() !== "" || $('#password1').val() !== "" || $('#directory1').val() !== "") {
+	if ($('#ip2').val() !== "" || $('#username2').val() !== "" || $('#password2').val() !== "" || $('#directory2').val() !== "") {
 	    getFieldsEntered = 1;
 	}
-
 	if (getFieldsEntered == 1) {
-	    if ($('#ip1').val() === "") {
-		$('#ip1Div').addClass("has-error");
-		$('#ip1Msg').addClass("has-error");
-		$('#ip1Msg').html('The host address is a required field.');
+	    if ($('#ip2').val() === "") {
+		$('#ip2Div').addClass("has-error");
+		$('#ip2Msg').addClass("has-error");
+		$('#ip2Msg').html('The host address is a required field.');
 		hasErrors = 1;
 	    } 
             /*else if (!IPReg.test($('#ip1').val())) {
@@ -360,33 +359,47 @@ function checkFormFields() {
 		$('#ip1Msg').html('The IP address entered is invalid.');
 		hasErrors = 1;
 	    }*/
-	    if ($('#username1').val() === "") {
-		$('#username1Div').addClass("has-error");
-		$('#username1Msg').addClass("has-error");
-		$('#username1Msg').html('The username is a required field.');
+	    if ($('#username2').val() === "") {
+		$('#username2Div').addClass("has-error");
+		$('#username2Msg').addClass("has-error");
+		$('#username2Msg').html('The username is a required field.');
 		hasErrors = 1;
 	    }
-
-	    if ($('#protocol1').val() === "SFTP") {
-		if ($('#password1').val() === "" && $('#file1').val() === "" && $('#certification1').val() === "") {
-		    $('#password1Div').addClass("has-error");
-		    $('#password1Msg').addClass("has-error");
-		    $('#password1Msg').html('The password or certification is a required field.');
+            
+	    if ($('#protocol2').val() === "SFTP") {
+		/*if ($('#password2').val() === "" && $('#file2').val() === "" && $('#certification2').val() === "") {
+		    $('#password2Div').addClass("has-error");
+		    $('#password2Msg').addClass("has-error");
+		    $('#password2Msg').html('The password or certification is a required field.');
 		    hasErrors = 1;
-		}
-	    } else {
-		if ($('#password1').val() === "") {
-		    $('#password1Div').addClass("has-error");
-		    $('#password1Msg').addClass("has-error");
-		    $('#password1Msg').html('The password is a required field.');
+		}*/
+                if ($('#password2').val() === "" && $('#currPassword2').val() === "") {
+                    $('#password2Div').addClass("has-error");
+                    $('#password2Msg').addClass("has-error");
+                    $('#password2Msg').html('The password is a required field.');
+                    hasErrors = 1;
+                }
+	    } 
+            else {
+		if ($('#password2').val() === "" && $('#currPassword2').val() === "") {
+		    $('#password2Div').addClass("has-error");
+		    $('#password2Msg').addClass("has-error");
+		    $('#password2Msg').html('The password is a required field.');
 		    hasErrors = 1;
 		}
 	    }
 
-	    if ($('#directory1').val() === "") {
-		$('#directory1Div').addClass("has-error");
-		$('#directory1Msg').addClass("has-error");
-		$('#directory1Msg').html('The directory is a required field.');
+	    if ($('#ftpdirectory2').val() === "") {
+		$('#directory2Div').addClass("has-error");
+		$('#directory2Msg').addClass("has-error");
+		$('#directory2Msg').html('The directory is a required field.');
+		hasErrors = 1;
+	    }
+            
+            if ($('#port2').val() === "") {
+		$('#port2Div').addClass("has-error");
+		$('#port2Msg').addClass("has-error");
+		$('#port2Msg').html('The port is a required field.');
 		hasErrors = 1;
 	    }
 	}
