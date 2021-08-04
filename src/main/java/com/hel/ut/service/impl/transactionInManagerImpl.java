@@ -4523,7 +4523,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			try {
 			    connectToRemoteFTP(ftpConfiguration);
 			} catch (Exception ex) {
-			    Logger.getLogger(transactionInManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
+			    
 			}
 		    //}
 		//});
@@ -4586,61 +4586,70 @@ public class transactionInManagerImpl implements transactionInManager {
 			    config.put("StrictHostKeyChecking", "no");
 			    config.put("PreferredAuthentications", "password");
 			    session.setConfig(config);
-
-			    session.connect(); 
 			    
-			    channel = session.openChannel("sftp");
-			    channel.connect();
-			    channelSftp = (ChannelSftp) channel;
+			    boolean sessionConnected = false;
+			    try {
+				session.connect(5000);
+				if(session.isConnected()) {sessionConnected = true;}
+			    }
+			    catch (JSchException ex) {
+			    }
 			    
-			    channelSftp.cd(ftpConfiguration.getdirectory());
-
-			    Vector filelist = channelSftp.ls(ftpConfiguration.getdirectory());
+			    if(sessionConnected) {
 			    
-			    if(filelist.size() > 0) {
-				for(int i=0; i<filelist.size();i++){
-				    LsEntry entry = (LsEntry) filelist.get(i);
+				channel = session.openChannel("sftp");
+				channel.connect();
+				channelSftp = (ChannelSftp) channel;
 
-				    if(!entry.getAttrs().isDir()) {
-					boolean fileMoved = false;
-					
-				       //Move the file locally
-				       try {
-					   channelSftp.get(entry.getFilename(),myProps.getProperty("ut.directory.utRootDir") + fileDropDetails.getDirectory() + entry.getFilename());
-					   fileMoved = true;
-				       }
-				       catch (SftpException e) {
-					    //Check if we need to log an error and send an email
-					    List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),e.getMessage().substring(0,Math.min(e.getMessage().length(), 500)));
+				channelSftp.cd(ftpConfiguration.getdirectory());
 
-					    logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
-					    ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
-					    ftpConnectionError.setConnectionError(e.getMessage().substring(0, Math.min(e.getMessage().length(), 500)));
+				Vector filelist = channelSftp.ls(ftpConfiguration.getdirectory());
+				
+				if(filelist.size() > 0) {
+				    for(int i=0; i<filelist.size();i++){
+					LsEntry entry = (LsEntry) filelist.get(i);
 
-					    configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
-					   
-					    if(connectionErrors.isEmpty()) {
-						StringWriter errors = new StringWriter();
-						e.printStackTrace(new PrintWriter(errors));
-						
-						try {
-						     String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
-						     mailMessage mail = new mailMessage();
-						     mail.setfromEmailAddress("support@health-e-link.net");
-						     mail.setmessageBody(emailBody);
-						     mail.setmessageSubject("Error retriving FTP files on " + myProps.getProperty("server.identity"));
-						     mail.settoEmailAddress(myProps.getProperty("admin.email"));
-						     emailManager.sendEmail(mail);
-						 } catch (Exception ex) {
-						     ex.printStackTrace();
-						     throw new Exception(ex);
-						 }
-					    }
-				       }
+					if(!entry.getAttrs().isDir()) {
+					    boolean fileMoved = false;
 
-				       if(fileMoved) {
-					   channelSftp.rm(entry.getFilename());
-				       }
+					   //Move the file locally
+					   try {
+					       channelSftp.get(entry.getFilename(),myProps.getProperty("ut.directory.utRootDir") + fileDropDetails.getDirectory() + entry.getFilename());
+					       fileMoved = true;
+					   }
+					   catch (SftpException e) {
+						//Check if we need to log an error and send an email
+						List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),e.getMessage().substring(0,Math.min(e.getMessage().length(), 500)));
+
+						logftpconnectionerrors ftpConnectionError = new logftpconnectionerrors();
+						ftpConnectionError.setFtpConnectionId(ftpConfiguration.getId());
+						ftpConnectionError.setConnectionError(e.getMessage().substring(0, Math.min(e.getMessage().length(), 500)));
+
+						configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
+
+						if(connectionErrors.isEmpty()) {
+						    StringWriter errors = new StringWriter();
+						    e.printStackTrace(new PrintWriter(errors));
+
+						    try {
+							 String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
+							 mailMessage mail = new mailMessage();
+							 mail.setfromEmailAddress("support@health-e-link.net");
+							 mail.setmessageBody(emailBody);
+							 mail.setmessageSubject("Error retriving FTP files on " + myProps.getProperty("server.identity"));
+							 mail.settoEmailAddress(myProps.getProperty("admin.email"));
+							 emailManager.sendEmail(mail);
+						     } catch (Exception ex) {
+							 ex.printStackTrace();
+							 throw new Exception(ex);
+						     }
+						}
+					   }
+
+					   if(fileMoved) {
+					       channelSftp.rm(entry.getFilename());
+					   }
+					}
 				    }
 				}
 			    }
@@ -4661,7 +4670,7 @@ public class transactionInManagerImpl implements transactionInManager {
 
 			    configurationtransportmanager.saveFTPConnectionError(ftpConnectionError);
 			    
-			     if(connectionErrors.isEmpty()) {
+			    if(connectionErrors.isEmpty()) {
 				StringWriter errors = new StringWriter();
 				e.printStackTrace(new PrintWriter(errors));
 				
