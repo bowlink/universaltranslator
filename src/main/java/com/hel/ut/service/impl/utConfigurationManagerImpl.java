@@ -1035,7 +1035,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Username</strong></span><br />");
 			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(ftpField.getusername()).append("</span><br /><br />");
 			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Password</strong></span><br />");
-			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(ftpField.getpassword()).append("</span><br /><br />");
+			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append("Password is Encrypted for security").append("</span><br /><br />");
 			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Directory</strong></span><br />");
 			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(ftpField.getdirectory()).append("</span><br /><br />");
 			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Port</strong></span><br />");
@@ -1992,7 +1992,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		sb.append(ftpDetails.getip()).append("|");
 		sb.append(ftpDetails.getdirectory()).append("|");
 		sb.append(ftpDetails.getusername()).append("|");
-		sb.append(ftpDetails.getpassword()).append("|");
+		sb.append("null|");
 		sb.append(ftpDetails.getmethod()).append("|");
 		sb.append(ftpDetails.getport()).append("|");
 		sb.append(ftpDetails.getprotocol()).append("|");
@@ -2003,6 +2003,9 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		    if(!ftpDetails.getcertification().isEmpty()) {
 			emailBodySB.append("<br />The following FTP Certificate File needs to be MOVED to the organizations certificate folder<br />").append("File Name: ").append(ftpDetails.getcertification().trim());
 		    }
+		}
+		else {
+		    emailBodySB.append("<br />In order to property encrypt the FTP password the password must be entered once the configuration import has completed.");
 		}
 	    }
 	}
