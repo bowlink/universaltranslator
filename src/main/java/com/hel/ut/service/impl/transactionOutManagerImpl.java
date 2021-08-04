@@ -14,6 +14,7 @@ import com.hel.ut.model.custom.batchErrorSummary;
 import com.hel.ut.reference.fileSystem;
 import com.hel.ut.restAPI.directManager;
 import com.hel.ut.restAPI.restfulManager;
+import com.hel.ut.security.decryptObject;
 import com.hel.ut.service.*;
 import com.hel.ut.webServices.WSManager;
 import com.jcraft.jsch.Channel;
@@ -2269,9 +2270,19 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			*/
 
 			session = jSch.getSession(FTPPushDetails.getusername(),FTPPushDetails.getip(),FTPPushDetails.getport());
+			
+			String ftpPassword = new String(FTPPushDetails.getPassword());
+
+			String encryptedId = ftpPassword.split("W5s")[0];
+			String encryptedSecret = ftpPassword.split("W5s")[1];
+
+			decryptObject decrypt = new decryptObject();
+			Map<String, Object> obj = (Map<String, Object>) decrypt.decryptObject(encryptedId, encryptedSecret);
+
+			String decryptedPwd = (String) obj.get("pwd");
 
 			// Set password here if not using key file
-			session.setPassword(FTPPushDetails.getpassword());
+			session.setPassword(decryptedPwd);
 
 			java.util.Properties config = new java.util.Properties();
 			config.put("StrictHostKeyChecking", "no");
@@ -2332,8 +2343,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			    mail.setmessageSubject("Error Remote FTP PUSH file " + myProps.getProperty("server.identity"));
 			    mail.settoEmailAddress(myProps.getProperty("admin.email"));
 			    emailMessageManager.sendEmail(mail);
-
-			    e.printStackTrace();
 		       }
 		    }
 		    catch (JSchException e) {
@@ -2360,9 +2369,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			mail.setmessageSubject("Error Remote FTP PUSH file " + myProps.getProperty("server.identity"));
 			mail.settoEmailAddress(myProps.getProperty("admin.email"));
 			emailMessageManager.sendEmail(mail);
-
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		    }
 		    catch (IOException e) {
 
@@ -2388,9 +2394,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			mail.setmessageSubject("Error Remote FTP PUSH file " + myProps.getProperty("server.identity"));
 			mail.settoEmailAddress(myProps.getProperty("admin.email"));
 			emailMessageManager.sendEmail(mail);
-
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		    }
 		    finally{
 			if(channelSftp!=null){
@@ -2426,7 +2429,18 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			    }
 			}
 			else {
-			    boolean success = ftpClient.login(FTPPushDetails.getusername().trim(), FTPPushDetails.getpassword().trim());
+			    
+			    String ftpPassword = new String(FTPPushDetails.getPassword());
+
+			    String encryptedId = ftpPassword.split("W5s")[0];
+			    String encryptedSecret = ftpPassword.split("W5s")[1];
+
+			    decryptObject decrypt = new decryptObject();
+			    Map<String, Object> obj = (Map<String, Object>) decrypt.decryptObject(encryptedId, encryptedSecret);
+
+			    String decryptedPwd = (String) obj.get("pwd");
+			    
+			    boolean success = ftpClient.login(FTPPushDetails.getusername().trim(), decryptedPwd);
 
 			    if (!success) {
 				ftpClient.disconnect();

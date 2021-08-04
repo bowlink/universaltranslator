@@ -16,6 +16,9 @@ public class configurationFTPFields {
 
     @Transient
     private CommonsMultipartFile file;
+    
+    @Transient
+    private String FTPPassword = "";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -36,7 +39,7 @@ public class configurationFTPFields {
     private String username = null;
 
     @Column(name = "PASSWORD", nullable = true)
-    private String password = null;
+    private byte[] password = null;
 
     @Column(name = "METHOD", nullable = false)
     private int method = 1;
@@ -91,12 +94,12 @@ public class configurationFTPFields {
         this.username = username;
     }
 
-    public String getpassword() {
-        return password;
+    public byte[] getPassword() {
+	return password;
     }
 
-    public void setpassword(String password) {
-        this.password = password;
+    public void setPassword(byte[] password) {
+	this.password = password;
     }
 
     public int getmethod() {
@@ -139,4 +142,11 @@ public class configurationFTPFields {
         this.file = file;
     }
 
+    public String getFTPPassword() {
+	return FTPPassword;
+    }
+
+    public void setFTPPassword(String FTPPassword) {
+	this.FTPPassword = FTPPassword;
+    }
 }
