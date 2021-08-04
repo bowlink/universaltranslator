@@ -400,8 +400,8 @@
 					<option value="FTP" <c:if test="${ftpDetails.protocol == 'FTP'}">selected</c:if>>FTP</option>
 					<%--<option value="FTPS" <c:if test="${ftpDetails.protocol == 'FTPS'}">selected</c:if>>FTPS</option>--%>
 					<option value="SFTP" <c:if test="${ftpDetails.protocol == 'SFTP'}">selected</c:if>>SFTP</option>
-					</select>
-					<span id="protocol${ftpDetails.method}Msg" class="control-label"></span>
+                                    </select>
+                                    <span id="protocol${ftpDetails.method}Msg" class="control-label"></span>
 				</div>
 				<div id="ip${ftpDetails.method}Div" class="form-group">
 				    <label class="control-label" for="ip${ftpDetails.method}">Host *</label>
@@ -413,7 +413,6 @@
 				    <input name="FTPFields[${field.index}].username" id="username${ftpDetails.method}" class="form-control" type="text" maxLength="45" value="${ftpDetails.username}"  />
 				    <span id="username${ftpDetails.method}Msg" class="control-label"></span>
 				</div>
-				
 				<%--<div id="logontype${ftpDetails.method}Div" class="form-group">
 				    <label class="control-label" for="logontype${ftpDetails.method}">Logon Type *</label>
 				    <select name="FTPFields[${field.index}].logontype" id="logontype${ftpDetails.method}" rel="${ftpDetails.method}" class="form-control logontype">
@@ -423,12 +422,15 @@
 				    </select>
 				    <span id="logontype${ftpDetails.method}Msg" class="control-label"></span>
 				</div>--%>
-				
-				
-				
 				<div id="password${ftpDetails.method}Div" class="form-group">
-				    <label class="control-label" for="password${ftpDetails.method}">Password *</label>
-				    <input name="FTPFields[${field.index}].password" id="password${ftpDetails.method}" class="form-control" type="text" maxLength="45" value="${ftpDetails.password}"  />
+				    <label class="control-label" for="password${ftpDetails.method}">
+                                        Password <c:if test="${empty ftpDetails.password}">*</c:if>
+                                    </label>
+                                    <c:if test="${not empty ftpDetails.password}">
+                                        <br /><small>(The current password is encrypted. To change the current password enter in the new password below.)</small>
+                                    </c:if>
+                                    <input type="hidden" id="currPassword${ftpDetails.method}" name="FTPFields[${field.index}].password" value="${ftpDetails.password}" />
+                                    <input name="FTPFields[${field.index}].FTPPassword" id="password${ftpDetails.method}" class="form-control" type="text" maxLength="45" value=""  />
 				    <span id="password${ftpDetails.method}Msg" class="control-label"></span>
 				</div>
 				<div id="directory${ftpDetails.method}Div" class="form-group">
@@ -442,8 +444,8 @@
 				    <span id="port${ftpDetails.method}Msg" class="control-label"></span>
 				</div>
 				<div class="form-group" <c:if test="${ftpDetails.certification == null || ftpDetails.certification == ''}">style="display:none" </c:if>>
-					<label class="control-label">Existing Certifciation:</label>
-					<input type="text" disabled value="${ftpDetails.certification}" class="form-control" />
+                                    <label class="control-label">Existing Certifciation:</label>
+                                    <input type="text" disabled value="${ftpDetails.certification}" class="form-control" />
 				    <input type="hidden" id="certification${ftpDetails.method}" name="FTPFields[${field.index}].certification" value="${ftpDetails.certification}" />
 				</div>
 				<div id="certificationfileDiv${ftpDetails.method}" class="form-group ${status.error ? 'has-error' : '' }" style="display:none;">
