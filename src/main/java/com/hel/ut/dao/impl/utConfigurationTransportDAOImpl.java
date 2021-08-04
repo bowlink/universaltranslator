@@ -40,11 +40,14 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
      * The 'getTransportDetails' function will return the details of the transport method for the passed in configuration id
      *
      * @param configId	Holds the id of the selected configuration
+     * @return 
+     * @throws java.lang.Exception
      *
      * @Return	This function will return a list of configurationTransport objects
      */
     @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
+    @Override
     public configurationTransport getTransportDetails(int configId) throws Exception {
         Query query = sessionFactory.getCurrentSession().createQuery("from configurationTransport where configId = :configId");
         query.setParameter("configId", configId);
@@ -57,10 +60,12 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
      *
      * @param configId	Holds the id of the selected configuration
      * @param transportMethod	Holds the selected transport method
+     * @return 
      *
      * @Return	This function will return a configurationTransport object
      */
     @Transactional(readOnly = true)
+    @Override
     public configurationTransport getTransportDetailsByTransportMethod(int configId, int transportMethod) {
         Query query = sessionFactory.getCurrentSession().createQuery("from configurationTransport where configId = :configId and transportMethodId = :transportMethod");
         query.setParameter("configId", configId);
@@ -78,8 +83,8 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
      * @return	this function does not return anything
      */
     @Transactional(readOnly = false)
+    @Override
     public Integer updateTransportDetails(configurationTransport transportDetails) {
-
         if (transportDetails.getId() > 0) {
             sessionFactory.getCurrentSession().update(transportDetails);
             return transportDetails.getId();
@@ -87,7 +92,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
             int detailId = (Integer) sessionFactory.getCurrentSession().save(transportDetails);
             return detailId;
         }
-
     }
 
     /**
@@ -112,7 +116,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = true)
     public List getTransportMethodsByType(utConfiguration configurationDetails) {
 	
-	 Query query;
+	Query query;
 	 
 	//Source configuration
 	if(configurationDetails.getType() == 1) {
@@ -133,7 +137,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
         return query.list();
     }
     
-
     /**
      * The 'copyMessageTypeFields' function will copy the form fields for the selected message type for the selected configuration.
      *
@@ -221,19 +224,21 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
      * The 'getConfigurationFieldsByBucket' function will return a list of form fields for the selected configuration and selected Bucket (Section 1-4)
      *
      * @param configId The id of the selected configuration
-     * @param transporetDetailId The id of the selected transport method
-     * @param buckt The integer value of the bucket (Section) you want to return fields for (must be 1-4)
+     * @param transportDetailId
+     * @param bucket
+     * @return 
+     * @throws java.lang.Exception
      */
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
     public List<configurationFormFields> getConfigurationFieldsByBucket(int configId, int transportDetailId, int bucket) throws Exception {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFormFields.class)
-                .add(Restrictions.eq("configId", configId))
-                .add(Restrictions.eq("transportDetailId", transportDetailId))
-                .add(Restrictions.eq("bucketNo", bucket))
-                .add(Restrictions.eq("useField", true))
-                .addOrder(Order.asc("bucketDspPos"));
+	.add(Restrictions.eq("configId", configId))
+	.add(Restrictions.eq("transportDetailId", transportDetailId))
+	.add(Restrictions.eq("bucketNo", bucket))
+	.add(Restrictions.eq("useField", true))
+	.addOrder(Order.asc("bucketDspPos"));
 
         return criteria.list();
     }
@@ -242,17 +247,19 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
      * The 'getConfigurationFieldsByFieldNo' function will return a list of form fields for the selected configuration and selected Field No
      *
      * @param configId The id of the selected configuration
-     * @param transporetDetailId The id of the selected transport method
+     * @param transportDetailId
      * @param fieldNo The integer value of the field you want to return fields
+     * @return 
+     * @throws java.lang.Exception
      */
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
     public configurationFormFields getConfigurationFieldsByFieldNo(int configId, int transportDetailId, int fieldNo) throws Exception {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFormFields.class)
-                .add(Restrictions.eq("configId", configId))
-                .add(Restrictions.eq("transportDetailId", transportDetailId))
-                .add(Restrictions.eq("fieldNo", fieldNo));
+	.add(Restrictions.eq("configId", configId))
+	.add(Restrictions.eq("transportDetailId", transportDetailId))
+	.add(Restrictions.eq("fieldNo", fieldNo));
 
         return (configurationFormFields) criteria.uniqueResult();
     }
@@ -263,6 +270,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
      * @param formField	object that will hold the form field settings
      */
     @Transactional(readOnly = false)
+    @Override
     public void updateConfigurationFormFields(configurationFormFields formField) {
         sessionFactory.getCurrentSession().saveOrUpdate(formField);
     }
@@ -270,15 +278,16 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     /**
      * The 'getTransportFTPDetails' function will return the FTP information for the passed in transportDetailId.
      *
-     * @param transportDetailsId the id of the selected transport method
      *
+     * @param transportDetailId
      * @return This function will return a list of FTP details
+     * @throws java.lang.Exception
      */
     @Override
     @Transactional(readOnly = true)
     public List<configurationFTPFields> getTransportFTPDetails(int transportDetailId) throws Exception {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFTPFields.class)
-                .add(Restrictions.eq("transportId", transportDetailId));
+	.add(Restrictions.eq("transportId", transportDetailId));
 
         return criteria.list();
     }
@@ -299,33 +308,30 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	.add(Restrictions.eq("method", 2));
 
         return (configurationFTPFields) criteria.uniqueResult();
-
     }
 
     /**
      * The 'getTransportFTPDetailsPull' function will return the PULL FTP details for the passed in transportDetailsId.
      *
-     * @param transportDetailsId The id of the selected transport method
      *
+     * @param transportDetailId
      * @return This function will return the PULL FTP details
+     * @throws java.lang.Exception
      */
     @Override
     @Transactional(readOnly = true)
     public configurationFTPFields getTransportFTPDetailsPull(int transportDetailId) throws Exception {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFTPFields.class)
-                .add(Restrictions.eq("transportId", transportDetailId))
-                .add(Restrictions.eq("method", 1));
+	.add(Restrictions.eq("transportId", transportDetailId))
+	.add(Restrictions.eq("method", 1));
 
         return (configurationFTPFields) criteria.uniqueResult();
-
     }
 
     /**
      * The 'saveTransportFTP' function will save the transport FTP information into the DB.
      *
      * @param FTPFields The FTP form fields
-     *
-     * @return this function will not return anything.
      */
     @Override
     @Transactional(readOnly = false)
@@ -336,15 +342,15 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     /**
      * The 'getTransportMethodById' function will return the name of a transport method based on the id passed in.
      *
-     * @param Id	This will hold the id of the transport method to retrieve
+     * @param Id This will hold the id of the transport method to retrieve
+     * @return 
      *
      * @Return This function will return a string (transport Method).
      */
     @Override
     @Transactional(readOnly = true)
     public String getTransportMethodById(int Id) {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT transportMethod FROM ref_transportMethods where id = :Id")
-                .setParameter("Id", Id);
+        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT transportMethod FROM ref_transportMethods where id = :Id").setParameter("Id", Id);
 
         String transportMethod = (String) query.uniqueResult();
 
@@ -379,7 +385,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     public void deleteTransportMessageTypes(int configTransportId) {
         Query query = sessionFactory.getCurrentSession().createQuery("DELETE FROM configurationTransportMessageTypes where configTransportId = :configTransportId");
         query.setParameter("configTransportId", configTransportId);
-
         query.executeUpdate();
     }
 
@@ -387,39 +392,43 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
      * The 'saveTransportMessageTypes' function will save the association between configuration transport and message types.
      *
      * @param messageType The configurationTransportMessageTypes object
-     *
-     * @return This function does not return anything.
      */
     @Transactional(readOnly = false)
+    @Override
     public void saveTransportMessageTypes(configurationTransportMessageTypes messageType) {
         sessionFactory.getCurrentSession().save(messageType);
     }
 
     /**
      * this method will returns a list of required form field for a configuration*
+     * @param configId
+     * @return 
      */
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
     public List<configurationFormFields> getRequiredFieldsForConfig(Integer configId) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFormFields.class)
-                .add(Restrictions.eq("configId", configId))
-                .add(Restrictions.eq("required", true))
-                .addOrder(Order.asc("fieldNo"));
+	.add(Restrictions.eq("configId", configId))
+	.add(Restrictions.eq("required", true))
+	.addOrder(Order.asc("fieldNo"));
 
         return criteria.list();
     }
 
     /**
      * this method returns a list of cff by validation type if 0 is passed in, we get them all *
+     * @param configId
+     * @param validationTypeId
+     * @return 
      */
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
-    public List<configurationFormFields> getCffByValidationType(
-            Integer configId, Integer validationTypeId) {
+    public List<configurationFormFields> getCffByValidationType(Integer configId, Integer validationTypeId) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFormFields.class)
-                .add(Restrictions.eq("configId", configId));
+	.add(Restrictions.eq("configId", configId));
+	
         if (validationTypeId != 0) {
             criteria.add(Restrictions.eq("validationTypeId", validationTypeId));
         }
@@ -433,13 +442,13 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @SuppressWarnings("unchecked")
     public List<configurationTransport> getDistinctConfigTransportForOrg(Integer orgId, Integer transportMethodId) {
         try {
-
             String sql = ("select distinct delimChar, errorHandling, autoRelease, fileLocation, fileType, containsHeaderRow, "
-                    + " transportMethodId, encodingId from configurationTransportDetails, ref_delimiters , configurationMessageSpecs "
-                    + " where ref_delimiters.id = configurationTransportDetails.fileDelimiter "
-                    + " and configurationMessageSpecs.configId = configurationTransportDetails.configId "
-                    + " and transportMethodId = :transportMethodId and configurationTransportDetails.configId in "
-                    + "(select id from configurations where orgId = :orgId and type = 1);");
+	    + " transportMethodId, encodingId from configurationTransportDetails, ref_delimiters , configurationMessageSpecs "
+	    + " where ref_delimiters.id = configurationTransportDetails.fileDelimiter "
+	    + " and configurationMessageSpecs.configId = configurationTransportDetails.configId "
+	    + " and transportMethodId = :transportMethodId and configurationTransportDetails.configId in "
+	    + "(select id from configurations where orgId = :orgId and type = 1);");
+	    
             Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
                     Transformers.aliasToBean(configurationTransport.class));
             query.setParameter("orgId", orgId);
@@ -480,8 +489,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 
         } catch (Exception ex) {
             System.err.println("getConfigurationMessageSpecsForUserTransport  " + ex.getCause());
-            ex.printStackTrace();
-
+	    
             return null;
         }
     }
@@ -491,14 +499,16 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
      *
      * @param configId The id of the selected configuration
      * @param fieldNo The integer value of the field you want to return fields
+     * @return 
+     * @throws java.lang.Exception
      */
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
     public configurationFormFields getCFFByFieldNo(int configId, int fieldNo) throws Exception {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFormFields.class)
-                .add(Restrictions.eq("configId", configId))
-                .add(Restrictions.eq("fieldNo", fieldNo));
+	.add(Restrictions.eq("configId", configId))
+	.add(Restrictions.eq("fieldNo", fieldNo));
 
         return (configurationFormFields) criteria.uniqueResult();
     }
@@ -535,8 +545,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 
         } catch (Exception ex) {
             System.err.println("getConfigurationMessageSpecs  " + ex.getCause());
-            ex.printStackTrace();
-
             return null;
         }
     }
@@ -567,8 +575,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 
         } catch (Exception ex) {
             System.err.println("getConfigTransportForConfigIds " + ex.getCause());
-            ex.printStackTrace();
-
             return null;
         }
     }
@@ -581,9 +587,9 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	try {
 
             String sql = "select a.* "
-		    + "from configurationtransportdetails a inner join "
-		    + "configurations b on b.id = a.configId "
-		    + "where a.id = :transportDetailsId and a.fileExt = :fileExt and a.transportMethodId = :transportMethodId and a.status = :status and b.type = 1";
+	    + "from configurationtransportdetails a inner join "
+	    + "configurations b on b.id = a.configId "
+	    + "where a.id = :transportDetailsId and a.fileExt = :fileExt and a.transportMethodId = :transportMethodId and a.status = :status and b.type = 1";
 	    
             Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(configurationTransport.class));
             query.setParameter("fileExt", fileExt);
@@ -597,7 +603,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 
         } catch (Exception ex) {
             System.err.println("getTransportListForFileExtAndPath " + ex.getCause());
-            ex.printStackTrace();
             return null;
         }
     }
@@ -611,7 +616,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
             return (configurationTransport) query.uniqueResult();
         } catch (Exception ex) {
             System.err.println("getTransportDetailsByTransportId " + ex.getCause());
-            ex.printStackTrace();
             return null;
         }
     }
@@ -635,7 +639,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 
         } catch (Exception ex) {
             System.err.println("getOrgIdForFTPPath  " + ex.getCause());
-            ex.printStackTrace();
             return null;
         }
     }
@@ -656,7 +659,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 
         } catch (Exception ex) {
             System.err.println("getMinMaxFileSize  " + ex.getCause());
-            ex.printStackTrace();
             return null;
         }
     }
@@ -682,7 +684,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 
         } catch (Exception ex) {
             System.err.println("getCountContainsHeaderRow  " + ex.getCause());
-            ex.printStackTrace();
             return null;
         }
     }
@@ -706,7 +707,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 
         } catch (Exception ex) {
             System.err.println("getConfigCount  " + ex.getCause());
-            ex.printStackTrace();
             return null;
         }
     }
@@ -734,8 +734,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 
         } catch (Exception ex) {
             System.err.println("getDistinctDelimCharForFileExt " + ex.getCause());
-            ex.printStackTrace();
-
             return null;
         }
     }
@@ -744,8 +742,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
      * The 'saveTransportFileDrop' function will save the transport file drop information into the DB.
      *
      * @param fileDropFields The file drop form fields
-     *
-     * @return this function will not return anything.
+     * @throws java.lang.Exception
      */
     @Override
     @Transactional(readOnly = false)
@@ -753,7 +750,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
         try {
             sessionFactory.getCurrentSession().saveOrUpdate(fileDropFields);
         } catch (Exception ex) {
-            ex.printStackTrace();
             System.err.println("saveTransportFileDrop " + ex.getCause());
         }
     }
@@ -768,7 +764,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = true)
     public List<configurationFileDropFields> getTransFileDropDetails(int transportDetailId) throws Exception {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFileDropFields.class)
-                .add(Restrictions.eq("transportId", transportDetailId));
+	.add(Restrictions.eq("transportId", transportDetailId));
 
         return criteria.list();
     }
@@ -783,29 +779,28 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = true)
     public configurationFileDropFields getTransFileDropDetailsPush(int transportDetailId) throws Exception {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFileDropFields.class)
-                .add(Restrictions.eq("transportId", transportDetailId))
-                .add(Restrictions.eq("method", 2));
+	.add(Restrictions.eq("transportId", transportDetailId))
+	.add(Restrictions.eq("method", 2));
 
         return (configurationFileDropFields) criteria.uniqueResult();
-
     }
 
     /**
      * The 'configurationFileDropFields' function will return the PULL file drop details for the passed in transportDetailsId.
      *
-     * @param transportDetailsId The id of the selected transport method
      *
+     * @param transportDetailId
      * @return This function will return the PULL file drop details
+     * @throws java.lang.Exception
      */
     @Override
     @Transactional(readOnly = true)
     public configurationFileDropFields getTransFileDropDetailsPull(int transportDetailId) throws Exception {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFileDropFields.class)
-                .add(Restrictions.eq("transportId", transportDetailId))
-                .add(Restrictions.eq("method", 1));
+	.add(Restrictions.eq("transportId", transportDetailId))
+	.add(Restrictions.eq("method", 1));
 
         return (configurationFileDropFields) criteria.uniqueResult();
-
     }
 
     @Override
@@ -814,10 +809,10 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     public List<configurationTransport> getTransportEncoding(String fileExt, Integer transportMethodId) {
         try {
             String sql = ("select distinct encodingId from configurationTransportDetails "
-                    + " where fileext = :fileExt and transportmethodId = :transportMethodId"
-                    + " and configurationTransportDetails.configId in (select id from configurations where type = 1)");
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
-                    Transformers.aliasToBean(configurationTransport.class));
+	    + " where fileext = :fileExt and transportmethodId = :transportMethodId"
+	    + " and configurationTransportDetails.configId in (select id from configurations where type = 1)");
+	    
+            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(configurationTransport.class));
             query.setParameter("fileExt", fileExt);
             query.setParameter("transportMethodId", transportMethodId);
 
@@ -827,7 +822,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 
         } catch (Exception ex) {
             System.err.println("getTransportEncoding  " + ex.getCause());
-            ex.printStackTrace();
             return null;
         }
     }
@@ -844,10 +838,10 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     public Integer getOrgIdForFileDropPath(configurationFileDropFields fileDropInfo) throws Exception {
 	
         try {
-             String sql = ("select b.orgId "
-		    + "from configurationtransportdetails a inner join "
-		    + "configurations b on b.id = a.configId "
-		    + "where a.id = :transportId");
+            String sql = ("select b.orgId "
+	    + "from configurationtransportdetails a inner join "
+	    + "configurations b on b.id = a.configId "
+	    + "where a.id = :transportId");
 	    
             Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
             query.setParameter("transportId", fileDropInfo.getTransportId());
@@ -858,7 +852,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 
         } catch (Exception ex) {
             System.err.println("getOrgIdForFileDropPath  " + ex.getCause());
-            ex.printStackTrace();
             return null;
         }
     }
@@ -866,6 +859,8 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     /**
      * The 'getTransportMethods' function will return a list of transport methods, it can be active, not active or both
      *
+     * @param statusIds
+     * @return 
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -873,9 +868,9 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     public List<TransportMethod> getTransportMethods(List<Integer> statusIds) {
         try {
             Query query = sessionFactory.getCurrentSession()
-                    .createSQLQuery("SELECT id, transportMethod FROM ref_transportMethods where active in (:statusIds) order by transportMethod asc")
-                    .setResultTransformer(
-                            Transformers.aliasToBean(TransportMethod.class));
+	    .createSQLQuery("SELECT id, transportMethod FROM ref_transportMethods where active in (:statusIds) order by transportMethod asc")
+	    .setResultTransformer(Transformers.aliasToBean(TransportMethod.class));
+	    
             query.setParameterList("statusIds", statusIds);
             return query.list();
         } catch (Exception ex) {
@@ -888,10 +883,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
-    public List<configurationTransport> getConfigurationTransportFileExtByFileType(
-            Integer orgId, Integer transportMethodId,
-            List<Integer> fileTypeIds, List<Integer> statusIds,
-            boolean distinctOnly, boolean foroutboundProcessing) {
+    public List<configurationTransport> getConfigurationTransportFileExtByFileType(Integer orgId, Integer transportMethodId,List<Integer> fileTypeIds, List<Integer> statusIds,boolean distinctOnly, boolean foroutboundProcessing) {
         Integer configType = 1;
         if (foroutboundProcessing) {
             configType = 2;
@@ -922,7 +914,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
             return query.list();
         } catch (Exception ex) {
             System.err.println("getConfigurationTransportFileExtByFileType  " + ex.getCause());
-            ex.printStackTrace();
             return null;
         }
     }
@@ -931,7 +922,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = true)
     public List<configurationWebServiceFields> getTransWSDetails(int transportDetailId) throws Exception {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationWebServiceFields.class)
-                .add(Restrictions.eq("transportId", transportDetailId));
+	.add(Restrictions.eq("transportId", transportDetailId));
 
         return criteria.list();
     }
@@ -975,8 +966,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 
         } catch (Exception ex) {
             System.err.println("getDistinctTransportDetailsForOrgByTransportMethodId " + ex.getCause());
-            ex.printStackTrace();
-
             return null;
         }
     }
@@ -1013,8 +1002,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 
         } catch (Exception ex) {
             System.err.println("getCTForOrgByTransportMethodId " + ex.getCause());
-            ex.printStackTrace();
-
             return null;
         }
     }
@@ -1022,73 +1009,70 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     /**
      * The 'getTransWSDetailsPush' function will return the PUSH web service details for the passed in transportDetailsId.
      *
-     * @param transportDetailsId The id of the selected transport method
      *
+     * @param transportDetailId
      * @return This function will return the PUSH web service details
+     * @throws java.lang.Exception
      */
     @Override
     @Transactional(readOnly = true)
     public configurationWebServiceFields getTransWSDetailsPush(int transportDetailId) throws Exception {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationWebServiceFields.class)
-                .add(Restrictions.eq("transportId", transportDetailId))
-                .add(Restrictions.eq("method", 2));
+	.add(Restrictions.eq("transportId", transportDetailId))
+	.add(Restrictions.eq("method", 2));
 
         return (configurationWebServiceFields) criteria.uniqueResult();
-
     }
 
     /**
      * The 'getTransWSDetailsPull' function will return the PULL web service details for the passed in transportDetailsId.
      *
-     * @param transportDetailsId The id of the selected transport method
      *
+     * @param transportDetailId
      * @return This function will return the PULL web service details
+     * @throws java.lang.Exception
      */
     @Override
     @Transactional(readOnly = true)
     public configurationWebServiceFields getTransWSDetailsPull(int transportDetailId) throws Exception {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationWebServiceFields.class)
-                .add(Restrictions.eq("transportId", transportDetailId))
-                .add(Restrictions.eq("method", 1));
+	.add(Restrictions.eq("transportId", transportDetailId))
+	.add(Restrictions.eq("method", 1));
 
         return (configurationWebServiceFields) criteria.uniqueResult();
-
     }
 
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
-    public List<configurationWebServiceSenders> getWSSenderList(int transportId)
-            throws Exception {
+    public List<configurationWebServiceSenders> getWSSenderList(int transportId) throws Exception {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationWebServiceSenders.class)
-                .add(Restrictions.eq("transportId", transportId));
+	.add(Restrictions.eq("transportId", transportId));
 
         return criteria.list();
     }
 
     @Override
     @Transactional(readOnly = false)
-    public void saveWSSender(configurationWebServiceSenders wsSender)
-            throws Exception {
+    public void saveWSSender(configurationWebServiceSenders wsSender)throws Exception {
         sessionFactory.getCurrentSession().saveOrUpdate(wsSender);
     }
 
     @Override
     @Transactional(readOnly = false)
-    public void deleteWSSender(configurationWebServiceSenders wsSender)
-            throws Exception {
+    public void deleteWSSender(configurationWebServiceSenders wsSender)throws Exception {
         sessionFactory.getCurrentSession().delete(wsSender);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
-    public boolean hasConfigsWithMasstranslations(
-            Integer orgId, Integer transportMethodId) throws Exception {
+    public boolean hasConfigsWithMasstranslations(Integer orgId, Integer transportMethodId) throws Exception {
         String sql = ("select masstranslation from configurationTransportDetails "
-                + " where transportMethodId = :transportMethodId and masstranslation = true "
-                + " and configurationTransportDetails.configId in "
-                + "(select id from configurations where orgId = :orgId and type = 1);");
+	+ " where transportMethodId = :transportMethodId and masstranslation = true "
+	+ " and configurationTransportDetails.configId in "
+	+ "(select id from configurations where orgId = :orgId and type = 1);");
+	
         Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
         query.setParameter("orgId", orgId);
         query.setParameter("transportMethodId", transportMethodId);
@@ -1099,7 +1083,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
             return false;
         }
     }
-    
     
     @Override
     @Transactional(readOnly = true)
@@ -1152,14 +1135,14 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	else {
 	    return (configurationTransport) query.uniqueResult();
 	}
-
     }
     
     /**
      * The 'getRestAPIMethodName' function will return the name of a rest api method based on the id passed in.
      *
-     * @param Id	This will hold the id of the rest api method to retrieve
      *
+     * @param methodId
+     * @return 
      * @Return This function will return a string (transport Method).
      */
     @Override
@@ -1181,12 +1164,9 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
      * @return This function will not return anything
      */
     @Transactional(readOnly = false)
+    @Override
     public Integer saveConfigurationFormFields(configurationFormFields formField) {
-	
-	Integer lastId;
-
-        lastId = (Integer) sessionFactory.getCurrentSession().save(formField);
-	
+	Integer lastId = (Integer) sessionFactory.getCurrentSession().save(formField);
 	return lastId;
     }
     
@@ -1311,7 +1291,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	}
     };
     
-    
     @Override
     @Transactional(readOnly = false)
     public void saveTransportDirectMessageDetails(organizationDirectDetails directDetails) throws Exception {
@@ -1323,14 +1302,14 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     public configurationTransport findConfigurationByDirectMessagKeyword(Integer orgId, String directMessageToAddress) throws Exception {
         
         String sql = "SELECT * "
-                + "FROM configurationtransportdetails "
-                + "WHERE INSTR(:directMessageToAddress,dmConfigKeyword) > 0 "
-                + "and configId in (select id from configurations where orgId = :organizationId)";
+	+ "FROM configurationtransportdetails "
+	+ "WHERE INSTR(:directMessageToAddress,dmConfigKeyword) > 0 "
+	+ "and configId in (select id from configurations where orgId = :organizationId)";
         
         Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
-                .setParameter("organizationId", orgId)
-                .setParameter("directMessageToAddress", directMessageToAddress)
-                .setResultTransformer(Transformers.aliasToBean(configurationTransport.class));
+	.setParameter("organizationId", orgId)
+	.setParameter("directMessageToAddress", directMessageToAddress)
+	.setResultTransformer(Transformers.aliasToBean(configurationTransport.class));
 	
 	if(!query.list().isEmpty()) {
 	    return (configurationTransport) query.list().get(0);
@@ -1349,10 +1328,8 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = false)
     public void executeConfigTransportSQL(String sqlStatement) throws Exception {
-	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlStatement);
 	query.executeUpdate();
-	
     }
     
     /**
@@ -1384,7 +1361,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     public void deleteConnectionMappedFields(Integer connectionId) throws Exception {
 	Query query = sessionFactory.getCurrentSession().createQuery("DELETE FROM configurationconnectionfieldmappings where connectionId = :connectionId");
         query.setParameter("connectionId", connectionId);
-
         query.executeUpdate();
     }
     

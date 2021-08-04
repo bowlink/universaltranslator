@@ -47,6 +47,7 @@ import com.hel.ut.model.lutables.lu_ProcessStatus;
 import com.hel.ut.model.referralActivityExports;
 import com.hel.ut.model.systemSummary;
 import com.hel.ut.reference.fileSystem;
+import com.hel.ut.security.decryptObject;
 import com.hel.ut.service.CCDtoTxt;
 import com.hel.ut.service.JSONtoTxt;
 import com.hel.ut.service.emailMessageManager;
@@ -4568,8 +4569,18 @@ public class transactionInManagerImpl implements transactionInManager {
 
 			    session = jSch.getSession(ftpConfiguration.getusername().trim(),ftpConfiguration.getip(),ftpConfiguration.getport());
 			    
+			    String ftpPassword = new String(ftpConfiguration.getPassword());
+
+			    String encryptedId = ftpPassword.split("W5s")[0];
+			    String encryptedSecret = ftpPassword.split("W5s")[1];
+
+			    decryptObject decrypt = new decryptObject();
+			    Map<String, Object> obj = (Map<String, Object>) decrypt.decryptObject(encryptedId, encryptedSecret);
+
+			    String decryptedPwd = (String) obj.get("pwd");
+			    
 			    // Set password here if not using key file
-			    session.setPassword(ftpConfiguration.getpassword().trim());
+			    session.setPassword(decryptedPwd);
 
 			    java.util.Properties config = new java.util.Properties();
 			    config.put("StrictHostKeyChecking", "no");
@@ -4744,7 +4755,17 @@ public class transactionInManagerImpl implements transactionInManager {
 				}
 			    }
 			    else {
-				boolean success = ftpClient.login(ftpConfiguration.getusername().trim(), ftpConfiguration.getpassword().trim());
+				String ftpPassword = new String(ftpConfiguration.getPassword());
+				
+				String encryptedId = ftpPassword.split("W5s")[0];
+				String encryptedSecret = ftpPassword.split("W5s")[1];
+
+				decryptObject decrypt = new decryptObject();
+				Map<String, Object> obj = (Map<String, Object>) decrypt.decryptObject(encryptedId, encryptedSecret);
+
+				String decryptedPwd = (String) obj.get("pwd");
+
+				boolean success = ftpClient.login(ftpConfiguration.getusername().trim(), decryptedPwd);
 			    
 				if (!success) {
 				    ftpClient.disconnect();
