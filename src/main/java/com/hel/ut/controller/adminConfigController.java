@@ -248,9 +248,15 @@ public class adminConfigController {
 		    if(!getConectionsByConfiguration.isEmpty()) {
 			config.setFileDropLocation(fileDropLocation.getDirectory());
 		    }
-		    
 		}
             }
+	    
+	    //Check to see if configuration has any FTP connection set up
+	    configurationFTPFields ftpDetails = utconfigurationTransportManager.getTransportFTPDetailsPull(transportDetails.getId());
+	    if(ftpDetails != null) {
+		config.setAllowFTPLink(true);
+		config.settransportDetailId(transportDetails.getId());
+	    }
 	    
 	    configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(config.getId());
 	    
@@ -261,7 +267,6 @@ public class adminConfigController {
 	    if(!"bowlinktest".equals(org.getCleanURL().trim().toLowerCase())) {
 		validSourceConfigurations.add(config);
 	    }
-	    
         }
 	mav.addObject("sourceconfigurations", validSourceConfigurations);
 	
@@ -371,7 +376,6 @@ public class adminConfigController {
             mav.addObject("existingName", "The configuration name " + configurationDetails.getconfigName().trim() + " already exists.");
             return mav;
         }
-	
 	
 	configurationDetails.setstepsCompleted(1);
 	
@@ -679,7 +683,7 @@ public class adminConfigController {
                 transportDetails.setfileLocation(orgDetails.getcleanURL() + "/output files/");
             }
 
-            List<Integer> assocMessageTypes = new ArrayList<Integer>();
+            List<Integer> assocMessageTypes = new ArrayList<>();
             assocMessageTypes.add(configurationDetails.getId());
             transportDetails.setmessageTypes(assocMessageTypes);
         }
@@ -892,8 +896,7 @@ public class adminConfigController {
      */
     @RequestMapping(value = "/transport", method = RequestMethod.POST)
     public ModelAndView updateTransportDetails(HttpSession session, @Valid @ModelAttribute(value = "transportDetails") configurationTransport transportDetails, BindingResult result, RedirectAttributes redirectAttr,
-            @RequestParam String action, @RequestParam(value = "domain1", required = false) String domain1, Authentication authentication
-    ) throws Exception {
+        @RequestParam String action, @RequestParam(value = "domain1", required = false) String domain1, Authentication authentication) throws Exception {
 	
 	Integer configId = 0;
 	
@@ -1008,19 +1011,8 @@ public class adminConfigController {
 	    }
 	}
 	
-        /**
-         * Need to set the associated messages types
-         *
-         * step 1: Remove all associations step 2: Loop through the selected message Types
-         */
-        /**
-         * Step 1:
-         */
         utconfigurationTransportManager.deleteTransportMessageTypes(transportId);
 
-        /**
-         * Step 2:
-         */
         if (transportDetails.getmessageTypes() != null) {
             configurationTransportMessageTypes messageType;
             for (Integer selconfigId : transportDetails.getmessageTypes()) {
@@ -1131,8 +1123,6 @@ public class adminConfigController {
 		mav.addObject("lastUploadedDate", finalDateFormat.format(configurationDetails.getDateCreated()));
 	    }
 	    else {
-		
-		//Check if file exists
 		File templateFile = new File( myProps.getProperty("ut.directory.utRootDir") + orgDetails.getCleanURL() + "/templates/"+messageSpecs.gettemplateFile());
 		
 		if(templateFile.exists()) {
@@ -1228,8 +1218,8 @@ public class adminConfigController {
     @SuppressWarnings("rawtypes")
     @RequestMapping(value = "/messagespecs", method = RequestMethod.POST)
     public ModelAndView updateMessageSpecs(HttpSession session,
-	    @Valid @ModelAttribute(value = "messageSpecs") configurationMessageSpecs messageSpecs, 
-	    BindingResult result, RedirectAttributes redirectAttr, @RequestParam String action, Authentication authentication) throws Exception {
+	@Valid @ModelAttribute(value = "messageSpecs") configurationMessageSpecs messageSpecs, 
+	BindingResult result, RedirectAttributes redirectAttr, @RequestParam String action, Authentication authentication) throws Exception {
 
 	//Need to pass the selected transport Type
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(messageSpecs.getconfigId());
@@ -1364,8 +1354,8 @@ public class adminConfigController {
     @RequestMapping(value = "/saveFields", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
     Integer saveFormFields(HttpSession session,
-	    @ModelAttribute(value = "transportDetails") configurationTransport transportDetails, 
-	    RedirectAttributes redirectAttr, @RequestParam String action, @RequestParam int transportMethod, @RequestParam int errorHandling, Authentication authentication) throws Exception {
+	@ModelAttribute(value = "transportDetails") configurationTransport transportDetails, 
+	RedirectAttributes redirectAttr, @RequestParam String action, @RequestParam int transportMethod, @RequestParam int errorHandling, Authentication authentication) throws Exception {
 
 	Integer configId = (Integer) session.getAttribute("manageconfigId");
 	
@@ -1537,7 +1527,7 @@ public class adminConfigController {
 
         //Loop through list of macros to mark the ones that need
         //fields filled in
-        List<Integer> macroLookUpList = new ArrayList<Integer>();
+        List<Integer> macroLookUpList = new ArrayList<>();
         for (Macros macro : macros) {
             if (macro.getfieldAQuestion() != null || macro.getfieldBQuestion() != null || macro.getcon1Question() != null || macro.getcon2Question() != null) {
                 macroLookUpList.add(macro.getId());
@@ -1573,8 +1563,7 @@ public class adminConfigController {
      *
      */
     @RequestMapping(value = "/getMacroDetails.do", method = RequestMethod.GET)
-    public @ResponseBody
-    ModelAndView getMacroDetails(@RequestParam(value = "macroId", required = true) Integer macroId, HttpSession session) throws Exception {
+    public @ResponseBody ModelAndView getMacroDetails(@RequestParam(value = "macroId", required = true) Integer macroId, HttpSession session) throws Exception {
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("/administrator/configurations/macroDetails");
@@ -1903,13 +1892,12 @@ public class adminConfigController {
     @RequestMapping(value = "/setTranslations{params}", method = RequestMethod.GET)
     public @ResponseBody
     ModelAndView setTranslations(HttpSession session,
-            @RequestParam(value = "f", required = true) Integer field, @RequestParam(value = "cw", required = true) Integer cwId, @RequestParam(value = "fText", required = true) String fieldText,
-            @RequestParam(value = "CWText", required = true) String cwText, @RequestParam(value = "macroId", required = true) Integer macroId,
-            @RequestParam(value = "macroName", required = true) String macroName, @RequestParam(value = "fieldA", required = false) String fieldA,
-            @RequestParam(value = "fieldB") String fieldB, @RequestParam(value = "constant1") String constant1,
-            @RequestParam(value = "constant2", required = false) String constant2, @RequestParam(value = "passClear") Integer passClear,
-            @RequestParam(value = "categoryId", required = true) Integer categoryId
-    ) throws Exception {
+	@RequestParam(value = "f", required = true) Integer field, @RequestParam(value = "cw", required = true) Integer cwId, @RequestParam(value = "fText", required = true) String fieldText,
+	@RequestParam(value = "CWText", required = true) String cwText, @RequestParam(value = "macroId", required = true) Integer macroId,
+	@RequestParam(value = "macroName", required = true) String macroName, @RequestParam(value = "fieldA", required = false) String fieldA,
+	@RequestParam(value = "fieldB") String fieldB, @RequestParam(value = "constant1") String constant1,
+	@RequestParam(value = "constant2", required = false) String constant2, @RequestParam(value = "passClear") Integer passClear,
+	@RequestParam(value = "categoryId", required = true) Integer categoryId) throws Exception {
 	
 	Integer configId = (Integer) session.getAttribute("manageconfigId");
 	
@@ -1971,7 +1959,6 @@ public class adminConfigController {
             String optionDesc;
             String optionValue;
 
-            /* Get values of crosswalk */
             List crosswalkdata = messagetypemanager.getCrosswalkData(cwId);
 
             Iterator cwDataIt = crosswalkdata.iterator();
@@ -2008,10 +1995,9 @@ public class adminConfigController {
      */
     @RequestMapping(value = "/removeTranslations{params}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
-    Integer removeTranslation(HttpSession session,
-	    @RequestParam(value = "fieldId", required = true) Integer fieldId, 
-	    @RequestParam(value = "processOrder", required = true) Integer processOrder,
-	    @RequestParam(value = "categoryId", required = true) Integer categoryId) throws Exception {
+    Integer removeTranslation(HttpSession session,@RequestParam(value = "fieldId", required = true) Integer fieldId, 
+	@RequestParam(value = "processOrder", required = true) Integer processOrder,
+	@RequestParam(value = "categoryId", required = true) Integer categoryId) throws Exception {
 
 	List<configurationDataTranslations> translations;
 	
@@ -2059,10 +2045,9 @@ public class adminConfigController {
      */
     @RequestMapping(value = "/updateTranslationProcessOrder{params}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
-    Integer updateTranslationProcessOrder(HttpSession session,
-	    @RequestParam(value = "currProcessOrder", required = true) Integer currProcessOrder, 
-	    @RequestParam(value = "newProcessOrder", required = true) Integer newProcessOrder,
-	    @RequestParam(value = "categoryId", required = true) Integer categoryId) throws Exception {
+    Integer updateTranslationProcessOrder(HttpSession session,@RequestParam(value = "currProcessOrder", required = true) Integer currProcessOrder, 
+	@RequestParam(value = "newProcessOrder", required = true) Integer newProcessOrder,
+	@RequestParam(value = "categoryId", required = true) Integer categoryId) throws Exception {
 
         List<configurationDataTranslations> translations;
 	if(null == categoryId) {
@@ -2263,7 +2248,6 @@ public class adminConfigController {
         } 
 	else {
 	    ModelAndView mav = new ModelAndView(new RedirectView("/administrator/configurations/list?msg=updated"));
-            //ModelAndView mav = new ModelAndView(new RedirectView("preprocessing"));
             return mav;
         }
     }
@@ -2316,16 +2300,13 @@ public class adminConfigController {
 
         // If null then create an empty HL7 Detail object
         if (hl7Details == null) {
-            /* Get a list of available HL7 Sepcs */
             List<mainHL7Details> HL7Specs = sysAdminManager.getHL7List();
             mav.addObject("HL7Specs", HL7Specs);
         } else {
             HL7Id = hl7Details.getId();
 
-            /* Get a list of HL7 Segments */
             List<HL7Segments> HL7Segments = utconfigurationmanager.getHL7Segments(HL7Id);
 
-            /* Get a list of HL7Elements */
             if (!HL7Segments.isEmpty()) {
                 for (HL7Segments segment : HL7Segments) {
 
@@ -2367,8 +2348,7 @@ public class adminConfigController {
      * @throws java.lang.Exception
      */
     @RequestMapping(value = "/loadHL7Spec", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody
-    Integer loadHL7Spec(@RequestParam int configId, @RequestParam int hl7SpecId) throws Exception {
+    public @ResponseBody Integer loadHL7Spec(@RequestParam int configId, @RequestParam int hl7SpecId) throws Exception {
 
         mainHL7Details hl7Specs = sysAdminManager.getHL7Details(hl7SpecId);
 
@@ -2775,7 +2755,6 @@ public class adminConfigController {
     @RequestMapping(value = "/removeElementComponent.do", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
     Integer removeElementComponent(@RequestParam(value = "componentId", required = true) int componentId) {
-
         utconfigurationmanager.removeHL7ElementComponent(componentId);
         return 1;
     }
@@ -2789,7 +2768,6 @@ public class adminConfigController {
     @RequestMapping(value = "/removeElement.do", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
     Integer removeElement(@RequestParam(value = "elementId", required = true) int elementId) {
-
         utconfigurationmanager.removeHL7Element(elementId);
         return 1;
     }
@@ -2804,7 +2782,6 @@ public class adminConfigController {
     @RequestMapping(value = "/removeSegment.do", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
     Integer removeSegment(@RequestParam(value = "segmentId", required = true) int segmentId) {
-
         utconfigurationmanager.removeHL7Segment(segmentId);
         return 1;
     }
@@ -2836,7 +2813,6 @@ public class adminConfigController {
         mav.addObject("HL7", session.getAttribute("configHL7"));
         mav.addObject("CCD", session.getAttribute("configCCD"));
 	
-
         //Set the variable to hold the number of completed steps for this utConfiguration;
         mav.addObject("stepsCompleted", session.getAttribute("configStepsCompleted"));
 
@@ -2886,8 +2862,6 @@ public class adminConfigController {
         ccdElement.setConfigId(configId);
         mav.addObject("ccdElement", ccdElement);
 
-        //Get the transport fields
-        //Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
         List<configurationFormFields> fields = utconfigurationTransportManager.getConfigurationFields(configId, transportDetails.getId());
         transportDetails.setFields(fields);
@@ -2917,8 +2891,6 @@ public class adminConfigController {
         configurationCCDElements ccdElement = utconfigurationmanager.getCCDElement(elementId);
         mav.addObject("ccdElement", ccdElement);
 
-        //Get the transport fields
-        //Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
         List<configurationFormFields> fields = utconfigurationTransportManager.getConfigurationFields(configId, transportDetails.getId());
         transportDetails.setFields(fields);
@@ -3172,7 +3144,6 @@ public class adminConfigController {
      */
     @RequestMapping(value = "/getHELRegistryConfigurations", method = RequestMethod.GET)
     public @ResponseBody List<configuration> getHELRegistryOrganizations() throws Exception {
-	
 	List<configuration> registryConfigurations = registryconfigurationmanager.getAllActiveConfigurations();
 	return registryConfigurations;
     }
@@ -3187,7 +3158,6 @@ public class adminConfigController {
      */
     @RequestMapping(value = "/getSourceConfigurationFields", method = RequestMethod.GET)
     public @ResponseBody ModelAndView getSourceConfigurationFields(@RequestParam Integer sourceConfigId) throws Exception {
-	
 	ModelAndView mav = new ModelAndView();
         mav.setViewName("/administrator/configurations/sourceConfigurationFields");
 	List<configurationFormFields> sourceConfigurationFields = utconfigurationTransportManager.getConfigurationFieldsToCopy(sourceConfigId);
@@ -3205,7 +3175,6 @@ public class adminConfigController {
     @RequestMapping(value = "/deleteConfiguration.do", method = RequestMethod.POST)
     public @ResponseBody
     Integer deleteConfiguration(@RequestParam int configId) throws Exception {
-
         utConfiguration configDetails = utconfigurationmanager.getConfigurationById(configId);
 	configDetails.setDeleted(true);
 	
@@ -3229,10 +3198,10 @@ public class adminConfigController {
     @RequestMapping(value = "/getCrosswalks.do", method = RequestMethod.GET)
     public @ResponseBody
     ModelAndView getCrosswalks(@RequestParam(value = "page", required = false) Integer page, 
-	    @RequestParam(value = "orgId", required = false) Integer orgId, 
-	    @RequestParam(value = "maxCrosswalks", required = false) Integer maxCrosswalks,
-	    @RequestParam(value = "configId", required = false) Integer configId,
-	    @RequestParam(value = "inUseOnly", required = false) boolean inUseOnly) throws Exception {
+	@RequestParam(value = "orgId", required = false) Integer orgId, 
+	@RequestParam(value = "maxCrosswalks", required = false) Integer maxCrosswalks,
+	@RequestParam(value = "configId", required = false) Integer configId,
+	@RequestParam(value = "inUseOnly", required = false) boolean inUseOnly) throws Exception {
 
         if (page == null) {
             page = 1;
@@ -3428,8 +3397,8 @@ public class adminConfigController {
      */
     @RequestMapping(value = "/reloadConfigurationFields", method = RequestMethod.GET)
     public @ResponseBody String reloadConfigurationFields(
-	    @RequestParam(value = "configurationId", required = true) Integer configurationId,
-	    @RequestParam(value = "transportDetailsId", required = true) Integer transportDetailsId) throws Exception {
+	@RequestParam(value = "configurationId", required = true) Integer configurationId,
+	@RequestParam(value = "transportDetailsId", required = true) Integer transportDetailsId) throws Exception {
 	
 	configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configurationId);
 	
@@ -3447,9 +3416,7 @@ public class adminConfigController {
      * @throws Exception
      */
     @RequestMapping(value = "/createDataTranslationDownload", method = RequestMethod.GET)
-    @ResponseBody
-    public ModelAndView createDataTranslationDownload(
-	    @RequestParam(value = "configId", required = false) Integer configId,HttpSession session) throws Exception {
+    @ResponseBody public ModelAndView createDataTranslationDownload(@RequestParam(value = "configId", required = false) Integer configId,HttpSession session) throws Exception {
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("/administrator/configurations/dtDownloadForm");
@@ -3476,9 +3443,7 @@ public class adminConfigController {
      * @throws Exception 
      */
     @RequestMapping(value = "/dataTranslationsDownload", method = RequestMethod.GET)
-    @ResponseBody
-    public String dataTranslationsDownload(
-	@RequestParam(value = "configId", required = true) Integer configId, @RequestParam(value = "fileName", required = true) String fileName, HttpSession session,HttpServletResponse response) throws Exception {
+    @ResponseBody public String dataTranslationsDownload(@RequestParam(value = "configId", required = true) Integer configId, @RequestParam(value = "fileName", required = true) String fileName, HttpSession session,HttpServletResponse response) throws Exception {
 	
 	utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
 	
@@ -3600,8 +3565,7 @@ public class adminConfigController {
      */
     @RequestMapping(value = "/crosswalksDownload", method = RequestMethod.GET)
     @ResponseBody
-    public String crosswalksDownload(
-	@RequestParam(value = "configId", required = true) Integer configId, @RequestParam(value = "fileName", required = true) String fileName, HttpSession session,HttpServletResponse response) throws Exception {
+    public String crosswalksDownload(@RequestParam(value = "configId", required = true) Integer configId, @RequestParam(value = "fileName", required = true) String fileName, HttpSession session,HttpServletResponse response) throws Exception {
 	
 	utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
 	
@@ -3663,8 +3627,7 @@ public class adminConfigController {
     } 
     
     @RequestMapping(value = "/downloadDTCWFile/{file}", method = RequestMethod.GET)
-    public void downloadDTCWFile(@PathVariable("file") String file,HttpServletResponse response
-    ) throws Exception {
+    public void downloadDTCWFile(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
 	
 	File dtFile = new File ("/tmp/" + file + ".csv");
 	InputStream is = new FileInputStream(dtFile);
@@ -3677,7 +3640,7 @@ public class adminConfigController {
 	//Delete the file
 	dtFile.delete();
 
-	 // close stream and return to view
+	// close stream and return to view
 	response.flushBuffer();
     } 
     
@@ -3687,11 +3650,11 @@ public class adminConfigController {
      * @param orgId The organization selected in the drop down
      *
      * @return configurations The available configurations
+     * @throws java.lang.Exception
      */
     @SuppressWarnings("rawtypes")
     @RequestMapping(value = "/getAvailableConfigurations.do", method = RequestMethod.GET)
-    public @ResponseBody
-    List<utConfiguration> getAvailableConfigurations(@RequestParam(value = "orgId", required = true) int orgId) throws Exception {
+    public @ResponseBody List<utConfiguration> getAvailableConfigurations(@RequestParam(value = "orgId", required = true) int orgId) throws Exception {
 
         List<utConfiguration> configurations = utconfigurationmanager.getActiveConfigurationsByOrgId(orgId);
 
@@ -3708,7 +3671,6 @@ public class adminConfigController {
 		else {
 		    configuration.settransportMethod("N/A");
 		}
-                
             }
         }
 
@@ -3724,8 +3686,7 @@ public class adminConfigController {
      *
      */
     @RequestMapping(value = "/macroDefinitions", method = RequestMethod.GET)
-    public @ResponseBody
-    ModelAndView macroDefinitions(@RequestParam(value = "macroCategory", required = true) Integer macroCategory) throws Exception {
+    public @ResponseBody ModelAndView macroDefinitions(@RequestParam(value = "macroCategory", required = true) Integer macroCategory) throws Exception {
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("/administrator/configurations/macroDefinitions");
@@ -3746,10 +3707,9 @@ public class adminConfigController {
      * @throws Exception
      */
     @RequestMapping(value = "/appendConfigurationFields", method = RequestMethod.GET)
-    @ResponseBody
-    public ModelAndView appendConfigurationFields(
-	    @RequestParam(value = "configId", required = true) Integer configId,
-	    @RequestParam(value = "configTransportId", required = true) Integer configTransportId,HttpSession session) throws Exception {
+    @ResponseBody public ModelAndView appendConfigurationFields(
+	@RequestParam(value = "configId", required = true) Integer configId,
+	@RequestParam(value = "configTransportId", required = true) Integer configTransportId,HttpSession session) throws Exception {
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("/administrator/configurations/appendNewFields");
@@ -3923,7 +3883,7 @@ public class adminConfigController {
     @RequestMapping(value = "/configFileUpload", method = RequestMethod.GET)
     @ResponseBody
     public ModelAndView configFileUpload(@RequestParam(value = "configId", required = true) Integer configId,
-	    @RequestParam(value = "fileDropLocation", required = true) String fileDropLocation,HttpSession session) throws Exception {
+	@RequestParam(value = "fileDropLocation", required = true) String fileDropLocation,HttpSession session) throws Exception {
 	
 	configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
 
@@ -4126,8 +4086,7 @@ public class adminConfigController {
     }
     
     @RequestMapping(value = "/printNewFieldSettingsTemplate/{file}", method = RequestMethod.GET)
-    public void printNewFieldSettingsTemplate(@PathVariable("file") String file,HttpServletResponse response
-    ) throws Exception {
+    public void printNewFieldSettingsTemplate(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
 	
 	File templatePrintFile = new File ("/tmp/" + file + ".xlsx");
 	InputStream is = new FileInputStream(templatePrintFile);
@@ -4140,7 +4099,7 @@ public class adminConfigController {
 	//Delete the file
 	templatePrintFile.delete();
 
-	 // close stream and return to view
+	// close stream and return to view
 	response.flushBuffer();
     } 
     
@@ -4769,7 +4728,6 @@ public class adminConfigController {
     @RequestMapping(value = "/deleteConfigurationFTPInformation.do", method = RequestMethod.POST)
     public @ResponseBody
     Integer deleteConfigurationFTPInformation(@RequestParam int transportId) throws Exception {
-
         utconfigurationmanager.deleteConfigurationFTPInformation(transportId);
         return 1;
     }
@@ -5413,7 +5371,6 @@ public class adminConfigController {
      * @param transportId 
      */
     public void processImportConfigFileDropDetails(String[] strArrayValues, Integer transportId) {
-	
 	configurationFileDropFields newFileDrop = new configurationFileDropFields();
 	newFileDrop.setTransportId(transportId);
 	newFileDrop.setDirectory(strArrayValues[2]);
@@ -5447,8 +5404,6 @@ public class adminConfigController {
 	newFTP.setip(strArrayValues[2]);
 	newFTP.setdirectory(strArrayValues[3]);
 	newFTP.setusername(strArrayValues[4]);
-	//Password is not saved so it can be entered manually in order to encrypt it
-	//newFTP.setPassword();
 	newFTP.setmethod(Integer.parseInt(strArrayValues[6]));
 	newFTP.setport(Integer.parseInt(strArrayValues[7]));
 	newFTP.setprotocol(strArrayValues[8]);
@@ -5567,7 +5522,6 @@ public class adminConfigController {
      * 
      */
     public void processImportConfigFieldDTS(String[] strArrayValues, Integer configId, Integer fieldId) {
-	
 	configurationDataTranslations dts = new configurationDataTranslations();
 	dts.setconfigId(configId);
 	dts.setFieldId(fieldId);
@@ -5597,7 +5551,6 @@ public class adminConfigController {
      * 
      */
     public void processImportConfigSchedule(String[] strArrayValues, Integer configId) {
-	
 	configurationSchedules configSchedule = new configurationSchedules();
 	configSchedule.setconfigId(configId);
 	configSchedule.settype(Integer.parseInt(strArrayValues[2]));
@@ -5607,7 +5560,6 @@ public class adminConfigController {
 	configSchedule.setprocessingTime(Integer.parseInt(strArrayValues[6]));
 	
 	utconfigurationmanager.saveSchedule(configSchedule);
-	
     }
     
      /**
@@ -5750,7 +5702,7 @@ public class adminConfigController {
 	
 	if(orgId > 0 && configId > 0) {
 	    backOutConfigSQL += "delete from rel_crosswalkdata where crosswalkId in (select id from crosswalks "
-		+ "where orgId = " + orgId + " and id in (select crosswalkId from configurationdatatranslations where configId = "+configId+"));";
+	    + "where orgId = " + orgId + " and id in (select crosswalkId from configurationdatatranslations where configId = "+configId+"));";
 	    backOutConfigSQL += "delete from crosswalks where orgId = " + orgId + " and id in (select crosswalkId from configurationdatatranslations where configId = "+configId+");";
 	}
 	
@@ -5785,5 +5737,44 @@ public class adminConfigController {
 	mail.setmessageSubject(emailSubject);
 	mail.setmessageBody(emailBody.toString());
 	emailMessageManager.sendEmail(mail);
+    }
+    
+    /**
+     * The 'configFTPCheck' GET request will display the configuration FTP file check window.
+     *
+     * @param configId
+     * @param session
+     * @param transportId
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/configFTPCheck", method = RequestMethod.GET)
+    @ResponseBody
+    public ModelAndView configFTPCheck(@RequestParam Integer configId, @RequestParam Integer transportId, HttpSession session) throws Exception {
+	
+	configurationFTPFields ftpDetails = utconfigurationTransportManager.getTransportFTPDetailsPull(transportId);
+	
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("/administrator/configurations/configFTPCheck");
+	mav.addObject("ftpLocation", ftpDetails.getdirectory());
+	mav.addObject("transportId", transportId);
+	
+        return mav;
+    }
+    
+    /**
+     * The 'runConfigFTPCheck' GET request will connect to the FTP to check for any files.
+     *
+     * @param session
+     * @param transportId
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/runConfigFTPCheck", method = RequestMethod.GET)
+    @ResponseBody
+    public String runConfigFTPCheck(@RequestParam Integer transportId, HttpSession session) throws Exception {
+	configurationFTPFields ftpDetails = utconfigurationTransportManager.getTransportFTPDetailsPull(transportId);
+	String ftpCheckResults = transactioninmanager.checkSingleRemoteFTPConnection(ftpDetails);
+        return ftpCheckResults;
     }
 }

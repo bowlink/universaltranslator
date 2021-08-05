@@ -3,8 +3,62 @@
 
 require(['./main'], function () {
     
-    $(document).on('click', '.importConfig', function() {
+    $(document).on('click', '.checkFTP', function() {
+        $.ajax({
+             url: '/administrator/configurations/configFTPCheck',
+             data: {
+                 'configId': $(this).attr('rel'),
+                 'transportId': $(this).attr('rel2')
+             },
+             type: "GET",
+             success: function(data) {
+                 $("#configFTPCheckdModal").html(data);
+             }
+         });
+    });
+    
+    $("#configFTPCheckdModal").on('shown.bs.modal', function () {
         
+        var transportId = 0;
+        if (typeof $('input[id=transportId]').val() !== 'undefined') {
+            transportId = $('input[id=transportId]').val();
+        }
+        
+        if(transportId > 0) {
+            $('#returnMsg').html("");
+            $.ajax({
+                url: '/administrator/configurations/runConfigFTPCheck',
+                data: {
+                    'transportId': transportId
+                },
+                type: "GET",
+                error: function() {
+                   $('#spinnerSymbol').removeClass('fa-spinner fa-spin').addClass('fa-times');
+                   $('#spinnerSymbol').css('color','red');
+                   $('#returnMsg').html("The FTP check ran into an issue.");
+                },
+                success: function(data) {
+                    if(data.indexOf('connection error') > 0) {
+                        $('#spinnerSymbol').removeClass('fa-spinner fa-spin').addClass('fa-times');
+                        $('#spinnerSymbol').css('color','red');
+                        $('#returnMsg').html(data);
+                    }
+                    else {
+                        $('#spinnerSymbol').removeClass('fa-spinner fa-spin').addClass('fa-check-circle');
+                        $('#spinnerSymbol').css('color','green');
+                        $('#returnMsg').html(data);
+                        
+                        if(data.indexOf('successfully') > 0) {
+                            $('#successMsg').show();
+                        }
+                    }
+                },
+                timeout: 30000
+            });
+        }
+    });
+    
+    $(document).on('click', '.importConfig', function() {
         $.ajax({
              url: '/administrator/configurations/configImportUpload',
              data: {},

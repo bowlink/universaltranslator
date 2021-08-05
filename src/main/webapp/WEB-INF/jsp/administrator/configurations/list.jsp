@@ -102,15 +102,23 @@
 									 Copy
 								     </a>
 								 </li>
-                                                                 <c:if test="${not empty config.fileDropLocation && config.messageTypeId != 2}">
+                                                                 <c:if test="${config.allowFTPLink}">
+                                                                    <li>
+                                                                        <a href="#configFTPCheckdModal" data-toggle="modal" class="checkFTP" rel="${config.id}" rel2="${config.transportDetailId}" title="Check FTP location for new file to process">
+                                                                            <span class="glyphicon glyphicon-play-circle"></span>
+                                                                            Check FTP Location
+                                                                        </a>
+                                                                    </li>
+                                                                </c:if>
+                                                                <c:if test="${not empty config.fileDropLocation && config.messageTypeId != 2}">
                                                                     <li>
                                                                         <a href="#configFileUploadModal" data-toggle="modal" class="uploadFile" rel="${config.id}" rel2="${config.fileDropLocation}" title="Upload File">
                                                                             <span class="glyphicon glyphicon-upload"></span>
                                                                             Upload File
                                                                         </a>
                                                                     </li>
-                                                                </c:if>
-                                                                    <li class="divider"></li>
+                                                                </c:if>    
+                                                                <li class="divider"></li>
 							     </c:if>
                                                              <li>
 								 <a href="javascript:void(0);" class="editConfig" rel="${config.id}" title="Edit this configuration">
@@ -262,3 +270,4 @@
     </div>		
 </div>
 <div class="modal fade" id="configFileUploadModal" role="dialog" tabindex="-1" aria-labeledby="Configuration File Upload" aria-hidden="true" aria-describedby="Configuration File Upload"></div>
+<div class="modal fade" id="configFTPCheckdModal" role="dialog" tabindex="-1" aria-labeledby="Configuration FTP Check" aria-hidden="true" aria-describedby="Configuration FTP Check"></div>
