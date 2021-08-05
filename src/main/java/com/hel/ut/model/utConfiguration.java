@@ -31,7 +31,7 @@ public class utConfiguration {
     private Date dateUpdated = null;
     
     @Transient
-    private boolean allowExport = false;
+    private boolean allowExport = false, allowFTPLink = false;
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -232,4 +232,11 @@ public class utConfiguration {
 	this.allowExport = allowExport;
     }
 
+    public boolean isAllowFTPLink() {
+	return allowFTPLink;
+    }
+
+    public void setAllowFTPLink(boolean allowFTPLink) {
+	this.allowFTPLink = allowFTPLink;
+    }
 }

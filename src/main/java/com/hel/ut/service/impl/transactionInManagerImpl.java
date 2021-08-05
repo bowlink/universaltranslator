@@ -4515,20 +4515,38 @@ public class transactionInManagerImpl implements transactionInManager {
 	List<configurationFTPFields> ftpConfigurations = configurationtransportmanager.getFTPSourceConfigurations();
 	
 	if(!ftpConfigurations.isEmpty()) {
-	    //Parallel processing of FTP Configurations
+	    String connectionResult = "";
 	    for (configurationFTPFields ftpConfiguration : ftpConfigurations) {
-		//executor.execute(new Runnable() {
-		    //@Override
-		    //public void run() {
-			try {
-			    connectToRemoteFTP(ftpConfiguration);
-			} catch (Exception ex) {
-			    
-			}
-		    //}
-		//});
+		try {
+		   connectionResult = connectToRemoteFTP(ftpConfiguration);
+		} catch (Exception ex) {}
 	    }
 	}
+    }
+    
+    @Override
+    public String checkSingleRemoteFTPConnection(configurationFTPFields ftpConfiguration) throws Exception {
+	return connectToRemoteFTP(ftpConfiguration);
+    }
+    
+    @Override
+    public String checkAllRemoteSFTPConfigurations() throws Exception {
+	
+	String connectionResult = "";
+	 
+	//Need to find all source configurations with FTP enabled
+	List<configurationFTPFields> ftpConfigurations = configurationtransportmanager.getFTPSourceConfigurations();
+	
+	if(!ftpConfigurations.isEmpty()) {
+	    for (configurationFTPFields ftpConfiguration : ftpConfigurations) {
+		try {
+		   connectionResult += connectToRemoteFTP(ftpConfiguration);
+		   System.out.println("Dir: " + ftpConfiguration.getdirectory() + " Response: " + connectionResult);
+		} catch (Exception ex) {}
+	    }
+	}
+	
+	return connectionResult;
     }
     
     /**
@@ -4536,7 +4554,9 @@ public class transactionInManagerImpl implements transactionInManager {
      * @param ftpConfiguration
      * @throws Exception 
      */
-    public void connectToRemoteFTP(configurationFTPFields ftpConfiguration) throws Exception,JSchException {
+    public String connectToRemoteFTP(configurationFTPFields ftpConfiguration) throws Exception,JSchException {
+	
+	String returnMessage = "";
 	
 	if(ftpConfiguration != null) {
 	    
@@ -4593,6 +4613,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				if(session.isConnected()) {sessionConnected = true;}
 			    }
 			    catch (JSchException ex) {
+				returnMessage = "The FTP check ran into a connection error";
 			    }
 			    
 			    if(sessionConnected) {
@@ -4606,6 +4627,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				Vector filelist = channelSftp.ls(ftpConfiguration.getdirectory());
 				
 				if(filelist.size() > 0) {
+				    Integer totalFilesMoved = 0;
 				    for(int i=0; i<filelist.size();i++){
 					LsEntry entry = (LsEntry) filelist.get(i);
 
@@ -4618,6 +4640,8 @@ public class transactionInManagerImpl implements transactionInManager {
 					       fileMoved = true;
 					   }
 					   catch (SftpException e) {
+					        returnMessage = "The FTP check ran into a connection error";
+						
 						//Check if we need to log an error and send an email
 						List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),e.getMessage().substring(0,Math.min(e.getMessage().length(), 500)));
 
@@ -4647,13 +4671,27 @@ public class transactionInManagerImpl implements transactionInManager {
 					   }
 
 					   if(fileMoved) {
+					       totalFilesMoved++;
+					       returnMessage += "The " + entry.getFilename() + " file was successfully picked up.<br/>";
 					       channelSftp.rm(entry.getFilename());
 					   }
 					}
 				    }
+				    
+				    if(totalFilesMoved == 0) {
+					returnMessage += "There were no files found in the ftp location.";
+				    }
+				}
+				else {
+				    returnMessage = "There were no files found in the ftp location.";
 				}
 			    }
+			    else {
+				returnMessage = "The FTP check ran into a connection error";
+			    }
 			} catch (JSchException e) {
+			    returnMessage = "The FTP check ran into a connection error";
+			    
 			    if(channelSftp!=null){
 				channelSftp.disconnect();
 				channelSftp.exit();
@@ -4688,6 +4726,8 @@ public class transactionInManagerImpl implements transactionInManager {
 				}
 			    }
 			} catch (SftpException e) {
+			    returnMessage = "The FTP check ran into a connection error";
+			    
 			    if(channelSftp!=null){
 				channelSftp.disconnect();
 				channelSftp.exit();
@@ -4777,6 +4817,8 @@ public class transactionInManagerImpl implements transactionInManager {
 				boolean success = ftpClient.login(ftpConfiguration.getusername().trim(), decryptedPwd);
 			    
 				if (!success) {
+				    returnMessage = "The FTP check ran into a connection error";
+				    
 				    ftpClient.disconnect();
 				    
 				    //Check if we need to log an error and send an email
@@ -4818,9 +4860,14 @@ public class transactionInManagerImpl implements transactionInManager {
 						OutputStream outStream = new FileOutputStream(targetFile);
 						outStream.write(buffer);
 						
+						returnMessage += "The " + file.getName() + " file was successfully picked up.<br/>";
+						
 						ftpClient.deleteFile(ftpConfiguration.getdirectory()+"/"+file.getName());
 					    }
 					}
+				    }
+				    else {
+					returnMessage = "There were no files found in the ftp location.";
 				    }
 
 				    // logs out
@@ -4830,6 +4877,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			    }
 			}
 			catch (IOException e) {
+			    returnMessage = "The FTP check ran into a connection error";
 			    
 			    //Check if we need to log an error and send an email
 			    List<logftpconnectionerrors> connectionErrors = configurationtransportmanager.findFTPConnectionErrors(ftpConfiguration.getId(),e.getMessage().substring(0,Math.min(e.getMessage().length(), 500)));
@@ -4862,6 +4910,8 @@ public class transactionInManagerImpl implements transactionInManager {
 		}
 	    }
 	}
+	
+	return returnMessage;
     }
 
     @Override

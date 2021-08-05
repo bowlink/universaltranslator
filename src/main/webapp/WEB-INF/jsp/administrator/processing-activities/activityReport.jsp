@@ -115,3 +115,4 @@
 	</section>
     </div>
 </div>
+<div class="modal fade" id="configFTPCheckdModal" role="dialog" tabindex="-1" aria-labeledby="Check All FTP locations for new files to process" aria-hidden="true" aria-describedby="Check All FTP locations for new files to process"></div>
