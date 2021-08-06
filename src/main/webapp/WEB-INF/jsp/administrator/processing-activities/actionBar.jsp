@@ -67,6 +67,9 @@
         <ul class="nav navbar-nav navbar-right navbar-actions" role="menu">
             <c:choose>
                 <c:when test="${param['page'] == 'report'}">
+                    <c:if test="${checkforFTP}">
+                        <li role="menuitem"><a href="#configFTPCheckdModal" data-toggle="modal" class="checkFTP" title="Check All FTP locations for new files to process" role="button"><span class="glyphicon glyphicon-play-circle icon-stacked"></span> Check ALL FTP Locations</a></li>
+                    </c:if>
                     <li role="menuitem"><a href="/administrator/processing-activity/generateReport" class="" title="Generate Activity Report" role="button"><span class="glyphicon glyphicon-list-alt icon-stacked"></span> Generate Report</a></li>
                 </c:when>
                 <c:when test="${param['page'] == 'generateReport'}">
