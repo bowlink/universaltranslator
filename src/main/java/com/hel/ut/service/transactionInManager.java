@@ -35,7 +35,6 @@ import com.hel.ut.model.generatedActivityReportAgencies;
 import com.hel.ut.model.generatedActivityReports;
 import com.hel.ut.model.referralActivityExports;
 import com.hel.ut.model.systemSummary;
-import java.io.File;
 
 import java.math.BigInteger;
 import java.util.Date;
@@ -376,4 +375,8 @@ public interface transactionInManager {
     boolean generateExcelActivityReport(generatedActivityReports activityReport, List<batchUploads> activityReportBatches) throws Exception;
     
     void deleteActivityReport(Integer activityReportId) throws Exception;
+    
+    String checkSingleRemoteFTPConnection(configurationFTPFields ftpConfiguration) throws Exception;
+    
+    String checkAllRemoteSFTPConfigurations() throws Exception;
 }
