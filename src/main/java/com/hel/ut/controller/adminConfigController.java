@@ -4942,7 +4942,8 @@ public class adminConfigController {
 	    boolean configImportSuccessful = true;
 	    
 	    while (((strLine = reader.readLine()) != null)){
-		strLine = strLine.replace("[", "").replace("]", "");
+		//strLine = strLine.replace("[", "").replace("]", "");
+		strLine = strLine.substring(1,strLine.length()-1);
 		strArrayValues = strLine.split("\\|", -1);
 		
 		if(strArrayValues[0].equals("orgDetails")) {
