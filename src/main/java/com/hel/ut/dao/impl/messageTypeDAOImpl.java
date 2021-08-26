@@ -15,7 +15,6 @@ import com.hel.ut.model.CrosswalkData;
 import com.hel.ut.model.Crosswalks;
 import com.hel.ut.model.validationType;
 import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.MatchMode;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 
@@ -40,6 +39,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
      * The 'findTotalCrosswalks' function will return the total number of generic crosswalks in the system
      *
      * @param orgId Will pass the orgId this will help determine if I want all crosswalks or generic system only crosswalks
+     * @return 
      *
      * @Table	crosswalks
      *
@@ -69,6 +69,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 
     /**
      * The 'getInformationTables' function will return a list of all available information tables where we can associate fields to an actual table and column.
+     * @return 
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -81,6 +82,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 
     /**
      * The 'getAllTables' function will return a list of all available tables where we can use to select which table to auto populate a form field.
+     * @return 
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -94,6 +96,8 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     /**
      * The 'getTableColumns' function will return a list of columns from the passed in table name
      *
+     * @param tableName
+     * @return 
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -108,6 +112,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     /**
      * The 'getValidationTypes' function will return a list of available field validation types
      *
+     * @return 
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -121,6 +126,8 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     /**
      * The 'getValidationById' function will return a validation by the passed in Id.
      *
+     * @param id
+     * @return 
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -137,6 +144,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     /**
      * The 'getDelimiters' function will return a list of available file delimiters
      *
+     * @return 
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -151,10 +159,12 @@ public class messageTypeDAOImpl implements messageTypeDAO {
      * The 'getDelimiterChar' will return the actual character of the delimiter for the id passed into the function
      *
      * @param id	The id will hold the delimiter ID to retrieve its associated character
+     * @return 
      *
      * @returns string
      */
     @Transactional(readOnly = true)
+    @Override
     public String getDelimiterChar(int id) {
         Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT delimChar FROM ref_delimiters where id = :id");
         query.setParameter("id", id);
@@ -167,28 +177,30 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     /**
      * The 'getTotalFields' function will return the number of fields for a passed in message type.
      *
+     * @param messageTypeId
+     * @return 
      * @Param messageTypeId	The message type to search
      *
      * @Return	Long	The total number of fields for the message type
      */
     @Transactional(readOnly = true)
+    @Override
     public Long getTotalFields(int messageTypeId) {
-
         Query query = sessionFactory.getCurrentSession().createQuery("select count(id) as totalFields from messageTypeFormFields where messageTypeId = :messageTypeId")
-                .setParameter("messageTypeId", messageTypeId);
+	.setParameter("messageTypeId", messageTypeId);
 
         Long totalFields = (Long) query.uniqueResult();
 
         return totalFields;
-
     }
 
     /**
-     * The 'getCrosswalks' function will return the list of available crosswalks to associate a message types to. This function will only return crosswalks not associated to a specific organization.
+     * The 'getCrosswalks' function will return the list of available crosswalks to associate a message types to.This function will only return crosswalks not associated to a specific organization.
      *
      * @param page	The current crosswalk page
      * @param	maxResults	The maximum number of crosswalks to return from each query
      * @param	orgId	The organization id (default 0)
+     * @return 
      *
      * @Table	crosswalks
      *
@@ -199,7 +211,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Transactional(readOnly = true)
     public List<Crosswalks> getCrosswalks(int page, int maxResults, int orgId) {
 
-        Query query = null;
+        Query query;
 
         if (orgId == 0) {
             query = sessionFactory.getCurrentSession().createQuery("from Crosswalks where orgId = 0 order by name asc");
@@ -224,16 +236,18 @@ public class messageTypeDAOImpl implements messageTypeDAO {
         }
 
         return query.list();
-
     }
 
     /**
      *
+     * @param name
+     * @param orgId
+     * @return 
      */
     @Override
     @Transactional(readOnly = true)
     public Long checkCrosswalkName(String name, int orgId) {
-        Query query = null;
+        Query query;
 
         if (orgId > 0) {
             query = sessionFactory.getCurrentSession().createQuery("select count(id) as total from Crosswalks where name = :name and orgId = :orgId");
@@ -262,9 +276,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Override
     @Transactional(readOnly = false)
     public Integer createCrosswalk(Crosswalks crosswalkDetails) {
-        Integer lastId = null;
-
-        lastId = (Integer) sessionFactory.getCurrentSession().save(crosswalkDetails);
+        Integer lastId = (Integer) sessionFactory.getCurrentSession().save(crosswalkDetails);
 
         return lastId;
     }
@@ -300,11 +312,11 @@ public class messageTypeDAOImpl implements messageTypeDAO {
         return query.list();
     }
 
-
     /**
-     * The 'getFieldName' function will return the name of a field based on the fieldId passed in. This is used for display purposes to show the actual field lable instead of a field name.
+     * The 'getFieldName' function will return the name of a field based on the fieldId passed in.This is used for display purposes to show the actual field lable instead of a field name.
      *
      * @param fieldId	This will hold the id of the field to retrieve
+     * @return 
      *
      * @Return This function will return a string (field name)
      */
@@ -312,7 +324,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Transactional(readOnly = true)
     public String getFieldName(int fieldId) {
         Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT fieldDesc FROM messageTypeFormFields where id = :fieldId")
-                .setParameter("fieldId", fieldId);
+	.setParameter("fieldId", fieldId);
 
         String fieldName = (String) query.uniqueResult();
 
@@ -323,6 +335,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
      * The 'getCrosswalkName' function will return the name of a crosswalk based on the id passed in.
      *
      * @param cwId	This will hold the id of the crosswalk to retrieve
+     * @return 
      *
      * @Return This function will return a string (crosswalk name).
      */
@@ -354,8 +367,8 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     }
     
     @Transactional(readOnly = false)
+    @Override
     public void executeSQLStatement(String sqlStmt) {
-	
 	if(sqlStmt != null) {
 	    if(!"".equals(sqlStmt)) {
 		
@@ -366,7 +379,6 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	}
     }
     
-    
     /**
      * The 'updateCrosswalk" function will update the existing crosswalk
      *
@@ -374,15 +386,13 @@ public class messageTypeDAOImpl implements messageTypeDAO {
      *
      * @param	crosswalkDetails	This will hold the crosswalk object from the form
      *
-     * @return The function will return the id of the new crosswalk
-     *
      */
     @Transactional(readOnly = false)
+    @Override
     public void updateCrosswalk(Crosswalks crosswalkDetails) {
         sessionFactory.getCurrentSession().update(crosswalkDetails);
     }
 
-    
     @Override
     @Transactional(readOnly = true)
     public List getCrosswalksWithData(Integer orgId) {
@@ -395,25 +405,19 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Override
     @Transactional(readOnly = true)
     public List<Crosswalks> getCrosswalksForConfig(int page, int maxCrosswalks, int orgId, int configId, boolean inUseOnly) {
-	String sql = "";
+	
+	String sql = "select distinct a.*, IFNULL((select id from configurationdatatranslations where configId = :configId and crosswalkId = a.id LIMIT 1),0) as dtsId "
+	+ "from crosswalks a ";
+	
+	if(inUseOnly) {
+	    sql += "inner join configurationdatatranslations b on (b.crosswalkid = a.id or (b.macroId in (129,160,177,195,199) and b.constant1 = a.id)) and b.configId = :configId ";
+	}	  
 	
 	if(orgId > 0) {
-	    sql = "select distinct a.*, IFNULL((select id from configurationdatatranslations where configId = :configId and crosswalkId = a.id LIMIT 1),0) as dtsId "
-	    + "from crosswalks a ";
-	    if(inUseOnly) {
-		sql += "inner join configurationdatatranslations b on (b.crosswalkid = a.id or (b.macroId in (129,160,177,195,199) and b.constant1 = a.id)) and b.configId = :configId ";
-	    }	    
-	    sql += "where a.orgId = :orgId or a.orgId = 0 "
-	    + "order by a.name asc";
+	    sql += "where a.orgId = :orgId or a.orgId = 0 order by a.name asc";
 	}
 	else {
-	    sql = "select distinct a.*, IFNULL((select id from configurationdatatranslations where configId = :configId and crosswalkId = a.id LIMIT 1),0) as dtsId "
-	    + "from crosswalks a ";
-	    if(inUseOnly) {
-		sql += "inner join configurationdatatranslations b on  (b.crosswalkid = a.id or (b.macroId in (129,160,177,195,199) and b.constant1 = a.id)) and b.configId = :configId ";
-	    }
-	    sql += "where a.orgId = 0 "
-	    + "order by a.name asc";
+	    sql += "where a.orgId = 0 order by a.name asc";
 	}
 	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
@@ -447,11 +451,11 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     public List getConfigCrosswalksWithData(Integer orgId, Integer configId) {
 	
 	String sql = "select a.name,  b.sourceValue, b.targetValue, b.descValue, a.id, a.fileDelimiter, a.dateCreated, ifnull(a.lastUpdated,a.dateCreated) as lastUpdated "
-	    + "from crosswalks a inner join "
-	    + "rel_crosswalkdata b on b.crosswalkId = a.id "
-	    + "where a.orgId = :orgId "
-	    + "and ((a.id in (select crosswalkId from configurationdatatranslations where configId = :configId)) OR (a.id in (select constant1 from configurationdatatranslations where configId = :configId))) "
-	    + "order by a.name asc";
+	+ "from crosswalks a inner join "
+	+ "rel_crosswalkdata b on b.crosswalkId = a.id "
+	+ "where a.orgId = :orgId "
+	+ "and ((a.id in (select crosswalkId from configurationdatatranslations where configId = :configId)) OR (a.id in (select constant1 from configurationdatatranslations where configId = :configId))) "
+	+ "order by a.name asc";
 	
         Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
         query.setParameter("orgId", orgId);
@@ -464,10 +468,12 @@ public class messageTypeDAOImpl implements messageTypeDAO {
      * The 'getDelimiterById' will return the actual character of the delimiter for the id passed into the function
      *
      * @param id	The id will hold the delimiter ID to retrieve its associated character
+     * @return 
      *
      * @returns string
      */
     @Transactional(readOnly = true)
+    @Override
     public String getDelimiterById(int id) {
         Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT delimiter FROM ref_delimiters where id = :id");
         query.setParameter("id", id);
@@ -489,6 +495,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
      * @param cwName
      * @param orgId
      * @param fileName
+     * @return 
      *
      * @Return This function will return a string (crosswalk name).
      */
@@ -505,9 +512,13 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	    criteria.add(Restrictions.like("name", "%"+cwName));
 	    criteria.add(Restrictions.eq("fileName", fileName));
 	}
-
-        Crosswalks cwDetails = (Crosswalks) criteria.uniqueResult();
-
-        return cwDetails;
+	
+	if(criteria.list().size() > 0) {
+	    Crosswalks cwDetails = (Crosswalks) criteria.list().get(0);
+	    return cwDetails;
+	}
+	else {
+	    return null;
+	}
     }
 }
