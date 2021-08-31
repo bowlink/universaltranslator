@@ -19,13 +19,18 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.util.List;
 
 import com.hel.ut.model.Organization;
+import com.hel.ut.model.batchDownloads;
+import com.hel.ut.model.batchUploads;
 import com.hel.ut.service.organizationManager;
 import com.hel.ut.model.utConfiguration;
 import com.hel.ut.model.configurationTransport;
+import com.hel.ut.model.utUser;
 import com.hel.ut.reference.CountryList;
 import com.hel.ut.reference.USStateList;
 import com.hel.ut.reference.fileSystem;
-import com.hel.ut.service.messageTypeManager;
+import com.hel.ut.service.transactionInManager;
+import com.hel.ut.service.transactionOutManager;
+import com.hel.ut.service.userManager;
 import com.registryKit.registry.helRegistry;
 import com.registryKit.registry.helRegistryManager;
 import com.registryKit.registry.tiers.tierManager;
@@ -43,6 +48,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
 
 
 
@@ -65,16 +71,22 @@ public class adminOrgContoller {
     private utConfigurationManager configurationmanager;
 
     @Autowired
-    private messageTypeManager messagetypemanager;
-
-    @Autowired
     private utConfigurationTransportManager configurationTransportManager;
     
     @Autowired
     private helRegistryManager helregistrymanager;
     
     @Autowired
+    private transactionInManager transactioninmanager;
+    
+    @Autowired
+    private transactionOutManager transactionoutmanager;
+    
+    @Autowired
     private tierManager tiermanager;
+    
+    @Autowired
+    private userManager userManager;
     
     @Resource(name = "myProps")
     private Properties myProps;
@@ -190,9 +202,9 @@ public class adminOrgContoller {
         USStateList stateList = new USStateList();
         
         //Get a list of countries
-        CountryList countryList = new CountryList();
+	CountryList countryList = new CountryList();
 	
-       if (result.hasErrors()) {
+	if (result.hasErrors()) {
             ModelAndView mav = new ModelAndView();
             mav.setViewName("/administrator/organizations/organizationDetails");
             //Get the object that will hold the states
@@ -227,13 +239,13 @@ public class adminOrgContoller {
             ModelAndView mav = new ModelAndView(new RedirectView("list"));
             return mav;
         }
-
     }
 
     /**
      * The '/{cleanURL}' GET request will display the clicked organization details page.
      *
      * @param cleanURL	The {clearnURL} will be the organizations name with spaces removed. This was set when the organization was created.
+     * @param authentication
      *
      * @return	Will return the organization details page.
      *
@@ -243,7 +255,7 @@ public class adminOrgContoller {
      *
      */
     @RequestMapping(value = "/{cleanURL}", method = RequestMethod.GET)
-    public ModelAndView viewOrganizationDetails(@PathVariable String cleanURL) throws Exception {
+    public ModelAndView viewOrganizationDetails(@PathVariable String cleanURL, Authentication authentication) throws Exception {
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("/administrator/organizations/organizationDetails");
@@ -270,8 +282,43 @@ public class adminOrgContoller {
 	List<Organization> organizations = organizationManager.getAllActiveOrganizations();
 	mav.addObject("organizationList",organizations);
 	
-        return mav;
+	utUser userDetails = userManager.getUserByUserName(authentication.getName());
+	
+	boolean allowOrgDelete = false;
+	
+	if(userDetails.getRoleId() == 1) {
+	    allowOrgDelete = true;
+	}
+	
+	if(allowOrgDelete) {
+	    //Check to see if this org has any submitted batches, if so don't allow delete option
+	    List<batchUploads> orgBatchUploads = transactioninmanager.getBatchesByOrgId(orgDetails.getId());
+	    
+	    if(!orgBatchUploads.isEmpty()) {
+		allowOrgDelete = false;
+	    }
+	    
+	    if(allowOrgDelete) {
+		//Check to see if this org has any submitted batches, if so don't allow delete option
+		List<batchDownloads> orgBatchDownloads = transactionoutmanager.getBatchesByOrgId(orgDetails.getId());
 
+		if(!orgBatchDownloads.isEmpty()) {
+		    allowOrgDelete = false;
+		}
+	    }
+	    
+	    if(allowOrgDelete) {
+		List<utConfiguration> orgConfigs = configurationmanager.getConfigurationsByOrgId(orgDetails.getId(), "");
+		
+		if(!orgConfigs.isEmpty()) {
+		    allowOrgDelete = false;
+		}
+	    }
+ 	}
+	
+	mav.addObject("allowOrgDelete",allowOrgDelete);
+	
+        return mav;
     }
 
     /**
@@ -379,7 +426,6 @@ public class adminOrgContoller {
             ModelAndView mav = new ModelAndView(new RedirectView("../list"));
             return mav;
         }
-
     }
 
     /**
@@ -478,7 +524,7 @@ public class adminOrgContoller {
     @SuppressWarnings("rawtypes")
     @RequestMapping(value = {"/{cleanURL}/getHELRegistryOrganizations", "/getHELRegistryOrganizations"}, method = RequestMethod.GET)
     public @ResponseBody List<tierOrganizationDetails> getHELRegistryOrganizations(@RequestParam(value = "registryType", required = false) Integer registryType,
-	    @RequestParam(value = "tierLevel", required = false) Integer tierLevel) throws Exception {
+	@RequestParam(value = "tierLevel", required = false) Integer tierLevel) throws Exception {
 	
 	if(registryType == null) {
 	    registryType = 1;
@@ -561,8 +607,8 @@ public class adminOrgContoller {
     @SuppressWarnings("rawtypes")
     @RequestMapping(value = {"/{cleanURL}/getHELRegistryOrganizationDetails", "/getHELRegistryOrganizationDetails"}, method = RequestMethod.GET)
     public @ResponseBody tierOrganizationDetails getHELRegistryOrganizationDetails(
-	    @RequestParam(value = "selRegistryOrgId", required = true) Integer selRegistryOrgId,
-	    @RequestParam(value = "registryType", required = false) Integer registryType) throws Exception {
+	@RequestParam(value = "selRegistryOrgId", required = true) Integer selRegistryOrgId,
+	@RequestParam(value = "registryType", required = false) Integer registryType) throws Exception {
 	
 	if(registryType == null) {
 	    registryType = 1;
