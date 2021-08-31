@@ -379,4 +379,6 @@ public interface transactionInManager {
     String checkSingleRemoteFTPConnection(configurationFTPFields ftpConfiguration) throws Exception;
     
     String checkAllRemoteSFTPConfigurations() throws Exception;
+    
+    List<batchUploads> getBatchesByOrgId(Integer orgId) throws Exception;
 }
