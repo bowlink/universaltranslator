@@ -51,10 +51,7 @@ public class organizationDAOImpl implements organizationDAO {
     @Override
     @Transactional(readOnly = false)
     public Integer createOrganization(Organization organization) {
-        Integer lastId = null;
-
-        lastId = (Integer) sessionFactory.getCurrentSession().save(organization);
-
+        Integer lastId = (Integer) sessionFactory.getCurrentSession().save(organization);
         return lastId;
     }
 
@@ -84,9 +81,7 @@ public class organizationDAOImpl implements organizationDAO {
     @Override
     @Transactional(readOnly = true)
     public Organization getOrganizationById(int orgId) {
-        return (Organization) sessionFactory.
-                getCurrentSession().
-                get(Organization.class, orgId);
+        return (Organization) sessionFactory.getCurrentSession().get(Organization.class, orgId);
     }
 
     /**
@@ -136,7 +131,6 @@ public class organizationDAOImpl implements organizationDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<Organization> getOrganizations() {
-	
         Query query = sessionFactory.getCurrentSession().createQuery("from Organization where cleanURL <> '' order by orgName asc");
 
         List<Organization> organizationList = query.list();
@@ -145,8 +139,9 @@ public class organizationDAOImpl implements organizationDAO {
     }
 
     /**
-     * The 'getLatestOrganizations' function will return a list of the latest organizations added to the system. This function will only return active organizations.
+     * The 'getLatestOrganizations' function will return a list of the latest organizations added to the system.This function will only return active organizations.
      *
+     * @return 
      * @Table	organizations
      *
      * @param	maxResults	This will hold the value of the maximum number of results we want to send back to the page
@@ -169,8 +164,9 @@ public class organizationDAOImpl implements organizationDAO {
     }
 
     /**
-     * The 'getAllActiveOrganizations' function will return all the active organizations in the system. The function will sort by organization name
+     * The 'getAllActiveOrganizations' function will return all the active organizations in the system.The function will sort by organization name
      *
+     * @return 
      * @Table	Organizations
      *
      * @Return	This function will return a list of organization objects
@@ -188,6 +184,8 @@ public class organizationDAOImpl implements organizationDAO {
     /**
      * The 'findTotalUsers' function will return the total number of system users set up for a specific organization.
      *
+     * @param orgId
+     * @return 
      * @Table	users
      *
      * @Param	orgId	This will hold the organization id we want to search on
@@ -204,12 +202,13 @@ public class organizationDAOImpl implements organizationDAO {
         Long totalUsers = (Long) query.uniqueResult();
 
         return totalUsers;
-
     }
 
     /**
      * The 'findTotalConfigurations' function will return the total number of configurations set up for a specific organization.
      *
+     * @param orgId
+     * @return 
      * @Table	configurations
      *
      * @Param	orgId	This will hold the organization id we want to search on
@@ -226,12 +225,13 @@ public class organizationDAOImpl implements organizationDAO {
         Long totalConfigs = (Long) query.uniqueResult();
 
         return totalConfigs;
-
     }
 
     /**
      * The 'getOrganizationUsers' function will return the list of users for a specific organization.
      *
+     * @param orgId
+     * @return 
      * @Table	users
      *
      * @Param	orgId	This will hold the organization id to search on page	This will hold the current page to view maxResults	This will hold the total number of results to return back to the list page
@@ -247,30 +247,29 @@ public class organizationDAOImpl implements organizationDAO {
         query.setParameter("orgId", orgId);
 
         return query.list();
-
     }
 
     /**
-     * The 'deleteOrganization' function will remove the organization and all other entities associated to the organization. (Users, Providers, Brochures, Configurations, etc). When deleting users the function will also remove anything associated to the users (Logins, Access, etc).
+     * The 'deleteOrganization' function will remove the organization and all other entities associated to the organization.(Users, Providers, Brochures, Configurations, etc). When deleting users the function will also remove anything associated to the users (Logins, Access, etc).
      *
+     * @param orgId
      * @Param	orgId	This will hold the organization that will be deleted
      *
      * @Return This function will not return any values.
      */
     @Override
     @Transactional(readOnly = false)
-    @SuppressWarnings({"unchecked", "empty-statement"})
     public void deleteOrganization(int orgId) {
         
         //Delete the logins for the users associated to the organization to be deleted.
-        Query findUsers = sessionFactory.getCurrentSession().createQuery("from User where orgId = :orgId");
+        Query findUsers = sessionFactory.getCurrentSession().createQuery("from utUser where orgId = :orgId");
         findUsers.setParameter("orgId", orgId);
 
         List<utUser> users = findUsers.list();
 
         if (users.size() > 0) {
             try {
-                Query deleteLogins = sessionFactory.getCurrentSession().createQuery("delete from userLogin where userId in (select id from User where orgId = :orgId");
+                Query deleteLogins = sessionFactory.getCurrentSession().createQuery("delete from utUserLogin where userId in (select id from utUser where orgId = :orgId");
                 deleteLogins.setParameter("orgId", orgId);
                 deleteLogins.executeUpdate();
             } catch (SQLGrammarException ex) {
@@ -279,7 +278,7 @@ public class organizationDAOImpl implements organizationDAO {
 
             //Delete the user access entries for the users associated to the organization to be deleted.
             try {
-                Query deleteuserFeatures = sessionFactory.getCurrentSession().createQuery("delete from userAccess where userId in (select id from User where orgId = :orgId");
+                Query deleteuserFeatures = sessionFactory.getCurrentSession().createQuery("delete from utUserActivity where userId in (select id from utUser where orgId = :orgId");
                 deleteuserFeatures.setParameter("orgId", orgId);
                 deleteuserFeatures.executeUpdate();
             } catch (SQLGrammarException ex) {
@@ -289,7 +288,7 @@ public class organizationDAOImpl implements organizationDAO {
 
         //Delete all users associated to the organization
         try {
-            Query deleteUser = sessionFactory.getCurrentSession().createQuery("delete from User where orgId = :orgId");
+            Query deleteUser = sessionFactory.getCurrentSession().createQuery("delete from utUser where orgId = :orgId");
             deleteUser.setParameter("orgId", orgId);
             deleteUser.executeUpdate();
         } catch (SQLGrammarException ex) {
@@ -311,7 +310,6 @@ public class organizationDAOImpl implements organizationDAO {
         } catch (SQLGrammarException ex) {
             throw ex;
         }
-
     }
 
     /**
@@ -325,8 +323,8 @@ public class organizationDAOImpl implements organizationDAO {
     @Transactional(readOnly = true)
     public List<Organization> getAssociatedOrgs(int orgId) {
 
-        /* Get a list of configurations for the passed in org */
-        List<Integer> configs = new ArrayList<Integer>();
+        // Get a list of configurations for the passed in org
+        List<Integer> configs = new ArrayList<>();
 
         Criteria configurations = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
         configurations.add(Restrictions.eq("orgId", orgId));
@@ -335,25 +333,26 @@ public class organizationDAOImpl implements organizationDAO {
         if (orgConfigs.isEmpty()) {
             configs.add(0);
         } else {
-            for (utConfiguration config : orgConfigs) {
-                configs.add(config.getId());
-            }
+	    orgConfigs.forEach(config -> {
+		configs.add(config.getId());
+	    });
         }
 
-        /* Find all connections set up for the returned configurations */
-        List<Integer> targetOrgIds = new ArrayList<Integer>();
+        // Find all connections set up for the returned configurations
+        List<Integer> targetOrgIds = new ArrayList<>();
 
         Criteria connections = sessionFactory.getCurrentSession().createCriteria(configurationConnection.class);
         connections.add(Restrictions.or(
-                Restrictions.in("sourceConfigId", configs),
-                Restrictions.in("targetConfigId", configs)
+	    Restrictions.in("sourceConfigId", configs),
+	    Restrictions.in("targetConfigId", configs)
         ));
         List<configurationConnection> orgConnections = connections.list();
 
-        /* Find all organiations associated to the returend connections */
+        // Find all organiations associated to the returend connections
         if (orgConnections.isEmpty()) {
             targetOrgIds.add(0);
-        } else {
+        } 
+	else {
             for (configurationConnection connection : orgConnections) {
 
                 Criteria getSrcConfigDetails = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
@@ -373,7 +372,6 @@ public class organizationDAOImpl implements organizationDAO {
                 if (TgtconfigDetails.getorgId() != orgId && !targetOrgIds.contains(TgtconfigDetails.getorgId())) {
                     targetOrgIds.add(TgtconfigDetails.getorgId());
                 }
-
             }
         }
 
@@ -384,7 +382,6 @@ public class organizationDAOImpl implements organizationDAO {
         orgs.addOrder(Order.asc("orgName"));
 
         return orgs.list();
-
     }
     
     /**

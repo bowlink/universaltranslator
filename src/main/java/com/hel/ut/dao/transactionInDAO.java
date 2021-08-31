@@ -335,4 +335,6 @@ public interface transactionInDAO {
     void deleteActivityReportAgencies(Integer activityReportId) throws Exception;
     
     void deleteActivityReport(Integer activityReportId) throws Exception;
+    
+    List<batchUploads> getBatchesByOrgId(Integer orgId) throws Exception;
 }

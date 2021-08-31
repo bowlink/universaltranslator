@@ -46,7 +46,7 @@
                         <div id="parentOrgId">
                             <spring:bind path="parentOrgId">
                                 <div id="parentOrgIdDiv" class="form-group ${status.error ? 'has-error' : '' }">
-                                    <label class="control-label" for="helRegistryOrgId">Parent Organization</label>
+                                    <label class="control-label" for="parentOrgId">Parent Organization</label>
                                     <form:select path="parentOrgId" class="form-control half">
                                         <option value="0">- Select Parent Organization -</option>
                                         <c:forEach var="parentOrg" items="${organizationList}">
@@ -248,8 +248,8 @@
                     Are you <strong>ABSOLUTELY</strong> sure?
                 </p>
                 <p>
-                    This action <strong>CANNOT</strong> be undone. This will delete all associated configurations, system users, providers and uploaded brochures.
-                    An alternative would be to make the organization inactive. This will set all system users and configurations to an inactive state.
+                    This action <strong>CANNOT</strong> be undone. This will delete all associated configurations, connections and uploaded batches.
+                    An alternative would be to make the organization inactive. This will set all configurations and connections to an inactive state.
                 </p>
                 <form id="confirmOrgDelete" method="post" role="form" action="delete">
                     <div id="confirmDiv" class="form-group" >
@@ -262,7 +262,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <input type="button" disabled id="submitButton" class="btn btn-primary" value="I understand the consequences, delete this organization" />
+                        <input type="button" id="confirmDeleteOrg" class="btn btn-primary" value="I understand the consequences, delete this organization" />
                     </div>
                 </form>
             </div>
