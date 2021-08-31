@@ -5534,4 +5534,9 @@ public class transactionInManagerImpl implements transactionInManager {
 
 	emailManager.sendEmail(mail);
     }
+    
+    @Override
+    public List<batchUploads> getBatchesByOrgId(Integer orgId) throws Exception {
+	return transactionInDAO.getBatchesByOrgId(orgId);
+    } 
 }

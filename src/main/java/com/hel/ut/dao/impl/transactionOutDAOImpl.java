@@ -1767,18 +1767,38 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	deletActivityLog.executeUpdate();
     }
 
-	@Transactional(readOnly = true)
-	public String getConfigFieldHeadingsForOutput(Integer configId) {
+    @Transactional(readOnly = true)
+    public String getConfigFieldHeadingsForOutput(Integer configId) {
+	String sql = "select group_concat(CONCAT(\"'\", fieldDesc, \"'\") order by fieldNo asc) as fieldHeadings "
+	+ "from configurationFormFields where configId = " + configId;
 
-    	String sql = "select group_concat(CONCAT(\"'\", fieldDesc, \"'\") order by fieldNo asc) as fieldHeadings "
-		+ "from configurationFormFields where configId = " + configId;
-
-		Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
-		List<String> fieldHeadings = query.list();
-		if (!fieldHeadings.isEmpty()) {
-			return fieldHeadings.get(0);
-		} else {
-			return null;
-		}
+	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	List<String> fieldHeadings = query.list();
+	if (!fieldHeadings.isEmpty()) {
+		return fieldHeadings.get(0);
+	} else {
+		return null;
 	}
+    }
+    
+    /**
+     * getBatchesByOrgId - return uploaded batch info for specific orgId
+     *
+     * @param orgId
+     * @return This function will return a list of batches.
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    @Transactional(readOnly = true)
+    public List<batchDownloads> getBatchesByOrgId(Integer orgId) {
+	try {
+	    /* Get a list of uploaded batches for these statuses */
+	    Criteria findBatches = sessionFactory.getCurrentSession().createCriteria(batchDownloads.class);
+	    findBatches.add(Restrictions.eq("orgId", orgId));
+	    return findBatches.list();
+	} catch (Exception ex) {
+	    System.err.println("/*** getBatchesByOrgId " + ex.getCause().getMessage());
+	    return null;
+	}
+    }
 }

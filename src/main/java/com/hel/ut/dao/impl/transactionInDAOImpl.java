@@ -546,33 +546,6 @@ public class transactionInDAOImpl implements transactionInDAO {
 	List<batchUploads> batchUploadMessages = query.list();
 	
         return batchUploadMessages;
-
-
-	/*Criteria findBatches = sessionFactory.getCurrentSession().createCriteria(batchUploads.class);
-	findBatches.add(Restrictions.ne("errorRecordCount", 0));
-
-	if (fromDate != null) {
-	    if (!"".equals(fromDate)) {
-		findBatches.add(Restrictions.ge("dateSubmitted", fromDate));
-	    }
-	}
-
-	if (toDate != null) {
-	    if (!"".equals(toDate)) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(toDate);
-		cal.add(Calendar.DATE, 1);
-		findBatches.add(Restrictions.lt("dateSubmitted", cal.getTime()));
-	    }
-	}
-
-	findBatches.addOrder(Order.desc("dateSubmitted"));
-
-	if (fetchSize > 0) {
-	    findBatches.setMaxResults(fetchSize);
-	}
-
-	return findBatches.list();*/
     }
 
     /**
@@ -798,6 +771,9 @@ public class transactionInDAOImpl implements transactionInDAO {
 
     /**
      * The 'getFeedbackReportConnection' method will return a list of connections for the clicked feedback report.
+     * @param configId
+     * @param targetorgId
+     * @return 
      */
     @Override
     @Transactional(readOnly = true)
@@ -809,7 +785,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 
 	List<configurationConnection> connections = configurationConnections.list();
 
-	List<Integer> connectionId = new ArrayList<Integer>();
+	List<Integer> connectionId = new ArrayList<>();
 
 	if (!connections.isEmpty()) {
 
@@ -822,15 +798,11 @@ public class transactionInDAOImpl implements transactionInDAO {
 		if (configDetails.getorgId() == targetorgId) {
 		    connectionId.add(connection.getId());
 		}
-
 	    }
-
 	}
 
 	return connectionId;
-
     }
-
     
     @Override
     @Transactional(readOnly = false)
@@ -1356,7 +1328,6 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    return null;
 	}
     }
-
 
     /**
      * getBatchesByStatusIds - return uploaded batch info for specific statusIds
@@ -4060,5 +4031,26 @@ public class transactionInDAOImpl implements transactionInDAO {
 	deleteActivityReport.setParameter("id", activityReportId);
 
 	deleteActivityReport.executeUpdate();
+    }
+    
+    /**
+     * getBatchesByOrgId - return uploaded batch info for specific orgId
+     *
+     * @param orgId
+     * @return This function will return a list of batches.
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    @Transactional(readOnly = true)
+    public List<batchUploads> getBatchesByOrgId(Integer orgId) {
+	try {
+	    /* Get a list of uploaded batches for these statuses */
+	    Criteria findBatches = sessionFactory.getCurrentSession().createCriteria(batchUploads.class);
+	    findBatches.add(Restrictions.eq("orgId", orgId));
+	    return findBatches.list();
+	} catch (Exception ex) {
+	    System.err.println("/*** getBatchesByOrgId " + ex.getCause().getMessage());
+	    return null;
+	}
     }
 }
