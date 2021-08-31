@@ -105,12 +105,11 @@ require(['./main'], function () {
         }
     });
 
-
     //Make sure the two values equal before the delete function is allowed
-    $('#submitButton').click(function (event) {
-        if ($('#realUsername').val() != $('#username').val()) {
+    $('#confirmDeleteOrg').click(function (event) {
+        if ($('#realUsername').val() !== $('#username').val()) {
             $('#confirmDiv').addClass("has-error");
-            $('#confirmMsg').html('That is not correct!');
+            $('#confirmMsg').html('The username entered does not match the username you logged in with!');
         } else {
             $('#confirmOrgDelete').submit();
         }
@@ -204,8 +203,8 @@ function populateHELRegistries(isHELRegistry) {
 	$('#helRegistryOrgId').val(0);
 	$('#helRegistrySchemaName').val("");
 	$('#orgDetails').show();
-	$('#helRegistry').find('option').remove().end().append('<option value="">- Select -</option>').val('');
-	$('#helRegistryOrgId').find('option').remove().end().append('<option value="">- Select -</option>').val('');
+	$('#helRegistry').find('option').remove().end().append('<option value="0">- Select -</option>').val('');
+	$('#helRegistryOrgId').find('option').remove().end().append('<option value="0">- Select -</option>').val('');
 	$('#HELRegistryDetails').hide();
     }
 }
@@ -302,13 +301,13 @@ function populateHELRegistryOrgs(selRegistry) {
 	else {
 	    //$('#orgDetails').hide();
 	    $('#HELRegistryOrgsDiv').hide();
-	    $('#helRegistryOrgId').find('option').remove().end().append('<option value="">- Select -</option>').val('');
+	    $('#helRegistryOrgId').find('option').remove().end().append('<option value="0">- Select -</option>').val('');
 	}
     }
     else {
 	//$('#orgDetails').hide();
 	$('#HELRegistryOrgsDiv').hide();
-	$('#helRegistryOrgId').find('option').remove().end().append('<option value="">- Select -</option>').val('');
+	$('#helRegistryOrgId').find('option').remove().end().append('<option value="0">- Select -</option>').val('');
     }
 }
 	   

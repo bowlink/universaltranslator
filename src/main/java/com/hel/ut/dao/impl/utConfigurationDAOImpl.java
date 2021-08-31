@@ -124,13 +124,11 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     public List<utConfiguration> getConfigurationsByOrgId(int orgId, String searchTerm) {
 
         if (!"".equals(searchTerm)) {
-
             Criteria criteria = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-
             criteria.add(Restrictions.eq("orgId", orgId)).addOrder(Order.desc("dateCreated"));
-
             return criteria.list();
-        } else {
+        } 
+	else {
             Criteria criteria = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
             criteria.add(Restrictions.eq("orgId", orgId));
 	    criteria.add(Restrictions.eq("deleted", false));
