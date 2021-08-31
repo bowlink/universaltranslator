@@ -127,4 +127,6 @@ public interface transactionOutManager {
     Integer genericValidation(configurationFormFields cff, Integer validationTypeId, Integer batchDownloadId, String regEx);
     
     void clearBatchActivityLogTable(Integer batchId) throws Exception;
+    
+    List<batchDownloads> getBatchesByOrgId(Integer orgId) throws Exception;
 }

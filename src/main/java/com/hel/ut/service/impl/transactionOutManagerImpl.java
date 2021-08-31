@@ -3036,4 +3036,9 @@ public class transactionOutManagerImpl implements transactionOutManager {
     public void clearBatchActivityLogTable(Integer batchId) throws Exception {
 	transactionInDAO.clearBatchActivityLogTable(batchId);
     }
+    
+    @Override
+    public List<batchDownloads> getBatchesByOrgId(Integer orgId) throws Exception {
+	return transactionOutDAO.getBatchesByOrgId(orgId);
+    } 
 }
