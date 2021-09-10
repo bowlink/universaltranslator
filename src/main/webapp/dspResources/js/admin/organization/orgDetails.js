@@ -155,17 +155,24 @@ require(['./main'], function () {
                 $('#helRegistrySchemaName').val(selRegistrySchemaName);
                 $('#helRegistryId').val(selRegistry.split("-")[0]);
             }
+            
+            //Resave the clean url;
+            $('#cleanURL').val('');
+            var orgName = $('#orgName').val();
+            var strippedorgName = orgName.replace(/ +/g, '');
+            $('#cleanURL').val(strippedorgName);
+            
             $("#organization").submit();
         }
     });
 
     //Need to set the organization clean url based off of the organization name
-    $('#orgName').keyup(function (event) {
+    /*$('#orgName').keyup(function (event) {
         var orgName = $(this).val();
         var strippedorgName = orgName.replace(/ +/g, '');
         $('#cleanURL').val(strippedorgName);
-        $('#nameChange').val(1);
-    });
+        //$('#nameChange').val(1);
+    });*/
 });
 
 function populateHELRegistries(isHELRegistry) {
@@ -315,17 +322,26 @@ function populateHELRegistryOrgs(selRegistry) {
 function checkFormFields() {
     var hasErrors = 0;
     
-    //Check to see if organization name contains any special characters
+    $('#orgNameDiv').removeClass("has-error");
+    $('#orgNameErrorMsg').removeClass("has-error");
+    $('#orgNameErrorMsg').html('');
+    
     var orgName = $('#orgName').val();
-    if(/^[a-zA-Z0-9- ]*$/.test(orgName) == false) {
+    
+    if($.trim(orgName) === '') {
         $('#orgNameDiv').addClass("has-error");
         $('#orgNameErrorMsg').addClass("has-error");
-        $('#orgNameErrorMsg').html('The organization name contains illegal characters. Only letters and numbers are accepted.');
+        $('#orgNameErrorMsg').html('The organization name is a required field.');
+        hasErrors = 1;
+    }
+    else if(/^[a-zA-Z0-9 ]*$/.test(orgName) === false) {
+        $('#orgNameDiv').addClass("has-error");
+        $('#orgNameErrorMsg').addClass("has-error");
+        $('#orgNameErrorMsg').html('The organization name contains illegal characters. Only letters, numbers and spaces are accepted.');
         hasErrors = 1;
     }
 
     if ($('#file').length > 1) {
-
         var filename = $('#file').val();
         var extension = filename.replace(/^.*\./, '');
 
@@ -344,11 +360,8 @@ function checkFormFields() {
             $('#parsingTemplateMsg').html('The Parsing Script must be a jar file.');
             hasErrors = 1;
         }
-
     }
 
     return hasErrors;
-
-
 }
 
