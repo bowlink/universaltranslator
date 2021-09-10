@@ -98,7 +98,7 @@ public class organizationDAOImpl implements organizationDAO {
     @SuppressWarnings("unchecked")
     public List<Organization> getOrganizationByName(String cleanURL) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Organization.class);
-        criteria.add(Restrictions.like("cleanURL", cleanURL));
+        criteria.add(Restrictions.eq("cleanURL", cleanURL));
         return criteria.list();
     }
 
