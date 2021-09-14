@@ -182,7 +182,7 @@
                                             </spring:bind>
                                              <c:choose>
                                                 <%-- Only CCD (XML), HL7 and JSON file types need parsing scripts --%>
-                                                <c:when test="${fileType == 4 || fileType == 9 || fileType == 12}">
+                                                <c:when test="${fileType == 4 || fileType == 9 || fileType == 12 || (fileType == 2 && fileDelim == 13)}">
                                                    <c:if test="${not empty messageSpecs.parsingTemplate}">
                                                        <c:set var="hrefLink" value="/FileDownload/downloadFile.do?fromPage=messagespec&filename=${messageSpecs.parsingTemplate}&foldername=${cleanOrgURL}/templates/"/>
                                                        <div class="form-group">
