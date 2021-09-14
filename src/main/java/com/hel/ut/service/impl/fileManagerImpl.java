@@ -132,7 +132,6 @@ public class fileManagerImpl implements fileManager {
 	    decodedBytes = fileAsBytes;
 	}
         writeByteArraysToFile(targetFile, decodedBytes);
-
     }
     
     @Override
@@ -165,8 +164,16 @@ public class fileManagerImpl implements fileManager {
     }
     
     public boolean isFileBase64Encoded(File file) throws Exception {
-	byte[] bytes = fileToBytes(file);
-	boolean isBase64 = Base64.isBase64(bytes);
+	//Read the first line of the file
+	BufferedReader brTest = new BufferedReader(new FileReader(file));
+	String firstLineText = brTest.readLine();
+	
+	String test = new String(Base64.decodeBase64(firstLineText));
+	
+	boolean isBase64 = false;
+	if(firstLineText.equals(Base64.encodeBase64String(test.getBytes()))) {
+	    isBase64 = true;
+	}
 	
 	return isBase64;
     }

@@ -60,6 +60,7 @@ import com.hel.ut.service.transactionOutManager;
 import com.hel.ut.service.userManager;
 import com.hel.ut.service.utilManager;
 import com.hel.ut.service.excelToTxt;
+import com.hel.ut.service.fixedLengthFiletoTxt;
 import com.hel.ut.service.xlsToTxt;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.logging.Level;
@@ -212,7 +213,10 @@ public class transactionInManagerImpl implements transactionInManager {
     private submittedMessageManager submittedmessagemanager;
     
     @Autowired
-    fileUploadManager fileuploadmanager;
+    private fixedLengthFiletoTxt fixedLengthFiletoTxt;
+    
+    @Autowired
+    private fileUploadManager fileuploadmanager;
     
     @Autowired
     ThreadPoolTaskExecutor executor;
@@ -1538,7 +1542,6 @@ public class transactionInManagerImpl implements transactionInManager {
 				}
 			    }
 			}
-
 		    }
 		}
 	    }
@@ -2325,10 +2328,13 @@ public class transactionInManagerImpl implements transactionInManager {
 		    String changeToExtension = "";
 		    String processFileName = batch.getOriginalFileName();
 		    String lineTerminator = "\\n";
+		    
+		    configurationMessageSpecs messageSpecs = null;
 
 		    //For configId of 0, we need to check to see if org has hr or ccd if configId is not 0, we pull up the extension type and rename file if we find more than one file extension set up for org we reject them them file extension will be 4 (hr) or 9 (ccd) info we have from batchUpload - transportMethodId, configId, orgId
 		    if (batch.getConfigId() != 0) {
 			configurationTransport ct = configurationtransportmanager.getTransportDetails(batch.getConfigId());
+			messageSpecs = configurationManager.getMessageSpecs(batch.getConfigId());
 			switch (ct.getfileType()) {
 			    case 9:
 				changeToExtension = "xml";
@@ -2479,8 +2485,6 @@ public class transactionInManagerImpl implements transactionInManager {
 			if (tempLoadFile.exists()) {
 			    tempLoadFile.delete();
 			}
-			
-			
 		    } 
 		    else if (processFileName.endsWith(".xlsx") || processFileName.endsWith(".xls")) {
 			
@@ -2578,6 +2582,57 @@ public class transactionInManagerImpl implements transactionInManager {
 			    tempLoadFile.delete();
 			}
 		    }
+		    else if (processFileName.endsWith(".txt") && messageSpecs != null) {
+			
+			if(messageSpecs.getParsingTemplate() != null) {
+			    if(!"".equals(messageSpecs.getParsingTemplate().trim()) && messageSpecs.getParsingTemplate().toLowerCase().contains("fixedlength")) {
+				
+				newfilename = fixedLengthFiletoTxt.translateFixedLengthFileToTxt(decodedFilePath,decodedFileName,batch);
+
+				if (newfilename.equals("ERRORERRORERROR")) {
+				    ba = new batchuploadactivity();
+				    ba.setActivity("Error parsing the txt fixed length file");
+				    ba.setBatchUploadId(batchId);
+				    transactionInDAO.submitBatchActivityLog(ba);
+
+				    updateBatchStatus(batchId, 39, "endDateTime");
+				    insertProcessingError(5, null, batchId, null, null, null, null, false, false, "Error parsing the txt fixed length file");
+				    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), " txt fixed length parsing failed.");
+				} 
+				else if (newfilename.equals("FILE IS NOT TXT ERROR")) {
+				    ba = new batchuploadactivity();
+				    ba.setActivity("File content is not valid for expected file type. File format is invalid.");
+				    ba.setBatchUploadId(batchId);
+				    transactionInDAO.submitBatchActivityLog(ba);
+
+				    updateBatchStatus(batchId, 7, "endDateTime");
+				    insertProcessingError(22, null, batchId, null, null, null, null, false, false, "File format is invalid.");
+				    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), " txt fixed length parsing failed.");
+				}
+				else {
+				    ba = new batchuploadactivity();
+				    ba.setActivity("Successfully parsed the inbound fixed length txt file and generated file location/name: " + decodedFilePath + newfilename);
+				    ba.setBatchUploadId(batchId);
+				    transactionInDAO.submitBatchActivityLog(ba);
+				}
+
+				actualFileName = (decodedFilePath + newfilename);
+
+				//we remove temp load file 
+				File tempLoadFile = new File(decodedFilePath + processFileName);
+				if (tempLoadFile.exists()) {
+				    tempLoadFile.delete();
+				}
+				
+				//Remove '-parsed' from the translated file name
+				File parsedFile = new File(actualFileName);
+				if(parsedFile.exists()) {
+				    parsedFile.renameTo(new File(decodedFilePath + decodedFileName + ".txt"));
+				    actualFileName = (decodedFilePath + decodedFileName + ".txt");
+				}
+			    }
+			}
+		    } 
 
 		    //at this point, hl7 and hr are in unencoded plain text
 		    if (actualFileName.endsWith(".txt") || actualFileName.endsWith(".csv")) {
@@ -2589,8 +2644,10 @@ public class transactionInManagerImpl implements transactionInManager {
 			    delimChar = messagetypemanager.getDelimiterChar(delimId);
 			} else if (!"".equals(batch.getDelimChar())) {
 			    delimChar = batch.getDelimChar();
+			} else if ("f".equals(batch.getDelimChar())) {
+			    delimChar = "|";
 			}
-
+			
 			if ("".equals(lineTerminator)) {
 			    lineTerminator = "\\n";
 			}
@@ -2604,7 +2661,11 @@ public class transactionInManagerImpl implements transactionInManager {
 				totalHeaderRows = configSpecs.getTotalHeaderRows();
 			    }
 			}
-
+			
+			if ("f".equals(delimChar)) {
+			    delimChar = "|";
+			}
+			
 			int errorHere = insertLoadData(batch.getId(), batch.getConfigId(), delimChar, actualFileName, "transactionInRecords_" + batch.getId(), batch.isContainsHeaderRow(), totalHeaderRows, lineTerminator);
 
 			if (errorHere > 0) {
@@ -3394,8 +3455,8 @@ public class transactionInManagerImpl implements transactionInManager {
 		transactionInDAO.submitBatchActivityLog(ba);
 
 		insertProcessingError(10, null, batchUploadId, null, null, null, null, false, false, "No valid connections were found for loading batch.");
-		updateRecordCounts(batchUploadId, new ArrayList<Integer>(), false, "errorRecordCount");
-		updateRecordCounts(batchUploadId, new ArrayList<Integer>(), false, "totalRecordCount");
+		updateRecordCounts(batchUploadId, new ArrayList<>(), false, "errorRecordCount");
+		updateRecordCounts(batchUploadId, new ArrayList<>(), false, "totalRecordCount");
 		updateBatchStatus(batchUploadId, 7, "endDateTime");
 
 		return false;
@@ -3409,7 +3470,8 @@ public class transactionInManagerImpl implements transactionInManager {
 		//File in Load Files
 		File fileToDelete = new File(myProps.getProperty("ut.directory.utRootDir") + "loadFiles/" + batch.getUtBatchName() + batch.getOriginalFileName().substring(batch.getOriginalFileName().lastIndexOf(".")).toLowerCase());
 
-		if (fileToDelete.exists()) {
+		//Don't delete file if the delimiter is set to Fixed Length
+		if (fileToDelete.exists() && handlingDetails.get(0).getfileDelimiter() != 13) {
 		    //log batch activity
 		    ba = new batchuploadactivity();
 		    ba.setActivity("Deleted file: " + fileToDelete.getAbsolutePath());
@@ -3432,12 +3494,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		    fileToDelete.delete();
 		}
 	    }
-	    
-
 	} // end of single batch insert 
-
-	
-
 	return true;
     }
 
@@ -3447,8 +3504,7 @@ public class transactionInManagerImpl implements transactionInManager {
     }
 
     @Override
-    public List<referralActivityExports> getReferralActivityExportsByStatus(
-	    List<Integer> statusIds, Integer howMany) throws Exception {
+    public List<referralActivityExports> getReferralActivityExportsByStatus(List<Integer> statusIds, Integer howMany) throws Exception {
 	return transactionInDAO.getReferralActivityExportsByStatus(statusIds, howMany);
     }
 
