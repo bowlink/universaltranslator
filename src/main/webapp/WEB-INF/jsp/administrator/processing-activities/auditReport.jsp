@@ -295,11 +295,11 @@
                                             <c:if test="${configDetails.configurationType == 1 && (batchDetails.transportMethodId == 10 || batchDetails.transportMethodId == 13)}">
                                                 <c:choose>
                                                     <c:when test="${fn:contains(transportMethod,'direct') || batchDetails.transportMethodId == 13}">
-                                                         <c:set var="fileName" value="${batchDetails.utBatchName}.txt" />
+                                                        <c:set var="fileName" value="${batchDetails.utBatchName}.txt" />
                                                         <c:set var="hreftranslateLink" value="/FileDownload/downloadFile.do?fromPage=inboundAudit&filename=${batchDetails.utBatchName}.txt&foldername=loadFiles&utBatchId=${batchDetails.utBatchName}"/>
                                                     </c:when>
                                                     <c:otherwise>
-                                                         <c:set var="fileName" value="archive_${batchDetails.utBatchName}.${fn:toLowerCase(ext)}" />
+                                                        <c:set var="fileName" value="archive_${batchDetails.utBatchName}.${fn:toLowerCase(ext)}" />
                                                         <c:set var="hreftranslateLink" value="/FileDownload/downloadFile.do?fromPage=inboundAudit&filename=archive_${batchDetails.utBatchName}.${fn:toLowerCase(ext)}&foldername=archivesIn&utBatchId=${batchDetails.utBatchName}"/>
                                                     </c:otherwise>
                                                 </c:choose>
@@ -344,7 +344,7 @@
 					    <p>
 						<strong>Associated File(s):</strong><br />
 						<a href="${hrefLink}" title="View Original File">Submitted File - ${batchDetails.originalFileName}</a>
-						<c:if test="${(batchDetails.transportMethodId == 9 || batchDetails.transportMethodId == 13) && ext != 'txt' && not empty fileName}">
+						<c:if test="${(batchDetails.transportMethodId == 9 || batchDetails.transportMethodId == 13) && (ext != 'txt' || fileDelimiter == 13) && not empty fileName}">
 						    <br /><a href="${hreftranslateLink}" title="View Internal Processing File">Internal File - ${fileName}</a></p>
 						</c:if>
 					    </p>

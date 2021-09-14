@@ -5,8 +5,10 @@
  */
 package com.hel.ut.service;
 
+import com.hel.ut.dao.transactionInDAO;
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.batchUploads;
+import com.hel.ut.model.batchuploadactivity;
 import com.hel.ut.model.configurationMessageSpecs;
 import com.hel.ut.model.utUserActivity;
 import java.io.File;
@@ -18,6 +20,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Properties;
 import javax.annotation.Resource;
 
@@ -36,6 +41,9 @@ public class fixedLengthFiletoTxt {
     
     @Autowired
     private userManager usermanager;
+    
+    @Autowired
+    private transactionInDAO transactionInDAO;
     
     @Autowired
     private utConfigurationManager configurationManager;
@@ -77,13 +85,10 @@ public class fixedLengthFiletoTxt {
 	if(templatefileName != null) {
 	    
 	    //log batch activity
-	    utUserActivity ua = new utUserActivity();
-	    ua.setUserId(0);
-	    ua.setFeatureId(0);
-	    ua.setAccessMethod("System");
-	    ua.setActivity("Fixed length file parsing template found: " + directory + templatefileName);
-	    ua.setBatchUploadId(batch.getId());
-	    usermanager.insertUserLog(ua);
+	    batchuploadactivity ba = new batchuploadactivity();
+	    ba.setActivity("Fixed length file parsing template found: " + directory + templatefileName);
+	    ba.setBatchUploadId(batch.getId());
+	    transactionInDAO.submitBatchActivityLog(ba);
 	    
 	    URLClassLoader loader = new URLClassLoader(new URL[]{new URL("file://" + directory + templatefileName)});
 	    
@@ -94,14 +99,10 @@ public class fixedLengthFiletoTxt {
 		cls = loader.loadClass(templatefileName.substring(0, templatefileName.lastIndexOf('.')));
 	    }
 	    catch (ClassNotFoundException ex) {
-		//log batch activity
-		ua = new utUserActivity();
-		ua.setUserId(0);
-		ua.setFeatureId(0);
-		ua.setAccessMethod("System");
-		ua.setActivity("Error loading fixed length file parsing template: " + directory + templatefileName + " Error: " + ex.getMessage());
-		ua.setBatchUploadId(batch.getId());
-		usermanager.insertUserLog(ua);
+		ba = new batchuploadactivity();
+		ba.setActivity("Error loading fixed length file parsing template: " + directory + templatefileName + " Error: " + ex.getMessage());
+		ba.setBatchUploadId(batch.getId());
+		transactionInDAO.submitBatchActivityLog(ba);
 	    }
 	    
 	    if(cls != null) {
@@ -137,8 +138,8 @@ public class fixedLengthFiletoTxt {
 
 		try {
 		    FileWriter fw = new FileWriter(newFile, true);
-
-		    String fileRecords = (String) myMethod.invoke(CCDObj, new Object[]{fileLocation + actualFileName + ".txt"});
+		    
+		    String fileRecords = (String) myMethod.invoke(CCDObj, new Object[]{directory + actualFileName + ".txt"});
 		    if (fileRecords.equalsIgnoreCase("")) {
 			newfileName = "FILE IS NOT TXT ERROR";
 		    }
@@ -153,13 +154,10 @@ public class fixedLengthFiletoTxt {
 		    ps.close();
 
 		    //log batch activity
-		    ua = new utUserActivity();
-		    ua.setUserId(0);
-		    ua.setFeatureId(0);
-		    ua.setAccessMethod("System");
-		    ua.setActivity("Error using fixed length parsing Template. Error: " + ex.getMessage());
-		    ua.setBatchUploadId(batch.getId());
-		    usermanager.insertUserLog(ua);
+		    ba = new batchuploadactivity();
+		    ba.setActivity("Error using fixed length parsing Template. Error: " + ex.getMessage());
+		    ba.setBatchUploadId(batch.getId());
+		    transactionInDAO.submitBatchActivityLog(ba);
 		}
 	    }
 	}

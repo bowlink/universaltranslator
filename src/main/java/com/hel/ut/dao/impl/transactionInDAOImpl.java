@@ -1102,14 +1102,13 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<configurationTransport> getHandlingDetailsByBatch(int batchId) throws Exception {
-	
 	try {
-	    String sql = ("select distinct clearRecords, autoRelease, errorHandling, errorEmailAddresses "
-		    + " from configurationtransportdetails where configId in "
-		    + "(select distinct configId from batchUploads where id = "+batchId+");");
+	    String sql = ("select distinct clearRecords, autoRelease, errorHandling, errorEmailAddresses, fileDelimiter "
+	    + " from configurationtransportdetails where configId in "
+	    + "(select distinct configId from batchUploads where id = "+batchId+");");
 	    
 	    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
-		    .setResultTransformer(Transformers.aliasToBean(configurationTransport.class));
+	    .setResultTransformer(Transformers.aliasToBean(configurationTransport.class));
 
 	    List<configurationTransport> ct = query.list();
 	    return ct;
@@ -1117,7 +1116,6 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    System.err.println("getHandlingDetailsByBatch " + ex.getCause());
 	    return null;
 	}
-
     }
 
     @Override
@@ -1225,11 +1223,11 @@ public class transactionInDAOImpl implements transactionInDAO {
 			ignoreSyntax = "  IGNORE " + totalHeaderRows + " LINES ";
 		    }
 		}
-		
 	    }
+	    
 	    String sql = ("LOAD DATA LOCAL INFILE '" + fileWithPath + "' INTO TABLE " + loadTableName + " fields terminated by '" + delimChar + "' "
-		    + " optionally ENCLOSED BY '\"' ESCAPED BY '\\b' LINES TERMINATED BY '" + lineTerminator + "'  " + ignoreSyntax
-		    + " set batchUploadId = " + batchId + ", configId = " + configId + ";");
+	    + " optionally ENCLOSED BY '\"' ESCAPED BY '\\b' LINES TERMINATED BY '" + lineTerminator + "'  " + ignoreSyntax
+	    + " set batchUploadId = " + batchId + ", configId = " + configId + ";");
 	    
 	    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
 	    query.executeUpdate();
@@ -3358,14 +3356,14 @@ public class transactionInDAOImpl implements transactionInDAO {
 	}
 	
 	String sqlQuery = "select id, orgId, utBatchName, transportMethodId, originalFileName, totalRecordCount, errorRecordCount, totalErrorRows, configName, threshold, inboundBatchConfigurationType, statusId, dateSubmitted,"
-		+ "startDateTime,endDateTime,statusValue, endUserDisplayText, orgName, case when dmConfigKeyWord != '' then 'File Drop (Direct)' when transportMethod != 'Online Form' && restAPIUsername != '' then 'File Drop (Rest)' else transportMethod end as transportMethod, totalMessages, 'On Demand' as uploadType, dmConfigKeyWord "
+		+ "startDateTime,endDateTime,statusValue, endUserDisplayText, orgName, case when dmConfigKeyWord != '' then 'File Drop (Direct)' when transportMethod != 'Online Form' && restAPIUsername != '' then 'File Drop (Rest)' else transportMethod end as transportMethod, totalMessages, 'On Demand' as uploadType, dmConfigKeyWord, fileDelimiter "
 		+ "FROM ("
 		+ "select a.id, a.orgId, a.utBatchName, a.transportMethodId, a.originalFileName, a.totalRecordCount, a.errorRecordCount, b.configName, b.threshold, b.configurationType as inboundBatchConfigurationType,"
 		+ "a.statusId, a.dateSubmitted, "
 		+ "a.startDateTime, a.endDateTime, c.displayCode as statusValue, c.endUserDisplayText as endUserDisplayText,d.orgName, e.transportMethod,"
 		+ "(select count(id) as total from batchuploads where "+dateSQLStringTotal+") as totalMessages, "
 		+ "(select count(distinct rowNumber) as totalRows from batchuploadauditerrors where batchUploadId = a.id and rowNumber > 0) as totalErrorRows, "
-		+ "f.dmConfigKeyWord, f.restAPIUsername "
+		+ "f.dmConfigKeyWord, f.restAPIUsername, f.fileDelimiter "
 		+ "FROM batchuploads a inner join "
 		+ "configurations b on b.id = a.configId inner join "
 		+ "lu_processstatus c on c.id = a.statusId inner join "
@@ -3416,6 +3414,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    .addScalar("uploadType", StandardBasicTypes.STRING)
 	    .addScalar("endUserDisplayText", StandardBasicTypes.STRING)
 	    .addScalar("dmConfigKeyWord", StandardBasicTypes.STRING)
+	    .addScalar("fileDelimiter", StandardBasicTypes.INTEGER)
 	    .setResultTransformer(Transformers.aliasToBean(batchUploads.class));
 	
 	List<batchUploads> batchUploadMessages = query.list();

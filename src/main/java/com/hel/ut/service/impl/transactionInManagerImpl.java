@@ -1542,7 +1542,6 @@ public class transactionInManagerImpl implements transactionInManager {
 				}
 			    }
 			}
-
 		    }
 		}
 	    }
@@ -2587,6 +2586,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			
 			if(messageSpecs.getParsingTemplate() != null) {
 			    if(!"".equals(messageSpecs.getParsingTemplate().trim()) && messageSpecs.getParsingTemplate().toLowerCase().contains("fixedlength")) {
+				
 				newfilename = fixedLengthFiletoTxt.translateFixedLengthFileToTxt(decodedFilePath,decodedFileName,batch);
 
 				if (newfilename.equals("ERRORERRORERROR")) {
@@ -2623,9 +2623,12 @@ public class transactionInManagerImpl implements transactionInManager {
 				if (tempLoadFile.exists()) {
 				    tempLoadFile.delete();
 				}
-				tempLoadFile = new File(decodedFilePath + decodedFileName + decodedFileExt);
-				if (tempLoadFile.exists()) {
-				    tempLoadFile.delete();
+				
+				//Remove '-parsed' from the translated file name
+				File parsedFile = new File(actualFileName);
+				if(parsedFile.exists()) {
+				    parsedFile.renameTo(new File(decodedFilePath + decodedFileName + ".txt"));
+				    actualFileName = (decodedFilePath + decodedFileName + ".txt");
 				}
 			    }
 			}
@@ -2641,8 +2644,10 @@ public class transactionInManagerImpl implements transactionInManager {
 			    delimChar = messagetypemanager.getDelimiterChar(delimId);
 			} else if (!"".equals(batch.getDelimChar())) {
 			    delimChar = batch.getDelimChar();
+			} else if ("f".equals(batch.getDelimChar())) {
+			    delimChar = "|";
 			}
-
+			
 			if ("".equals(lineTerminator)) {
 			    lineTerminator = "\\n";
 			}
@@ -2656,7 +2661,11 @@ public class transactionInManagerImpl implements transactionInManager {
 				totalHeaderRows = configSpecs.getTotalHeaderRows();
 			    }
 			}
-
+			
+			if ("f".equals(delimChar)) {
+			    delimChar = "|";
+			}
+			
 			int errorHere = insertLoadData(batch.getId(), batch.getConfigId(), delimChar, actualFileName, "transactionInRecords_" + batch.getId(), batch.isContainsHeaderRow(), totalHeaderRows, lineTerminator);
 
 			if (errorHere > 0) {
@@ -3446,8 +3455,8 @@ public class transactionInManagerImpl implements transactionInManager {
 		transactionInDAO.submitBatchActivityLog(ba);
 
 		insertProcessingError(10, null, batchUploadId, null, null, null, null, false, false, "No valid connections were found for loading batch.");
-		updateRecordCounts(batchUploadId, new ArrayList<Integer>(), false, "errorRecordCount");
-		updateRecordCounts(batchUploadId, new ArrayList<Integer>(), false, "totalRecordCount");
+		updateRecordCounts(batchUploadId, new ArrayList<>(), false, "errorRecordCount");
+		updateRecordCounts(batchUploadId, new ArrayList<>(), false, "totalRecordCount");
 		updateBatchStatus(batchUploadId, 7, "endDateTime");
 
 		return false;
@@ -3461,7 +3470,8 @@ public class transactionInManagerImpl implements transactionInManager {
 		//File in Load Files
 		File fileToDelete = new File(myProps.getProperty("ut.directory.utRootDir") + "loadFiles/" + batch.getUtBatchName() + batch.getOriginalFileName().substring(batch.getOriginalFileName().lastIndexOf(".")).toLowerCase());
 
-		if (fileToDelete.exists()) {
+		//Don't delete file if the delimiter is set to Fixed Length
+		if (fileToDelete.exists() && handlingDetails.get(0).getfileDelimiter() != 13) {
 		    //log batch activity
 		    ba = new batchuploadactivity();
 		    ba.setActivity("Deleted file: " + fileToDelete.getAbsolutePath());
@@ -3484,12 +3494,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		    fileToDelete.delete();
 		}
 	    }
-	    
-
 	} // end of single batch insert 
-
-	
-
 	return true;
     }
 
@@ -3499,8 +3504,7 @@ public class transactionInManagerImpl implements transactionInManager {
     }
 
     @Override
-    public List<referralActivityExports> getReferralActivityExportsByStatus(
-	    List<Integer> statusIds, Integer howMany) throws Exception {
+    public List<referralActivityExports> getReferralActivityExportsByStatus(List<Integer> statusIds, Integer howMany) throws Exception {
 	return transactionInDAO.getReferralActivityExportsByStatus(statusIds, howMany);
     }
 
