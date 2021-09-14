@@ -1002,6 +1002,7 @@ public class adminProcessingActivity {
 	    }
 	    
 	    mav.addObject("transportMethod",transportMethod);
+	    mav.addObject("fileDelimiter", transportDetails.getfileDelimiter());
 	    
 	    Organization orgDetails = organizationmanager.getOrganizationById(batchDetails.getOrgId());
             batchDetails.setOrgName(orgDetails.getOrgName());

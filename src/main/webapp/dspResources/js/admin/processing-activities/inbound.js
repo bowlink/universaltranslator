@@ -178,7 +178,7 @@ function populateMessages(fromDate,toDate) {
 			   returnData += '<br /><a href="/FileDownload/downloadFile.do?fromPage=inbound&filename=encoded_'+row.utBatchName+'.'+row.originalFileName.split('.')[1].toString().toLowerCase()+'&foldername=input files&orgId='+row.orgId+'" title="View Submitted File">Submitted File - '+row.originalFileName+'</a>'; 
 			}
 			
-                        if(row.originalFileName.split('.')[1].toString().toLowerCase() != 'txt') {
+                        if(row.originalFileName.split('.')[1].toString().toLowerCase() != 'txt' || row.fileDelimiter == 13) {
                             if(row.inboundBatchConfigurationType == 1 && (row.transportMethodId == 10 || row.transportMethodId == 13)) {
                                 if(row.transportMethod.indexOf("Direct") > 0 || row.transportMethod === 'File Drop') {
                                     returnData += '<br /><a href="/FileDownload/downloadFile.do?fromPage=inbound&filename='+row.utBatchName+'.txt&foldername=loadFiles" title="View Pipe File">Internal File - '+row.utBatchName+'.txt</a>';
@@ -186,11 +186,10 @@ function populateMessages(fromDate,toDate) {
                                 else {
                                     returnData += '<br /><a href="/FileDownload/downloadFile.do?fromPage=inbound&filename=archive_'+row.utBatchName+'.'+row.originalFileName.split('.')[1].toString().toLowerCase()+'&foldername=archivesIn" title="View Pipe File">Internal File - '+row.utBatchName+'</a>';
                                 }
-                             }
+                            }
                         }
 		    }
-		    
-		   return returnData;
+                    return returnData;
 		}
 	    },
 	    {
