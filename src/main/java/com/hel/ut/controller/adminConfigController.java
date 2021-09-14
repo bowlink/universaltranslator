@@ -213,8 +213,6 @@ public class adminConfigController {
         Organization org;
         configurationTransport transportDetails;
 	
-	Calendar cal = Calendar.getInstance();
-	
 	TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
 	DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -1161,6 +1159,7 @@ public class adminConfigController {
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
         mav.addObject("transportType", transportDetails.gettransportMethodId());
 	mav.addObject("fileType", transportDetails.getfileType());
+	mav.addObject("fileDelim", transportDetails.getfileDelimiter());
 	mav.addObject("transportDetails", transportDetails);
 
         //Set the variable id to hold the current utConfiguration id
@@ -1209,6 +1208,7 @@ public class adminConfigController {
      * @param result
      * @param redirectAttr
      * @param action
+     * @param authentication
      *
      * @return	This function will either return to the message spec details screen or redirect to the next step (Field Mappings)
      *
