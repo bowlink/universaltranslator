@@ -349,41 +349,11 @@ public class fileDownloadController {
 	outputStream = response.getOutputStream();
 	
 	try {
-	    byte[] fileAsBytes = filemanager.loadFileAsBytesArray(directory + actualFileName);
-	    
-	    FileInputStream fileInput = new FileInputStream(f);
-	    BufferedReader br = new BufferedReader(new InputStreamReader(fileInput));
-	    
-	    String line;
-	    Integer delimCount = 0;
-	    boolean isBase64Encoded = true;
-	    
-	    List<String> delims = new ArrayList<>();
-	    delims.add("t");
-	    delims.add("|");
-	    delims.add(":");
-	    delims.add(";");
-	    delims.add(",");
-
-		try {
-			while ((line = br.readLine()) != null) {
-				for(String delim : delims) {
-					if ("t".equals(delim)) {
-						delimCount += line.split("\t", -1).length - 1;
-					} else {
-						delimCount += line.split("\\" + delim, -1).length - 1;
-					}
-				}
-			}
-		} catch (IOException ex) {}
-
-		if(delimCount > 0) {
-			isBase64Encoded = false;
-		}
-	    br.close();
-	    fileInput.close();
-	    
+	    //Check if the file is base64 Encoded
+	    boolean isBase64Encoded = filemanager.isFileBase64Encoded(new File(directory + actualFileName));
+	   
 	    if(isBase64Encoded) {
+		byte[] fileAsBytes = filemanager.loadFileAsBytesArray(directory + actualFileName);
 		byte[] decodedBytes = Base64.decodeBase64(fileAsBytes);
 		String decodedString = new String(decodedBytes);
 		response.setContentLength((int) decodedString.length());
@@ -409,6 +379,5 @@ public class fileDownloadController {
 	    outputStream.close();
 	}
     }
-
 }
 
