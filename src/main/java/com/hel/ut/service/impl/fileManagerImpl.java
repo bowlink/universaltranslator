@@ -164,18 +164,28 @@ public class fileManagerImpl implements fileManager {
     }
     
     public boolean isFileBase64Encoded(File file) throws Exception {
-	//Read the first line of the file
-	BufferedReader brTest = new BufferedReader(new FileReader(file));
-	String firstLineText = brTest.readLine();
-	
-	String test = new String(Base64.decodeBase64(firstLineText));
-	
 	boolean isBase64 = false;
-	if(firstLineText.equals(Base64.encodeBase64String(test.getBytes()))) {
-	    isBase64 = true;
+	
+	try {
+	    //Read the first line of the file
+	    BufferedReader brTest = new BufferedReader(new FileReader(file));
+	    String firstLineText = brTest.readLine();
+
+	    String test = new String(Base64.decodeBase64(firstLineText));
+
+	    if(firstLineText.equals(Base64.encodeBase64String(test.getBytes()))) {
+		isBase64 = true;
+	    }
+	}
+	catch(IOException ex) {
+	    byte[] bytes = fileToBytes(file);
+	    isBase64 = Base64.isBase64(bytes);
+	}
+	catch(Exception ex) {
+	    byte[] bytes = fileToBytes(file);
+	    isBase64 = Base64.isBase64(bytes);
 	}
 	
 	return isBase64;
     }
-    
 }
