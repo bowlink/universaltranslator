@@ -17,6 +17,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Service;
 
 import com.hel.ut.service.fileManager;
+import org.apache.commons.io.FilenameUtils;
 
 @Service
 public class fileManagerImpl implements fileManager {
@@ -164,28 +165,37 @@ public class fileManagerImpl implements fileManager {
     }
     
     public boolean isFileBase64Encoded(File file) throws Exception {
-	boolean isBase64 = false;
 	
-	try {
-	    //Read the first line of the file
-	    BufferedReader brTest = new BufferedReader(new FileReader(file));
-	    String firstLineText = brTest.readLine();
+	String fileExt = FilenameUtils.getExtension(file.getName());
+	
+	if("txt".equals(fileExt) || "csv".equals(fileExt)) {
+	    try {
+		//Read the first line of the file
+		BufferedReader brTest = new BufferedReader(new FileReader(file));
+		String firstLineText = brTest.readLine();
 
-	    String test = new String(Base64.decodeBase64(firstLineText));
+		String test = new String(Base64.decodeBase64(firstLineText));
 
-	    if(firstLineText.equals(Base64.encodeBase64String(test.getBytes()))) {
-		isBase64 = true;
+		if(firstLineText.equals(Base64.encodeBase64String(test.getBytes()))) {
+		    return true;
+		}
+		else {
+		    return false;
+		}
+	    }
+	    catch(IOException ex) {
+		byte[] bytes = fileToBytes(file);
+		return Base64.isBase64(bytes);
+	    }
+	    catch(Exception ex) {
+		byte[] bytes = fileToBytes(file);
+		boolean isBase64 = Base64.isBase64(bytes);  
+		return Base64.isBase64(bytes);
 	    }
 	}
-	catch(IOException ex) {
-	    byte[] bytes = fileToBytes(file);
-	    isBase64 = Base64.isBase64(bytes);
+	else {
+	  byte[] bytes = fileToBytes(file);
+	  return Base64.isBase64(bytes);
 	}
-	catch(Exception ex) {
-	    byte[] bytes = fileToBytes(file);
-	    isBase64 = Base64.isBase64(bytes);
-	}
-	
-	return isBase64;
     }
 }
