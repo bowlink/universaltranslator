@@ -62,4 +62,7 @@ public interface messageTypeManager {
     void executeSQLStatement(String sqlStatement);
     
     Crosswalks getCrosswalkByNameAndOrg(String cwName, Integer orgId, String fileName);
+    
+    void moveCWForConfigToNewOrg(Integer newOrgId, Integer currOrgId, Integer configId, String oldOrgCleanURL, String newOrgCleanURL) throws Exception;
+    
 }

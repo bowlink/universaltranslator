@@ -106,6 +106,7 @@ import java.util.logging.Logger;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -523,6 +524,8 @@ public class adminConfigController {
 	
 	utConfiguration currentConfigDetails = utconfigurationmanager.getConfigurationById(configurationDetails.getId());
 	
+	Organization currentOrgDetails = organizationmanager.getOrganizationById(currentConfigDetails.getorgId());
+	
 	if(!currentConfigDetails.getconfigName().trim().equals(configurationDetails.getconfigName().trim())) {
 	    configNameChanged = true;
 	}
@@ -546,6 +549,19 @@ public class adminConfigController {
 		if(organizationChanged) {
 		    transportDetails.setfileLocation(orgDetails.getcleanURL() + "/input files/");
 		    utconfigurationTransportManager.updateTransportDetails(configurationDetails, transportDetails);
+		    
+		    //Check if a parsing template exists (if so it must be copied)
+		    configurationMessageSpecs messageSpecs = utconfigurationmanager.getMessageSpecs(configurationDetails.getId());
+
+		    //Need to move the parsing script file
+		    if(messageSpecs.getParsingTemplate() != null) {
+			if(!"".equals(messageSpecs.getParsingTemplate())) {
+			    FileUtils.copyFile(new File(myProps.getProperty("ut.directory.utRootDir") + currentOrgDetails.getcleanURL() + "/templates/" + messageSpecs.getParsingTemplate()), new File(myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/templates/" + messageSpecs.getParsingTemplate()));
+			}
+		    }
+		    
+		    //Need to modify the org id for all associated CWs
+		    messagetypemanager.moveCWForConfigToNewOrg(configurationDetails.getorgId(),currentConfigDetails.getorgId(),configurationDetails.getId(),currentOrgDetails.getcleanURL(),orgDetails.getcleanURL());
 		}
 		
 		if(!fileDropFields.isEmpty()) {
@@ -5675,6 +5691,9 @@ public class adminConfigController {
 		messagetypemanager.executeSQLStatement(sqlUpdate);
 
 		sqlUpdate = "update configurationdatatranslations set constant2 = " + cwId + " where constant2 = " + Integer.parseInt(strArrayValues[1]) + " and macroId = 199 and configId = " + configId;
+		messagetypemanager.executeSQLStatement(sqlUpdate);
+		
+		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + " where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and macroId = 201 and configId = " + configId;
 		messagetypemanager.executeSQLStatement(sqlUpdate);
 	    }
 	}
