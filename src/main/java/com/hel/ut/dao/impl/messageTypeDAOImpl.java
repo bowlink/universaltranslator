@@ -521,4 +521,20 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	    return null;
 	}
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<Crosswalks> getCrosswalksForConfigAndOrg(Integer orgId, Integer configId) {
+	
+	String sql = "select distinct * from crosswalks a where orgId = :orgId and id in (select crosswalkid from configurationdatatranslations where configId = :configId);";
+
+	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
+	.setResultTransformer( Transformers.aliasToBean(Crosswalks.class))
+	.setParameter("orgId", orgId)
+	.setParameter("configId", configId);
+	
+	List<Crosswalks> crosswalks = query.list();
+	
+        return crosswalks;
+    }
 }

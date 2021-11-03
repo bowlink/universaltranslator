@@ -22,6 +22,7 @@ import com.hel.ut.model.validationType;
 import com.hel.ut.reference.fileSystem;
 import java.util.Properties;
 import javax.annotation.Resource;
+import org.apache.commons.io.FileUtils;
 
 @Service
 public class messageTypeManagerImpl implements messageTypeManager {
@@ -381,4 +382,35 @@ public class messageTypeManagerImpl implements messageTypeManager {
     public Crosswalks getCrosswalkByNameAndOrg(String cwName, Integer orgId, String fileName) {
 	return messageTypeDAO.getCrosswalkByNameAndOrg(cwName,orgId,fileName);
     }
+    
+    @Override
+    public void moveCWForConfigToNewOrg(Integer newOrgId, Integer currOrgId, Integer configId, String oldOrgCleanURL, String newOrgCleanURL) throws Exception {
+
+	//Modify the orgId
+	messageTypeDAO.executeSQLStatement("update crosswalks set orgId = " + newOrgId + " where id in (select crosswalkId from configurationdatatranslations where configId = " + configId + ")");
+	
+	List<Crosswalks> usedCWs = messageTypeDAO.getCrosswalksForConfigAndOrg(newOrgId,configId);
+	
+	if(!usedCWs.isEmpty()) {
+	    for(Crosswalks cw : usedCWs) {
+		if(cw.getName().contains("_")) {
+		    String[] nameVals = cw.getName().split("_");
+		    String cwName = nameVals[1];
+		    String newCWName = configId+"_"+cwName;
+		    
+		    cw.setName(newCWName);
+		    
+		    messageTypeDAO.updateCrosswalk(cw);
+		}
+		
+		//Check if file exists
+		File cwFile = new File(myProps.getProperty("ut.directory.utRootDir") + oldOrgCleanURL + "/crosswalks/" + cw.getfileName());
+		File newOrgCWFile = new File(myProps.getProperty("ut.directory.utRootDir") + newOrgCleanURL + "/crosswalks/" + cw.getfileName());
+		
+		if(cwFile.exists() && !newOrgCWFile.exists()) {
+		    FileUtils.copyFile(new File(myProps.getProperty("ut.directory.utRootDir") + oldOrgCleanURL + "/crosswalks/" + cw.getfileName()), new File(myProps.getProperty("ut.directory.utRootDir") + newOrgCleanURL + "/crosswalks/" + cw.getfileName()));
+		}
+	    }
+	}
+    }	    
 }
