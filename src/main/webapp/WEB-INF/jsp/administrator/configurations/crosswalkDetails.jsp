@@ -59,7 +59,7 @@
                                 </div>
                             </c:when>
                             <c:when test="${crosswalkDetails.orgId == 0}">
-                                <c:set var="hrefLink" value="/FileDownload/downloadFile.do?fromPage=crosswalks&filename=${crosswalkDetails.fileName}&foldername=libraryFiles"/>
+                                <c:set var="hrefLink" value="/FileDownload/downloadFile.do?fromPage=crosswalks&filename=${crosswalkDetails.fileName}&foldername=libraryFiles/crosswalks"/>
                                 <div class="form-group">
                                     <label class="control-label" >Existing Crosswalk File</label>
                                     <p><a href="${hrefLink}" title="Download Crosswalk File">${crosswalkDetails.fileName}</a></p>
