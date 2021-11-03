@@ -1336,19 +1336,70 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
                 crosswalkName = "";
 
                 for(configurationFormFields field : fields) {
-                if(field.getId() == dt.getFieldId()) { fieldName = field.getFieldDesc(); fieldNo = field.getFieldNo(); }
+		    if(field.getId() == dt.getFieldId()) { 
+			fieldName = field.getFieldDesc(); fieldNo = field.getFieldNo(); 
+		    }
                 }
 
                 if(dt.getMacroId() > 0) {
-                for(Macros macro : macros) {
-                    if(macro.getId() == dt.getMacroId()) { macroName = macro.getMacroName(); }
-                }
+		    for(Macros macro : macros) {
+			if(macro.getId() == dt.getMacroId()) { 
+			    macroName = macro.getMacroName(); 
+			    
+			    if(macro.getcon1Question().contains("crosswalk")) {
+				if(dt.getConstant1() != null) {
+				    if(!"".equals(dt.getConstant1())) {
+					for(Crosswalks crosswalk : crosswalks) {
+					    if(crosswalk.getId() == Integer.parseInt(dt.getConstant1())) { 
+						crosswalkName = crosswalk.getName(); 
+					    }
+					}
+				    }
+				}
+			    }
+			    else if(macro.getcon2Question().contains("crosswalk")) {
+				if(dt.getConstant2() != null) {
+				    if(!"".equals(dt.getConstant2())) {
+					for(Crosswalks crosswalk : crosswalks) {
+					    if(crosswalk.getId() == Integer.parseInt(dt.getConstant2())) { 
+						crosswalkName = crosswalk.getName(); 
+					    }
+					}
+				    }
+				}
+			    }
+			    else if(macro.getfieldAQuestion().contains("crosswalk")) {
+				if(dt.getFieldA() != null) {
+				    if(!"".equals(dt.getFieldA())) {
+					for(Crosswalks crosswalk : crosswalks) {
+					    if(crosswalk.getId() == Integer.parseInt(dt.getFieldA())) { 
+						crosswalkName = crosswalk.getName(); 
+					    }
+					}
+				    }
+				}
+			    }
+			    else if(macro.getfieldBQuestion().contains("crosswalk")) {
+				if(dt.getFieldB() != null) {
+				    if(!"".equals(dt.getFieldB())) {
+					for(Crosswalks crosswalk : crosswalks) {
+					    if(crosswalk.getId() == Integer.parseInt(dt.getFieldB())) { 
+						crosswalkName = crosswalk.getName(); 
+					    }
+					}
+				    }
+				}
+			    }
+			}
+		    }
                 }
 
                 if(dt.getCrosswalkId() > 0) {
-                for(Crosswalks crosswalk : crosswalks) {
-                    if(crosswalk.getId() == dt.getCrosswalkId()) { crosswalkName = crosswalk.getName(); }
-                }
+		    for(Crosswalks crosswalk : crosswalks) {
+			if(crosswalk.getId() == dt.getCrosswalkId()) { 
+			    crosswalkName = crosswalk.getName(); 
+			}
+		    }
                 }
 
                 reportBody.append("<tr>");
