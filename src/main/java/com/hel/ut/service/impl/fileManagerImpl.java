@@ -172,8 +172,8 @@ public class fileManagerImpl implements fileManager {
 	    try {
 		//Read the first line of the file
 		BufferedReader brTest = new BufferedReader(new FileReader(file));
-		String firstLineText = brTest.readLine();
-
+		String firstLineText = brTest.readLine().substring(0,10);
+		
 		String test = new String(Base64.decodeBase64(firstLineText));
 
 		if(firstLineText.equals(Base64.encodeBase64String(test.getBytes()))) {
@@ -189,7 +189,6 @@ public class fileManagerImpl implements fileManager {
 	    }
 	    catch(Exception ex) {
 		byte[] bytes = fileToBytes(file);
-		boolean isBase64 = Base64.isBase64(bytes);  
 		return Base64.isBase64(bytes);
 	    }
 	}
