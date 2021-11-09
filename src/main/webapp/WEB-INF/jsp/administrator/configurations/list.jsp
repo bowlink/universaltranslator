@@ -110,7 +110,7 @@
                                                                         </a>
                                                                     </li>
                                                                 </c:if>
-                                                                <c:if test="${not empty config.fileDropLocation}">
+                                                                <c:if test="${not empty config.fileDropLocation && config.messageTypeId != 2}">
                                                                     <li>
                                                                         <a href="#configFileUploadModal" data-toggle="modal" class="uploadFile" rel="${config.id}" rel2="${config.fileDropLocation}" title="Upload File">
                                                                             <span class="glyphicon glyphicon-upload"></span>
