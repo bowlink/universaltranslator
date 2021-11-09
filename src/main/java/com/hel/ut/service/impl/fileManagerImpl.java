@@ -200,8 +200,18 @@ public class fileManagerImpl implements fileManager {
 		 BufferedReader delimTest = new BufferedReader(new FileReader(file));
 		 String firstLine = delimTest.readLine();
 		 
-		 if(!firstLine.contains(delimiter)) {
+		 if("tab".equals(delimiter)) {
+		    if(!firstLine.contains("\t")) {
+			isEncoded = true;
+		    }  
+		 }
+		 else if("f".equals(delimiter)) {
 		     isEncoded = true;
+		 }
+		 else {
+		    if(!firstLine.contains(delimiter)) {
+			isEncoded = true;
+		    } 
 		 }
 		 delimTest.close();
 	    }
