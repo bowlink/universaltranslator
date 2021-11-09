@@ -1207,7 +1207,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				    
 				} 
 				else if (transports.size() == 1) {
-
+				    
 				    if (errorId == 0) {
 					encodingId = transports.get(0).getEncodingId();
 					configurationTransport ct = configurationtransportmanager.getTransportDetailsByTransportId(transportId);
@@ -1444,6 +1444,15 @@ public class transactionInManagerImpl implements transactionInManager {
 
 				//we check encoding here 
 				//file is not encoded
+				
+				if("".equals(delimiter)) {
+				    List<configurationTransport> delimList = configurationtransportmanager.getDistinctDelimCharForFileExt(fileExt, transportMethodId);
+				    
+				    if(!delimList.isEmpty()) {
+					delimiter = delimList.get(0).getDelimChar();
+				    }
+				}
+				
 				if (encodingId < 2 && !filemanager.isFileBase64Encoded(file, delimiter)) { 
 				    String encodedOldFile = filemanager.encodeFileToBase64Binary(file);
 				    filemanager.writeFile(newFile.getAbsolutePath(), encodedOldFile);
