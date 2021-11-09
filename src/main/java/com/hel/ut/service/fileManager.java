@@ -23,5 +23,5 @@ public interface fileManager {
     
     void copyFile(String sourceFile, String targetFile) throws Exception;
     
-    boolean isFileBase64Encoded(File file) throws Exception;
+    boolean isFileBase64Encoded(File file, String delimiter) throws Exception;
 }
