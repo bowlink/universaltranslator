@@ -1414,7 +1414,6 @@ public class transactionInManagerImpl implements transactionInManager {
 				File archiveFile = new File(myProps.getProperty("ut.directory.utRootDir") + "archivesIn/" + "archive_"+batchName + fileName.substring(fileName.lastIndexOf(".")));
 				Path archive = archiveFile.toPath();
 				
-
 				//we keep original file in archive folder
 				try {
 				    Files.copy(source, archive);
@@ -1446,10 +1445,18 @@ public class transactionInManagerImpl implements transactionInManager {
 				//file is not encoded
 				
 				if("".equals(delimiter)) {
-				    List<configurationTransport> delimList = configurationtransportmanager.getDistinctDelimCharForFileExt(fileExt, transportMethodId);
 				    
-				    if(!delimList.isEmpty()) {
-					delimiter = delimList.get(0).getDelimChar();
+				    configurationTransport ct = configurationtransportmanager.getTransportDetails(batchDetails.getConfigId());
+				    
+				    if(ct.getfileDelimiter() == 12) {
+					delimiter = "tab";
+				    }
+				    else {
+					List<configurationTransport> delimList = configurationtransportmanager.getDistinctDelimCharForFileExt(fileExt, transportMethodId);
+
+					if(!delimList.isEmpty()) {
+					    delimiter = delimList.get(0).getDelimChar();
+					}
 				    }
 				}
 				
