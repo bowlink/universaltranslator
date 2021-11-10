@@ -350,7 +350,7 @@ public class fileDownloadController {
 	
 	try {
 	    //Check if the file is base64 Encoded
-	    boolean isBase64Encoded = filemanager.isFileBase64Encoded(new File(directory + actualFileName));
+	    boolean isBase64Encoded = filemanager.isFileBase64Encoded(new File(directory + actualFileName),"");
 	   
 	    if(isBase64Encoded) {
 		byte[] fileAsBytes = filemanager.loadFileAsBytesArray(directory + actualFileName);
