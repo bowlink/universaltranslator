@@ -1187,6 +1187,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				Integer configId = 0;
 				Integer fileSize = 0;
 				Integer encodingId = 1;
+				String delimiter = "";
 
 				//Check to see if there was a transport found, if not create error
 				if (transportList.isEmpty() || transports.isEmpty()) {
@@ -1206,7 +1207,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				    
 				} 
 				else if (transports.size() == 1) {
-
+				    
 				    if (errorId == 0) {
 					encodingId = transports.get(0).getEncodingId();
 					configurationTransport ct = configurationtransportmanager.getTransportDetailsByTransportId(transportId);
@@ -1249,7 +1250,6 @@ public class transactionInManagerImpl implements transactionInManager {
 				} 
 				else if (transportList.size() > 1 && transports.size() > 1) {
 				    //we loop though our delimiters for this type of fileExt
-				    String delimiter = "";
 				    Integer fileDelimiter = 0;
 				    String fileLocation = "";
 				    Integer userId = 0;
@@ -1414,7 +1414,6 @@ public class transactionInManagerImpl implements transactionInManager {
 				File archiveFile = new File(myProps.getProperty("ut.directory.utRootDir") + "archivesIn/" + "archive_"+batchName + fileName.substring(fileName.lastIndexOf(".")));
 				Path archive = archiveFile.toPath();
 				
-
 				//we keep original file in archive folder
 				try {
 				    Files.copy(source, archive);
@@ -1444,7 +1443,24 @@ public class transactionInManagerImpl implements transactionInManager {
 
 				//we check encoding here 
 				//file is not encoded
-				if (encodingId < 2 && !filemanager.isFileBase64Encoded(file)) { 
+				
+				if("".equals(delimiter)) {
+				    
+				    configurationTransport ct = configurationtransportmanager.getTransportDetails(batchDetails.getConfigId());
+				    
+				    if(ct.getfileDelimiter() == 12) {
+					delimiter = "tab";
+				    }
+				    else {
+					List<configurationTransport> delimList = configurationtransportmanager.getDistinctDelimCharForFileExt(fileExt, transportMethodId);
+
+					if(!delimList.isEmpty()) {
+					    delimiter = delimList.get(0).getDelimChar();
+					}
+				    }
+				}
+				
+				if (encodingId < 2 && !filemanager.isFileBase64Encoded(file, delimiter)) { 
 				    String encodedOldFile = filemanager.encodeFileToBase64Binary(file);
 				    filemanager.writeFile(newFile.getAbsolutePath(), encodedOldFile);
 
@@ -3795,7 +3811,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		    //decode and check delimiter
 		    File file = new File(writeToFile);
 		    
-		    if (ct.getEncodingId() == 2 && filemanager.isFileBase64Encoded(file)) {
+		    if (ct.getEncodingId() == 2 && filemanager.isFileBase64Encoded(file,ct.getDelimChar())) {
 			//write to temp file
 			String strDecode = filemanager.decodeFileToBase64Binary(file);
 			file = new File(myProps.getProperty("ut.directory.utRootDir") + "archivesIn/" + batchName + "_dec" + fileExt);
@@ -4440,7 +4456,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		    //decode and check delimiter
 		    File file = new File(writeToFile);
 
-		    if (ct.getEncodingId() == 2 && filemanager.isFileBase64Encoded(file)) {
+		    if (ct.getEncodingId() == 2 && filemanager.isFileBase64Encoded(file,ct.getDelimChar())) {
 			//write to temp file
 			String strDecode = filemanager.decodeFileToBase64Binary(file);
 			file = new File(myProps.getProperty("ut.directory.utRootDir") + "archivesIn/" + batchName + "_dec" + fileExt);
