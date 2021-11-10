@@ -164,9 +164,11 @@ public class fileManagerImpl implements fileManager {
 
     }
     
-    public boolean isFileBase64Encoded(File file) throws Exception {
+    public boolean isFileBase64Encoded(File file, String delimiter) throws Exception {
 	
 	String fileExt = FilenameUtils.getExtension(file.getName());
+	
+	boolean isEncoded = false;
 	
 	if("txt".equals(fileExt) || "csv".equals(fileExt)) {
 	    try {
@@ -177,20 +179,61 @@ public class fileManagerImpl implements fileManager {
 		String test = new String(Base64.decodeBase64(firstLineText));
 
 		if(firstLineText.equals(Base64.encodeBase64String(test.getBytes()))) {
-		    return true;
+		    isEncoded = true;
 		}
 		else {
-		    return false;
+		    isEncoded = false;
 		}
+		brTest.close();
 	    }
 	    catch(IOException ex) {
 		byte[] bytes = fileToBytes(file);
-		return Base64.isBase64(bytes);
+		isEncoded = Base64.isBase64(bytes);
 	    }
 	    catch(Exception ex) {
 		byte[] bytes = fileToBytes(file);
-		return Base64.isBase64(bytes);
+		isEncoded = Base64.isBase64(bytes);
 	    }
+	    
+	    //Try the full line and not a subset
+	    if(!isEncoded) {
+		//Read the first line of the file
+		BufferedReader brTest = new BufferedReader(new FileReader(file));
+		String firstLineText = brTest.readLine();
+		
+		String test = new String(Base64.decodeBase64(firstLineText));
+
+		if(firstLineText.equals(Base64.encodeBase64String(test.getBytes()))) {
+		    isEncoded = true;
+		}
+		else {
+		    isEncoded = false;
+		}
+		brTest.close();
+	    }
+	    
+	    //If false make sure file contains correct delim
+	    if(!isEncoded && !"".equals(delimiter)) {
+		 BufferedReader delimTest = new BufferedReader(new FileReader(file));
+		 String firstLine = delimTest.readLine();
+		 
+		 if("tab".equals(delimiter)) {
+		    if(!firstLine.contains("\t")) {
+			isEncoded = true;
+		    }  
+		 }
+		 else if("f".equals(delimiter)) {
+		     isEncoded = true;
+		 }
+		 else {
+		    if(!firstLine.contains(delimiter)) {
+			isEncoded = true;
+		    } 
+		 }
+		 delimTest.close();
+	    }
+	    
+	    return isEncoded;
 	}
 	else {
 	  byte[] bytes = fileToBytes(file);
