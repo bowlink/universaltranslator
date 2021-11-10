@@ -197,19 +197,27 @@ public class fileManagerImpl implements fileManager {
 	    
 	    //Try the full line and not a subset
 	    if(!isEncoded) {
-		//Read the first line of the file
-		BufferedReader brTest = new BufferedReader(new FileReader(file));
-		String firstLineText = brTest.readLine();
-		
-		String test = new String(Base64.decodeBase64(firstLineText));
+		try {
+		    //Read the first line of the file
+		    BufferedReader brTest = new BufferedReader(new FileReader(file));
+		    String firstLineText = brTest.readLine();
 
-		if(firstLineText.equals(Base64.encodeBase64String(test.getBytes()))) {
-		    isEncoded = true;
+		    String test = new String(Base64.decodeBase64(firstLineText));
+
+		    if(firstLineText.equals(Base64.encodeBase64String(test.getBytes()))) {
+			isEncoded = true;
+		    }
+		    else {
+			isEncoded = false;
+		    }
+		    brTest.close();
 		}
-		else {
+		catch(IOException ex) {
 		    isEncoded = false;
 		}
-		brTest.close();
+		catch(Exception ex) {
+		    isEncoded = false;
+		}
 	    }
 	    
 	    //If false make sure file contains correct delim
