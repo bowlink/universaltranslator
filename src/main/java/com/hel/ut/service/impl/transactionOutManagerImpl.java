@@ -242,7 +242,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
 	    /* Need to update the batch with the updated file name */
 	    transactionOutDAO.updateBatchOutputFileName(batchDetails.getId(), fileName);
-
 	}
 
 	// Read in the file
@@ -254,8 +253,17 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	String recordRow = "";
 
 	List<configurationFormFields> formFields = configurationTransportManager.getConfigurationFields(transportDetails.getconfigId(), 0);
-
-	List<transactionOutRecords> records = transactionOutDAO.getTransactionRecords(batchId, transportDetails.getconfigId(), formFields.size());
+	
+	utConfiguration targetConfigDetails = configurationManager.getConfigurationById(batchDetails.getConfigId());
+	
+	List<transactionOutRecords> records = null;
+	
+	if(targetConfigDetails.getMessageTypeId() == 2) {
+	    records = transactionOutDAO.getTransactionRecordsForFP(batchId, transportDetails.getconfigId(), formFields.size());
+	}
+	else {
+	    records = transactionOutDAO.getTransactionRecords(batchId, transportDetails.getconfigId(), formFields.size());
+	}
 	
 	// Need to get the max field number
 	int maxFieldNo = transactionOutDAO.getMaxFieldNo(transportDetails.getconfigId());
@@ -861,84 +869,85 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	    } 
 	    else {
 
-			StringBuilder sb = new StringBuilder("");
+		StringBuilder sb = new StringBuilder("");
 
-			boolean addHeader = true;
+		boolean addHeader = true;
 
-			if(addHeader) {
-				for (configurationFormFields field : formFields) {
-					if (field.getUseField() == true) {
-						if (field.getFieldNo() == maxFieldNo) {
-							sb.append(field.getFieldDesc().trim()).append(System.getProperty("line.separator"));
-						} else {
-							sb.append(field.getFieldDesc().trim()).append(delimChar);
-						}
-					}
-				}
+		if(addHeader) {
+		    for (configurationFormFields field : formFields) {
+			if (field.getUseField() == true) {
+			    if (field.getFieldNo() == maxFieldNo) {
+				sb.append(field.getFieldDesc().trim()).append(System.getProperty("line.separator"));
+			    } 
+			    else {
+				sb.append(field.getFieldDesc().trim()).append(delimChar);
+			    }
 			}
+		    }
+		}
 
-			for(transactionOutRecords record : records) {
+		for(transactionOutRecords record : records) {
 
-				for (configurationFormFields field : formFields) {
+		    for (configurationFormFields field : formFields) {
+			if (field.getUseField() == true) {
+			    String colName = new StringBuilder().append("f").append(field.getFieldNo()).toString();
 
-					//String colName = new StringBuilder().append("f").append(i).toString();
-					//NEW
-					if (field.getUseField() == true) {
-						//NEW
-						String colName = new StringBuilder().append("f").append(field.getFieldNo()).toString();
+			    try {
+				String fieldValue = BeanUtils.getProperty(record, colName);
 
-						try {
-							String fieldValue = BeanUtils.getProperty(record, colName);
-
-							if (fieldValue == null) {
-								fieldValue = "";
-							} else if ("null".equals(fieldValue)) {
-								fieldValue = "";
-							} else if (fieldValue.isEmpty()) {
-								fieldValue = "";
-							} else if (fieldValue.length() == 0) {
-								fieldValue = "";
-							}
-
-							//if (i == maxFieldNo) {
-							//New
-							if (field.getFieldNo() == maxFieldNo) {
-								sb.append(recordRow).append(fieldValue).append(System.getProperty("line.separator"));
-							} else {
-								sb.append(recordRow).append(fieldValue).append(delimChar);
-							}
-
-						} catch (IllegalAccessException ex) {
-							Logger.getLogger(transactionOutManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
-						} catch (InvocationTargetException ex) {
-							Logger.getLogger(transactionOutManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
-						} catch (NoSuchMethodException ex) {
-							Logger.getLogger(transactionOutManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
-						}
-						//NEW
-					}
+				if (fieldValue == null) {
+				    fieldValue = "";
+				} else if ("null".equals(fieldValue)) {
+				    fieldValue = "";
+				} else if (fieldValue.isEmpty()) {
+				    fieldValue = "";
+				} else if (fieldValue.length() == 0) {
+				    fieldValue = "";
 				}
-			}
 
-			if ("".equals(sb.toString())) {
-				recordRow = "";
+				if (field.getFieldNo() == maxFieldNo) {
+				    sb.append(recordRow).append(fieldValue);
+				    if(targetConfigDetails.getMessageTypeId() == 2) {
+					sb.append(delimChar).append(record.getTransactionInRecordsId());
+				    }
+				    sb.append(System.getProperty("line.separator"));
+				} 
+				else {
+				    sb.append(recordRow).append(fieldValue).append(delimChar);
+				}
+			    } 
+			    catch (IllegalAccessException ex) {
+				Logger.getLogger(transactionOutManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
+			    } 
+			    catch (InvocationTargetException ex) {
+				Logger.getLogger(transactionOutManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
+			    } 
+			    catch (NoSuchMethodException ex) {
+				Logger.getLogger(transactionOutManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
+			    }
+			}
+		    }
+		}
+
+		if ("".equals(sb.toString())) {
+		    recordRow = "";
+		} else {
+		    recordRow = sb.toString();
+		}
+
+		if (!"".equals(recordRow)) {
+		    try {
+			if (encrypt == true) {
+			    byte[] encoded = Base64.encode(recordRow.getBytes());
+			    fw.write(new String(encoded));
 			} else {
-				recordRow = sb.toString();
+			    fw.write(recordRow);
 			}
-
-			if (!"".equals(recordRow)) {
-				try {
-					if (encrypt == true) {
-						byte[] encoded = Base64.encode(recordRow.getBytes());
-						fw.write(new String(encoded));
-					} else {
-						fw.write(recordRow);
-					}
-					fw.close();
-				} catch (IOException ex) {
-					throw new IOException(ex);
-				}
-			}
+			fw.close();
+		    } catch (IOException ex) {
+			throw new IOException(ex);
+		    }
+		}
 	    }
 	}
 	
@@ -1127,12 +1136,21 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
     @Override
     public Integer writeOutputToTextFile(configurationTransport transportDetails, Integer batchDownLoadId, String filePathAndName, String fieldNos, Integer batchUploadId) throws Exception {
-	return transactionOutDAO.writeOutputToTextFile(transportDetails, batchDownLoadId, filePathAndName, fieldNos, batchUploadId);
+	
+	batchDownloads batchDetails = transactionOutDAO.getBatchDetails(batchDownLoadId);
+	
+	utConfiguration targetConfigDetails = configurationManager.getConfigurationById(batchDetails.getConfigId());
+	
+	if(targetConfigDetails.getMessageTypeId() == 2) {
+	    return transactionOutDAO.writeFPOutputToTextFile(transportDetails, batchDownLoadId, filePathAndName, fieldNos);
+	}
+	else {
+	    return transactionOutDAO.writeOutputToTextFile(transportDetails, batchDownLoadId, filePathAndName, fieldNos, batchUploadId);
+	}
     }
 
     @Override
-    public String generateDLBatchName(String utbatchName, configurationTransport transportDetails, utConfiguration configDetails,
-	    batchUploads batchUploadDetails, Date date) throws Exception {
+    public String generateDLBatchName(String utbatchName, configurationTransport transportDetails, utConfiguration configDetails, batchUploads batchUploadDetails, Date date) throws Exception {
 
 	DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssS");
 
@@ -1595,7 +1613,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	// some macros have to error in the macro and do not return macro_error, those are R errors, we add them to totalErrorCount so that populateOutboundAuditReport will run
 	totalErrorCount = totalErrorCount + totalRequiredErrorsFound;
 		
-	
 	if (totalRequiredErrorsFound > 0 && (sourceConfigTransportDetails.geterrorHandling() == 3 || transportDetails.geterrorHandling() == 3)) {
 	    
 	    ba = new batchdownloadactivity();
@@ -1639,9 +1656,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	    }
 	    
 	    return 1;
-	    
 	} 
-	
 	else {
 	    
 	    transactionInManager.populateDroppedValues(batchDownload.getId(), batchDownload.getConfigId(), true);
@@ -1946,7 +1961,8 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		    transactionOutDAO.submitBatchActivityLog(ba);
 		}
 
-	    } else {
+	    } 
+	    else {
 		ba = new batchdownloadactivity();
 		ba.setActivity("Writing records to output file:" + myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + fileExt);
 		ba.setBatchDownloadId(batchDownload.getId());
@@ -1955,45 +1971,45 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		boolean isExcel = false;
 		String finalFileExt = "";
 		if("xlsx".equals(fileExt) || "xls".equals(fileExt)) {
-			finalFileExt = fileExt;
-			fileExt = "csv";
-			isExcel = true;
+		    finalFileExt = fileExt;
+		    fileExt = "csv";
+		    isExcel = true;
 
-			if(!",".equals(transportDetails.getDelimChar())) {
-				transportDetails.setDelimChar(",");
-			}
+		    if(!",".equals(transportDetails.getDelimChar())) {
+			transportDetails.setDelimChar(",");
+		    }
 		}
 
 		Integer writeOutCome = writeOutputToTextFile(transportDetails, batchDownload.getId(), myProps.getProperty("ut.directory.massOutputMySQLPath") + batchDownload.getUtBatchName() + "." + fileExt, configFields,batchDownload.getBatchUploadId());
 
 		//Need to convert the csv into xlsx file
 		if(isExcel) {
-			XSSFWorkbook workBook = new XSSFWorkbook();
-			XSSFSheet sheet = workBook.createSheet("sheet1");
+		    XSSFWorkbook workBook = new XSSFWorkbook();
+		    XSSFSheet sheet = workBook.createSheet("sheet1");
 
-			String currentLine=null;
-			int RowNum=0;
-			BufferedReader br = new BufferedReader(new FileReader(myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + fileExt));
-			while ((currentLine = br.readLine()) != null) {
-				String str[] = currentLine.split(",");
-				XSSFRow currentRow=sheet.createRow(RowNum);
-				for(int i=0;i<str.length;i++){
-					currentRow.createCell(i).setCellValue(str[i]);
-				}
-				RowNum++;
-			}
+		    String currentLine=null;
+		    int RowNum=0;
+		    BufferedReader br = new BufferedReader(new FileReader(myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + fileExt));
+		    while ((currentLine = br.readLine()) != null) {
+			    String str[] = currentLine.split(",");
+			    XSSFRow currentRow=sheet.createRow(RowNum);
+			    for(int i=0;i<str.length;i++){
+				    currentRow.createCell(i).setCellValue(str[i]);
+			    }
+			    RowNum++;
+		    }
 
-			FileOutputStream fileOutputStream =  new FileOutputStream(myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + finalFileExt);
-			workBook.write(fileOutputStream);
-			fileOutputStream.close();
+		    FileOutputStream fileOutputStream =  new FileOutputStream(myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + finalFileExt);
+		    workBook.write(fileOutputStream);
+		    fileOutputStream.close();
 
-			//Delete csv file
-			File csvFile = new File(myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + fileExt);
-			if(csvFile.exists()) {
-				csvFile.delete();
-			}
+		    //Delete csv file
+		    File csvFile = new File(myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + fileExt);
+		    if(csvFile.exists()) {
+			    csvFile.delete();
+		    }
 
-			fileExt = finalFileExt;
+		    fileExt = finalFileExt;
 		}
 	    }
 

@@ -145,5 +145,9 @@ public interface transactionOutDAO {
     
     void clearBatchActivityLogTable(Integer batchId) throws Exception;
     
-     List<batchDownloads> getBatchesByOrgId(Integer orgId) throws Exception;
+    List<batchDownloads> getBatchesByOrgId(Integer orgId) throws Exception;
+     
+    List<transactionOutRecords> getTransactionRecordsForFP(Integer batchId, Integer configId, Integer totalFields) throws Exception;
+    
+    Integer writeFPOutputToTextFile(configurationTransport transportDetails, Integer batchDLId, String filePathAndName, String configFields);
 }
