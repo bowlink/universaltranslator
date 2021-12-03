@@ -4816,7 +4816,7 @@ public class adminConfigController {
 	reportBody.append(System.getProperty("line.separator"));
 	reportBody.append(utconfigurationmanager.exportConfigSchedulingSection(configDetails.getId()));
 	reportBody.append(System.getProperty("line.separator"));
-	reportBody.append(utconfigurationmanager.exportOrgCrosswalks(orgDetails.getId()));
+	reportBody.append(utconfigurationmanager.exportOrgCrosswalks(orgDetails.getId(),configDetails.getId()));
 	
 	out.println(reportBody.toString());
 	
