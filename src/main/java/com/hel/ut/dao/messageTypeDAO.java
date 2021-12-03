@@ -68,5 +68,7 @@ public interface messageTypeDAO {
     
     Crosswalks getCrosswalkByNameAndOrg(String cwName, Integer orgId, String fileName);
     
-   List<Crosswalks> getCrosswalksForConfigAndOrg(Integer orgId, Integer configId);
+    List<Crosswalks> getCrosswalksForConfigAndOrg(Integer orgId, Integer configId);
+    
+    List<Crosswalks> getCrosswalksForConfigToBeCopied(Integer configId, Integer newOrgId);
 }
