@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.hel.ut.dao.messageTypeDAO;
 import com.hel.ut.dao.organizationDAO;
+import com.hel.ut.dao.utConfigurationDAO;
 import com.hel.ut.model.CrosswalkData;
 import com.hel.ut.service.messageTypeManager;
 import com.hel.ut.model.Crosswalks;
@@ -32,6 +33,9 @@ public class messageTypeManagerImpl implements messageTypeManager {
 
     @Autowired
     private organizationDAO organizationDAO;
+    
+    @Autowired
+    private utConfigurationDAO utConfigurationDAO;
     
     @Resource(name = "myProps")
     private Properties myProps;
@@ -386,29 +390,55 @@ public class messageTypeManagerImpl implements messageTypeManager {
     @Override
     public void moveCWForConfigToNewOrg(Integer newOrgId, Integer currOrgId, Integer configId, String oldOrgCleanURL, String newOrgCleanURL) throws Exception {
 
-	//Modify the orgId
-	messageTypeDAO.executeSQLStatement("update crosswalks set orgId = " + newOrgId + " where id in (select crosswalkId from configurationdatatranslations where configId = " + configId + ")");
+	//Get a list of Crosswalks for the new configuration
+	List<Crosswalks> existingCWs = messageTypeDAO.getCrosswalksForConfigToBeCopied(configId, newOrgId);
 	
-	List<Crosswalks> usedCWs = messageTypeDAO.getCrosswalksForConfigAndOrg(newOrgId,configId);
-	
-	if(!usedCWs.isEmpty()) {
-	    for(Crosswalks cw : usedCWs) {
-		if(cw.getName().contains("_")) {
-		    String[] nameVals = cw.getName().split("_");
-		    String cwName = nameVals[1];
-		    String newCWName = configId+"_"+cwName;
+	if(existingCWs != null) {
+	    if(!existingCWs.isEmpty()) {
+		Integer newCWID = 0;
+		for(Crosswalks cw : existingCWs) {
+		    if(cw.getName().contains("_")) {
+			Crosswalks newCW = new Crosswalks();
+			
+			String[] nameVals = cw.getName().split("_");
+			String cwName = nameVals[1];
+			String newCWName = configId+"_"+cwName;
 		    
-		    cw.setName(newCWName);
-		    
-		    messageTypeDAO.updateCrosswalk(cw);
-		}
-		
-		//Check if file exists
-		File cwFile = new File(myProps.getProperty("ut.directory.utRootDir") + oldOrgCleanURL + "/crosswalks/" + cw.getfileName());
-		File newOrgCWFile = new File(myProps.getProperty("ut.directory.utRootDir") + newOrgCleanURL + "/crosswalks/" + cw.getfileName());
-		
-		if(cwFile.exists() && !newOrgCWFile.exists()) {
-		    FileUtils.copyFile(new File(myProps.getProperty("ut.directory.utRootDir") + oldOrgCleanURL + "/crosswalks/" + cw.getfileName()), new File(myProps.getProperty("ut.directory.utRootDir") + newOrgCleanURL + "/crosswalks/" + cw.getfileName()));
+			newCW.setName(newCWName);
+			newCW.setOrgId(newOrgId);
+			newCW.setFileDelimiter(cw.getFileDelimiter());
+			newCW.setfileName(cw.getfileName());
+			
+			newCWID = messageTypeDAO.createCrosswalk(newCW);
+			
+			//Get data for old CW
+			List<CrosswalkData> cwData = utConfigurationDAO.getCrosswalkData(cw.getId());
+			
+			if(!cwData.isEmpty()) {
+			    for(CrosswalkData data : cwData) {
+				CrosswalkData newCWData = new CrosswalkData();
+				newCWData.setCrosswalkId(newCWID);
+				newCWData.setDescValue(data.getDescValue());
+				newCWData.setSourceValue(data.getSourceValue());
+				newCWData.setTargetValue(data.getTargetValue());
+				
+				messageTypeDAO.saveCrosswalkData(newCWData);
+			    }
+			}
+			
+			//Check if file exists if so copy to the new org folder
+			File cwFile = new File(myProps.getProperty("ut.directory.utRootDir") + oldOrgCleanURL + "/crosswalks/" + cw.getfileName());
+			File newOrgCWFile = new File(myProps.getProperty("ut.directory.utRootDir") + newOrgCleanURL + "/crosswalks/" + cw.getfileName());
+
+			if(cwFile.exists() && !newOrgCWFile.exists()) {
+			    FileUtils.copyFile(new File(myProps.getProperty("ut.directory.utRootDir") + oldOrgCleanURL + "/crosswalks/" + cw.getfileName()), new File(myProps.getProperty("ut.directory.utRootDir") + newOrgCleanURL + "/crosswalks/" + cw.getfileName()));
+			}
+			
+			//Update the data transation CW id to the new id
+			messageTypeDAO.executeSQLStatement("update configurationdatatranslations set crosswalkId = " + newCWID + " where configId = " + configId + " and crosswalkId = " + cw.getId());
+			messageTypeDAO.executeSQLStatement("update configurationdatatranslations set constant1 = " + newCWID + " where configId = " + configId + " and macroId in (129,160,177,195,199) and constant1 = '" + cw.getId() + "'");
+			messageTypeDAO.executeSQLStatement("update configurationdatatranslations set constant2 = " + newCWID + " where configId = " + configId + " and macroId in (129,160,177,195,199) and constant2 = '" + cw.getId() + "'");
+		    }
 		}
 	    }
 	}
