@@ -71,4 +71,6 @@ public interface messageTypeDAO {
     List<Crosswalks> getCrosswalksForConfigAndOrg(Integer orgId, Integer configId);
     
     List<Crosswalks> getCrosswalksForConfigToBeCopied(Integer configId, Integer newOrgId);
+    
+    List getConfigCrosswalksWithDataForPrint(Integer configId);
 }

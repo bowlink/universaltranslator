@@ -563,4 +563,19 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	
         return crosswalks;
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List getConfigCrosswalksWithDataForPrint(Integer configId) {
+	
+	String sql = "select a.name, b.sourceValue, b.targetValue, b.descValue, a.id, a.fileDelimiter, a.dateCreated, ifnull(a.lastUpdated,a.dateCreated) as lastUpdated "
+	+ "from crosswalks a inner join rel_crosswalkdata b on b.crosswalkId = a.id inner join " 
+	+ "configurationdatatranslations c on (c.crosswalkid = a.id or (c.macroId in (129,160,177,195,199) and (c.constant1 = a.id or c.constant2 = a.id))) and c.configId = :configId "
+	+ "order by a.name asc";
+	
+        Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	query.setParameter("configId", configId);
+
+        return query.list();
+    }
 }
