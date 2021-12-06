@@ -537,4 +537,45 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	
         return crosswalks;
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<Crosswalks> getCrosswalksForConfigToBeCopied(Integer configId, Integer newOrgId) {
+	
+	String sql = "select distinct a.* "
+	+ "from crosswalks a "
+	+ "inner join configurationdatatranslations b on (b.crosswalkid = a.id or (b.macroId in (129,160,177,195,199) and (b.constant1 = a.id or b.constant2 = a.id))) and b.configId = :configId "
+	+ "where a.orgId > 0 and a.orgId != :newOrgId order by a.name asc";
+	
+	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
+	.addScalar("id", StandardBasicTypes.INTEGER)
+	.addScalar("orgId", StandardBasicTypes.INTEGER)
+	.addScalar("fileDelimiter", StandardBasicTypes.INTEGER)	
+	.addScalar("name", StandardBasicTypes.STRING)
+	.addScalar("fileName", StandardBasicTypes.STRING)	
+	.addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
+	.addScalar("lastUpdated", StandardBasicTypes.TIMESTAMP)	
+	.setResultTransformer( Transformers.aliasToBean(Crosswalks.class))
+	.setParameter("configId", configId)
+	.setParameter("newOrgId", newOrgId);
+	
+	List<Crosswalks> crosswalks = query.list();
+	
+        return crosswalks;
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List getConfigCrosswalksWithDataForPrint(Integer configId) {
+	
+	String sql = "select a.name, b.sourceValue, b.targetValue, b.descValue, a.id, a.fileDelimiter, a.dateCreated, ifnull(a.lastUpdated,a.dateCreated) as lastUpdated "
+	+ "from crosswalks a inner join rel_crosswalkdata b on b.crosswalkId = a.id inner join " 
+	+ "configurationdatatranslations c on (c.crosswalkid = a.id or (c.macroId in (129,160,177,195,199) and (c.constant1 = a.id or c.constant2 = a.id))) and c.configId = :configId "
+	+ "order by a.name asc";
+	
+        Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	query.setParameter("configId", configId);
+
+        return query.list();
+    }
 }
