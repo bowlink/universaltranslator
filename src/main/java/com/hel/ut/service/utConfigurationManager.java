@@ -248,7 +248,7 @@ public interface utConfigurationManager {
     
     StringBuffer exportConfigSchedulingSection(Integer configId) throws Exception;
     
-    StringBuffer exportOrgCrosswalks(Integer orgId) throws Exception;
+    StringBuffer exportOrgCrosswalks(Integer orgId, Integer configId) throws Exception;
     
     StringBuffer exportConnectionSrcDetails(utConfiguration configDetails,Organization orgDetails) throws Exception;
     
