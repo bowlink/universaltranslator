@@ -1309,7 +1309,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 
         List<Crosswalks> crosswalks = messageTypeDAO.getCrosswalks(1, 0, configDetails.getorgId());
 
-        List crosswalksWithData = messageTypeDAO.getConfigCrosswalksWithData(configDetails.getorgId(),configDetails.getId());
+        List crosswalksWithData = messageTypeDAO.getConfigCrosswalksWithDataForPrint(configDetails.getId());
 
         StringBuffer reportBody = new StringBuffer();
         reportBody.append("<div style='padding-top:10px;'>");
@@ -2181,9 +2181,9 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
     }
     
     @Override 
-    public StringBuffer exportOrgCrosswalks(Integer orgId) throws Exception {
+    public StringBuffer exportOrgCrosswalks(Integer orgId, Integer configId) throws Exception {
 	
-	List crosswalks = getCrosswalksForExport(orgId);
+	List crosswalks = getCrosswalksForExport(orgId, configId);
 	
 	StringBuffer sb = new StringBuffer();
 		
@@ -2219,10 +2219,11 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	return sb;
     }
     
-    public List getCrosswalksForExport(Integer orgId) throws Exception {
+    public List getCrosswalksForExport(Integer orgId, Integer configId) throws Exception {
 	
 	String sqlStatement = "select a.id, a.name, a.fileDelimiter, a.fileName, a.orgId, b.sourceValue, b.targetValue, b.descValue " 
-	+ "from crosswalks a inner join rel_crosswalkdata b on b.crosswalkId = a.id "
+	+ "from crosswalks a inner join rel_crosswalkdata b on b.crosswalkId = a.id inner join "
+	+ "configurationdatatranslations c on (c.crosswalkid = a.id or (c.macroId in (129,160,177,195,199) and (c.constant1 = a.id or c.constant2 = a.id))) and c.configId = " + configId + " "
 	+ "where a.orgId = 0 or a.orgId = " + orgId + " "
 	+ "order by a.id";
 	 
