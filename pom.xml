@@ -37,7 +37,6 @@
 	<jackson-annotations.version>2.9.10</jackson-annotations.version>
 	<poi.version>3.17</poi.version>
 	<poi-ooxml.version>3.17</poi-ooxml.version>
-	<log4j.version>2.13.2</log4j.version>
 	<quartz.version>2.3.2</quartz.version>
 	<commons-validator.version>1.6</commons-validator.version>
         <tomcat-jdbc.version>9.0.6</tomcat-jdbc.version>
@@ -189,12 +188,6 @@
 	</dependency>
        
 	<!-- Apache Tiles -->
-	<dependency>
-	    <groupId>org.apache.logging.log4j</groupId>
-	    <artifactId>log4j</artifactId>
-	    <version>${log4j.version}</version>
-	    <type>pom</type>
-	</dependency>
 	<dependency>
 	    <groupId>org.apache.tiles</groupId>
 	    <artifactId>tiles-jsp</artifactId>
