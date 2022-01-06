@@ -144,6 +144,9 @@ public class fileDownloadController {
 	    if(!f.exists() && "archivesOut".equals(foldername)) {
 		 directory = myProps.getProperty("ut.directory.utRootDir") + foldername + "/";
 		 f = new File(directory + filename);
+		 if(!f.exists()) {
+		    f = new File(directory + utBatchId + ".txt");
+		 }
 	    }
 	    else if(!f.exists() && foldername.contains("/crosswalks")) {
 		directory = myProps.getProperty("ut.directory.utRootDir") + "libraryFiles/crosswalks/";
