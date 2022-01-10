@@ -1666,7 +1666,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	    ba.setBatchDownloadId(batchDownload.getId());
 	    transactionOutDAO.submitBatchActivityLog(ba);
 	    
-	    if(totalErrorCount > 0) {
+	    if(totalErrorCount > 0 || transportDetails.isPopulateInboundAuditReport()) {
 		populateOutboundAuditReport(batchDownload.getConfigId(),batchDownload.getId(), batchDownload.getBatchUploadId(),batchUploadDetails.getConfigId());
 		
 		ba = new batchdownloadactivity();
