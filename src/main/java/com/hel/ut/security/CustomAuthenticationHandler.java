@@ -22,11 +22,16 @@ import com.hel.ut.service.userManager;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import com.hel.ut.service.utConfigurationManager;
+import com.registryKit.messenger.emailManager;
+import java.util.Random;
 
 public class CustomAuthenticationHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     @Autowired
     private userManager usermanager;
+    
+    @Autowired
+    private emailManager emailmanager;
 
     @Autowired
     private organizationManager organizationManager;
@@ -40,10 +45,6 @@ public class CustomAuthenticationHandler extends SimpleUrlAuthenticationSuccessH
 	String adminTargetUrl = "/administrator";
         Set<String> roles = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
 
-        //we do not log
-        if (request.getParameter("username").equalsIgnoreCase(authentication.getName())) {
-            usermanager.setLastLogin(authentication.getName());
-        }
         /**
          * log the admin who logged in as user*
          */
@@ -70,7 +71,7 @@ public class CustomAuthenticationHandler extends SimpleUrlAuthenticationSuccessH
             }
         }
 
-        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_OPERATIONSSTAFF") || roles.contains("ROLE_SYSTEMADMIN")) {
+        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_OPERATIONSSTAFF") || roles.contains("ROLE_SYSTEMADMIN") || roles.contains("ROLE_VALIDATE")) {
 
             HttpSession session = request.getSession();
 
@@ -81,6 +82,25 @@ public class CustomAuthenticationHandler extends SimpleUrlAuthenticationSuccessH
 
             /* Need to store the user object in session */
             session.setAttribute("userDetails", userDetails);
+	    
+	    //Generate Two-Factor authentication code
+	    Random r = new Random(System.currentTimeMillis());
+
+	    Integer code = ((1 + r.nextInt(2)) * 10000 + r.nextInt(10000));
+	    session.removeAttribute("2FactorCode");
+	    session.setAttribute("2FactorCode", code);
+	    
+	    //Send generated two-factor code to users email address
+	    try {
+		emailmanager.sendTwoFactor(code, userDetails.getEmail(), "Health-e-Link Universal Translator");
+		adminTargetUrl = "/authenticate";
+	    }
+	    catch (Exception ex) {
+		session.removeAttribute("userDetails");
+		session.removeAttribute("2FactorCode");
+		session.invalidate();
+		adminTargetUrl = "/login";
+	    }
 
             getRedirectStrategy().sendRedirect(request, response, adminTargetUrl);
         } 
