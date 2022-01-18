@@ -76,12 +76,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 final List<GrantedAuthority> grantedAuths = new ArrayList<>();
                 //we get authority for login user
                 List<String> userRoles = usermanager.getUserRoles(loginUserInfo);
-                if (userRoles.size() == 0) {
+		
+                if (userRoles.size() == 0) { 
                     throw new BadCredentialsException(strErrorMessage);
                 }
-                for (String role : userRoles) {
-                    grantedAuths.add(new SimpleGrantedAuthority(role));
-                }
+		
+		grantedAuths.add(new SimpleGrantedAuthority("ROLE_VALIDATE"));
 
                 final UserDetails principal = new User(loginUser, "", grantedAuths);
                 final Authentication auth = new UsernamePasswordAuthenticationToken(principal, "", grantedAuths);
