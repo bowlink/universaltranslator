@@ -45,6 +45,15 @@
         <put-attribute name="body" value="/WEB-INF/jsp/resetPassword.jsp" />
         <put-attribute name="jscript" value="/dspResources/js/admin/resetPassword.js" />
     </definition>
+    
+    <!-- Two-Factor Authentication -->
+    <definition name="/authenticate" extends="base.definition.admin">
+        <put-attribute name="page-id" value="authenticate" />
+        <put-attribute name="page-section" value="section-login" />
+        <put-attribute name="title" value="Health-e-Link UT Tow-Factor Authentication" />
+        <put-attribute name="body" value="/WEB-INF/jsp/authenticate.jsp" />
+        <put-attribute name="jscript" value="/dspResources/js/admin/authenticate.js" />
+    </definition>
 
     <!-- Admin Dashboard -->
     <definition name="/administrator/dashboard" extends="base.definition.admin">
