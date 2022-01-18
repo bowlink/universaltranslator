@@ -1010,16 +1010,16 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    }
 	    query.setParameter("fieldB", ("F" + cdt.getFieldB()));
 	    if(!", ".equals(cdt.getConstant1())) {
-		query.setParameter("con1", cdt.getConstant1());
+		query.setParameter("con1", cdt.getConstant1().trim());
 	    }
 	    else {
-		query.setParameter("con1", cdt.getConstant1());
+		query.setParameter("con1", cdt.getConstant1().trim());
 	    }
 	    if(!", ".equals(cdt.getConstant2())) {
-		query.setParameter("con2", cdt.getConstant2());
+		query.setParameter("con2", cdt.getConstant2().trim());
 	    }
 	    else {
-		query.setParameter("con2", cdt.getConstant2());
+		query.setParameter("con2", cdt.getConstant2().trim());
 	    }
 	    query.setParameter("macroId", cdt.getMacroId());
 	    query.setParameter("foroutboundProcessing", foroutboundProcessing);
