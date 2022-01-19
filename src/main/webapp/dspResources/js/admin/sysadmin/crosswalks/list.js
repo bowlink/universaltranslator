@@ -7,6 +7,14 @@ require(['./main'], function () {
     }
 
     $("input:text,form").attr("autocomplete", "off");
+    
+    $(document).on('change','#delimiter', function() {
+        var cwFileLink = $('#cwFileLink').attr('href');
+        
+        cwFileLink = cwFileLink.replace('&delim='+$('#delimiter').data("delim"),'&delim='+$(this).val());
+        $('#delimiter').data("delim",$(this).val());
+        $('#cwFileLink').attr('href',cwFileLink);
+    });
 
 
      //This function will launch the crosswalk overlay with the selected

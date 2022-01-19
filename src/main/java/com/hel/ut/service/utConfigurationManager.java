@@ -22,6 +22,7 @@ import com.hel.ut.model.configurationTransport;
 import com.hel.ut.model.configurationUpdateLogs;
 import com.hel.ut.model.watchlist;
 import com.hel.ut.model.watchlistEntry;
+import java.io.File;
 import java.util.Date;
 import javax.servlet.http.HttpSession;
 
@@ -256,4 +257,5 @@ public interface utConfigurationManager {
     
     StringBuffer exportConnectionFields(Integer connectionId) throws Exception;
     
+    File generateCrosswalkTempDownloadFile(Integer crosswalkId, Integer delim) throws Exception;
 }
