@@ -71,6 +71,8 @@ public class fileDownloadController {
 	@RequestParam(value = "utBatchName", required = false) String utBatchName,
 	@RequestParam(value = "fromPage", required = false) String fromPage,
 	@RequestParam(value = "utBatchId", required = false) String utBatchId,
+	@RequestParam(value = "cwId", required = false) Integer cwId,
+	@RequestParam(value = "delim", required = false) Integer delim,
 	HttpServletResponse response, RedirectAttributes redirectAttr, HttpSession session) throws Exception {
 	
 	String desc = "";
@@ -85,17 +87,21 @@ public class fileDownloadController {
 
 	    utUser userDetails = usermanager.getUserByUserName(authentication.getName());
 
-	    /**
-	     * tracking *
-	     */
+	    //tracking 
 	    utUserActivity ua = new utUserActivity();
 	    ua.setUserId(userDetails.getId());
 	    ua.setAccessMethod(request.getMethod());
-	    ua.setPageAccess("/downloadFile.do"); // include mapping in case we want to send them back to page in the future
-	    ua.setActivity("Downloaded File");
-	    desc = foldername + filename;
-	    if (orgId != null) {
-		desc = orgId.toString() + "_" + foldername + filename;
+	    ua.setPageAccess("/downloadFile.do"); 
+	    if(cwId != null) {
+		ua.setActivity("Downloaded Crosswalk");
+		desc = "Crowsswalk Id: " + cwId;
+	    }
+	    else {
+		ua.setActivity("Downloaded File");
+		desc = foldername + filename;
+		if (orgId != null) {
+		    desc = orgId.toString() + "_" + foldername + filename;
+		}
 	    }
 	    ua.setActivityDesc(desc);
 	    usermanager.insertUserLog(ua);
@@ -112,7 +118,18 @@ public class fileDownloadController {
 	boolean fileExists = false;
 
 	try {
-	    String directory;
+	    
+	    if(cwId != null) {
+		File f = utconfigurationmanager.generateCrosswalkTempDownloadFile(cwId, delim);
+		
+		in = new FileInputStream(f.getAbsolutePath());
+
+		downloadfile(f, in, "text/plain", f.getName(), "", response, outputStream);
+
+		return null;
+	    }
+	    else {
+		String directory;
 	    
 	    Organization organization = null;
 	    String cleanURL = "";
@@ -348,18 +365,20 @@ public class fileDownloadController {
 
 				    downloadfile(f, in, mimeType, actualFileName, directory, response, outputStream);
 
-				    return null;
+					return null;
+				   }
 			       }
-			   }
+			    }
 			}
 		    }
+
+		    if(mav == null) {
+			mav = new ModelAndView(new RedirectView("/administrator/processing-activity/inbound/"));
+		    }
+		    return mav;
 		}
-		
-		if(mav == null) {
-		    mav = new ModelAndView(new RedirectView("/administrator/processing-activity/inbound/"));
-		}
-		return mav;
 	    }
+	    
 	} catch (FileNotFoundException e) {
 	    errorMessage = errorMessage + "<br/>" + e.getMessage();
 
@@ -402,9 +421,13 @@ public class fileDownloadController {
 	outputStream = response.getOutputStream();
 	
 	try {
-	    //Check if the file is base64 Encoded
-	    boolean isBase64Encoded = filemanager.isFileBase64Encoded(new File(directory + actualFileName),"");
-	   
+	    boolean isBase64Encoded = false;
+	    
+	    if(!"".equals(directory)) {
+		//Check if the file is base64 Encoded
+		isBase64Encoded = filemanager.isFileBase64Encoded(new File(directory + actualFileName),"");
+	    }
+
 	    if(isBase64Encoded) {
 		byte[] fileAsBytes = filemanager.loadFileAsBytesArray(directory + actualFileName);
 		byte[] decodedBytes = Base64.decodeBase64(fileAsBytes);

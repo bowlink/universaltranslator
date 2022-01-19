@@ -2293,5 +2293,76 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	
 	return sb;
     }
+    
+    @Override
+    public File generateCrosswalkTempDownloadFile(Integer crosswalkId, Integer delim) throws Exception {
+	
+	Crosswalks cwDetails = messageTypeDAO.getCrosswalk(crosswalkId);
+	
+	List crosswalksWithData = messageTypeDAO.getConfigCrosswalkDownloadWithData(crosswalkId);
+	
+	String delimChar = "|";
+	
+	if(delim != null) {
+	    delimChar = messageTypeDAO.getDelimiterChar(delim);
+	    
+	    if("".equals(delimChar) || delim == 12) {
+		delimChar = "tab";
+	    }
+	    else if("f".equals(delimChar) || delim == 13) {
+		delimChar = "|";
+	    }
+	}
+	
+	if(crosswalksWithData != null) {
+	    if(!crosswalksWithData.isEmpty()) {
+		Iterator<Object[]> cwIterator = crosswalksWithData.iterator();
+		 
+		String tempDir = System.getProperty("java.io.tmpdir");
+		
+		File crosswalkFile = new File(tempDir+'/'+cwDetails.getfileName());
+		
+		FileWriter fileWriter = new FileWriter(crosswalkFile);
+		
+		while(cwIterator.hasNext()) {
+		    Object[] cwData = cwIterator.next();
+		    
+		    fileWriter.write(cwData[0].toString());
+
+		    if("tab".equals(delimChar)) {
+			fileWriter.write("\t");
+		    }
+		    else {
+			fileWriter.write(delimChar);
+		    }
+
+		    fileWriter.write(cwData[1].toString());
+
+		    if("tab".equals(delimChar)) {
+			fileWriter.write("\t");
+		    }
+		    else {
+			fileWriter.write(delimChar);
+		    }
+
+		    fileWriter.write(cwData[2].toString());
+
+		    if(cwIterator.hasNext()) {
+			fileWriter.write(System.getProperty( "line.separator" ));
+		    }
+		}
+
+		fileWriter.close();
+		
+		return crosswalkFile;
+	    }
+	    else {
+		return null;
+	    }
+	}
+	else {
+	    return null;
+	}
+    }
 }
 
