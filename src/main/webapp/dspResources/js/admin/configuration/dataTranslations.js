@@ -2,6 +2,14 @@
 
 require(['./main'], function () {
     
+    $(document).on('change','#delimiter', function() {
+        var cwFileLink = $('#cwFileLink').attr('href');
+        
+        cwFileLink = cwFileLink.replace('&delim='+$('#delimiter').data("delim"),'&delim='+$(this).val());
+        $('#delimiter').data("delim",$(this).val());
+        $('#cwFileLink').attr('href',cwFileLink);
+    });
+    
     $(document).on('click', '.showMore', function() {
        var macroId = $(this).attr('rel');
        
