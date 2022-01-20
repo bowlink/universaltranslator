@@ -2,11 +2,14 @@ package com.hel.ut.controller;
 
 import com.hel.ut.model.utUser;
 import com.hel.ut.model.mailMessage;
+import com.hel.ut.model.utUserActivity;
 import com.hel.ut.restAPI.directManager;
 import com.hel.ut.service.emailMessageManager;
 import com.hel.ut.service.transactionInManager;
 import com.hel.ut.service.userManager;
 import com.registryKit.messenger.emailManager;
+import com.registryKit.user.User;
+import com.registryKit.user.userActivity;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -396,4 +399,26 @@ public class mainController {
         return codeValidated;
     }
 
+    @RequestMapping(value = "/disableUser", method = RequestMethod.POST)
+    public @ResponseBody String disableUser(HttpSession session) throws Exception {
+	
+	utUser loggedInUserDetails = (utUser) session.getAttribute("userDetails");
+	
+	utUser userDetails = usermanager.getUserById(loggedInUserDetails.getId());
+	userDetails.setStatus(false);
+	
+	usermanager.updateUser(userDetails);
+	
+	//Log the patient accessed
+	utUserActivity newUserActivity = new utUserActivity();
+	newUserActivity.setUserId(loggedInUserDetails.getId());
+	newUserActivity.setActivityDesc("This user was disabled after 3 invalid two-factor authentication tries.");
+	newUserActivity.setActivity("This user was disabled");
+	newUserActivity.setAccessMethod("POST");
+	newUserActivity.setFeatureId(0);
+	
+	usermanager.insertUserLog(newUserActivity);
+	
+	return "";
+    }
 }
