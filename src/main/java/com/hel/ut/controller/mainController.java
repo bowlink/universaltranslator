@@ -2,18 +2,27 @@ package com.hel.ut.controller;
 
 import com.hel.ut.model.utUser;
 import com.hel.ut.model.mailMessage;
+import com.hel.ut.model.utUserActivity;
 import com.hel.ut.restAPI.directManager;
 import com.hel.ut.service.emailMessageManager;
 import com.hel.ut.service.transactionInManager;
 import com.hel.ut.service.userManager;
+import com.registryKit.messenger.emailManager;
+import com.registryKit.user.User;
+import com.registryKit.user.userActivity;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
@@ -49,6 +58,8 @@ public class mainController {
     @Autowired
     private transactionInManager transactionInManager;
     
+    @Autowired
+    private emailManager emailmanager;
     
     /**
      * The '/', '/login' request will serve up the login page.
@@ -273,5 +284,141 @@ public class mainController {
 	}
 
     }
+    
+    /**
+     * The '/authenticate' request will serve up the two-factor authentication page.
+     *
+     * @param session
+     * @return	the two-factor authentication page view
+     * @throws Exception
+     */
+    @RequestMapping(value = "/authenticate", method = RequestMethod.GET)
+    public ModelAndView authenticate(HttpSession session) throws Exception {
+	
+	utUser systemUserDetails = (utUser) session.getAttribute("userDetails");
+	
+        ModelAndView mav = new ModelAndView();
+	
+	if(systemUserDetails != null) {
+	    mav.setViewName("/authenticate");
+	}
+	else {
+	    mav.setViewName("/login");
+	}
 
+        return mav;
+    }
+    
+    /**
+     * The '/resendCode' request will send a new verication code to the user
+     *
+     * @param session
+     * @return 
+     * @throws Exception
+     */
+    @RequestMapping(value = "/resendCode", method = {RequestMethod.GET, RequestMethod.POST})
+    public @ResponseBody Integer resendCode(HttpSession session) throws Exception {
+	
+	utUser systemUserDetails = (utUser) session.getAttribute("userDetails");
+	
+	Integer codeSent = 0;
+	
+	if(systemUserDetails != null) {
+	    
+	    //Generate new Two-Factor authentication code
+	    Random r = new Random(System.currentTimeMillis());
+
+	    Integer code = ((1 + r.nextInt(2)) * 10000 + r.nextInt(10000));
+	    session.removeAttribute("2FactorCode");
+	    session.setAttribute("2FactorCode", code);
+
+	    //Send generated two-factor code to users email address
+	    try {
+		emailmanager.sendTwoFactor(code, systemUserDetails.getEmail(), "Health-e-Link Universal Translator");
+		codeSent = 1;
+	    }
+	    catch (Exception ex) {
+		codeSent = 0;
+	    }
+	}
+	
+        return codeSent;
+    }
+    
+    /**
+     * The '/validateCode' request will validate the authentication code to the code entered by the user.
+     *
+     * @param session
+     * @param vericationCode
+     * @return 
+     * @throws Exception
+     */
+    @RequestMapping(value = "/validateCode", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody Integer validateCode(HttpSession session, @RequestParam String vericationCode) throws Exception {
+	
+	Integer codeValidated = 0;
+	
+	utUser userDetails = (utUser) session.getAttribute("userDetails");
+	
+	if(userDetails != null) {
+	
+	    if(vericationCode.toLowerCase().equals(session.getAttribute("2FactorCode").toString().toLowerCase())) {
+
+		final List<GrantedAuthority> updatedAuthorities = new ArrayList<>();
+
+		//we get authority for login user
+		List<String> userRoles = usermanager.getUserRoles(userDetails);
+
+		if(!userRoles.isEmpty()) {
+		    for (String role : userRoles) { 
+			updatedAuthorities.add(new SimpleGrantedAuthority(role));
+		    }
+		    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+		    Authentication newAuth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), auth.getCredentials(), updatedAuthorities);
+
+		    SecurityContextHolder.getContext().setAuthentication(newAuth);
+
+		    usermanager.setLastLogin(userDetails.getUsername());
+
+		    codeValidated = 1;
+		}
+		else {
+		    //If no roles were found for the user clear session and send to login screen.
+		    session.removeAttribute("userDetails");
+		    session.removeAttribute("2FactorCode");
+		    session.invalidate();
+		    codeValidated = 2;
+		}
+	    }
+	}
+	else {
+	    codeValidated = 2;
+	}
+
+        return codeValidated;
+    }
+
+    @RequestMapping(value = "/disableUser", method = RequestMethod.POST)
+    public @ResponseBody String disableUser(HttpSession session) throws Exception {
+	
+	utUser loggedInUserDetails = (utUser) session.getAttribute("userDetails");
+	
+	utUser userDetails = usermanager.getUserById(loggedInUserDetails.getId());
+	userDetails.setStatus(false);
+	
+	usermanager.updateUser(userDetails);
+	
+	//Log the patient accessed
+	utUserActivity newUserActivity = new utUserActivity();
+	newUserActivity.setUserId(loggedInUserDetails.getId());
+	newUserActivity.setActivityDesc("This user was disabled after 3 invalid two-factor authentication tries.");
+	newUserActivity.setActivity("This user was disabled");
+	newUserActivity.setAccessMethod("POST");
+	newUserActivity.setFeatureId(0);
+	
+	usermanager.insertUserLog(newUserActivity);
+	
+	return "";
+    }
 }
