@@ -168,12 +168,12 @@ public class directMessaging {
                                                 return new ResponseEntity("Invalid Credentials!", HttpStatus.UNAUTHORIZED);
                                             } 
                                             else {
-                                                //Find the CCDA in the attachment list (will be the biggest file)
+                                                //Find the CCDA in the attachment list (will be the biggest file and attachmentClass of "text/xml")
                                                 String CCDAContent = null;
                                                 String CCDATitle = "";
                                                 Integer attachmentSize = 0;
                                                 for(eReferralAPIAttachmentList attachment : attachmentList) {
-                                                    if(Integer.parseInt(attachment.getAttachmentSize()) > attachmentSize) {
+                                                    if(Integer.parseInt(attachment.getAttachmentSize()) > attachmentSize && "text/xml".equals(attachment.getAttachmentClass())) {
                                                         CCDAContent = attachment.getAttachmentContent();
                                                         attachmentSize = Integer.parseInt(attachment.getAttachmentSize());
                                                         CCDATitle = attachment.getAttachmentTitle();
