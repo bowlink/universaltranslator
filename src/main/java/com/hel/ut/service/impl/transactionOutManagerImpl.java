@@ -2047,6 +2047,8 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
 		//Need to get the health-e-link registry details
 		Organization utOrgDetails = organizationManager.getOrganizationById(batchDownload.getOrgId());
+		
+		Integer targetOrdId = utOrgDetails.getHelRegistryOrgId();
 
 		if(utOrgDetails.getHelRegistryId() > 0 && !utOrgDetails.getHelRegistrySchemaName().equals("")) {
 		    helRegistry registryDetails = helregistrymanager.getRegistryDetails("registries",utOrgDetails.getHelRegistryId());
@@ -2060,29 +2062,29 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			boolean createSubmittedMessage = false;
 
 			if(existingRegistrySubmittedMessage != null){
-				if(existingRegistrySubmittedMessage.getId() > 0) {
-				    //Check to see if the target configuration is just a downloadable file update
-				    if(transportDetails.isErgFileDownload()) {
-					submittedmessagemanager.updateSubmittedMessageDownloadableFileName(registryDetails.getDbschemaname(),batchDownload.getBatchUploadId(),batchDownload.getOutputFileName());
+			    if(existingRegistrySubmittedMessage.getId() > 0) {
+				//Check to see if the target configuration is just a downloadable file update
+				if(transportDetails.isErgFileDownload()) {
+				    submittedmessagemanager.updateSubmittedMessageDownloadableFileName(registryDetails.getDbschemaname(),batchDownload.getBatchUploadId(),batchDownload.getOutputFileName());
 
-					ba = new batchdownloadactivity();
-					ba.setActivity("Updated eReferral uploaded file entry for messageId:" + existingRegistrySubmittedMessage.getId());
-					ba.setBatchDownloadId(batchDownload.getId());
-					transactionOutDAO.submitBatchActivityLog(ba);
-				    }
-				    else {
-					//Need to update the Registry submitted message entry to capture the created file name
-					submittedmessagemanager.updateSubmittedMessage(registryDetails.getDbschemaname(),batchDownload.getBatchUploadId(),batchDownload.getOutputFileName(),utOrgDetails.getHelRegistryOrgId());
-
-					ba = new batchdownloadactivity();
-					ba.setActivity("Updated eReferral online form entry for messageId:" + existingRegistrySubmittedMessage.getId());
-					ba.setBatchDownloadId(batchDownload.getId());
-					transactionOutDAO.submitBatchActivityLog(ba);
-				    }
+				    ba = new batchdownloadactivity();
+				    ba.setActivity("Updated eReferral uploaded file entry for messageId:" + existingRegistrySubmittedMessage.getId());
+				    ba.setBatchDownloadId(batchDownload.getId());
+				    transactionOutDAO.submitBatchActivityLog(ba);
 				}
 				else {
-				    createSubmittedMessage = true;
+				    //Need to update the Registry submitted message entry to capture the created file name
+				    submittedmessagemanager.updateSubmittedMessage(registryDetails.getDbschemaname(),batchDownload.getBatchUploadId(),batchDownload.getOutputFileName(),utOrgDetails.getHelRegistryOrgId());
+
+				    ba = new batchdownloadactivity();
+				    ba.setActivity("Updated eReferral online form entry for messageId:" + existingRegistrySubmittedMessage.getId());
+				    ba.setBatchDownloadId(batchDownload.getId());
+				    transactionOutDAO.submitBatchActivityLog(ba);
 				}
+			    }
+			    else {
+				createSubmittedMessage = true;
+			    }
 			}
 			else {
 			    createSubmittedMessage = true;
@@ -2092,7 +2094,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
 			    Integer sendingOrdId = 0;
 
-			    //Get the registery organization Id
+			    //Get the registry organization Id
 			    Organization organizationDetails = organizationManager.getOrganizationById(batchUploadDetails.getOrgId());
 
 			    sendingOrdId = organizationDetails.getHelRegistryOrgId();
@@ -2111,8 +2113,29 @@ public class transactionOutManagerImpl implements transactionOutManager {
 				    }
 				    catch (Exception ex) {}
 				}
-			    }
+				
+				if(targetOrdId == 0) {
+				    if(sourceConfigMessageSpecs.gettargetOrgCol() > 0) {
+					//Pull the first record for the batch
+					String recordVal = transactionInDAO.getFieldValue("transactiontranslatedin_"+batchUploadDetails.getId(),"F"+sourceConfigMessageSpecs.gettargetOrgCol(), "batchUploadId", batchUploadDetails.getId());
 
+					try {
+					    if(Integer.parseInt(recordVal.trim().toLowerCase()) > 0) {
+						Integer targetUTOrgId = Integer.parseInt(recordVal.trim().toLowerCase());
+						Organization eRefTargetOrgDetails = organizationManager.getOrganizationById(targetUTOrgId);
+						
+						if(eRefTargetOrgDetails != null) {
+						    if(eRefTargetOrgDetails.getHelRegistryOrgId() > 0) {
+							targetOrdId = eRefTargetOrgDetails.getHelRegistryOrgId();
+						    }
+						}
+					    }
+					}
+					catch (Exception ex) {}
+				    }
+				}
+			    }
+			    
 			    DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssS");
 			    Date date = new Date();
 
@@ -2133,7 +2156,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			    newSubmittedMessage.setSystemUserId(0);
 			    newSubmittedMessage.setTotalRows(batchUploadDetails.getTotalRecordCount());
 			    newSubmittedMessage.setSourceOrganizationId(sendingOrdId);
-			    newSubmittedMessage.setTargetOrganizationId(utOrgDetails.getHelRegistryOrgId());
+			    newSubmittedMessage.setTargetOrganizationId(targetOrdId);
 			    newSubmittedMessage.setReceivedFileName(batchDownload.getOutputFileName());
 			    newSubmittedMessage.setAssignedMessageNumber(messageName);
 
