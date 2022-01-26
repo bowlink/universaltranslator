@@ -3249,17 +3249,22 @@ public class transactionInManagerImpl implements transactionInManager {
 		    updateBatchStatus(batchUploadId, 7, "endDateTime");
 		    return false;
 		}
+		
+		utConfiguration sourceConfigDetails = configurationManager.getConfigurationById(batch.getConfigId());
 
-		//Check to make sure all returned targets match the config of the uploaded batch
-		Integer checkTargets = 0;
-		for (configurationConnection bt : batchTargetList) {
-		    if (bt.getsourceConfigId() != sourceConfigId) {
-			sourceConfigId = bt.getsourceConfigId();
+		//Check to make sure all returned targets match the config of the uploaded batch for family planning or other configuration
+		//types. this is not used for eReferral configuration types.
+		if(sourceConfigDetails.getMessageTypeId() != 1) {
+		    Integer checkTargets = 0;
+		    for (configurationConnection bt : batchTargetList) {
+			if (bt.getsourceConfigId() != sourceConfigId) {
+			    sourceConfigId = bt.getsourceConfigId();
 
-			if (bt.getTargetOrgCol() != 0) {
-			    checkTargets = rejectInvalidTargetOrg(batchUploadId, bt);
-			    if(checkTargets == 9999999) {
-				systemErrorCount++; 
+			    if (bt.getTargetOrgCol() != 0) {
+				checkTargets = rejectInvalidTargetOrg(batchUploadId, bt);
+				if(checkTargets == 9999999) {
+				    systemErrorCount++; 
+				}
 			    }
 			}
 		    }
