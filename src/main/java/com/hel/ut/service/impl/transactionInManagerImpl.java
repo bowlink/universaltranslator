@@ -3968,7 +3968,6 @@ public class transactionInManagerImpl implements transactionInManager {
 
 		transactionOutDAO.submitBatchDownloadChanges(pendingBatches);
 	    }
-
 	} 
 	else {
 
@@ -4030,6 +4029,22 @@ public class transactionInManagerImpl implements transactionInManager {
 				if(recordVal.trim().toLowerCase().equals(String.valueOf(targetOrg.getHelRegistryOrgId()))) {
 				    useTarget = true;
 				    useTargetOrgId = targetOrg.getId();
+				}
+			    }
+			    
+			    //If still false and a eReferral source config check that the orgs have the same registry
+			    if(!useTarget) {
+				recordVal = transactionInDAO.getFieldValue("transactiontranslatedin_"+batchUploadId,"F"+messageSpec.gettargetOrgCol(), "batchUploadId", batchUploadId);
+				
+				utConfiguration srcConfigDetails = configurationManager.getConfigurationById(batchConfigId);
+				
+				if(srcConfigDetails.getMessageTypeId() == 1) {
+				    Organization siteOrg = organizationmanager.getOrganizationById(Integer.parseInt(recordVal));
+				    
+				    if(siteOrg.getHelRegistryId() == targetOrg.getHelRegistryId()) {
+					useTarget = true;
+					useTargetOrgId = targetOrg.getId();
+				    }
 				}
 			    }
 			}
@@ -4095,7 +4110,6 @@ public class transactionInManagerImpl implements transactionInManager {
 	}
 	
 	return targetsInserted;
-
     }
 
     @Override
@@ -4104,14 +4118,12 @@ public class transactionInManagerImpl implements transactionInManager {
     }
 
     @Override
-    public Integer checkClearAfterDeliveryBatch(int batchUploadId)
-	    throws Exception {
+    public Integer checkClearAfterDeliveryBatch(int batchUploadId) throws Exception {
 	return transactionInDAO.checkClearAfterDeliveryBatch(batchUploadId);
     }
 
     @Override
-    public Integer removeLoadTableBlankRows(Integer batchUploadId,
-	    String loadTableName) throws Exception {
+    public Integer removeLoadTableBlankRows(Integer batchUploadId, String loadTableName) throws Exception {
 	return transactionInDAO.removeLoadTableBlankRows(batchUploadId, loadTableName);
     }
 
@@ -4124,7 +4136,6 @@ public class transactionInManagerImpl implements transactionInManager {
     public void deleteBatch(Integer batchId) throws Exception {
 	transactionInDAO.deleteBatch(batchId);
     }
-
 
     @Override
     public Integer getRecordCountForTable(String tableName, String colName, int matchId) throws Exception {

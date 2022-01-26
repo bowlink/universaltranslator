@@ -2676,10 +2676,9 @@ public class transactionInDAOImpl implements transactionInDAO {
     public List<Integer> getTargetConfigsForUploadBatch(Integer batchUploadId, Integer configId) throws Exception {
 	
 	String sql = "select distinct targetconfigId from configurationconnections "
-		+ " where status = true and sourceConfigId = :configId order by id asc";
+	+ " where status = true and sourceConfigId = :configId order by id asc";
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
-	    .setParameter("configId", configId);
+	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setParameter("configId", configId);
 
 	List<Integer> configIds = query.list();
 	return configIds;
@@ -2688,14 +2687,13 @@ public class transactionInDAOImpl implements transactionInDAO {
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
-    public Integer checkClearAfterDeliveryBatch(int batchUploadId)
-	    throws Exception {
+    public Integer checkClearAfterDeliveryBatch(int batchUploadId) throws Exception {
 	
 	String sql = "select case when dlbatchIds = dlbatches then 1 else 0 end as doneDLBatch from ("
-	    + "select group_concat(distinct batchDLId order by batchDLId) as dlbatchIds from batchclearafterdelivery "
-	    + "where batchUploadId = :batchUploadId) bcad "
-	    + "inner join (select group_concat(distinct Id order by Id) as dlbatches from batchdownloads "
-	    + "where statusId = 28 and batchUploadId = :batchUploadId) batches ";
+	+ "select group_concat(distinct batchDLId order by batchDLId) as dlbatchIds from batchclearafterdelivery "
+	+ "where batchUploadId = :batchUploadId) bcad "
+	+ "inner join (select group_concat(distinct Id order by Id) as dlbatches from batchdownloads "
+	+ "where statusId = 28 and batchUploadId = :batchUploadId) batches ";
 	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
 	    .addScalar("doneDLBatch", StandardBasicTypes.INTEGER)
