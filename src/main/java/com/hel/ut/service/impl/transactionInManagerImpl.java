@@ -3249,17 +3249,22 @@ public class transactionInManagerImpl implements transactionInManager {
 		    updateBatchStatus(batchUploadId, 7, "endDateTime");
 		    return false;
 		}
+		
+		utConfiguration sourceConfigDetails = configurationManager.getConfigurationById(batch.getConfigId());
 
-		//Check to make sure all returned targets match the config of the uploaded batch
-		Integer checkTargets = 0;
-		for (configurationConnection bt : batchTargetList) {
-		    if (bt.getsourceConfigId() != sourceConfigId) {
-			sourceConfigId = bt.getsourceConfigId();
+		//Check to make sure all returned targets match the config of the uploaded batch for family planning or other configuration
+		//types. this is not used for eReferral configuration types.
+		if(sourceConfigDetails.getMessageTypeId() != 1) {
+		    Integer checkTargets = 0;
+		    for (configurationConnection bt : batchTargetList) {
+			if (bt.getsourceConfigId() != sourceConfigId) {
+			    sourceConfigId = bt.getsourceConfigId();
 
-			if (bt.getTargetOrgCol() != 0) {
-			    checkTargets = rejectInvalidTargetOrg(batchUploadId, bt);
-			    if(checkTargets == 9999999) {
-				systemErrorCount++; 
+			    if (bt.getTargetOrgCol() != 0) {
+				checkTargets = rejectInvalidTargetOrg(batchUploadId, bt);
+				if(checkTargets == 9999999) {
+				    systemErrorCount++; 
+				}
 			    }
 			}
 		    }
@@ -3963,7 +3968,6 @@ public class transactionInManagerImpl implements transactionInManager {
 
 		transactionOutDAO.submitBatchDownloadChanges(pendingBatches);
 	    }
-
 	} 
 	else {
 
@@ -4025,6 +4029,22 @@ public class transactionInManagerImpl implements transactionInManager {
 				if(recordVal.trim().toLowerCase().equals(String.valueOf(targetOrg.getHelRegistryOrgId()))) {
 				    useTarget = true;
 				    useTargetOrgId = targetOrg.getId();
+				}
+			    }
+			    
+			    //If still false and a eReferral source config check that the orgs have the same registry
+			    if(!useTarget) {
+				recordVal = transactionInDAO.getFieldValue("transactiontranslatedin_"+batchUploadId,"F"+messageSpec.gettargetOrgCol(), "batchUploadId", batchUploadId);
+				
+				utConfiguration srcConfigDetails = configurationManager.getConfigurationById(batchConfigId);
+				
+				if(srcConfigDetails.getMessageTypeId() == 1) {
+				    Organization siteOrg = organizationmanager.getOrganizationById(Integer.parseInt(recordVal));
+				    
+				    if(siteOrg.getHelRegistryId() == targetOrg.getHelRegistryId()) {
+					useTarget = true;
+					useTargetOrgId = targetOrg.getId();
+				    }
 				}
 			    }
 			}
@@ -4090,7 +4110,6 @@ public class transactionInManagerImpl implements transactionInManager {
 	}
 	
 	return targetsInserted;
-
     }
 
     @Override
@@ -4099,14 +4118,12 @@ public class transactionInManagerImpl implements transactionInManager {
     }
 
     @Override
-    public Integer checkClearAfterDeliveryBatch(int batchUploadId)
-	    throws Exception {
+    public Integer checkClearAfterDeliveryBatch(int batchUploadId) throws Exception {
 	return transactionInDAO.checkClearAfterDeliveryBatch(batchUploadId);
     }
 
     @Override
-    public Integer removeLoadTableBlankRows(Integer batchUploadId,
-	    String loadTableName) throws Exception {
+    public Integer removeLoadTableBlankRows(Integer batchUploadId, String loadTableName) throws Exception {
 	return transactionInDAO.removeLoadTableBlankRows(batchUploadId, loadTableName);
     }
 
@@ -4119,7 +4136,6 @@ public class transactionInManagerImpl implements transactionInManager {
     public void deleteBatch(Integer batchId) throws Exception {
 	transactionInDAO.deleteBatch(batchId);
     }
-
 
     @Override
     public Integer getRecordCountForTable(String tableName, String colName, int matchId) throws Exception {

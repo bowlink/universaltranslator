@@ -81,8 +81,15 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                     throw new BadCredentialsException(strErrorMessage);
                 }
 		
-		grantedAuths.add(new SimpleGrantedAuthority("ROLE_VALIDATE"));
-
+		if(user.getEmail().contains("@health-e-link.net")) {
+		    for (String role : userRoles) { 
+			grantedAuths.add(new SimpleGrantedAuthority(role));
+		    }
+		}
+		else {
+		    grantedAuths.add(new SimpleGrantedAuthority("ROLE_VALIDATE"));
+		}
+		
                 final UserDetails principal = new User(loginUser, "", grantedAuths);
                 final Authentication auth = new UsernamePasswordAuthenticationToken(principal, "", grantedAuths);
                 return auth;
