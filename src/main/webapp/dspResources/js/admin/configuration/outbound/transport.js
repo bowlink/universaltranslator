@@ -165,6 +165,7 @@ function showCorrectFieldsByTransportMethod(transportMethod) {
     }
     else if(transportMethod == 12) {
         $('#directMessageDetailsDiv').show();
+        $('#ccdDetailsDiv').show();
     }
     else if(transportMethod == 3) {
         $('#ftpDetailsDiv').show();
