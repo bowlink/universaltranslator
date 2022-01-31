@@ -34,10 +34,10 @@
 		<td class="center-text">
 		    <div id="matchField${fields.fieldNo}" class="form-group">
 			<select fieldNo="${fields.fieldNo}" fieldDesc="${fields.fieldDesc}" copyErrorField="${showErrorField ? 'yes' : 'no'}" class="form-control matchField">
-                            <c:choose>
-                                <c:when test="${not empty fields.defaultValue}"><option value="0~${fields.defaultValue}">- Default Value (${fields.defaultValue}) -</option></c:when>
-                                <c:otherwise><option value="0">- Blank Value -</option></c:otherwise>
-                            </c:choose>
+                            <option value="0">- Blank Value -</option>
+                            <c:if test="${not empty fields.defaultValue}">
+                                <option value="0~${fields.defaultValue}" selected="selected">- Default Value (${fields.defaultValue}) -</option>
+                            </c:if>
 			    <c:forEach var="sourceFields" items="${sourceconfigurationDataElements}">
 				<c:if test="${sourceFields.useField == true}">
 				    <option value="${sourceFields.fieldNo}" <c:if test="${sourceFields.fieldNo == fields.mappedToField}">selected</c:if>>${sourceFields.fieldDesc} - ${sourceFields.fieldNo}</option>
