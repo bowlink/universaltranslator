@@ -4625,9 +4625,9 @@ public class adminConfigController {
 
 			Integer rowCount = 0;
 			Integer cellCount = 0;
-
+			
 			while (cwDataIt.hasNext()) {
-
+			    
 			    Object cwDatarow[] = (Object[]) cwDataIt.next();
 
 			    if("".equals(crosswalkName.trim()) || !cwDatarow[0].toString().equals(crosswalkName.trim())) {
@@ -4673,22 +4673,15 @@ public class adminConfigController {
 			    row = sheet.createRow(rowCount);
 			    cell = row.createCell(cellCount);
 			    cell.setCellValue(cwDatarow[2].toString());
-			    cell.setCellStyle(cellStyleMap.get("normalLeftFont"));
-			    sheet.autoSizeColumn(cellCount);
 			    cellCount++;
 			    cell = row.createCell(cellCount);
 			    cell.setCellValue(cwDatarow[3].toString());
-			    cell.setCellStyle(cellStyleMap.get("normalLeftFont"));
-			    sheet.autoSizeColumn(cellCount);
 			    cellCount++;
 			    cell = row.createCell(cellCount);
 			    cell.setCellValue(cwDatarow[4].toString());
-			    cell.setCellStyle(cellStyleMap.get("normalLeftFont"));
-			    sheet.autoSizeColumn(cellCount);
-
 			}
 
-			FileOutputStream fileOut = new FileOutputStream("/tmp/" + fileName + ".xlsx");
+			FileOutputStream fileOut = new FileOutputStream(dtFile);
 			workbook.write(fileOut);
 			fileOut.close();
 			workbook.close();
