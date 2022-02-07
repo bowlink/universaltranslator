@@ -700,7 +700,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	+ "from crosswalks inner join ";
 	
 	if(inUseOnly) {
-	    sqlStatement += "configurationdatatranslations b on (b.crosswalkid = crosswalks.id or (b.macroId in (129,160,177,195,199) and b.constant1 = crosswalks.id)) and b.configId = "+configId+" inner join ";
+	    sqlStatement += "configurationdatatranslations b on (b.crosswalkid = crosswalks.id or (b.macroId in (129,160,177,195,199,201) and b.constant1 = crosswalks.id)) and b.configId = "+configId+" inner join ";
 	}
 
 	sqlStatement += "rel_crosswalkdata on rel_crosswalkdata.crosswalkId = crosswalks.id " 
@@ -2223,7 +2223,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	
 	String sqlStatement = "select a.id, a.name, a.fileDelimiter, a.fileName, a.orgId, b.sourceValue, b.targetValue, b.descValue " 
 	+ "from crosswalks a inner join rel_crosswalkdata b on b.crosswalkId = a.id inner join "
-	+ "configurationdatatranslations c on (c.crosswalkid = a.id or (c.macroId in (129,160,177,195,199) and (c.constant1 = a.id or c.constant2 = a.id))) and c.configId = " + configId + " "
+	+ "configurationdatatranslations c on (c.crosswalkid = a.id or (c.macroId in (129,160,177,195,199,201) and (c.constant1 = a.id or c.constant2 = a.id))) and c.configId = " + configId + " "
 	+ "where a.orgId = 0 or a.orgId = " + orgId + " "
 	+ "order by a.id";
 	 
