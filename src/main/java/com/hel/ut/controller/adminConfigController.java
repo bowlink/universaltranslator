@@ -248,14 +248,14 @@ public class adminConfigController {
 			config.setFileDropLocation(fileDropLocation.getDirectory());
 		    }
 		}
+		
+		//Check to see if configuration has any FTP connection set up
+		configurationFTPFields ftpDetails = utconfigurationTransportManager.getTransportFTPDetailsPull(transportDetails.getId());
+		if(ftpDetails != null) {
+		    config.setAllowFTPLink(true);
+		    config.settransportDetailId(transportDetails.getId());
+		}
             }
-	    
-	    //Check to see if configuration has any FTP connection set up
-	    configurationFTPFields ftpDetails = utconfigurationTransportManager.getTransportFTPDetailsPull(transportDetails.getId());
-	    if(ftpDetails != null) {
-		config.setAllowFTPLink(true);
-		config.settransportDetailId(transportDetails.getId());
-	    }
 	    
 	    configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(config.getId());
 	    
