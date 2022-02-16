@@ -51,8 +51,13 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     public configurationTransport getTransportDetails(int configId) throws Exception {
         Query query = sessionFactory.getCurrentSession().createQuery("from configurationTransport where configId = :configId");
         query.setParameter("configId", configId);
-
-        return (configurationTransport) query.uniqueResult();
+	
+	try {
+	    return (configurationTransport) query.uniqueResult();
+	}
+	catch (Exception ex) {
+	    return null;
+	}
     }
 
     /**
