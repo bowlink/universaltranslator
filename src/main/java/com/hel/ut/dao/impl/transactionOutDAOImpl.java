@@ -421,7 +421,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Transactional(readOnly = true)
     public int getMaxFieldNo(int configId) throws Exception {
 
-	String sql = "select max(fieldNo) as maxFieldNo from configurationFormFields where configId = :configId";
+	String sql = "select max(fieldNo) as maxFieldNo from configurationFormFields where configId = :configId and useField = 1";
 
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).addScalar("maxFieldNo", StandardBasicTypes.INTEGER);
 	query.setParameter("configId", configId);
