@@ -24,12 +24,8 @@ import com.hel.ut.service.fileManager;
 import com.hel.ut.service.organizationManager;
 import com.hel.ut.service.userManager;
 import com.hel.ut.service.utConfigurationManager;
-import java.io.BufferedReader;
 
 import java.io.File;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import javax.annotation.Resource;
 
@@ -69,13 +65,15 @@ public class fileDownloadController {
 
     @RequestMapping(value = "/downloadFile.do", method = RequestMethod.GET)
     public ModelAndView downloadFile(HttpServletRequest request, Authentication authentication,
-	    @RequestParam String filename,
-	    @RequestParam String foldername,
-	    @RequestParam(value = "orgId", required = false) Integer orgId,
-	    @RequestParam(value = "utBatchName", required = false) String utBatchName,
-	    @RequestParam(value = "fromPage", required = false) String fromPage,
-	    @RequestParam(value = "utBatchId", required = false) String utBatchId,
-	    HttpServletResponse response, RedirectAttributes redirectAttr, HttpSession session) throws Exception {
+	@RequestParam String filename,
+	@RequestParam String foldername,
+	@RequestParam(value = "orgId", required = false) Integer orgId,
+	@RequestParam(value = "utBatchName", required = false) String utBatchName,
+	@RequestParam(value = "fromPage", required = false) String fromPage,
+	@RequestParam(value = "utBatchId", required = false) String utBatchId,
+	@RequestParam(value = "cwId", required = false) Integer cwId,
+	@RequestParam(value = "delim", required = false) Integer delim,
+	HttpServletResponse response, RedirectAttributes redirectAttr, HttpSession session) throws Exception {
 	
 	String desc = "";
 	
@@ -89,17 +87,21 @@ public class fileDownloadController {
 
 	    utUser userDetails = usermanager.getUserByUserName(authentication.getName());
 
-	    /**
-	     * tracking *
-	     */
+	    //tracking 
 	    utUserActivity ua = new utUserActivity();
 	    ua.setUserId(userDetails.getId());
 	    ua.setAccessMethod(request.getMethod());
-	    ua.setPageAccess("/downloadFile.do"); // include mapping in case we want to send them back to page in the future
-	    ua.setActivity("Downloaded File");
-	    desc = foldername + filename;
-	    if (orgId != null) {
-		desc = orgId.toString() + "_" + foldername + filename;
+	    ua.setPageAccess("/downloadFile.do"); 
+	    if(cwId != null) {
+		ua.setActivity("Downloaded Crosswalk");
+		desc = "Crowsswalk Id: " + cwId;
+	    }
+	    else {
+		ua.setActivity("Downloaded File");
+		desc = foldername + filename;
+		if (orgId != null) {
+		    desc = orgId.toString() + "_" + foldername + filename;
+		}
 	    }
 	    ua.setActivityDesc(desc);
 	    usermanager.insertUserLog(ua);
@@ -116,7 +118,18 @@ public class fileDownloadController {
 	boolean fileExists = false;
 
 	try {
-	    String directory;
+	    
+	    if(cwId != null) {
+		File f = utconfigurationmanager.generateCrosswalkTempDownloadFile(cwId, delim);
+		
+		in = new FileInputStream(f.getAbsolutePath());
+
+		downloadfile(f, in, "text/plain", f.getName(), "", response, outputStream);
+
+		return null;
+	    }
+	    else {
+		String directory;
 	    
 	    Organization organization = null;
 	    String cleanURL = "";
@@ -142,11 +155,18 @@ public class fileDownloadController {
 	    String actualFileName = "";
 
 	    File f = new File(directory + filename);
-	    
+	   
 	    if(!f.exists() && "archivesIn".equals(foldername) && !"".equals(cleanURL)) {
 		directory = myProps.getProperty("ut.directory.utRootDir") + cleanURL + "/input files/";
 		filename = filename.replace("archive_","encoded_");
 		f = new File(directory + filename);
+	    }
+	    if(!f.exists() && "archivesOut".equals(foldername)) {
+		 directory = myProps.getProperty("ut.directory.utRootDir") + foldername + "/";
+		 f = new File(directory + filename);
+		 if(!f.exists()) {
+		    f = new File(directory + utBatchId + ".txt");
+		 }
 	    }
 	    else if(!f.exists() && foldername.contains("/crosswalks")) {
 		directory = myProps.getProperty("ut.directory.utRootDir") + "libraryFiles/crosswalks/";
@@ -158,12 +178,12 @@ public class fileDownloadController {
 		}
 	    }
 	    
-	    if (utBatchName != null) {
-
-		if (!f.exists() && !"".equals(utBatchName)) {
-		   
+	    if (utBatchName != null || utBatchId != null) {
+		
+		if (!f.exists() && (utBatchName != null && !"".equals(utBatchName))) {
+		    
 		    f = new File(directory + utBatchName);
-
+		    
 		    if (f.exists()) {
 			fileExists = true;
 			mimeType = context.getMimeType(directory + utBatchName);
@@ -171,7 +191,8 @@ public class fileDownloadController {
 			in = new FileInputStream(directory + utBatchName);
 			
 			actualFileName = utBatchName;
-		    } else if (!f.exists() && "txt".equals(FilenameUtils.getExtension(utBatchName))) {
+		    } 
+		    else if (!f.exists() && "txt".equals(FilenameUtils.getExtension(utBatchName))) {
 			utBatchName = utBatchName.replace("txt", FilenameUtils.getExtension(filename));
 
 			f = new File(directory + utBatchName);
@@ -183,7 +204,57 @@ public class fileDownloadController {
 			    actualFileName = utBatchName;
 			}
 		    }
-		} else {
+		    else if (!f.exists() && "".equals(FilenameUtils.getExtension(utBatchName))) {
+			utBatchName = utBatchName + ".txt";
+
+			f = new File(directory + utBatchName);
+			if (f.exists()) {
+			    fileExists = true;
+			    mimeType = context.getMimeType(directory + utBatchName);
+			    in = new FileInputStream(directory + utBatchName);
+			    
+			    actualFileName = utBatchName;
+			}
+		    }
+		} 
+		else if (!f.exists() && (utBatchId != null && !"".equals(utBatchId))) {
+		    
+		    f = new File(directory + utBatchId);
+		    
+		    if (f.exists()) {
+			fileExists = true;
+			mimeType = context.getMimeType(directory + utBatchId);
+			//we don't know when a file is encoding or decoding without having to do queries, it will be easy to try to decode first
+			in = new FileInputStream(directory + utBatchId);
+			
+			actualFileName = utBatchId;
+		    } 
+		    else if (!f.exists() && "txt".equals(FilenameUtils.getExtension(utBatchName))) {
+			utBatchId = utBatchName.replace("txt", FilenameUtils.getExtension(filename));
+
+			f = new File(directory + utBatchId);
+			if (f.exists()) {
+			    fileExists = true;
+			    mimeType = context.getMimeType(directory + utBatchId);
+			    in = new FileInputStream(directory + utBatchId);
+			    
+			    actualFileName = utBatchId;
+			}
+		    }
+		    else if (!f.exists() && "".equals(FilenameUtils.getExtension(utBatchId))) {
+			utBatchId = utBatchId + ".txt";
+
+			f = new File(directory + utBatchId);
+			if (f.exists()) {
+			    fileExists = true;
+			    mimeType = context.getMimeType(directory + utBatchId);
+			    in = new FileInputStream(directory + utBatchId);
+			    
+			    actualFileName = utBatchId;
+			}
+		    }
+		} 
+		else {
 		    if(f.exists()) {
 			fileExists = true;
 			mimeType = context.getMimeType(directory + filename);
@@ -295,18 +366,20 @@ public class fileDownloadController {
 
 				    downloadfile(f, in, mimeType, actualFileName, directory, response, outputStream);
 
-				    return null;
+					return null;
+				   }
 			       }
-			   }
+			    }
 			}
 		    }
+
+		    if(mav == null) {
+			mav = new ModelAndView(new RedirectView("/administrator/processing-activity/inbound/"));
+		    }
+		    return mav;
 		}
-		
-		if(mav == null) {
-		    mav = new ModelAndView(new RedirectView("/administrator/processing-activity/inbound/"));
-		}
-		return mav;
 	    }
+	    
 	} catch (FileNotFoundException e) {
 	    errorMessage = errorMessage + "<br/>" + e.getMessage();
 
@@ -349,9 +422,13 @@ public class fileDownloadController {
 	outputStream = response.getOutputStream();
 	
 	try {
-	    //Check if the file is base64 Encoded
-	    boolean isBase64Encoded = filemanager.isFileBase64Encoded(new File(directory + actualFileName),"");
-	   
+	    boolean isBase64Encoded = false;
+	    
+	    if(!"".equals(directory)) {
+		//Check if the file is base64 Encoded
+		isBase64Encoded = filemanager.isFileBase64Encoded(new File(directory + actualFileName),"");
+	    }
+
 	    if(isBase64Encoded) {
 		byte[] fileAsBytes = filemanager.loadFileAsBytesArray(directory + actualFileName);
 		byte[] decodedBytes = Base64.decodeBase64(fileAsBytes);
