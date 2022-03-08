@@ -60,6 +60,13 @@ public class batchUploadDroppedValues {
     
     @Column(name = "fromOutboundConfig", nullable = false)
     private boolean fromOutboundConfig = false;
+    
+    @Column(name = "sourceFieldNo", nullable = true)
+    private boolean sourceFieldNo = true;
+    
+    @Column(name = "targetFieldNo", nullable = true)
+    private boolean targetFieldNo = true;
+    
 
     public int getId() {
 	return id;
@@ -163,5 +170,21 @@ public class batchUploadDroppedValues {
 
     public void setFromOutboundConfig(boolean fromOutboundConfig) {
 	    this.fromOutboundConfig = fromOutboundConfig;
+    }
+
+    public boolean isSourceFieldNo() {
+        return sourceFieldNo;
+    }
+
+    public void setSourceFieldNo(boolean sourceFieldNo) {
+        this.sourceFieldNo = sourceFieldNo;
+    }
+
+    public boolean isTargetFieldNo() {
+        return targetFieldNo;
+    }
+
+    public void setTargetFieldNo(boolean targetFieldNo) {
+        this.targetFieldNo = targetFieldNo;
     }
 }

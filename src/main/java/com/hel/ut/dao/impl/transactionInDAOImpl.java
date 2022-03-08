@@ -1013,13 +1013,13 @@ public class transactionInDAOImpl implements transactionInDAO {
 		query.setParameter("con1", cdt.getConstant1().trim());
 	    }
 	    else {
-		query.setParameter("con1", cdt.getConstant1());
+		query.setParameter("con1", cdt.getConstant1().trim());
 	    }
 	    if(!", ".equals(cdt.getConstant2())) {
 		query.setParameter("con2", cdt.getConstant2().trim());
 	    }
 	    else {
-		query.setParameter("con2", cdt.getConstant2());
+		query.setParameter("con2", cdt.getConstant2().trim());
 	    }
 	    query.setParameter("macroId", cdt.getMacroId());
 	    query.setParameter("foroutboundProcessing", foroutboundProcessing);
@@ -2314,18 +2314,18 @@ public class transactionInDAOImpl implements transactionInDAO {
 	String inboundOutbound = "Inbound";
 	
 	if (foroutboundProcessing == false) {
-	    sql = "update transactiontranslatedin_"+batchId+" JOIN (select sourcevalue as matchid, targetvalue as label   "
+	    sql = "update transactiontranslatedin_"+batchId+" JOIN (select lcase(sourcevalue) as matchid, targetvalue as label   "
 		+ " from rel_crosswalkdata where crosswalkId = :crosswalkId) tbl_concat "
-		+ " ON IFNULL(REPLACE(REPLACE(trim(F" + cdt.getFieldNo() + "), '\n', ''), '\r', ''),'') = tbl_concat.matchid   "
+		+ " ON IFNULL(REPLACE(REPLACE(trim(lcase(F" + cdt.getFieldNo() + ")), '\n', ''), '\r', ''),'') = tbl_concat.matchid   "
 		+ " SET transactiontranslatedin_"+batchId+".forCW = tbl_concat.label  "
 		+ " where configId = :configId "
 		+ " and (statusId is null or statusId not in (:transRELId));";
 	    
 	} else {
 	    inboundOutbound = "Outbound";
-	    sql = "update transactiontranslatedout_"+batchId+" JOIN (select sourcevalue as matchid, targetvalue as label   "
+	    sql = "update transactiontranslatedout_"+batchId+" JOIN (select lcase(sourcevalue) as matchid, targetvalue as label   "
 		+ " from rel_crosswalkdata where crosswalkId = :crosswalkId) tbl_concat "
-		+ " ON IFNULL(REPLACE(REPLACE(trim(F" + cdt.getFieldNo() + "), '\n', ''), '\r', ''),'') = tbl_concat.matchid   "
+		+ " ON IFNULL(REPLACE(REPLACE(trim(lcase(F" + cdt.getFieldNo() + ")), '\n', ''), '\r', ''),'') = tbl_concat.matchid   "
 		+ " SET transactiontranslatedout_"+batchId+".forCW = tbl_concat.label  "
 		+ " where configId = :configId "
 		+ " and (statusId is null or statusId not in (:transRELId));";
