@@ -348,13 +348,15 @@ public class messageTypeDAOImpl implements messageTypeDAO {
         Crosswalks cwDetails = (Crosswalks) criteria.uniqueResult();
 
         String cwName = "";
-
-        if (cwDetails.getOrgId() > 0) {
-            cwName = cwDetails.getName() + " (Org Specific)";
-        } else {
-            cwName = cwDetails.getName();
-        }
-
+	
+	if(cwDetails != null) {
+	    if (cwDetails.getOrgId() > 0) {
+		cwName = cwDetails.getName() + " (Org Specific)";
+	    } else {
+		cwName = cwDetails.getName();
+	    }
+	}
+        
         return cwName;
     }
 

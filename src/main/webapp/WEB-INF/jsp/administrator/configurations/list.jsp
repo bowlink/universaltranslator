@@ -67,6 +67,9 @@
 						 <td scope="row" class="center-text">${config.id}</td>
 						 <td>
 						     ${config.orgName}
+                                                     <c:if test="${not empty config.helRegistry}">
+                                                         <br />HEL Registry: ${config.helRegistry}
+                                                     </c:if>
 						 </td>
 						 <td >
 						     <a href="javascript:void(0);" class="editConfig" rel="${config.id}" title="Edit this configuration">${config.configName}</a>
