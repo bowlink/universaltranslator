@@ -136,9 +136,32 @@ public class adminOrgContoller {
 	List<Organization> organizations = organizationManager.getOrganizationsPaged(iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
 	List<Organization> totalOrgs = organizationManager.getOrganizations();
 	
+	List<helRegistry> helRegistries = helregistrymanager.getAllActiveRegistries();
+	
 	for(Organization org : totalOrgs) {
 	    if(!"bowlinktest".equals(org.getCleanURL().trim().toLowerCase())) {
 		totalRecords++;
+	    }
+	    if(org.getHelRegistryId() > 0) {
+		if(helRegistries != null) {
+		    for(helRegistry reg : helRegistries) {
+			if(reg.getId() == org.getHelRegistryId()) {
+			    org.setHelRegistry(reg.getRegistryName());
+			}
+		    }
+		}
+	    }
+	}
+	
+	for(Organization org : organizations) {
+	    if(org.getHelRegistryId() > 0) {
+		if(helRegistries != null) {
+		    for(helRegistry reg : helRegistries) {
+			if(reg.getId() == org.getHelRegistryId()) {
+			    org.setHelRegistry(reg.getRegistryName());
+			}
+		    }
+		}
 	    }
 	}
 	
