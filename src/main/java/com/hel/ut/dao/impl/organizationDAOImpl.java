@@ -400,6 +400,9 @@ public class organizationDAOImpl implements organizationDAO {
         
 	String query = "select id, orgName, address, address2, city, state, postalCode, fax, phone, dateCreated, cleanURL, orgType, helRegistryId, organizationType "
 	    + "FROM (select id, orgName, address, address2, city, state, postalCode, fax, phone, dateCreated, cleanURL, orgType, helRegistryId, "
+	    + "CASE WHEN helRegistryId > 0 THEN (select registryName from registries.registries where id = organizations.helRegistryId) "
+		+ "ELSE '' "
+	    + "END AS helRegistry, "
 	    + "CASE WHEN orgType = 1 THEN 'Health Care Provider' "
 		 + "WHEN orgType = 2 THEN 'Community Based Organization' "
 		 + "WHEN orgType = 3 THEN 'Health Management Information System' "
@@ -418,6 +421,7 @@ public class organizationDAOImpl implements organizationDAO {
 	    + "OR dateCreated like '%"+searchTerm+"%' "
 	    + "OR orgName like '%"+searchTerm+"%'"
 	    + "OR organizationType like '%"+searchTerm+"%'"
+	    + "OR helRegistry like '%"+searchTerm+"%'"
 	    + ") ";
 	}	
 		
