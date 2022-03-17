@@ -33,7 +33,7 @@
 						<th scope="col">Organization Name ${result}</th>
 						<th scope="col">Organization Type</th>
 						<th scope="col">Contact Information</th>
-						<th scope="col" class="center-text">Health-e-Link Registry</th>
+						<th scope="col">Health-e-Link Registry</th>
 						<th scope="col" class="center-text">Date Created</th>
 						<th scope="col"></th>
 					    </tr>
