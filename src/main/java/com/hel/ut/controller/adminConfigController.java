@@ -97,7 +97,6 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -220,6 +219,8 @@ public class adminConfigController {
 	requiredFormat.setTimeZone(timeZone);
 	String dateinTZ = "";
 	
+	List<helRegistry> helRegistries = helregistrymanager.getAllActiveRegistries();
+	
 	List<utConfiguration> validSourceConfigurations = new ArrayList<>();
 	
         for (utConfiguration config : sourceconfigurations) {
@@ -234,6 +235,16 @@ public class adminConfigController {
 	    
             org = organizationmanager.getOrganizationById(config.getorgId());
             config.setOrgName(org.getOrgName());
+	    
+	    if(org.getHelRegistryId() > 0) {
+		if(helRegistries != null) {
+		    for(helRegistry reg : helRegistries) {
+			if(reg.getId() == org.getHelRegistryId()) {
+			    config.setHelRegistry(reg.getRegistryName());
+			}
+		    }
+		}
+	    }
 	    
             transportDetails = utconfigurationTransportManager.getTransportDetails(config.getId());
             if (transportDetails != null) {
@@ -5668,25 +5679,25 @@ public class adminConfigController {
 	    
 	    if(cwId > 0) {
 		//Update all DTS that has the old crosswalk id with the new one
-		String sqlUpdate = "update configurationdatatranslations set crosswalkId = " + cwId + " where crosswalkId = " + Integer.parseInt(strArrayValues[1]) + " and configId = " + configId;
+		String sqlUpdate = "update configurationdatatranslations set crosswalkId = " + cwId + ", updatedByImport = 1 where crosswalkId = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and configId = " + configId;
 		messagetypemanager.executeSQLStatement(sqlUpdate);
 
-		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + " where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and macroId = 129 and configId = " + configId;
+		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 129 and configId = " + configId;
 		messagetypemanager.executeSQLStatement(sqlUpdate);
 
-		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + " where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and macroId = 160 and configId = " + configId;
+		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 160 and configId = " + configId;
 		messagetypemanager.executeSQLStatement(sqlUpdate);
 
-		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + " where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and macroId = 177 and configId = " + configId;
+		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 177 and configId = " + configId;
 		messagetypemanager.executeSQLStatement(sqlUpdate);
 
-		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + " where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and macroId = 195 and configId = " + configId;
+		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 195 and configId = " + configId;
 		messagetypemanager.executeSQLStatement(sqlUpdate);
 
-		sqlUpdate = "update configurationdatatranslations set constant2 = " + cwId + " where constant2 = " + Integer.parseInt(strArrayValues[1]) + " and macroId = 199 and configId = " + configId;
+		sqlUpdate = "update configurationdatatranslations set constant2 = " + cwId + ", updatedByImport = 1 where constant2 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 199 and configId = " + configId;
 		messagetypemanager.executeSQLStatement(sqlUpdate);
 		
-		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + " where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and macroId = 201 and configId = " + configId;
+		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 201 and configId = " + configId;
 		messagetypemanager.executeSQLStatement(sqlUpdate);
 	    }
 	}

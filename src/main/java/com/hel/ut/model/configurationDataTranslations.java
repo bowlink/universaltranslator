@@ -71,6 +71,9 @@ public class configurationDataTranslations {
     @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
     @Column(name = "dateAdded", nullable = true)
     private Date dateAdded = new Date();
+    
+    @Column(name = "updatedByImport", nullable = true)
+    private boolean updatedByImport = false;
 
     public int getId() {
         return id;
@@ -238,5 +241,13 @@ public class configurationDataTranslations {
 
     public void setDateAdded(Date dateAdded) {
 	this.dateAdded = dateAdded;
+    }
+
+    public boolean isUpdatedByImport() {
+	return updatedByImport;
+    }
+
+    public void setUpdatedByImport(boolean updatedByImport) {
+	this.updatedByImport = updatedByImport;
     }
 }

@@ -120,18 +120,12 @@ require(['./main'], function () {
                      }
                 },
                 {
-                    "mData": "helRegistryId", 
+                    "mData": "helRegistry", 
                     "defaultContent": "",
                     "bSortable":true,
-                    "sWidth": "10%",
-                    "className": "center-text",
+                    "sWidth": "15%",
                     "render": function ( data, type, row, meta ) {
-                        if(data > 0) {
-                            return "Yes (id: " + data + ")";
-                        }
-                        else {
-                            return "No";
-                        }
+                        return data;
                     },
                     'createdCell':  function (td, cellData, rowData, row, col) {
                         $(td).attr('rel', rowData.cleanURL);
@@ -142,7 +136,7 @@ require(['./main'], function () {
                     "mData": "dateCreated", 
                     "defaultContent": "",
                     "bSortable":true,
-                    "sWidth": "15%",
+                    "sWidth": "10%",
                     "className": "center-text",
                     "render": function ( data, type, row, meta ) {
                         var dateC = new Date(row.dateCreated);
