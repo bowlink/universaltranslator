@@ -25,7 +25,7 @@ public class Organization {
     private CommonsMultipartFile file = null;
     
     @Transient
-    private String organizationType = "";
+    private String organizationType = "", helRegistry = "";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -369,5 +369,11 @@ public class Organization {
 	this.primaryTechContactName = primaryTechContactName;
     }
 
-    
+    public String getHelRegistry() {
+	return helRegistry;
+    }
+
+    public void setHelRegistry(String helRegistry) {
+	this.helRegistry = helRegistry;
+    }
 }

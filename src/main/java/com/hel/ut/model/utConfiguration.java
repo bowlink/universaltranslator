@@ -19,7 +19,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class utConfiguration {
 
     @Transient
-    private String orgName = null, messageTypeName = null, transportMethod = null, fileDropLocation = null;
+    private String orgName = null, messageTypeName = null, transportMethod = null, fileDropLocation = null, helRegistry = "";
 
     @Transient
     private Integer transportDetailId = 0, scheduleType = 5;
@@ -238,5 +238,13 @@ public class utConfiguration {
 
     public void setAllowFTPLink(boolean allowFTPLink) {
 	this.allowFTPLink = allowFTPLink;
+    }
+
+    public String getHelRegistry() {
+	return helRegistry;
+    }
+
+    public void setHelRegistry(String helRegistry) {
+	this.helRegistry = helRegistry;
     }
 }
