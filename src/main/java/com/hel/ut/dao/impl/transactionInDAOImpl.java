@@ -2966,7 +2966,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 		    + "`transactionInRecordsId` int(11) DEFAULT NULL,"
 		    + "`fieldNo` int(11) DEFAULT NULL,"
 		    + "`fieldLabel` varchar(255) DEFAULT NULL,"
-		    + "`fieldValue` varchar(255) DEFAULT NULL,"
+		    + "`fieldValue` text DEFAULT NULL,"
 		    + "`required` bit(1) DEFAULT NULL,"
 		    + "`errorId` int(11) DEFAULT NULL,"
 		    + "`cwId` int(11) DEFAULT NULL,"
