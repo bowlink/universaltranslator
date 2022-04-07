@@ -1369,7 +1369,13 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	}
 	
 	sqlQuery += "order by "+sortColumnName+" "+sortDirection;
-        sqlQuery += " limit " + displayStart + ", " + displayRecords;
+	
+	if(displayRecords > 0) {
+	    sqlQuery += " limit " + displayStart + ", " + displayRecords;
+	}
+	else {
+	    sqlQuery += " limit " + displayStart+ ", 1000000";
+	}
 	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery)
 	.addScalar("id", StandardBasicTypes.INTEGER)
@@ -1606,7 +1612,13 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	}	
 	
 	sqlQuery += "order by "+sortColumnName+" "+sortDirection;
-        sqlQuery += " limit " + displayStart + ", " + displayRecords;
+	
+	if(displayRecords > 0) {
+	    sqlQuery += " limit " + displayStart + ", " + displayRecords;
+	}
+	else {
+	    sqlQuery += " limit " + displayStart+ ", 1000000";
+	}
 	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery)
 	    .addScalar("id", StandardBasicTypes.INTEGER)
