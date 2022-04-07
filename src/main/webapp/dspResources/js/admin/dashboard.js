@@ -186,7 +186,7 @@ function getInboundMessages() {
 		'<option value="50">50 Records</option>' +
 		'<option value="-1">All</option>' +
 		'</select>',
-	    sProcessing: "<div style='background-color:#64A5D4; height:50px; margin-top:200px'><p style='color:white; padding-top:15px;' class='bolder'>Retrieving Results. Please wait...</p></div>"
+            sProcessing: "<div style='background-color:#64A5D4; text-align:center; width:100%; height:50px; margin-top:100px; position:absolute'><p style='color:white; font-weight:bold; padding-top:15px;' class='bolder'>Retrieving Results. Please wait...</p></div>"
 	},
 	sAjaxSource: "/administrator/processing-activity/dashboardInBoundBatches?fromDate="+fromDate+"&toDate="+toDate,
 	createdRow: function(row, data, index) {
@@ -540,7 +540,7 @@ function getOutboundMessages() {
 		'<option value="50">50 Records</option>' +
 		'<option value="-1">All</option>' +
 		'</select>',
-	    sProcessing: "<div style='background-color:#64A5D4; height:50px; margin-top:200px'><p style='color:white; padding-top:15px;' class='bolder'>Retrieving Results. Please wait...</p></div>"
+            sProcessing: "<div style='background-color:#64A5D4; text-align:center; width:100%; height:50px; margin-top:100px; position:absolute'><p style='color:white; font-weight:bold; padding-top:15px;' class='bolder'>Retrieving Results. Please wait...</p></div>"
 	},
 	sAjaxSource: "/administrator/processing-activity/dashboardOutBoundBatches?fromDate="+fromDate+"&toDate="+toDate,
 	createdRow: function(row, data, index) {

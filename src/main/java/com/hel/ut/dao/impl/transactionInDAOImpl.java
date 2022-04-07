@@ -3387,8 +3387,14 @@ public class transactionInDAOImpl implements transactionInDAO {
 	}	
 	
 	sqlQuery += "order by "+sortColumnName+" "+sortDirection;
-        sqlQuery += " limit " + displayStart + ", " + displayRecords;
 	
+	if(displayRecords > 0) {
+	    sqlQuery += " limit " + displayStart + ", " + displayRecords;
+	}
+	else {
+	    sqlQuery += " limit " + displayStart+ ", 1000000";
+	}
+        
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery)
 	    .addScalar("id", StandardBasicTypes.INTEGER)
 	    .addScalar("orgId", StandardBasicTypes.INTEGER)
@@ -3502,7 +3508,13 @@ public class transactionInDAOImpl implements transactionInDAO {
 	}	
 	
 	sqlQuery += "order by "+sortColumnName+" "+sortDirection;
-        sqlQuery += " limit " + displayStart + ", " + displayRecords;
+	
+	if(displayRecords > 0) {
+	    sqlQuery += " limit " + displayStart + ", " + displayRecords;
+	}
+	else {
+	    sqlQuery += " limit " + displayStart+ ", 1000000";
+	}
 	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery)
 	    .addScalar("id", StandardBasicTypes.INTEGER)
