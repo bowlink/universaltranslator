@@ -2520,7 +2520,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			    transactionInDAO.submitBatchActivityLog(ba);
 			    
 			    updateBatchStatus(batchId, 39, "endDateTime");
-			    insertProcessingError(5, null, batchId, null, null, null, null, false, false, "Error translating xlsx / xls file");
+			    insertProcessingError(5, batch.getConfigId(), batchId, null, null, null, null, false, false, "Error translating xlsx / xls file");
 			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load Excel Batch Failed");
 			} 
 			else if (newfilename.equals("FILE IS NOT excel ERROR")) {
@@ -2532,8 +2532,42 @@ public class transactionInManagerImpl implements transactionInManager {
 			    transactionInDAO.submitBatchActivityLog(ba);
 			    
 			    updateBatchStatus(batchId, 7, "endDateTime");
-			    insertProcessingError(22, null, batchId, null, null, null, null, false, false, "Excel format is invalid.");
+			    insertProcessingError(22, batch.getConfigId(), batchId, null, null, null, null, false, false, "Excel format is invalid.");
 			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load Excel Batch Failed");
+			}else if (newfilename.contains("Formula error in")) {
+			    
+			    //log batch activity
+			    ba = new batchuploadactivity();
+			    ba.setActivity("Formula error found in excel file. First instance at -  "  + newfilename);
+			    ba.setBatchUploadId(batchId);
+			    transactionInDAO.submitBatchActivityLog(ba);
+			    
+			    updateBatchStatus(batchId, 7, "endDateTime");
+			    insertProcessingError(22, batch.getConfigId(), batchId, null, null, null, null, false, false, "Formula found.");
+			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Formula found, first instance at " + newfilename + ".  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Formula Error");
+			    //clean
+				cleanAuditErrorTable(batch.getId());
+
+				//populate
+				populateAuditReport(batch.getId(), configurationManager.getMessageSpecs(batch.getConfigId()));
+				return;
+				
+			} else if (newfilename.contains("Cell error in")) {
+		    
+			    //log batch activity
+			    ba = new batchuploadactivity();
+			    ba.setActivity("Cell data error found in excel file. First instance at -  "  + newfilename);
+			    ba.setBatchUploadId(batchId);
+			    transactionInDAO.submitBatchActivityLog(ba);
+			    
+			    updateBatchStatus(batchId, 7, "endDateTime");
+			    insertProcessingError(22, batch.getConfigId(), batchId, null, null, null, null, false, false, "Excel format is invalid.");
+			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Cell error data found, first instance at " + newfilename + ".  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Cell Data Error");
+			    cleanAuditErrorTable(batch.getId());
+
+				//populate
+				populateAuditReport(batch.getId(), configurationManager.getMessageSpecs(batch.getConfigId()));
+				return;
 			}
 			else {
 			    //log batch activity
@@ -2696,6 +2730,8 @@ public class transactionInManagerImpl implements transactionInManager {
 
 			//check how many records are loaded
 			int numLoadTransactions = getLoadTransactionCount("transactionInRecords_" + batch.getId());
+			
+			
 			if (numLoadTransactions < 1) {
 			   
 			    //log batch activity
@@ -2871,7 +2907,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		}
 		
 		if (sysErrors > 0) {
-		    insertProcessingError(processingSysErrorId, null, batchId, null, null, null, null, false, false, errorMessage);
+		    insertProcessingError(processingSysErrorId, batch.getConfigId(), batchId, null, null, null, null, false, false, errorMessage);
 		    updateBatchStatus(batchId, 39, "endDateTime");
 		}
 
