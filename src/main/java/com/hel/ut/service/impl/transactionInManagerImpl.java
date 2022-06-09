@@ -2141,7 +2141,7 @@ public class transactionInManagerImpl implements transactionInManager {
 	    Integer batchStatusId = 38;
 	    List<Integer> errorStatusIds = Arrays.asList(11, 13, 14, 16);
 	    String processFolderPath = "loadFiles/";
-
+	    
 	    try {
 		try {
 		    //log batch activity
@@ -2535,16 +2535,20 @@ public class transactionInManagerImpl implements transactionInManager {
 			    insertProcessingError(22, batch.getConfigId(), batchId, null, null, null, null, false, false, "Excel format is invalid.");
 			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load Excel Batch Failed");
 			}else if (newfilename.contains("Formula error in")) {
-			    
+				
+				utConfiguration configDetails = new utConfiguration ();
+				if (batch.getConfigId() != 0) {
+					configDetails = configurationManager.getConfigurationById(batch.getConfigId());
+					
+			    }
 			    //log batch activity
 			    ba = new batchuploadactivity();
-			    ba.setActivity("Formula error found in excel file. First instance at -  "  + newfilename);
+			    ba.setActivity(configDetails.getconfigName() + " - Formula error found in excel file. First instance at -  "  + newfilename);
 			    ba.setBatchUploadId(batchId);
 			    transactionInDAO.submitBatchActivityLog(ba);
 			    
 			    updateBatchStatus(batchId, 7, "endDateTime");
-			    insertProcessingError(22, batch.getConfigId(), batchId, null, null, null, null, false, false, "Formula found.");
-			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Formula found, first instance at " + newfilename + ".  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Formula Error");
+			    sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Formula found, first instance at " + newfilename + ".  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Formula Error");
 			    //clean
 				cleanAuditErrorTable(batch.getId());
 
@@ -2553,16 +2557,21 @@ public class transactionInManagerImpl implements transactionInManager {
 				return;
 				
 			} else if (newfilename.contains("Cell error in")) {
-		    
+				
+				utConfiguration configDetails = new utConfiguration ();
+				if (batch.getConfigId() != 0) {
+					configDetails = configurationManager.getConfigurationById(batch.getConfigId());
+					
+			    }
+				
 			    //log batch activity
 			    ba = new batchuploadactivity();
-			    ba.setActivity("Cell data error found in excel file. First instance at -  "  + newfilename);
+			    ba.setActivity(configDetails.getconfigName() + " - Cell data error found in excel file. First instance at -  "  + newfilename);
 			    ba.setBatchUploadId(batchId);
 			    transactionInDAO.submitBatchActivityLog(ba);
 			    
 			    updateBatchStatus(batchId, 7, "endDateTime");
-			    insertProcessingError(22, batch.getConfigId(), batchId, null, null, null, null, false, false, "Excel format is invalid.");
-			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Cell error data found, first instance at " + newfilename + ".  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Cell Data Error");
+			    sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Cell error data found, first instance at " + newfilename + ".  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Cell Data Error");
 			    cleanAuditErrorTable(batch.getId());
 
 				//populate
