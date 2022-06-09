@@ -161,11 +161,11 @@ public class excelToTxt {
 	    
 	    if (hasFormulaCell) {
 	    	newfileName = "Formula error in " + formulaErrorLocation;
-	    	transactioninmanager.insertProcessingError(22, batch.getConfigId(), batch.getId(), null, null, null, null, false, false, newfileName);
+	    	transactioninmanager.insertProcessingError(22, batch.getConfigId(), batch.getId(), 1, null, null, null, true, false, newfileName);
 	    	
 	    } else if (hasErrorCell) {
 	    	newfileName = "Cell error in " + cellErrorLocation;
-	    	transactioninmanager.insertProcessingError(22, batch.getConfigId(), batch.getId(), null, null, null, null, false, false, newfileName);
+	    	transactioninmanager.insertProcessingError(22, batch.getConfigId(), batch.getId(), 1, null, null, null, true, false, (newfileName + ". #DIV/0!, #N/A, #NAME?, #NULL!, #NUM!, #REF!, #VALUE! are invalid values."));
 	    	
 	    }
 
@@ -175,8 +175,8 @@ public class excelToTxt {
 	    PrintStream ps = new PrintStream(newFile);
 	    ex.printStackTrace(ps);
 	    ps.close();
-	    transactioninmanager.insertProcessingError(5, batch.getConfigId(), batch.getId(), null, null, null, null,
-		    false, false, ex.getStackTrace().toString());
+	    transactioninmanager.insertProcessingError(5, batch.getConfigId(), batch.getId(), 1, null, null, null,
+	    		true, false, ex.getStackTrace().toString());
 	}
 	return newfileName;
 
