@@ -1844,6 +1844,9 @@ public class transactionInManagerImpl implements transactionInManager {
 	    mail.setmessageBody(message);
 	    mail.setmessageSubject(subject + " " + myProps.getProperty("server.identity"));
 	    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+	    String[] ccEmailAddress = {myProps.getProperty("ccImport.email")};
+	    mail.setccEmailAddress(ccEmailAddress) ;
+	    
 	    emailManager.sendEmail(mail);
 	} catch (Exception ex) {
 	    ex.printStackTrace();
