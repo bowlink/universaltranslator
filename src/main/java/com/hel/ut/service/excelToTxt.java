@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.PrintStream;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -35,9 +36,6 @@ public class excelToTxt {
 
     @Autowired
     private organizationManager organizationmanager;
-
-    @Autowired
-    private utConfigurationTransportManager configurationTransportManager;
 
     @Autowired
     private transactionInManager transactioninmanager;
@@ -100,31 +98,76 @@ public class excelToTxt {
 
 	    DataFormatter formatter = new DataFormatter();
 	    int  writeRow = 0;
-
+	    boolean hasFormulaCell = false;
+	    boolean hasErrorCell = false;
+	    String cellErrorLocation = "";
+	    String formulaErrorLocation = "";
+	    
+	    
 	    for(Row row : datatypeSheet) {
-		String string = "";
-		for(int cn=0; cn<row.getLastCellNum(); cn++) {
-		    // If the cell is missing from the file, generate a blank one
-		    // (Works by specifying a MissingCellPolicy)
-		    Cell cell = row.getCell(cn, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-		    String text = formatter.formatCellValue(cell);
-		    string = string + text.trim() + batch.getDelimChar();
-		}
-		// check to see if row is blank
-		String stringRemoveEmptyRows = string.replaceAll("(?m)^[ \t]*\r?\n", "");
-		if (stringRemoveEmptyRows.trim().length() > 0) {
-		    writeRow ++;
-		    if (writeRow == 1) {
-			     fw.write(stringRemoveEmptyRows);
-		    } else {
-			    fw.write(System.getProperty("line.separator") + stringRemoveEmptyRows);
+	    	String string = "";
+		
+	    	for(int cn=0; cn<row.getLastCellNum(); cn++) {
+			    // If the cell is missing from the file, generate a blank one
+			    // (Works by specifying a MissingCellPolicy)
+			    Cell cell = row.getCell(cn, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+			    String text = "";
+			    //need to review cells for formula and reject entire file
+			    if (cell != null && cell.getCellTypeEnum() != CellType.BLANK) {
+			    	//formula
+			    	if (cell.getCellTypeEnum() == CellType.FORMULA) {			
+				    		   hasFormulaCell = true;
+				    		   text = "FORMULA";
+				    		   int errorRow  = row.getRowNum()+1;
+				    		   int errorCell = cn + 1;
+				    		   formulaErrorLocation = "row " + errorRow + ", cell " + errorCell;
+				    		   
+				    } else if (cell.getCellTypeEnum() == CellType.ERROR) {
+				    			hasErrorCell = true;
+				    			text = "CELL ERROR";
+				    			int errorRow  = row.getRowNum()+1;
+					    		int errorCell = cn + 1;
+					    		cellErrorLocation = "row " + errorRow + ", cell " + errorCell;
+				    	    
+				    } else {
+				    	 text = formatter.formatCellValue(cell);
+					}
+	
+				 } 
+			    //handle error cells
+			    string = string + text.trim() + batch.getDelimChar();
+			    if (hasFormulaCell || hasErrorCell) {
+			    	break;
+			    }
+		 }
+			// check to see if row is blank
+			String stringRemoveEmptyRows = string.replaceAll("(?m)^[ \t]*\r?\n", "");
+			if (stringRemoveEmptyRows.trim().length() > 0) {
+			    writeRow ++;
+			    if (writeRow == 1) {
+				     fw.write(stringRemoveEmptyRows);
+			    } else {
+				    fw.write(System.getProperty("line.separator") + stringRemoveEmptyRows);
+			    }
+			}
+			if (hasFormulaCell || hasErrorCell) {
+		    	break;
 		    }
-		}
 	    }
 
 	    workbook.close();
 	    is.close();
 	    fw.close();
+	    
+	    if (hasFormulaCell) {
+	    	newfileName = "Formula error in " + formulaErrorLocation;
+	    	transactioninmanager.insertProcessingError(22, batch.getConfigId(), batch.getId(), 1, null, null, null, true, false, newfileName);
+	    	
+	    } else if (hasErrorCell) {
+	    	newfileName = "Cell error in " + cellErrorLocation;
+	    	transactioninmanager.insertProcessingError(22, batch.getConfigId(), batch.getId(), 1, null, null, null, true, false, (newfileName + ". #DIV/0!, #N/A, #NAME?, #NULL!, #NUM!, #REF!, #VALUE! are invalid values."));
+	    	
+	    }
 
 	} catch (Exception ex) {
 	    ex.printStackTrace();
@@ -132,8 +175,8 @@ public class excelToTxt {
 	    PrintStream ps = new PrintStream(newFile);
 	    ex.printStackTrace(ps);
 	    ps.close();
-	    transactioninmanager.insertProcessingError(5, null, batch.getId(), null, null, null, null,
-		    false, false, ex.getStackTrace().toString());
+	    transactioninmanager.insertProcessingError(5, batch.getConfigId(), batch.getId(), 1, null, null, null,
+	    		true, false, ex.getStackTrace().toString());
 	}
 	return newfileName;
 
