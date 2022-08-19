@@ -971,6 +971,7 @@ public class adminProcessingActivity {
 	boolean showButtons = false;
 	
 	Integer totalErroredRows = 0;
+        Integer batchStatus = 0;
 	
 	String page = "inbound";
 	if(request.getRequestURL().toString().contains("invalidIn")) {
@@ -1113,6 +1114,9 @@ public class adminProcessingActivity {
 		List<batchErrorSummary> batchSystemErrors = transactionInManager.getBatchSystemErrorSummary(batchDetails.getId(),"inbound");
 		mav.addObject("batchSystemErrors", batchSystemErrors);
 	    }
+            
+            batchStatus = batchDetails.getStatusId();
+            
         } else {
             mav.addObject("doesNotExist", true);
         }
@@ -1125,7 +1129,7 @@ public class adminProcessingActivity {
 	mav.addObject("totalErroredRows", totalErroredRows);
 	mav.addObject("page", page);
 	
-	if(canReset || canCancel || canEdit || canSend || batchDetails.getStatusId() == 2 || batchDetails.getStatusId() == 3 || batchDetails.getStatusId() == 36) {
+	if(canReset || canCancel || canEdit || canSend || batchStatus == 2 || batchStatus == 3 || batchStatus == 36) {
 	    showButtons = true;
 	}
 	
