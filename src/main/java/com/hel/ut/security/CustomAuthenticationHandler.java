@@ -114,6 +114,8 @@ public class CustomAuthenticationHandler extends SimpleUrlAuthenticationSuccessH
 
             /* Need to store the user object in session */
             session.setAttribute("userDetails", userDetails);
+            
+            usermanager.setLastLogin(userDetails.getUsername());
 	    
             getRedirectStrategy().sendRedirect(request, response, adminTargetUrl);
         } 
@@ -147,6 +149,8 @@ public class CustomAuthenticationHandler extends SimpleUrlAuthenticationSuccessH
             
             /* Need to store the user object in session */
             session.setAttribute("userDetails", userDetails);
+            
+            usermanager.setLastLogin(userDetails.getUsername());
             
             /* Need to store the search session object */
             session.setAttribute("searchParameters", searchParameters);
