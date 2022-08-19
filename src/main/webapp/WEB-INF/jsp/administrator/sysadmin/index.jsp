@@ -13,7 +13,6 @@
 
 <!-- End Actions Nav -->
 <div class="main clearfix full-width" role="main">
-
     <div class="row-fluid contain">
         <div class="col-md-12">
             <section class="panel panel-default panel-intro">
@@ -23,9 +22,7 @@
             </section>
         </div>
     </div>
-
     <div class="row-fluid contain basic-clearfix">
-        
         <div class="col-md-3 col-sm-3 col-xs-6">
             <section class="panel panel-default panel-stats">
                 <div class="panel-body">
@@ -35,7 +32,6 @@
                 </div>
             </section>
         </div>
-        
         <div class="col-md-3 col-sm-3 col-xs-6">
             <section class="panel panel-default panel-stats">
                 <div class="panel-body">
@@ -45,7 +41,6 @@
                 </div>
             </section>
         </div>
-
         <div class="col-md-3 col-sm-3 col-xs-6">
             <section class="panel panel-default panel-stats">
                 <div class="panel-body">
@@ -54,8 +49,7 @@
                     <a href="hl7" title="HL7 Specs" class="btn btn-primary btn-small" role="button">View all</a>
                 </div>
             </section>
-        </div>    
-
+        </div>   
         <div class="col-md-3 col-sm-3 col-xs-6">
             <section class="panel panel-default panel-stats">
                 <div class="panel-body">
@@ -66,8 +60,6 @@
                 </div>
             </section>
         </div>  
-	
-        
         <div class="col-md-3 col-sm-3 col-xs-3">
             <section class="panel panel-default panel-stats">
                 <div class="panel-body">
@@ -87,7 +79,7 @@
                 </div>
             </section>
         </div>--%>
-                    
+         <c:if test="${userDetails.email == 'cmccue@health-e-link.net' || userDetails.email == 'gchan@health-e-link.net'}">           
          <div class="col-md-3 col-sm-3 col-xs-3">
             <section class="panel panel-default panel-stats">
                 <div class="panel-body">
@@ -98,7 +90,7 @@
                 </div>
             </section>
         </div> 
-
+ </c:if>
 
     </div>
 </div>
