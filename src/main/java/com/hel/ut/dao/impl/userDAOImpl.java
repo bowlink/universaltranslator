@@ -530,9 +530,6 @@ public class userDAOImpl implements userDAO {
                 Date logoutDate = new Date();
                 DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-                // Set the formatter to use a different timezone  
-                formatter.setTimeZone(TimeZone.getTimeZone("EST"));  
-
                 utUserLogin lastLogin = (utUserLogin) logins.get(0);
 
                 Query q1 = sessionFactory.getCurrentSession().createSQLQuery("update rel_userlogins set dateLoggedOut = '" +formatter.format(logoutDate)+ "' where id = " + lastLogin.getId());
