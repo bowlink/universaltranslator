@@ -155,11 +155,7 @@ public class userDAOImpl implements userDAO {
         Query q1 = sessionFactory.getCurrentSession().createQuery("insert into utUserLogin (userId)" + " select id from utUser where username = :username");
         q1.setParameter("username", username);
         q1.executeUpdate();
-
     }
-
-    ;
-
 
     /**
      * The 'getOrganizationContact' function will return a user based on the organization id passed in and the mainContact parameter;
@@ -530,17 +526,18 @@ public class userDAOImpl implements userDAO {
 	List<utUserLogin> logins = query.list();
 	
 	if(logins != null) {
-	    Date logoutDate = new Date();
-	    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            if(!logins.isEmpty()) {
+                Date logoutDate = new Date();
+                DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-	    // Set the formatter to use a different timezone  
-	    formatter.setTimeZone(TimeZone.getTimeZone("EST"));  
-	    
-	    utUserLogin lastLogin = (utUserLogin) logins.get(0);
-	    
-	    Query q1 = sessionFactory.getCurrentSession().createSQLQuery("update rel_userlogins set dateLoggedOut = '" +formatter.format(logoutDate)+ "' where id = " + lastLogin.getId());
-	    q1.executeUpdate();
-	    
+                // Set the formatter to use a different timezone  
+                formatter.setTimeZone(TimeZone.getTimeZone("EST"));  
+
+                utUserLogin lastLogin = (utUserLogin) logins.get(0);
+
+                Query q1 = sessionFactory.getCurrentSession().createSQLQuery("update rel_userlogins set dateLoggedOut = '" +formatter.format(logoutDate)+ "' where id = " + lastLogin.getId());
+                q1.executeUpdate();
+            }
 	}
     }
     

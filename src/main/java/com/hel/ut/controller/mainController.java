@@ -8,8 +8,6 @@ import com.hel.ut.service.emailMessageManager;
 import com.hel.ut.service.transactionInManager;
 import com.hel.ut.service.userManager;
 import com.registryKit.messenger.emailManager;
-import com.registryKit.user.User;
-import com.registryKit.user.userActivity;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
