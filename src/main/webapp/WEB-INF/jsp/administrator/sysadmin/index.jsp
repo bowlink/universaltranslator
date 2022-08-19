@@ -13,7 +13,6 @@
 
 <!-- End Actions Nav -->
 <div class="main clearfix full-width" role="main">
-
     <div class="row-fluid contain">
         <div class="col-md-12">
             <section class="panel panel-default panel-intro">
@@ -23,9 +22,7 @@
             </section>
         </div>
     </div>
-
     <div class="row-fluid contain basic-clearfix">
-        
         <div class="col-md-3 col-sm-3 col-xs-6">
             <section class="panel panel-default panel-stats">
                 <div class="panel-body">
@@ -35,7 +32,6 @@
                 </div>
             </section>
         </div>
-        
         <div class="col-md-3 col-sm-3 col-xs-6">
             <section class="panel panel-default panel-stats">
                 <div class="panel-body">
@@ -45,7 +41,6 @@
                 </div>
             </section>
         </div>
-
         <div class="col-md-3 col-sm-3 col-xs-6">
             <section class="panel panel-default panel-stats">
                 <div class="panel-body">
@@ -54,8 +49,7 @@
                     <a href="hl7" title="HL7 Specs" class="btn btn-primary btn-small" role="button">View all</a>
                 </div>
             </section>
-        </div>    
-
+        </div>   
         <div class="col-md-3 col-sm-3 col-xs-6">
             <section class="panel panel-default panel-stats">
                 <div class="panel-body">
@@ -66,8 +60,6 @@
                 </div>
             </section>
         </div>  
-	
-        
         <div class="col-md-3 col-sm-3 col-xs-3">
             <section class="panel panel-default panel-stats">
                 <div class="panel-body">
@@ -76,8 +68,7 @@
 		    <a href="moveFilePaths" id="moveFilePaths" class="btn btn-primary btn-small" class="moveFilePaths" title="View File Paths">Bad File Paths</a>    
                 </div>
             </section>
-        </div>
-		    
+        </div>   
 	<div class="col-md-3 col-sm-3 col-xs-3">
             <section class="panel panel-default panel-stats">
                 <div class="panel-body">
@@ -86,19 +77,18 @@
 		    <a href="hisps" class="btn btn-primary btn-small" class="hisps" title="View HISPS">View HISPS</a>    
                 </div>
             </section>
-        </div>
-                    
-         <div class="col-md-3 col-sm-3 col-xs-3">
-            <section class="panel panel-default panel-stats">
-                <div class="panel-body">
-                    <span class="stat-number"><a href="getLog" class="getLog" title="Download Latest Tomcat Log">1</a></span>
-                    <h3>Log</h3>
-                         <a href="getLog" id="getLog" class="btn btn-primary btn-small" class="getLog" title="Download Latest Tomcat Log">
-                         Download Latest Tomcat Log</a>               
-                </div>
-            </section>
-        </div> 
-
-
+        </div>    
+        <c:if test="${userDetails.email == 'cmccue@health-e-link.net' || userDetails.email == 'gchan@health-e-link.net'}">       
+            <div class="col-md-3 col-sm-3 col-xs-3">
+                <section class="panel panel-default panel-stats">
+                    <div class="panel-body">
+                        <span class="stat-number"><a href="getLog" class="getLog" title="Download Latest Tomcat Log">1</a></span>
+                        <h3>Log</h3>
+                        <a href="getLog" id="getLog" class="btn btn-primary btn-small" class="getLog" title="Download Latest Tomcat Log">
+                        Download Latest Tomcat Log</a>               
+                    </div>
+                </section>
+            </div> 
+        </c:if>
     </div>
 </div>
