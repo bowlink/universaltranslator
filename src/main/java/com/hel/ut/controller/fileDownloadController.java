@@ -433,7 +433,13 @@ public class fileDownloadController {
 		byte[] decodedBytes = Base64.decodeBase64(fileAsBytes);
 		String decodedString = new String(decodedBytes);
 		response.setContentLength((int) decodedString.length());
-		outputStream.write(decodedString.getBytes());
+                
+                if(actualFileName.contains(".xls") || actualFileName.contains(".xlsx")) {
+                    outputStream.write(decodedBytes);
+                }
+                else {
+                    outputStream.write(decodedString.getBytes());
+                }
 		in.close();
 		outputStream.close();
 	    }
