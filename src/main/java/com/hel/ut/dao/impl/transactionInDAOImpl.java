@@ -2712,7 +2712,7 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Transactional
     public Integer removeLoadTableBlankRows(Integer batchUploadId,String loadTableName) throws Exception {
 	
-	String sql = "delete from " + loadTableName + " where F1 IS NULL";
+	String sql = "delete from " + loadTableName + " where F1 IS NULL AND F2 IS NULL";
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
 
 	try {
