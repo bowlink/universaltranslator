@@ -87,10 +87,9 @@ public class xlsToTxt {
             int totalSheets = wb.getNumberOfSheets();
             
             if(totalSheets > 1) {
-                for(int i = 0; i<totalSheets; i++) {
-                    if(i > 0) {
-                        wb.removeSheetAt(i);
-                    }
+                while(totalSheets > 1) {
+                    wb.removeSheetAt(1);
+                    totalSheets = wb.getNumberOfSheets();
                 }
             }
             
