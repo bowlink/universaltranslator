@@ -84,7 +84,7 @@ public class xlsToTxt {
             InputStream inp = new FileInputStream(inputFile);
             HSSFWorkbook wb = new HSSFWorkbook(inp);
             
-            int totalSheets = wb.getNumberOfSheets();
+            /*int totalSheets = wb.getNumberOfSheets();
             
             if(totalSheets > 1) {
                 for(int i = 0; i<totalSheets; i++) {
@@ -92,7 +92,7 @@ public class xlsToTxt {
                         wb.removeSheetAt(i);
                     }
                 }
-            }
+            }*/
             
             ExcelExtractor extractor = new ExcelExtractor(wb);
             extractor.setIncludeBlankCells(true);
