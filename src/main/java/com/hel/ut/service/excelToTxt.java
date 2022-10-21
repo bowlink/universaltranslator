@@ -55,7 +55,7 @@ public class excelToTxt {
 	
 	String excelFile = (excelFileName + ".xlsx");
 	
-	/* Create the txt file that will hold the excel fields */
+	// Create the txt file that will hold the excel fields
 	String newfileName = (excelFileName + ".txt");
 
 	File newFile = new File(directory + newfileName);
@@ -63,7 +63,6 @@ public class excelToTxt {
 	
 	if (newFile.exists()) {
 	    try {
-
 		if (newFile.exists()) {
 		    int i = 1;
 		    while (newFile.exists()) {
@@ -72,27 +71,27 @@ public class excelToTxt {
 		    }
 		    newfileName = newFile.getName();
 		    newFile.createNewFile();
-		} else {
+		} 
+                else {
 		    newFile.createNewFile();
 		}
-	    } catch (Exception e) {
+	    } 
+            catch (Exception e) {
 		e.printStackTrace();
 	    }
-
-	} else {
+	} 
+        else {
 	    newFile.createNewFile();
 	    newfileName = newFile.getName();
-
 	}
 
 	try {
-
 	    FileWriter fw = new FileWriter(newFile);
 	    InputStream is = new FileInputStream(inputFile);
 	    Workbook workbook = StreamingReader.builder()
-		    .rowCacheSize(100)    // number of rows to keep in memory (defaults to 10)
-		    .bufferSize(4096)     // buffer size to use when reading InputStream to file (defaults to 1024)
-		    .open(is);            // InputStream or File for XLSX file (required)
+            .rowCacheSize(100)    // number of rows to keep in memory (defaults to 10)
+            .bufferSize(4096)     // buffer size to use when reading InputStream to file (defaults to 1024)
+            .open(is);            // InputStream or File for XLSX file (required)
 
 	    Sheet datatypeSheet = workbook.getSheetAt(0);
 
@@ -102,57 +101,59 @@ public class excelToTxt {
 	    boolean hasErrorCell = false;
 	    String cellErrorLocation = "";
 	    String formulaErrorLocation = "";
-	    
-	    
+            
 	    for(Row row : datatypeSheet) {
 	    	String string = "";
 		
 	    	for(int cn=0; cn<row.getLastCellNum(); cn++) {
-			    // If the cell is missing from the file, generate a blank one
-			    // (Works by specifying a MissingCellPolicy)
-			    Cell cell = row.getCell(cn, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-			    String text = "";
-			    //need to review cells for formula and reject entire file
-			    if (cell != null && cell.getCellTypeEnum() != CellType.BLANK) {
-			    	//formula
-			    	if (cell.getCellTypeEnum() == CellType.FORMULA) {			
-				    		   hasFormulaCell = true;
-				    		   text = "FORMULA";
-				    		   int errorRow  = row.getRowNum()+1;
-				    		   int errorCell = cn + 1;
-				    		   formulaErrorLocation = "row " + errorRow + ", cell " + errorCell;
-				    		   
-				    } else if (cell.getCellTypeEnum() == CellType.ERROR) {
-				    			hasErrorCell = true;
-				    			text = "CELL ERROR";
-				    			int errorRow  = row.getRowNum()+1;
-					    		int errorCell = cn + 1;
-					    		cellErrorLocation = "row " + errorRow + ", cell " + errorCell;
-				    	    
-				    } else {
-				    	 text = formatter.formatCellValue(cell);
-					}
-	
-				 } 
-			    //handle error cells
-			    string = string + text.trim() + batch.getDelimChar();
-			    if (hasFormulaCell || hasErrorCell) {
-			    	break;
-			    }
+                    // If the cell is missing from the file, generate a blank one
+                    // (Works by specifying a MissingCellPolicy)
+                    Cell cell = row.getCell(cn, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                    String text = "";
+                    
+                    //need to review cells for formula and reject entire file
+                    if (cell != null && cell.getCellTypeEnum() != CellType.BLANK) {
+                        //formula
+                        if (cell.getCellTypeEnum() == CellType.FORMULA) {			
+                            hasFormulaCell = true;
+                            text = "FORMULA";
+                            int errorRow  = row.getRowNum()+1;
+                            int errorCell = cn + 1;
+                            formulaErrorLocation = "row " + errorRow + ", cell " + errorCell;
+                        } 
+                        else if (cell.getCellTypeEnum() == CellType.ERROR) {
+                            hasErrorCell = true;
+                            text = "CELL ERROR";
+                            int errorRow  = row.getRowNum()+1;
+                            int errorCell = cn + 1;
+                            cellErrorLocation = "row " + errorRow + ", cell " + errorCell;
+			 } 
+                        else {
+                            text = formatter.formatCellValue(cell);
+                        }
+                    } 
+                    
+                    //handle error cells
+                    string = string + text.trim() + batch.getDelimChar();
+                    if (hasFormulaCell || hasErrorCell) {
+                        break;
+                    }
 		 }
-			// check to see if row is blank
-			String stringRemoveEmptyRows = string.replaceAll("(?m)^[ \t]*\r?\n", "");
-			if (stringRemoveEmptyRows.trim().length() > 0) {
-			    writeRow ++;
-			    if (writeRow == 1) {
-				     fw.write(stringRemoveEmptyRows);
-			    } else {
-				    fw.write(System.getProperty("line.separator") + stringRemoveEmptyRows);
-			    }
-			}
-			if (hasFormulaCell || hasErrorCell) {
-		    	break;
-		    }
+                
+                // check to see if row is blank
+                String stringRemoveEmptyRows = string.replaceAll("(?m)^[ \t]*\r?\n", "");
+                if (stringRemoveEmptyRows.trim().length() > 0) {
+                    writeRow ++;
+                    if (writeRow == 1) {
+                        fw.write(stringRemoveEmptyRows);
+                    } 
+                    else {
+                        fw.write(System.getProperty("line.separator") + stringRemoveEmptyRows);
+                    }
+                }
+                if (hasFormulaCell || hasErrorCell) {
+                    break;
+                }
 	    }
 
 	    workbook.close();
@@ -162,24 +163,20 @@ public class excelToTxt {
 	    if (hasFormulaCell) {
 	    	newfileName = "Formula error in " + formulaErrorLocation;
 	    	transactioninmanager.insertProcessingError(22, batch.getConfigId(), batch.getId(), 1, null, null, null, true, false, newfileName);
-	    	
-	    } else if (hasErrorCell) {
+	    } 
+            else if (hasErrorCell) {
 	    	newfileName = "Cell error in " + cellErrorLocation;
 	    	transactioninmanager.insertProcessingError(22, batch.getConfigId(), batch.getId(), 1, null, null, null, true, false, (newfileName + ". #DIV/0!, #N/A, #NAME?, #NULL!, #NUM!, #REF!, #VALUE! are invalid values."));
-	    	
 	    }
-
-	} catch (Exception ex) {
+	} 
+        catch (Exception ex) {
 	    ex.printStackTrace();
 	    newfileName = "ERRORERRORERROR";
 	    PrintStream ps = new PrintStream(newFile);
 	    ex.printStackTrace(ps);
 	    ps.close();
-	    transactioninmanager.insertProcessingError(5, batch.getConfigId(), batch.getId(), 1, null, null, null,
-	    		true, false, ex.getStackTrace().toString());
+	    transactioninmanager.insertProcessingError(5, batch.getConfigId(), batch.getId(), 1, null, null, null,true, false, ex.getStackTrace().toString());
 	}
 	return newfileName;
-
     }
-
 }

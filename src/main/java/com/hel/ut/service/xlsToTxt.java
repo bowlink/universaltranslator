@@ -31,9 +31,6 @@ public class xlsToTxt {
     @Autowired
     private organizationManager organizationmanager;
 
-    @Autowired
-    private utConfigurationTransportManager configurationTransportManager;
-    
     @Resource(name = "myProps")
     private Properties myProps;
 
@@ -59,7 +56,6 @@ public class xlsToTxt {
 
     	if (newFile.exists()) {
     	    try {
-
     		if (newFile.exists()) {
     		    int i = 1;
     		    while (newFile.exists()) {
@@ -68,47 +64,54 @@ public class xlsToTxt {
     		    }
     		    newfileName = newFile.getName();
     		    newFile.createNewFile();
-    		} else {
+    		} 
+                else {
     		    newFile.createNewFile();
     		}
     	    } catch (Exception e) {
     		e.printStackTrace();
     	    }
-
-    	} else {
+    	}
+        else {
     	    newFile.createNewFile();
     	    newfileName = newFile.getName();
-
     	}
 
     	try {
-    		String text = "";
-        	FileWriter fw = new FileWriter(newFile);
+            String text = "";
+            FileWriter fw = new FileWriter(newFile);
 	        
-        		InputStream inp = new FileInputStream(inputFile);
-        	    HSSFWorkbook wb = new HSSFWorkbook(inp);
-        	    ExcelExtractor extractor = new ExcelExtractor(wb);
-        	    extractor.setIncludeBlankCells(true);
-        	    extractor.setFormulasNotResults(true);
-        	    extractor.setIncludeSheetNames(false);
-        	    text = extractor.getText();
-        	    fw.write(text.replaceAll("(?m)^[ \t]*\r?\n", ""));
-		        extractor.close();
-		        wb.close();
-		        inp.close();
-		        fw.close();
-		        
-        } catch (Exception ex) {
-        	ex.printStackTrace();
-        	newfileName = "ERRORERRORERROR";
-        	PrintStream ps = new PrintStream(newFile);
-        	ex.printStackTrace(ps);
-        	ps.close();
-        	transactioninmanager.insertProcessingError(5, null, batch.getId(), null, null, null, null,
-                    false, false, ex.getStackTrace().toString());
+            InputStream inp = new FileInputStream(inputFile);
+            HSSFWorkbook wb = new HSSFWorkbook(inp);
+            
+            int totalSheets = wb.getNumberOfSheets();
+            
+            if(totalSheets > 1) {
+                while(totalSheets > 1) {
+                    wb.removeSheetAt(1);
+                    totalSheets = wb.getNumberOfSheets();
+                }
+            }
+            
+            ExcelExtractor extractor = new ExcelExtractor(wb);
+            extractor.setIncludeBlankCells(true);
+            extractor.setFormulasNotResults(true);
+            extractor.setIncludeSheetNames(false);
+            text = extractor.getText();
+            fw.write(text.replaceAll("(?m)^[ \t]*\r?\n", ""));
+            extractor.close();
+            wb.close();
+            inp.close();
+            fw.close();
+        } 
+        catch (Exception ex) {
+            ex.printStackTrace();
+            newfileName = "ERRORERRORERROR";
+            PrintStream ps = new PrintStream(newFile);
+            ex.printStackTrace(ps);
+            ps.close();
+            transactioninmanager.insertProcessingError(5, null, batch.getId(), null, null, null, null,false, false, ex.getStackTrace().toString());
         }
         return newfileName;
-
     }
-
 }
