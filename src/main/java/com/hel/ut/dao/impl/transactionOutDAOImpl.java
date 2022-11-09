@@ -325,7 +325,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Transactional(readOnly = true)
     public List<transactionOutRecords> getTransactionRecords(Integer batchId, Integer configId, Integer totalFields) throws Exception {
 	
-	totalFields = totalFields + 10;
+	//totalFields = totalFields + 10;
 	
 	String sql = "select ";
 		
@@ -871,7 +871,8 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 
 	    if (configFormFields != null) {
 		if (!configFormFields.isEmpty()) {
-		    totalFields = configFormFields.size() + 10;
+		    //totalFields = configFormFields.size() + 10;
+                    totalFields = configFormFields.size();
 		}
 	    }
 
@@ -1802,8 +1803,8 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Transactional(readOnly = true)
     public List<transactionOutRecords> getTransactionRecordsForFP(Integer batchId, Integer configId, Integer totalFields) throws Exception {
 	
-	totalFields = totalFields + 10;
-	
+	//totalFields = totalFields + 10;
+        
 	String sql = "select ";
 		
 	for (int i = 1; i <= totalFields; i++) {

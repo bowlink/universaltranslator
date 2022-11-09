@@ -2914,7 +2914,8 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    
 	    if (configFormFields != null) {
 		if (!configFormFields.isEmpty()) {
-		    totalFields = configFormFields.size() + 10;
+		    //totalFields = configFormFields.size() + 10;
+                    totalFields = configFormFields.size();
 		}
 	    }
 	    
