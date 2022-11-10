@@ -7,16 +7,19 @@ package com.hel.ut.service;
 
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.batchUploads;
+import com.hel.ut.model.configurationFormFields;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.List;
 import java.util.Properties;
 import javax.annotation.Resource;
 
 import org.apache.poi.hssf.extractor.ExcelExtractor;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,10 @@ public class xlsToTxt {
 
     @Autowired
     private organizationManager organizationmanager;
+    
+    @Autowired
+    private utConfigurationTransportManager configurationtransportmanager;
+    
 
     @Resource(name = "myProps")
     private Properties myProps;
@@ -41,7 +48,7 @@ public class xlsToTxt {
 
     	Organization orgDetails = organizationmanager.getOrganizationById(batch.getOrgId());
 
-	String directory = myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/loadFiles/";
+    	String directory = myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/loadFiles/";
 
     	// Get the uploaded xls File
     	directory = fileLocation;
@@ -92,6 +99,33 @@ public class xlsToTxt {
                     totalSheets = wb.getNumberOfSheets();
                 }
             }
+            
+            //check field numbers
+	    	List<configurationFormFields> configFormFields = configurationtransportmanager.getConfigurationFields(batch.getConfigId(), 0);
+	    	HSSFSheet datatypeSheet = wb.getSheetAt(0);
+	    	
+	    	Integer totalFields = configFormFields.size();
+	    	int totalNoColsInSheet = datatypeSheet.getRow(0).getLastCellNum();
+	    	
+	    	
+	        if (totalNoColsInSheet != totalFields) {
+		    	try {
+		    		newfileName = "Column Size Mismatch" + totalNoColsInSheet;
+		    		transactioninmanager.insertProcessingError(5, batch.getConfigId(), batch.getId(), 1, null, null, null,true, false, "File submitted has extra columns");
+		    		
+		            wb.close();
+		            inp.close();
+		            fw.close();
+		    		return newfileName;
+		    		
+		    	} catch (Exception e) {
+		            wb.close();
+		            inp.close();
+		            fw.close();
+		    		e.printStackTrace();
+			    }
+		    }  
+            
             
             ExcelExtractor extractor = new ExcelExtractor(wb);
             extractor.setIncludeBlankCells(true);
