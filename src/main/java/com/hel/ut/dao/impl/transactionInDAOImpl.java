@@ -1002,25 +1002,11 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    query.setParameter("configId", configId);
 	    query.setParameter("batchId", batchId);
 	    query.setParameter("srcField", ("F" + cdt.getFieldNo()));
-	    
-	    if (!cdt.getFieldA().equalsIgnoreCase("")) {
-		query.setParameter("fieldA", ("F" + cdt.getFieldA()));
-	    } else {
-		query.setParameter("fieldA", ("F" + cdt.getFieldNo()));
-	    }
+	    /** fieldA should be pass as they are entered **/
+	    query.setParameter("fieldA", ("F" + cdt.getFieldA()));
 	    query.setParameter("fieldB", ("F" + cdt.getFieldB()));
-	    if(!", ".equals(cdt.getConstant1())) {
-		query.setParameter("con1", cdt.getConstant1().trim());
-	    }
-	    else {
-		query.setParameter("con1", cdt.getConstant1().trim());
-	    }
-	    if(!", ".equals(cdt.getConstant2())) {
-		query.setParameter("con2", cdt.getConstant2().trim());
-	    }
-	    else {
-		query.setParameter("con2", cdt.getConstant2().trim());
-	    }
+	    query.setParameter("con1", cdt.getConstant1().trim());
+	    query.setParameter("con2", cdt.getConstant2().trim());
 	    query.setParameter("macroId", cdt.getMacroId());
 	    query.setParameter("foroutboundProcessing", foroutboundProcessing);
 	    query.setParameter("passClear", cdt.getPassClear());
