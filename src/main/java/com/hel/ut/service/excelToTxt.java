@@ -8,6 +8,7 @@ package com.hel.ut.service;
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.batchUploads;
 import com.hel.ut.model.configurationFormFields;
+import com.hel.ut.model.utConfiguration;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import com.monitorjbl.xlsx.StreamingReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import javax.annotation.Resource;
@@ -44,6 +46,10 @@ public class excelToTxt {
     
     @Autowired
     private utConfigurationTransportManager configurationtransportmanager;
+   
+    @Autowired
+    private utConfigurationManager configurationManager;
+
     
     @Resource(name = "myProps")
     private Properties myProps;
@@ -108,28 +114,18 @@ public class excelToTxt {
 	    String formulaErrorLocation = "";
             
 	   
-		    //check field numbers
+		    //check field numbers, we email admin if field do not match
 	    	List<configurationFormFields> configFormFields = configurationtransportmanager.getConfigurationFields(batch.getConfigId(), 0);
 
 	    	Integer totalFields = configFormFields.size();
 	    	Integer totalNoColsInSheet = datatypeSheet.getLastRowNum();
 	    	if (totalNoColsInSheet != totalFields) {
-		    	try {
-		    		newfileName = "Column Size Mismatch " + totalNoColsInSheet;
-		    		transactioninmanager.insertProcessingError(5, batch.getConfigId(), batch.getId(), 1, null, null, null,true, false, "File submitted has extra columns");
-		    		
-		    		workbook.close();
-		    		is.close();
-		    		fw.close();
-		    		return newfileName;
-		    		
-		    	} catch (Exception e) {
-		    		workbook.close();
-		    		is.close();
-		    		fw.close();
-		    		e.printStackTrace();
-			    }
-		    }  
+	    		try {
+	        		 utConfiguration configDetails = configurationManager.getConfigurationById(batch.getConfigId());
+	        		 transactioninmanager.sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Column Size Mismatch " + totalNoColsInSheet + " found. Expecting  "+totalFields+" columns. <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Columns size mismatch", false);			   
+	        	 } catch (Exception e) {
+	        		    e.printStackTrace();
+	        	 }}  
 	    
 	    for(Row row : datatypeSheet) {
 	    	String string = "";

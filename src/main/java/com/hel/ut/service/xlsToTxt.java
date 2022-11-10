@@ -8,12 +8,14 @@ package com.hel.ut.service;
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.batchUploads;
 import com.hel.ut.model.configurationFormFields;
+import com.hel.ut.model.utConfiguration;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import javax.annotation.Resource;
@@ -37,6 +39,9 @@ public class xlsToTxt {
     @Autowired
     private utConfigurationTransportManager configurationtransportmanager;
     
+    @Autowired
+    private utConfigurationManager configurationManager;
+
 
     @Resource(name = "myProps")
     private Properties myProps;
@@ -109,22 +114,14 @@ public class xlsToTxt {
 	    	
 	    	
 	        if (totalNoColsInSheet != totalFields) {
-		    	try {
-		    		newfileName = "Column Size Mismatch" + totalNoColsInSheet;
-		    		transactioninmanager.insertProcessingError(5, batch.getConfigId(), batch.getId(), 1, null, null, null,true, false, "File submitted has extra columns");
-		    		
-		            wb.close();
-		            inp.close();
-		            fw.close();
-		    		return newfileName;
-		    		
-		    	} catch (Exception e) {
-		            wb.close();
-		            inp.close();
-		            fw.close();
-		    		e.printStackTrace();
-			    }
-		    }  
+	        	 try {
+	        		 utConfiguration configDetails = configurationManager.getConfigurationById(batch.getConfigId());
+	        		 transactioninmanager.sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Column Size Mismatch " + totalNoColsInSheet + " found. Expecting  "+totalFields+" columns. <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Columns size mismatch", false);			   
+	        	 } catch (Exception e) {
+	                 e.printStackTrace();
+	        	 }
+	        	 
+	       }  
             
             
             ExcelExtractor extractor = new ExcelExtractor(wb);
