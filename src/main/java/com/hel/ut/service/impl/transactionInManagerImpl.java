@@ -1835,7 +1835,7 @@ public class transactionInManagerImpl implements transactionInManager {
 
     @Override
     public void sendEmailToAdmin(String message, String subject) throws Exception {
-    	 sendEmailToAdmin(message, subject, true);
+    	 sendEmailToAdmin(message, subject, true, false);
     			
     }
 
@@ -5662,13 +5662,17 @@ public class transactionInManagerImpl implements transactionInManager {
     } 
     
     @Override
-    public void sendEmailToAdmin(String message, String subject, boolean sendToCC) throws Exception {
+    public void sendEmailToAdmin(String message, String subject, boolean sendToCC, boolean singleEmail) throws Exception {
 		try {
 		    mailMessage mail = new mailMessage();
 		    mail.setfromEmailAddress("support@health-e-link.net");
 		    mail.setmessageBody(message);
 		    mail.setmessageSubject(subject + " " + myProps.getProperty("server.identity"));
-		    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+		    if (singleEmail) {
+		    	 mail.settoEmailAddress("singlemonitor@health-e-link.net");
+		    } else {
+		    	 mail.settoEmailAddress(myProps.getProperty("admin.email"));	   
+		    }
 		    if (sendToCC) {
 		    	String[] ccEmailAddress = {myProps.getProperty("ccImport.email")};
 		    	mail.setccEmailAddress(ccEmailAddress) ;
