@@ -2526,6 +2526,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			    insertProcessingError(5, batch.getConfigId(), batchId, null, null, null, null, false, false, "Error translating xlsx / xls file");
 			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load Excel Batch Failed");
 			} 
+			
 			else if (newfilename.equals("FILE IS NOT excel ERROR")) {
 			    
 			    //log batch activity
@@ -2575,6 +2576,31 @@ public class transactionInManagerImpl implements transactionInManager {
 			    
 			    updateBatchStatus(batchId, 7, "endDateTime");
 			    sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Cell error data found, first instance at " + newfilename + ".  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Cell Data Error");
+			    cleanAuditErrorTable(batch.getId());
+
+				//populate
+				populateAuditReport(batch.getId(), configurationManager.getMessageSpecs(batch.getConfigId()));
+				return;
+			} else if (newfilename.startsWith("Column Size Mismatch")) {
+				
+				List<configurationFormFields> configFormFields = configurationtransportmanager.getConfigurationFields(batch.getConfigId(), 0);
+
+		    	Integer totalFields = configFormFields.size();
+				
+		    	utConfiguration configDetails = new utConfiguration ();
+				if (batch.getConfigId() != 0) {
+					configDetails = configurationManager.getConfigurationById(batch.getConfigId());
+					
+			    }
+				
+			    //log batch activity
+			    ba = new batchuploadactivity();
+			    ba.setActivity(configDetails.getconfigName() + " - "+newfilename+" found in excel file.");
+			    ba.setBatchUploadId(batchId);
+			    transactionInDAO.submitBatchActivityLog(ba);
+			    
+			    updateBatchStatus(batchId, 7, "endDateTime");
+			    sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. "+newfilename+" found. Expecting  " + totalFields + " columns.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Column Sizes Mismatch");
 			    cleanAuditErrorTable(batch.getId());
 
 				//populate

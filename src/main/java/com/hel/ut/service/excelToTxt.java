@@ -7,6 +7,7 @@ package com.hel.ut.service;
 
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.batchUploads;
+import com.hel.ut.model.configurationFormFields;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import com.monitorjbl.xlsx.StreamingReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 import javax.annotation.Resource;
 
@@ -39,6 +41,9 @@ public class excelToTxt {
 
     @Autowired
     private transactionInManager transactioninmanager;
+    
+    @Autowired
+    private utConfigurationTransportManager configurationtransportmanager;
     
     @Resource(name = "myProps")
     private Properties myProps;
@@ -102,6 +107,30 @@ public class excelToTxt {
 	    String cellErrorLocation = "";
 	    String formulaErrorLocation = "";
             
+	   
+		    //check field numbers
+	    	List<configurationFormFields> configFormFields = configurationtransportmanager.getConfigurationFields(batch.getConfigId(), 0);
+
+	    	Integer totalFields = configFormFields.size();
+	    	Integer totalNoColsInSheet = datatypeSheet.getLastRowNum();
+	    	if (totalNoColsInSheet != totalFields) {
+		    	try {
+		    		newfileName = "Column Size Mismatch " + totalNoColsInSheet;
+		    		transactioninmanager.insertProcessingError(5, batch.getConfigId(), batch.getId(), 1, null, null, null,true, false, "File submitted has extra columns");
+		    		
+		    		workbook.close();
+		    		is.close();
+		    		fw.close();
+		    		return newfileName;
+		    		
+		    	} catch (Exception e) {
+		    		workbook.close();
+		    		is.close();
+		    		fw.close();
+		    		e.printStackTrace();
+			    }
+		    }  
+	    
 	    for(Row row : datatypeSheet) {
 	    	String string = "";
 		
