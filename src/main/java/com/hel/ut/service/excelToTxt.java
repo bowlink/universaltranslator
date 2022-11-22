@@ -118,14 +118,21 @@ public class excelToTxt {
 	    	List<configurationFormFields> configFormFields = configurationtransportmanager.getConfigurationFields(batch.getConfigId(), 0);
 
 	    	Integer totalFields = configFormFields.size();
-	    	Integer totalNoColsInSheet = datatypeSheet.getLastRowNum();
-	    	if (totalNoColsInSheet != totalFields) {
-	    		try {
-	        		 utConfiguration configDetails = configurationManager.getConfigurationById(batch.getConfigId());
-	        		 transactioninmanager.sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Column Size Mismatch " + totalNoColsInSheet + " found. Expecting  "+totalFields+" columns. <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Columns size mismatch", false);			   
-	        	 } catch (Exception e) {
-	        		    e.printStackTrace();
-	        	 }}  
+	    
+	    	for(Row row : datatypeSheet) {
+	    		int totalNoColsInSheet = row.getLastCellNum();
+	    		if (totalNoColsInSheet != totalFields) {
+		    		try {
+		        		 utConfiguration configDetails = configurationManager.getConfigurationById(batch.getConfigId());
+		        		 transactioninmanager.sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Column Size Mismatch " + totalNoColsInSheet + " found. Expecting  "+totalFields+" columns. <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), ("Columns size mismatch " + configDetails.getconfigName()), false, true);			   
+		        	 } catch (Exception e) {
+		        		    e.printStackTrace();
+		        	 }}  
+	    
+	    	break;
+	    	
+	    }
+	    
 	    
 	    for(Row row : datatypeSheet) {
 	    	String string = "";
