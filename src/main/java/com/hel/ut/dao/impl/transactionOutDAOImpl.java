@@ -325,7 +325,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Transactional(readOnly = true)
     public List<transactionOutRecords> getTransactionRecords(Integer batchId, Integer configId, Integer totalFields) throws Exception {
 	
-	totalFields = totalFields + 10;
+	//totalFields = totalFields + 10;
 	
 	String sql = "select ";
 		
@@ -877,7 +877,8 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 
 	    if (configFormFields != null) {
 		if (!configFormFields.isEmpty()) {
-		    totalFields = configFormFields.size() + 10;
+		    //totalFields = configFormFields.size() + 10;
+                    totalFields = configFormFields.size();
 		}
 	    }
 
@@ -1796,5 +1797,86 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    System.err.println("/*** getBatchesByOrgId " + ex.getCause().getMessage());
 	    return null;
 	}
+    }
+    
+    /**
+     * The 'getTransactionRecords' function will return the transaction TARGET records for the passed in transactionId.
+     *
+     * @param batchId
+     * @param configId
+     * @param totalFields
+     * @return 
+     * @throws java.lang.Exception 
+     *
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<transactionOutRecords> getTransactionRecordsForFP(Integer batchId, Integer configId, Integer totalFields) throws Exception {
+	
+	totalFields = totalFields + 10;
+	
+	String sql = "select ";
+		
+	for (int i = 1; i <= totalFields; i++) {
+	    sql += "a.f" + i + ",";
+	}	
+	sql += "a.id, b.transactionInRecordsId from transactiontranslatedout_" + batchId + " a inner join "
+	+ "transactionoutrecords_" + batchId + " b on b.id = a.transactionOutRecordsId "
+	+ "order by a.id asc";
+	
+	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
+	Transformers.aliasToBean(transactionOutRecords.class));
+
+	List<transactionOutRecords> records = query.list();
+	
+	return records;
+    }
+    
+    @Override
+    @Transactional(readOnly = false)
+    public Integer writeFPOutputToTextFile(configurationTransport transportDetails, Integer batchDownloadId, String filePathAndName, String fieldNos) {
+
+	String sql = "";
+
+	if(transportDetails.isAddTargetFileHeaderRow()) {
+	    String configFieldHeadings = getConfigFieldHeadingsForOutput(transportDetails.getconfigId());
+	    if(configFieldHeadings != null) {
+		if(!"".equals(configFieldHeadings)) {
+		    sql += "SELECT " + configFieldHeadings + " UNION ALL ";
+		}
+	    }
+	}
+
+	sql += "SELECT " + fieldNos.replace("(F", "(a.F") + ", b.transactionInRecordsId "
+	+ "FROM transactionTranslatedOut_" + batchDownloadId + " a inner join "
+	+ "transactionoutrecords_" + batchDownloadId + " b on b.id = a.transactionOutRecordsId "
+	+ "where a.configId = " + transportDetails.getconfigId() + " and ";
+
+	if(transportDetails.geterrorHandling() == 4) {
+	    sql += "a.statusId in (9,14) ";
+	}
+	else {
+	    sql += "a.statusId = 9 ";
+	}
+	sql += "INTO OUTFILE  '" + filePathAndName + "' "
+	+ "FIELDS TERMINATED BY '" + transportDetails.getDelimChar()+"' LINES TERMINATED BY '\\n';";
+	
+	if (!"".equals(sql)) {
+	    
+	    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+
+	    if (transportDetails.getfileType() == 12) {
+		query.setParameter("batchConfigId", transportDetails.getconfigId());
+		query.setParameter("batchDownloadId", batchDownloadId);
+		query.setParameter("filePathAndName", filePathAndName);
+		query.setParameter("jsonWrapperElement", transportDetails.getJsonWrapperElement());
+	    }
+
+	    try {
+		query.list();
+	    } catch (Exception ex) {}
+	}
+
+	return 0;
     }
 }
