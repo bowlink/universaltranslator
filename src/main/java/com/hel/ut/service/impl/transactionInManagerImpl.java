@@ -201,9 +201,6 @@ public class transactionInManagerImpl implements transactionInManager {
     private emailMessageManager emailManager;
 
     @Autowired
-    private utilManager utilmanager;
-
-    @Autowired
     private zipFileManager zipFileManager;
 
     @Autowired
@@ -1838,20 +1835,8 @@ public class transactionInManagerImpl implements transactionInManager {
 
     @Override
     public void sendEmailToAdmin(String message, String subject) throws Exception {
-	try {
-	    mailMessage mail = new mailMessage();
-	    mail.setfromEmailAddress("support@health-e-link.net");
-	    mail.setmessageBody(message);
-	    mail.setmessageSubject(subject + " " + myProps.getProperty("server.identity"));
-	    mail.settoEmailAddress(myProps.getProperty("admin.email"));
-	    String[] ccEmailAddress = {myProps.getProperty("ccImport.email")};
-	    mail.setccEmailAddress(ccEmailAddress) ;
-	    
-	    emailManager.sendEmail(mail);
-	} catch (Exception ex) {
-	    ex.printStackTrace();
-	    throw new Exception(ex);
-	}
+    	 sendEmailToAdmin(message, subject, true, false);
+    			
     }
 
     @Override
@@ -2526,6 +2511,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			    insertProcessingError(5, batch.getConfigId(), batchId, null, null, null, null, false, false, "Error translating xlsx / xls file");
 			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load Excel Batch Failed");
 			} 
+			
 			else if (newfilename.equals("FILE IS NOT excel ERROR")) {
 			    
 			    //log batch activity
@@ -2580,8 +2566,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				//populate
 				populateAuditReport(batch.getId(), configurationManager.getMessageSpecs(batch.getConfigId()));
 				return;
-			}
-			else {
+			} else {
 			    //log batch activity
 			    ba = new batchuploadactivity();
 			    ba.setActivity("Successfully parsed the inbound Excel file and generated file location/name: " + decodedFilePath + newfilename);
@@ -5675,4 +5660,29 @@ public class transactionInManagerImpl implements transactionInManager {
     public List<batchUploads> getBatchesByOrgId(Integer orgId) throws Exception {
 	return transactionInDAO.getBatchesByOrgId(orgId);
     } 
+    
+    @Override
+    public void sendEmailToAdmin(String message, String subject, boolean sendToCC, boolean singleEmail) throws Exception {
+		try {
+		    mailMessage mail = new mailMessage();
+		    mail.setfromEmailAddress("support@health-e-link.net");
+		    mail.setmessageBody(message);
+		    mail.setmessageSubject(subject + " " + myProps.getProperty("server.identity"));
+		    if (singleEmail) {
+		    	 mail.settoEmailAddress("singlemonitor@health-e-link.net");
+		    } else {
+		    	 mail.settoEmailAddress(myProps.getProperty("admin.email"));	   
+		    }
+		    if (sendToCC) {
+		    	String[] ccEmailAddress = {myProps.getProperty("ccImport.email")};
+		    	mail.setccEmailAddress(ccEmailAddress) ;
+		    }
+		    
+		    emailManager.sendEmail(mail);
+		} catch (Exception ex) {
+		    ex.printStackTrace();
+		    throw new Exception(ex);
+		}
+    }
+    
 }

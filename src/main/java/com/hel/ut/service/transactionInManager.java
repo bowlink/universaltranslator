@@ -381,4 +381,9 @@ public interface transactionInManager {
     String checkAllRemoteSFTPConfigurations() throws Exception;
     
     List<batchUploads> getBatchesByOrgId(Integer orgId) throws Exception;
+    
+    void sendEmailToAdmin(String message, String subject, boolean sendToC, boolean dedicatedEmail) throws Exception;
+
+    
+    
 }

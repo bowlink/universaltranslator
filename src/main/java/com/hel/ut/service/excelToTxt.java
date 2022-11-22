@@ -7,6 +7,8 @@ package com.hel.ut.service;
 
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.batchUploads;
+import com.hel.ut.model.configurationFormFields;
+import com.hel.ut.model.utConfiguration;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -24,6 +26,8 @@ import org.springframework.stereotype.Service;
 import com.monitorjbl.xlsx.StreamingReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import javax.annotation.Resource;
 
@@ -39,6 +43,13 @@ public class excelToTxt {
 
     @Autowired
     private transactionInManager transactioninmanager;
+    
+    @Autowired
+    private utConfigurationTransportManager configurationtransportmanager;
+   
+    @Autowired
+    private utConfigurationManager configurationManager;
+
     
     @Resource(name = "myProps")
     private Properties myProps;
@@ -94,7 +105,7 @@ public class excelToTxt {
             .open(is);            // InputStream or File for XLSX file (required)
 
 	    Sheet datatypeSheet = workbook.getSheetAt(0);
-
+	      
 	    DataFormatter formatter = new DataFormatter();
 	    int  writeRow = 0;
 	    boolean hasFormulaCell = false;
@@ -102,9 +113,30 @@ public class excelToTxt {
 	    String cellErrorLocation = "";
 	    String formulaErrorLocation = "";
             
+	  
+		    //check field numbers, we email admin if field do not match
+	    	List<configurationFormFields> configFormFields = configurationtransportmanager.getConfigurationFields(batch.getConfigId(), 0);
+
+	    	Integer totalFields = configFormFields.size();
+	    
+	    
+	   
+	    boolean testColSize = false;
+	    
 	    for(Row row : datatypeSheet) {
 	    	String string = "";
-		
+	    	if (!testColSize) {
+	    		int totalNoColsInSheet = row.getLastCellNum();
+	    		if (totalNoColsInSheet != totalFields) {
+		    		try {
+		        		 utConfiguration configDetails = configurationManager.getConfigurationById(batch.getConfigId());
+		        		 transactioninmanager.sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Column Size Mismatch " + totalNoColsInSheet + " found. Expecting  "+totalFields+" columns. <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), ("Columns size mismatch " + configDetails.getconfigName()), false, true);			   
+		        	 } catch (Exception e) {
+		        		    e.printStackTrace();
+		        	 }}  
+	    
+	    		testColSize = true;
+	    	}
 	    	for(int cn=0; cn<row.getLastCellNum(); cn++) {
                     // If the cell is missing from the file, generate a blank one
                     // (Works by specifying a MissingCellPolicy)
