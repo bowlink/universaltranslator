@@ -105,7 +105,7 @@ public class excelToTxt {
             .open(is);            // InputStream or File for XLSX file (required)
 
 	    Sheet datatypeSheet = workbook.getSheetAt(0);
-
+	      
 	    DataFormatter formatter = new DataFormatter();
 	    int  writeRow = 0;
 	    boolean hasFormulaCell = false;
@@ -113,13 +113,19 @@ public class excelToTxt {
 	    String cellErrorLocation = "";
 	    String formulaErrorLocation = "";
             
-	   
+	  
 		    //check field numbers, we email admin if field do not match
 	    	List<configurationFormFields> configFormFields = configurationtransportmanager.getConfigurationFields(batch.getConfigId(), 0);
 
 	    	Integer totalFields = configFormFields.size();
 	    
-	    	for(Row row : datatypeSheet) {
+	    
+	   
+	    boolean testColSize = false;
+	    
+	    for(Row row : datatypeSheet) {
+	    	String string = "";
+	    	if (!testColSize) {
 	    		int totalNoColsInSheet = row.getLastCellNum();
 	    		if (totalNoColsInSheet != totalFields) {
 		    		try {
@@ -129,14 +135,8 @@ public class excelToTxt {
 		        		    e.printStackTrace();
 		        	 }}  
 	    
-	    	break;
-	    	
-	    }
-	    
-	    
-	    for(Row row : datatypeSheet) {
-	    	String string = "";
-		
+	    		testColSize = true;
+	    	}
 	    	for(int cn=0; cn<row.getLastCellNum(); cn++) {
                     // If the cell is missing from the file, generate a blank one
                     // (Works by specifying a MissingCellPolicy)
