@@ -2,6 +2,10 @@
 
 require(['./main'], function () {
     
+    //Disable the save buttons (will be reactivated when the existing DTS are loaded)
+    $('#saveDetails').addClass( "disabled" );
+    $('#next').addClass( "disabled" );
+    
     $(document).on('change','#delimiter', function() {
         var cwFileLink = $('#cwFileLink').attr('href');
         
@@ -296,7 +300,6 @@ require(['./main'], function () {
         
     });
 
-
     //This function will get the next/prev page for the crosswalk list
     $(document).on('click', '.nextPage', function () {
         var page = $(this).attr('rel');
@@ -329,34 +332,41 @@ require(['./main'], function () {
       }
     });
     
-    //The function that will be called when the "Save" button
-    //is clicked
+    //The function that will be called when the "Save" button is clicked
     $('#saveDetails').click(function () {
-        $.ajax({
-            url: 'translations',
-            type: "POST",
-            data: {'categoryId': 1},
-            success: function (data) {
-                window.location.href = "translations?msg=updated";
-            }
-        });
+        if(!$(this).hasClass("disabled")) {
+            $.ajax({
+                url: 'translations',
+                type: "POST",
+                data: {'categoryId': 1},
+                success: function (data) {
+                    window.location.href = "translations?msg=updated";
+                }
+            });
+        }
+        else {
+            alert("Data translations are still loading. You can save the page once they are fully loaded.");
+        }
     });
-
-    //The function that will be called when the "Next Step" button
-    //is clicked
+     
+    //The function that will be called when the "Next Step" button is clicked
     $('#next').click(function () {
-
         var configType = $('#configtype').attr('rel');
         var mappings = $('#configtype').attr('rel2');
-
-        $.ajax({
-            url: 'translations',
-            type: "POST",
-            data: {'categoryId': 1},
-            success: function (data) {
-                window.location.href = "scheduling?msg=updated";
-            }
-        });
+        
+        if(!$(this).hasClass("disabled")) {
+            $.ajax({
+                url: 'translations',
+                type: "POST",
+                data: {'categoryId': 1},
+                success: function (data) {
+                    window.location.href = "scheduling?msg=updated";
+                }
+            });
+        }
+        else {
+            alert("Data translations are still loading. You can save the page once they are fully loaded.");
+        }
     });
 
     $(document).on('click', '.cwClose', function() {
@@ -374,7 +384,6 @@ require(['./main'], function () {
             }
         });
     });
-
 
     //This function will launch the new crosswalk overlay with a blank form
     $(document).on('click', '#createNewCrosswalk', function () {
@@ -632,14 +641,18 @@ require(['./main'], function () {
 
 
 function populateExistingTranslations(reload) {
-
     $.ajax({
         url: 'getTranslations.do',
         type: "GET",
-        data: {'reload': reload, 'categoryId': 1},
+        data: {
+            'reload': reload, 
+            'categoryId': 1
+        },
         success: function (data) {
             $("#existingTranslations").html(data);
 	    $('.dtDownloadLink').show();
+            $('#saveDetails').removeClass( "disabled" );
+            $('#next').removeClass( "disabled" );
         }
     });
 }
