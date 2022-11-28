@@ -3203,10 +3203,21 @@ public class adminConfigController {
     public @ResponseBody
     Integer deleteConfiguration(@RequestParam int configId) throws Exception {
         utConfiguration configDetails = utconfigurationmanager.getConfigurationById(configId);
-	configDetails.setDeleted(true);
-	
-	utconfigurationmanager.updateConfiguration(configDetails);
-	
+        
+        if(configDetails != null) {
+            configDetails.setStatus(false);
+            configDetails.setDeleted(true);
+
+            utconfigurationmanager.updateConfiguration(configDetails);
+
+            //Delete any ftp information
+            //Get the transport Id
+            configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
+            if(transportDetails != null) {
+                utconfigurationmanager.deleteConfigurationFTPInformation(transportDetails.getId());
+            }
+        }
+        
         return 1;
     }
     
