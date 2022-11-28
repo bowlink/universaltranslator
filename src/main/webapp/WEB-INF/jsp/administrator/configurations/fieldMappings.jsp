@@ -19,7 +19,7 @@
                 </div>
                 <div class="panel-body">
                     <p><strong>Organization:</strong> ${configurationDetails.orgName}</p>
-                    <p><strong>Configuration Name:</strong> ${configurationDetails.configName}</p>
+                    <p><strong>Configuration Name:</strong> ${configurationDetails.configName} (Id: ${configurationDetails.id})</p>
                     <p><strong>Configuration Type:</strong> <span id="configType" rel="${configurationDetails.type}"><c:choose><c:when test="${configurationDetails.type == 1}">Source</c:when><c:otherwise>Target</c:otherwise></c:choose></span></p>
                     <p><strong>Transport Method:</strong> <c:choose><c:when test="${configurationDetails.transportMethod == 'File Upload'}"><c:choose><c:when test="${configurationDetails.type == 1}">File Upload</c:when><c:otherwise>File Download</c:otherwise></c:choose></c:when><c:otherwise>${configurationDetails.transportMethod}</c:otherwise></c:choose></p>
                     <c:if test="${not empty lastConfigUpdate}"><p><strong>Template file last updated on:</strong> <fmt:formatDate value="${lastConfigUpdate}" type="date" pattern="M/dd/yyyy h:mm a" /></p></c:if>
