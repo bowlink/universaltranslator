@@ -1,12 +1,40 @@
 
 
 require(['./main'], function () {
+    
+    $(document).on('click', '.exportConfig', function() {
+            
+        var configId = $(this).attr('rel');
+
+        if(confirm("Are you sure you want to export this configuration?")) {
+
+            $.ajax({
+                url: 'createConfigExportFile.do',
+                data: {
+                    'configId': configId
+                },
+                type: "GET",
+                dataType : 'text',
+                contentType : 'application/json;charset=UTF-8',
+                success: function(data) {
+                    if(data !== '') {
+                        window.location.href = '/administrator/configurations/printConfigExport/'+ data;
+                        //$('#dtDownloadModal').modal('toggle');
+                    }
+                    else {
+                        $('#exportErrorMsg').show();
+                    }
+                }
+            });
+        }
+    });
         
     $(document).on('click','.printConfig',function() {
        /* $('body').overlay({
             glyphicon : 'print',
             message : 'Gathering Details...'
         });*/
+        
 
         var configId = $(this).attr('rel');
 

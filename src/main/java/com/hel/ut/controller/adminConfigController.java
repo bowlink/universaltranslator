@@ -421,6 +421,7 @@ public class adminConfigController {
      *
      * @param session
      * @param id
+     * @param authentication
      * @return	Will return the utConfiguration details page.
      *
      * @Objects	(1) The object containing all the information for the clicked configuration (2) The 'id' of the clicked configuration that will be used in the menu and action bar
@@ -429,7 +430,7 @@ public class adminConfigController {
      *
      */
     @RequestMapping(value = "/details", method = RequestMethod.GET)
-    public ModelAndView viewConfigurationDetails(HttpSession session,@RequestParam(value = "i", required = false) Integer id) throws Exception {
+    public ModelAndView viewConfigurationDetails(HttpSession session,@RequestParam(value = "i", required = false) Integer id,Authentication authentication) throws Exception {
 
         Integer configId = 0;
 	
@@ -450,6 +451,15 @@ public class adminConfigController {
         mav.setViewName("/administrator/configurations/details");
 
         utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
+        
+        configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(configurationDetails.getId());
+        
+        utUser userDetails = userManager.getUserByUserName(authentication.getName());
+	    
+        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+            configurationDetails.setAllowExport(true);
+        }
+        
         mav.addObject("configurationDetails", configurationDetails);
 
         //Need to get a list of active organizations.
@@ -619,6 +629,12 @@ public class adminConfigController {
         if (action.equals("save")) {
             ModelAndView mav = new ModelAndView();
             mav.setViewName("/administrator/configurations/details");
+            
+            configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(configurationDetails.getId());
+        
+            if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+                configurationDetails.setAllowExport(true);
+            }
 
             mav.addObject("organizations", organizations);
             mav.addObject("users", users);
@@ -645,6 +661,7 @@ public class adminConfigController {
      * The '/transport' GET request will display the clicked utConfiguration transport details form.
      *
      * @param session
+     * @param authentication
      * @return	Will return the utConfiguration transport details form
      *
      * @Objects	transportDetails will hold a empty object or an object containing the existing transport details for the selected configuration
@@ -654,7 +671,7 @@ public class adminConfigController {
      */
     @SuppressWarnings("rawtypes")
     @RequestMapping(value = "/transport", method = RequestMethod.GET)
-    public ModelAndView viewTransportDetails(HttpSession session) throws Exception {
+    public ModelAndView viewTransportDetails(HttpSession session,Authentication authentication) throws Exception {
 	
         ModelAndView mav = new ModelAndView();
 	
@@ -851,6 +868,14 @@ public class adminConfigController {
 	mav.addObject("cleanOrgURL",orgDetails.getCleanURL());
 	
         configurationDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+        
+        configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(configurationDetails.getId());
+        
+        utUser userDetails = userManager.getUserByUserName(authentication.getName());
+	    
+        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+            configurationDetails.setAllowExport(true);
+        }
 
         //pass the utConfiguration detail object back to the page.
         mav.addObject("configurationDetails", configurationDetails);
@@ -1104,6 +1129,7 @@ public class adminConfigController {
      * The '/messagespecs' GET request will display the utConfiguration message specs form.
      *
      * @param session
+     * @param authentication
      * @return	Will return the utConfiguration message spec details form
      *
      * @Objects	transportDetails will hold a empty object or an object containing the existing transport details for the selected configuration
@@ -1113,7 +1139,7 @@ public class adminConfigController {
      */
     @SuppressWarnings("rawtypes")
     @RequestMapping(value = "/messagespecs", method = RequestMethod.GET)
-    public ModelAndView viewMessageSpecDetails(HttpSession session) throws Exception {
+    public ModelAndView viewMessageSpecDetails(HttpSession session, Authentication authentication) throws Exception {
 	
 	Integer configId = 0;
 	
@@ -1129,6 +1155,14 @@ public class adminConfigController {
 	
 	//Get the utConfiguration details for the selected config
         utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
+        
+        configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(configurationDetails.getId());
+        
+        utUser userDetails = userManager.getUserByUserName(authentication.getName());
+	    
+        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+            configurationDetails.setAllowExport(true);
+        }
 	
 	// Get organization directory name
         Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getorgId());
@@ -1298,12 +1332,13 @@ public class adminConfigController {
     /**
      * The '/mappings' GET request will determine based on the selected transport method what page to display.Either the choose fields page if 'online form' is selected or 'mappings' if a custom file is being uploaded.
      * @param session
+     * @param authentication
      * @return 
      * @throws java.lang.Exception 
      */
     @SuppressWarnings("rawtypes")
     @RequestMapping(value = "/mappings", method = RequestMethod.GET)
-    public ModelAndView getConfigurationMappings(HttpSession session) throws Exception {
+    public ModelAndView getConfigurationMappings(HttpSession session, Authentication authentication) throws Exception {
 	
 	Integer configId = 0;
 	
@@ -1334,6 +1369,15 @@ public class adminConfigController {
         configurationDetails.setOrgName(orgDetails.getOrgName());
        
         configurationDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+        
+        configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(configurationDetails.getId());
+        
+        utUser userDetails = userManager.getUserByUserName(authentication.getName());
+	    
+        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+            configurationDetails.setAllowExport(true);
+        }
+        
 	mav.addObject("configurationDetails", configurationDetails);
 
         //Get the transport fields
@@ -1489,12 +1533,13 @@ public class adminConfigController {
     /**
      * The '/translations' GET request will display the data translations page for the selected transport Method
      * @param session
+     * @param authentication
      * @return 
      * @throws java.lang.Exception
      */
     @SuppressWarnings("rawtypes")
     @RequestMapping(value = "/translations", method = RequestMethod.GET)
-    public ModelAndView getConfigurationTranslations(HttpSession session) throws Exception {
+    public ModelAndView getConfigurationTranslations(HttpSession session, Authentication authentication) throws Exception {
 
         //Set the data translations array to get ready to hold data=
         List<configurationDataTranslations> translations = new CopyOnWriteArrayList<>();
@@ -1527,6 +1572,14 @@ public class adminConfigController {
 
         //Get the completed steps for the selected utConfiguration;
         utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
+        
+        configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(configurationDetails.getId());
+        
+        utUser userDetails = userManager.getUserByUserName(authentication.getName());
+	    
+        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+            configurationDetails.setAllowExport(true);
+        }
 
         //Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
@@ -2112,12 +2165,13 @@ public class adminConfigController {
     /**
      * The '/scheduling' GET request will display the scheduling page for the selected transport Method
      * @param session
+     * @param authentication
      * @return 
      * @throws java.lang.Exception
      */
     @SuppressWarnings("rawtypes")
     @RequestMapping(value = "/scheduling", method = RequestMethod.GET)
-    public ModelAndView getConfigurationSchedules(HttpSession session) throws Exception {
+    public ModelAndView getConfigurationSchedules(HttpSession session, Authentication authentication) throws Exception {
 
        Integer configId = 0;
 	
@@ -2140,6 +2194,14 @@ public class adminConfigController {
 
         //Get the completed steps for the selected utConfiguration;
         utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
+        
+        configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(configurationDetails.getId());
+        
+        utUser userDetails = userManager.getUserByUserName(authentication.getName());
+	    
+        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+            configurationDetails.setAllowExport(true);
+        }
 
         //Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
@@ -2149,9 +2211,6 @@ public class adminConfigController {
 
         //pass the utConfiguration detail object back to the page.
         mav.addObject("configurationDetails", configurationDetails);
-
-        //Get the schedule for the utConfiguration and selected transport method
-        configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(configId);
 
         if (scheduleDetails == null) {
             scheduleDetails = new configurationSchedules();

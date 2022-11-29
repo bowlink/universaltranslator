@@ -80,6 +80,11 @@
                     <li><a href="#ccdElementModal" id="createNewCCDElement" data-toggle="modal" role="button" title="Create CCD Element"><span class="glyphicon icon-stacked glyphicon glyphicon-plus"></span>Create New</a></li>
                 </c:when>    
                 <c:otherwise>
+                    <c:if test="${configurationDetails.allowExport}">
+                        <li>
+                            <a href="javascript:void(0);" class="exportConfig" rel="${configurationDetails.id}" title="Export this Configuration" role="button"><span class="glyphicon glyphicon-export icon-stacked"></span>Export</a>
+                         </li> 
+                    </c:if>
                     <li>
 			<a href="javascript:void(0);" class="printConfig" title="Print this Configuration" rel="${configurationDetails.id}" role="button"><span class="glyphicon glyphicon-print icon-stacked"></span> Print </a>
 		    </li>
