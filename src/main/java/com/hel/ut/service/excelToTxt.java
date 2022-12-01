@@ -148,14 +148,16 @@ public class excelToTxt {
                         //formula
                         if (cell.getCellTypeEnum() == CellType.FORMULA) {			
                             hasFormulaCell = true;
-                            text = "FORMULA";
+                            //text = "FORMULA";
+                            text = "FORMULA FOUND HERE " + formatter.formatCellValue(cell);
                             int errorRow  = row.getRowNum()+1;
                             int errorCell = cn + 1;
                             formulaErrorLocation = "row " + errorRow + ", cell " + errorCell;
                         } 
                         else if (cell.getCellTypeEnum() == CellType.ERROR) {
                             hasErrorCell = true;
-                            text = "CELL ERROR";
+                            //text = "CELL ERROR";
+                            text = "CELL ERROR FOUND HERE " + formatter.formatCellValue(cell);
                             int errorRow  = row.getRowNum()+1;
                             int errorCell = cn + 1;
                             cellErrorLocation = "row " + errorRow + ", cell " + errorCell;

@@ -1210,10 +1210,29 @@ public class transactionInDAOImpl implements transactionInDAO {
 		    }
 		}
 	    }
+	   
+	    List<configurationFormFields> configFormFields = configurationtransportmanager.getConfigurationFields(configId, 0);
+
+	    Integer totalFields = 50;
+	    
+	    if (configFormFields != null) {
+			if (!configFormFields.isEmpty()) {
+			    //totalFields = configFormFields.size() + 10;
+	                    totalFields = configFormFields.size();
+			}
+	    }
 	    
 	    String sql = ("LOAD DATA LOCAL INFILE '" + fileWithPath + "' INTO TABLE " + loadTableName + " fields terminated by '" + delimChar + "' "
-	    + " optionally ENCLOSED BY '\"' ESCAPED BY '\\b' LINES TERMINATED BY '" + lineTerminator + "'  " + ignoreSyntax
-	    + " set batchUploadId = " + batchId + ", configId = " + configId + ";");
+	    + " optionally ENCLOSED BY '\"' ESCAPED BY '\\b' LINES TERMINATED BY '" + lineTerminator + "'  " + ignoreSyntax  + " (");
+	    
+	    String fieldSql = "";
+	    for (int i = 1; i <= totalFields; i++) {
+	    	fieldSql += "F" + i + " ,";
+		    }
+	    fieldSql = fieldSql.substring(0, fieldSql.length() - 1);
+	    
+	    sql = sql + fieldSql;
+	    sql = sql +  ") set batchUploadId = " + batchId + ", configId = " + configId + ";";
 	    
 	    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
 	    query.executeUpdate();
