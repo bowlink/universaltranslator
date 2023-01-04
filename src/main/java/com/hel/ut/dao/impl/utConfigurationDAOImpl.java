@@ -1207,10 +1207,9 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 
             try {
                 pkg = OPCPackage.open(new File(dir + fileName));
-
                 workbook = new XSSFWorkbook(pkg);
-
-            } catch (Exception e1) {
+            } 
+            catch (Exception e1) {
                 e1.printStackTrace();
                 errorMessage = errorMessage + "<br/>" + e1.getMessage();
             }
@@ -1251,11 +1250,13 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 		if(row.getLastCellNum() > 5) {
 		    messageSpecs.settemplateFile(currentTemplateFileName);
 		    updateMessageSpecs(messageSpecs, transportDetailId);
+                    workbook.close();
 		    throw new Exception("The uploaded template file had more than 5 columns, please choose horizontal layout or check your uploaded template file.");
 		}
 		else if(row.getLastCellNum() < 2) {
 		    messageSpecs.settemplateFile(currentTemplateFileName);
 		    updateMessageSpecs(messageSpecs, transportDetailId);
+                    workbook.close();
 		    throw new Exception("The uploaded template file had only 1 column, please check your uploaded template file.");
 		}
 		else {
@@ -1314,6 +1315,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 					    requiredAsString = cell.getStringCellValue();
 					    
 					    if(configDetails.getType() == 1 && ("default".equals(requiredAsString.toLowerCase()) || "d".equals(requiredAsString.toLowerCase()))) {
+                                                workbook.close();
 						throw new Exception("The uploaded template file did not have a correct R/O value (" + requiredAsString + ") in row " + rowCounter + " column 2");
 					    }
 					    else {
@@ -1330,9 +1332,11 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 						else {
 						    //required = false;
 						    if(configDetails.getType() == 1) {
+                                                        workbook.close();
 							throw new Exception("The uploaded template file did not have a correct R/O value (" + requiredAsString + ") in row " + rowCounter + " column 2");
 						    }
 						    else {
+                                                        workbook.close();
 							throw new Exception("The uploaded template file did not have a correct R/O/D value (" + requiredAsString + ") in row " + rowCounter + " column 2");
 						    }
 						}
@@ -1341,6 +1345,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 					catch (Exception e) {
 					    messageSpecs.settemplateFile(currentTemplateFileName);
 					    updateMessageSpecs(messageSpecs, transportDetailId);
+                                            workbook.close();
 					    if(e.getMessage() != null && e.getMessage().contains("uploaded template")) {
 						throw e;
 					    }
@@ -1352,7 +1357,6 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 						    throw new Exception("The uploaded template file did not have a correct R/O/D value in row " + rowCounter + " column 2");
 						}
 					    }
-					    //required = false;
 					}
 				    }
 				    break;
@@ -1384,12 +1388,14 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 					     useField = false;
 					 }
 					 else {
+                                            workbook.close();
 					    throw new Exception("The uploaded template file did not have a correct Use/Not Use value ("+useNotUse+") in row " + rowCounter + " column 4");
 					 }
 				    }
 				    catch (Exception ex) {
 					 messageSpecs.settemplateFile(currentTemplateFileName);
 					 updateMessageSpecs(messageSpecs, transportDetailId);
+                                         workbook.close();
 					 if(ex.getMessage() != null && ex.getMessage().contains("uploaded template")) {
 					      throw ex;
 					 }
@@ -1421,14 +1427,14 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 					     validationId = 6;
 					 }
 					 else {
-					    //validationId = 1;
+					    workbook.close();
 					    throw new Exception("The uploaded template file did not have a correct validation value ("+validationVal+") in row " + rowCounter + " column 5");
 					 }
 				    }
 				    catch (Exception ex) {
 					messageSpecs.settemplateFile(currentTemplateFileName);
 					updateMessageSpecs(messageSpecs, transportDetailId);
-					//validationId = 1;
+					workbook.close();
 					if(ex.getMessage() != null && ex.getMessage().contains("uploaded template")) {
 					    throw ex;
 					}
@@ -1461,54 +1467,49 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 			
 			if(fieldFound && foundFieldId > 0) {
 			    query = sessionFactory.getCurrentSession().createSQLQuery(sqlStatement)
-				.setParameter("fieldNo", fieldNo) 
-				.setParameter("validationId", validationId)
-				.setParameter("required", required)
-				.setParameter("useField", useField)
-				.setParameter("defaultValue", defaultValue)
-				.setParameter("sampleData", sampleData)
-				.setParameter("fieldId", foundFieldId);
+                            .setParameter("fieldNo", fieldNo) 
+                            .setParameter("validationId", validationId)
+                            .setParameter("required", required)
+                            .setParameter("useField", useField)
+                            .setParameter("defaultValue", defaultValue)
+                            .setParameter("sampleData", sampleData)
+                            .setParameter("fieldId", foundFieldId);
 			}
 			else {
 			    sqlStatement = "INSERT INTO configurationFormFields (configId, transportDetailId, fieldNo, fieldDesc, validationType, required, useField, defaultValue, sampleData)"
-				+ " VALUES (:configId, :transportDetailId, :fieldNo, :fieldDesc, :validationId, :required, :useField, :defaultValue, :sampleData)";
+                            + " VALUES (:configId, :transportDetailId, :fieldNo, :fieldDesc, :validationId, :required, :useField, :defaultValue, :sampleData)";
 			    
 			    query = sessionFactory.getCurrentSession().createSQLQuery(sqlStatement)
-				.setParameter("configId", messageSpecs.getconfigId())
-				.setParameter("transportDetailId", transportDetailId)
-				.setParameter("fieldNo", fieldNo)
-				.setParameter("fieldDesc", fieldDesc)
-				.setParameter("validationId", validationId)
-				.setParameter("required", required)
-				.setParameter("useField", useField)
-				.setParameter("defaultValue", defaultValue)
-				.setParameter("sampleData", sampleData);
+                            .setParameter("configId", messageSpecs.getconfigId())
+                            .setParameter("transportDetailId", transportDetailId)
+                            .setParameter("fieldNo", fieldNo)
+                            .setParameter("fieldDesc", fieldDesc)
+                            .setParameter("validationId", validationId)
+                            .setParameter("required", required)
+                            .setParameter("useField", useField)
+                            .setParameter("defaultValue", defaultValue)
+                            .setParameter("sampleData", sampleData);
 			}
 			
 			query.executeUpdate();
-
 		    }
 		}
 	    }
 	    else if(fileLayout == 1) {
-		
+                
 		if(sheet.getLastRowNum() > 5) {
 		    messageSpecs.settemplateFile(currentTemplateFileName);
 		    updateMessageSpecs(messageSpecs, transportDetailId);
+                    workbook.close();
 		    throw new Exception("The uploaded template file had more than 5 rows, please choose vertical layout or check your uploaded template file.");
 		}
 		else if(sheet.getLastRowNum() < 2) {
 		    messageSpecs.settemplateFile(currentTemplateFileName);
 		    updateMessageSpecs(messageSpecs, transportDetailId);
+                    workbook.close();
 		    throw new Exception("The uploaded template file had less than 3 rows, please choose horizontal layout or check your uploaded template file.");
 		}
 		else {
-		    //update 4/14/2020 CM - No need to clear anything becauase we are looking for matches in the uploaded file
-		    //and existing fields, if a match then we update values else we insert
-		    
-		    //Clear existing fields
-		    //clearMessageSpecFormFields(messageSpecs,transportDetailId);
-		    
 		    Integer startRow = 0;
 		    Integer rowNumber = 0;
 
@@ -1562,7 +1563,6 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 				 if(DateUtil.isCellDateFormatted(cell)) {
 				     CellStyle cellstyle = cell.getCellStyle();
 				     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-d");
-
 
 				     if(cellstyle.getDataFormatString().equals("m/d/yy")) {
 					format = new SimpleDateFormat("M/d/yy");
@@ -1644,8 +1644,9 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 				row = sheet.getRow(rowNumber);
 				cell = row.getCell(colNumber);
 				requiredAsString = cell.getStringCellValue();
-				
+                                
 				if(configDetails.getType() == 1 && ("default".equals(requiredAsString.toLowerCase()) || "d".equals(requiredAsString.toLowerCase()))) {
+                                    workbook.close();
 				    throw new Exception("The uploaded template file did not have a correct R/O value (" + requiredAsString + ") in in row 3 column " + fieldNo);
 				}
 				else {
@@ -1662,20 +1663,21 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 					defaultValue = "";
 				    }
 				    else {
-					if(configDetails.getType() == 1) {
+                                        if(configDetails.getType() == 1) {
+                                            workbook.close();
 					    throw new Exception("The uploaded template file did not have a correct R/O value ("+requiredAsString+") in row 3 column " + fieldNo); 
 					}
 					else {
+                                            workbook.close();
 					    throw new Exception("The uploaded template file did not have a correct R/O/D value ("+requiredAsString+") in row 3 column " + fieldNo);  
 					}
-					//required = false;
-					//defaultValue = "";
 				    }
 				}
 			    }
 			    catch (Exception e) {
 				messageSpecs.settemplateFile(currentTemplateFileName);
 				updateMessageSpecs(messageSpecs, transportDetailId);
+                                workbook.close();
 				if(e.getMessage() != null && e.getMessage().contains("uploaded template")) {
 				     throw e;
 				}
@@ -1687,7 +1689,6 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 					throw new Exception("The uploaded template file did not have a correct R/O/D value in row 3 column " + fieldNo);
 				    }
 				}
-				//required = false;
 			    }
 			}
 			
@@ -1705,12 +1706,14 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 				useField = false;
 			    }
 			    else {
+                                workbook.close();
 				throw new Exception("The uploaded template file did not have a correct Use/Not Use value (" + useNotUse+ ") in row 4 column " + fieldNo);
 			    }
 			}
 			catch (Exception ex) {
 			    messageSpecs.settemplateFile(currentTemplateFileName);
 			    updateMessageSpecs(messageSpecs, transportDetailId);
+                            workbook.close();
 			    if(ex.getMessage() != null && ex.getMessage().contains("uploaded template")) {
 				throw ex;
 			    }
@@ -1746,20 +1749,20 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 				validationId = 6;
 			    }
 			    else {
+                                workbook.close();
 				throw new Exception("The uploaded template file did not have a correct validation value (" + validationVal + ") in row 5 column " + fieldNo);
-				//validationId = 1;
-			    }
+                            }
 		       }
 		       catch (Exception ex) {
 			   messageSpecs.settemplateFile(currentTemplateFileName);
 			   updateMessageSpecs(messageSpecs, transportDetailId);
+                           workbook.close();
 			   if(ex.getMessage() != null && ex.getMessage().contains("uploaded template")) {
 				throw ex;
 			   }
 			   else {
 			       throw new Exception("The uploaded template file did not have a correct validation value in row 5 column " + fieldNo);
 			   }
-			   //validationId = 1;
 		       }      
 
 			fieldFound = false;
@@ -1781,37 +1784,36 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 			
 			if(fieldFound && foundFieldId > 0) {
 			    query = sessionFactory.getCurrentSession().createSQLQuery(sqlStatement)
-				.setParameter("fieldNo", fieldNo) 
-				.setParameter("validationId", validationId)
-				.setParameter("required", required)
-				.setParameter("useField", useField)
-				.setParameter("defaultValue", defaultValue)
-				.setParameter("sampleData", sampleData.replace(".0", ""))
-				.setParameter("fieldId", foundFieldId);
+                            .setParameter("fieldNo", fieldNo) 
+                            .setParameter("validationId", validationId)
+                            .setParameter("required", required)
+                            .setParameter("useField", useField)
+                            .setParameter("defaultValue", defaultValue)
+                            .setParameter("sampleData", sampleData.replace(".0", ""))
+                            .setParameter("fieldId", foundFieldId);
 			}
 			else {
 			    sqlStatement = "INSERT INTO configurationFormFields (configId, transportDetailId, fieldNo, fieldDesc, validationType, required, useField, defaultValue, sampleData)"
-				+ " VALUES (:configId, :transportDetailId, :fieldNo, :fieldDesc, :validationId, :required, :useField, :defaultValue, :sampleData)";
+                            + " VALUES (:configId, :transportDetailId, :fieldNo, :fieldDesc, :validationId, :required, :useField, :defaultValue, :sampleData)";
 			    
 			    query = sessionFactory.getCurrentSession().createSQLQuery(sqlStatement)
-				.setParameter("configId", messageSpecs.getconfigId())
-				.setParameter("transportDetailId", transportDetailId)
-				.setParameter("fieldNo", fieldNo)
-				.setParameter("fieldDesc", fieldDesc)
-				.setParameter("validationId", validationId)
-				.setParameter("required", required)
-				.setParameter("useField", useField)
-				.setParameter("defaultValue", defaultValue)
-				.setParameter("sampleData", sampleData.replace(".0", ""));
+                            .setParameter("configId", messageSpecs.getconfigId())
+                            .setParameter("transportDetailId", transportDetailId)
+                            .setParameter("fieldNo", fieldNo)
+                            .setParameter("fieldDesc", fieldDesc)
+                            .setParameter("validationId", validationId)
+                            .setParameter("required", required)
+                            .setParameter("useField", useField)
+                            .setParameter("defaultValue", defaultValue)
+                            .setParameter("sampleData", sampleData.replace(".0", ""));
 			}
-			
 			query.executeUpdate();
 		    }
 		}
 	    }
 	    
             try {
-                pkg.close();
+                workbook.close();
             } catch (IOException e) {
                 e.printStackTrace();
                 errorMessage = errorMessage + "<br/>" + e.getMessage();
@@ -1857,9 +1859,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 		}
 	    }
 	}
-
     }
-    
     
     @Override
     @Transactional(readOnly = false)
@@ -1879,7 +1879,6 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 	configexceldetails.setDiscardLastRows(messageSpecs.getExcelskiprows());
 	
 	sessionFactory.getCurrentSession().save(configexceldetails);
-	
     }
     
     /**
@@ -1896,8 +1895,8 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = false)
     public Integer getFieldCrosswalkIdByFieldName(int configId, String fieldName) {
         Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT crosswalkId from configurationdatatranslations where fieldId in (select id FROM configurationformfields where configId = :configId and fieldDesc = :fieldName)")
-                .setParameter("configId", configId)
-                .setParameter("fieldName", fieldName);
+        .setParameter("configId", configId)
+        .setParameter("fieldName", fieldName);
         
         Integer crosswalkId = 0;
         
@@ -1908,7 +1907,6 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         return crosswalkId;
     }  
     
-   
     /**
      * The 'getActiveConfigurationsByTransportType' function will return a list of configurations set up the passed in userId and passed in transport method
      *

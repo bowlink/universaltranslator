@@ -1971,29 +1971,30 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			XSSFWorkbook workBook = new XSSFWorkbook();
 			XSSFSheet sheet = workBook.createSheet("sheet1");
 
-			String currentLine=null;
-			int RowNum=0;
-			BufferedReader br = new BufferedReader(new FileReader(myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + fileExt));
-			while ((currentLine = br.readLine()) != null) {
-				String str[] = currentLine.split(",");
-				XSSFRow currentRow=sheet.createRow(RowNum);
-				for(int i=0;i<str.length;i++){
-					currentRow.createCell(i).setCellValue(str[i]);
-				}
-				RowNum++;
-			}
+		    String currentLine=null;
+		    int RowNum=0;
+		    BufferedReader br = new BufferedReader(new FileReader(myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + fileExt));
+		    while ((currentLine = br.readLine()) != null) {
+			    String str[] = currentLine.split(",");
+			    XSSFRow currentRow=sheet.createRow(RowNum);
+			    for(int i=0;i<str.length;i++){
+				    currentRow.createCell(i).setCellValue(str[i]);
+			    }
+			    RowNum++;
+		    }
 
 			FileOutputStream fileOutputStream =  new FileOutputStream(myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + finalFileExt);
 			workBook.write(fileOutputStream);
 			fileOutputStream.close();
 
-			//Delete csv file
-			File csvFile = new File(myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + fileExt);
-			if(csvFile.exists()) {
-				csvFile.delete();
-			}
+		    //Delete csv file
+		    File csvFile = new File(myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + fileExt);
+		    if(csvFile.exists()) {
+			    csvFile.delete();
+		    }
 
-			fileExt = finalFileExt;
+		    fileExt = finalFileExt;
+                    workBook.close();
 		}
 	    }
 
