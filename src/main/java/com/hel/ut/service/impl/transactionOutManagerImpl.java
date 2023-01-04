@@ -1991,12 +1991,12 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		    int RowNum=0;
 		    BufferedReader br = new BufferedReader(new FileReader(myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + fileExt));
 		    while ((currentLine = br.readLine()) != null) {
-			    String str[] = currentLine.split(",");
-			    XSSFRow currentRow=sheet.createRow(RowNum);
-			    for(int i=0;i<str.length;i++){
-				    currentRow.createCell(i).setCellValue(str[i]);
-			    }
-			    RowNum++;
+                        String str[] = currentLine.split(",");
+                        XSSFRow currentRow=sheet.createRow(RowNum);
+                        for(int i=0;i<str.length;i++){
+                            currentRow.createCell(i).setCellValue(str[i]);
+                        }
+                        RowNum++;
 		    }
 
 		    FileOutputStream fileOutputStream =  new FileOutputStream(myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + finalFileExt);
@@ -2006,10 +2006,11 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		    //Delete csv file
 		    File csvFile = new File(myProps.getProperty("ut.directory.massOutputPath") + batchDownload.getUtBatchName() + "." + fileExt);
 		    if(csvFile.exists()) {
-			    csvFile.delete();
+                        csvFile.delete();
 		    }
 
 		    fileExt = finalFileExt;
+                    workBook.close();
 		}
 	    }
 
