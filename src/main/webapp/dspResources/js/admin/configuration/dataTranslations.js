@@ -2,17 +2,14 @@
 
 require(['./main'], function () {
     
-    //Disable the save buttons (will be reactivated when the existing DTS are loaded)
-    $('#saveDetails').addClass( "disabled" );
-    $('#next').addClass( "disabled" );
-    
-    $('#loadingModal').html('<div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h3 class="panel-title">Data Translations are loading</h3></div></div></div>');
-    $('#loadingModal').modal(
-        {
-            backdrop: 'static', 
-            keyboard: false
-        }
-    ); 
+    $("input:text,form").attr("autocomplete", "off");
+    populateCrosswalks(1,1);
+    populateExistingTranslations(0);
+
+    //Fade out the updated/created message after being displayed.
+    if ($('.alert').length > 0) {
+        $('.alert').delay(2000).fadeOut(1000);
+    }
     
     $(document).on('click', '.exportConfig', function() {
             
@@ -255,15 +252,6 @@ require(['./main'], function () {
        }
     });
 
-    $("input:text,form").attr("autocomplete", "off");
-    populateCrosswalks(1,1);
-    populateExistingTranslations(0);
-
-    //Fade out the updated/created message after being displayed.
-    if ($('.alert').length > 0) {
-        $('.alert').delay(2000).fadeOut(1000);
-    }
-
     //Function that will check the selected macro and determine if a module
     //should be launched to ask questions.
     $('#macro').change(function () {
@@ -370,6 +358,8 @@ require(['./main'], function () {
     //The function that will be called when the "Save" button is clicked
     $('#saveDetails').click(function () {
         if(!$(this).hasClass("disabled")) {
+            $('#next').addClass( "disabled" );
+            $('#saveDetails').addClass( "disabled" );
             $.ajax({
                 url: 'translations',
                 type: "POST",
@@ -390,6 +380,8 @@ require(['./main'], function () {
         var mappings = $('#configtype').attr('rel2');
         
         if(!$(this).hasClass("disabled")) {
+            $('#saveDetails').addClass( "disabled" );
+            $('#next').addClass( "disabled" );
             $.ajax({
                 url: 'translations',
                 type: "POST",
@@ -400,12 +392,15 @@ require(['./main'], function () {
             });
         }
         else {
-            alert("Data translations are still loading. You can save the page once they are fully loaded.");
+            alert("Data translations are still loading. You can proceed to the next step once they are fully loaded.");
         }
     });
 
     $(document).on('click', '.cwClose', function() {
-      window.location.reload();
+        $('.showCrosswalks').attr('rel',0);
+        $('.showCrosswalks').html('Show Only In Use Crosswalks');
+        $('#crosswalkTitle').html("Available");
+        populateCrosswalks(1,0);
     });
 
     //This function will launch the crosswalk overlay with the selected
@@ -676,6 +671,19 @@ require(['./main'], function () {
 
 
 function populateExistingTranslations(reload) {
+    
+    //Disable the save buttons (will be reactivated when the existing DTS are loaded)
+    $('#saveDetails').addClass( "disabled" );
+    $('#next').addClass( "disabled" );
+    
+    $('#loadingModal').html('<div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h3 class="panel-title">Data Translations are loading</h3></div></div></div>');
+    $('#loadingModal').modal(
+        {
+            backdrop: 'static', 
+            keyboard: false
+        }
+    ); 
+    
     $.ajax({
         url: 'getTranslations.do',
         type: "GET",
