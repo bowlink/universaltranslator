@@ -174,3 +174,4 @@
 <div class="modal fade" id="macroModal" role="dialog" tabindex="-1" aria-labeledby="Macro Details" aria-hidden="true" aria-describedby="Macro Details"></div>
 <div class="modal fade" id="dtDownloadModal" role="dialog" tabindex="-1" aria-labeledby="Data Translations Download" aria-hidden="true" aria-describedby="Data Translations Download"></div>
 <div class="modal fade" id="cwDownloadModal" role="dialog" tabindex="-1" aria-labeledby="Crosswalks Download" aria-hidden="true" aria-describedby="Crosswalks Download"></div>
+<div class="modal fade" id="loadingModal" role="dialog" tabindex="-1" aria-labeledby="Data Translations Loading" aria-hidden="true" aria-describedby="Data Translations Loading"></div>
