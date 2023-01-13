@@ -6,6 +6,14 @@ require(['./main'], function () {
     $('#saveDetails').addClass( "disabled" );
     $('#next').addClass( "disabled" );
     
+    $('#loadingModal').html('<div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h3 class="panel-title">Data Translations are loading</h3></div></div></div>');
+    $('#loadingModal').modal(
+        {
+            backdrop: 'static', 
+            keyboard: false
+        }
+    ); 
+    
     $(document).on('click', '.exportConfig', function() {
             
         var configId = $(this).attr('rel');
@@ -59,15 +67,14 @@ require(['./main'], function () {
         var cwId = $(this).attr('rel');
         
         if((dtsId*1) > 0) {
-             //alert("The selected crosswalk is currently associated to one of the below data translations and cannot be deleted. \n\nIf you are trying to upload a new file for the selected crosswalk click on the 'View' link to upload a new file. \n\nTo completely remove this crosswalk you must first remove the associated translation below.");
-             alert("The selected crosswalk is part of an existing configuration. You can click 'view' and upload an updated crosswalk file or you can delete the crosswalk after removing it from all configurations (data translations section) it is associated with.");
+             alert("The crosswalk you are trying to delete is associated to a field within the data translations section of one or more of your configurations. \n\nIn order to modify the crosswalks existing values you can click 'view' and upload a new crosswalk file. \n\nTo delete the crosswalk you must first remove its association with any of your configuration fields.");
         }
         else {
             if(confirm("Are you sure you want to remove this crosswalk?")) {
-                $('body').overlay({
+                /*$('body').overlay({
                     glyphicon : 'floppy-disk',
                     message : 'Deleting...'
-                });
+                });*/
 
                 $.ajax({
                     url: 'deleteCrosswalk.do',
@@ -76,7 +83,8 @@ require(['./main'], function () {
                     },
                     type: 'POST',
                     success: function(data) {
-                       location.reload();
+                       //$('.overlay').css('display','none');
+                       populateCrosswalks(1,1);
                     }
                 });
             }
@@ -680,6 +688,7 @@ function populateExistingTranslations(reload) {
 	    $('.dtDownloadLink').show();
             $('#saveDetails').removeClass( "disabled" );
             $('#next').removeClass( "disabled" );
+            $('#loadingModal').modal('toggle');
         }
     });
 }
