@@ -1170,7 +1170,6 @@ public class transactionInManagerImpl implements transactionInManager {
 				   transactionInDAO.submitBatchActivityLog(ba);
 				}
 				
-				
 				//figure out how many active transports are using fileExt method for this particular path, we need to remove the parent directory from input path
 				List<configurationTransport> transportList = configurationtransportmanager.getTransportListForFileExtAndPath(fileExt, transportMethodId, 1, transportId);
 
@@ -1198,10 +1197,9 @@ public class transactionInManagerImpl implements transactionInManager {
 				    
 				    //log batch activity
 				    batchuploadactivity ba = new batchuploadactivity();
-				    ba.setActivity("No valid configuration was found for the selected organization and the file extension of the uploaded file.");
+				    ba.setActivity("No valid configuration was found for the selected organization (Id: " +orgId +") and the file extension ("+fileExt+") of the uploaded file.");
 				    ba.setBatchUploadId(batchId);
 				    transactionInDAO.submitBatchActivityLog(ba);
-				    
 				} 
 				else if (transports.size() == 1) {
 				    
@@ -1386,27 +1384,22 @@ public class transactionInManagerImpl implements transactionInManager {
 					}
 				    }
 				}
+                                
+                                batchuploadactivity ba;
+                                
+                                //we encoded the file if it is not
+                                File newFile = new File(rootPath + orgDetails.getcleanURL() + "/input files/encoded_"+batchName + fileName.substring(fileName.lastIndexOf(".")));
 
-				createBatchTables(batchId, batchDetails.getConfigId());
-				
-				//log batch activity
-				batchuploadactivity ba = new batchuploadactivity();
-				ba.setActivity("Created all inbound batch tables for batchId:" + batchId);
-				ba.setBatchUploadId(batchId);
-				transactionInDAO.submitBatchActivityLog(ba);
+                                //log batch activity
+                                ba = new batchuploadactivity();
+                                ba.setActivity("Created the encoded file. File Location/Name:" + rootPath + orgDetails.getcleanURL() + "/input files/encoded_"+batchName + fileName.substring(fileName.lastIndexOf(".")));
+                                ba.setBatchUploadId(batchId);
+                                transactionInDAO.submitBatchActivityLog(ba);
 
-				//we encoded the file if it is not
-				File newFile = new File(rootPath + orgDetails.getcleanURL() + "/input files/encoded_"+batchName + fileName.substring(fileName.lastIndexOf(".")));
-				
-				//log batch activity
-				ba = new batchuploadactivity();
-				ba.setActivity("Created the encoded file. File Location/Name:" + rootPath + orgDetails.getcleanURL() + "/input files/encoded_"+batchName + fileName.substring(fileName.lastIndexOf(".")));
-				ba.setBatchUploadId(batchId);
-				transactionInDAO.submitBatchActivityLog(ba);
+                                Path target = newFile.toPath();
 
-				// now we move file
-				Path source = file.toPath();
-				Path target = newFile.toPath();
+                                // now we move file
+                                Path source = file.toPath();
 
 				File archiveFile = new File(myProps.getProperty("ut.directory.utRootDir") + "archivesIn/" + "archive_"+batchName + fileName.substring(fileName.lastIndexOf(".")));
 				Path archive = archiveFile.toPath();
@@ -1440,22 +1433,32 @@ public class transactionInManagerImpl implements transactionInManager {
 
 				//we check encoding here 
 				//file is not encoded
-				
-				if("".equals(delimiter)) {
+                                
+                                if(configId > 0) {
+                                    createBatchTables(batchId, batchDetails.getConfigId());
+                                    
+                                    //log batch activity
+                                    ba = new batchuploadactivity();
+                                    ba.setActivity("Created all inbound batch tables for batchId:" + batchId);
+                                    ba.setBatchUploadId(batchId);
+                                    transactionInDAO.submitBatchActivityLog(ba);
+                                    
+                                    if("".equals(delimiter)) {
 				    
-				    configurationTransport ct = configurationtransportmanager.getTransportDetails(batchDetails.getConfigId());
-				    
-				    if(ct.getfileDelimiter() == 12) {
-					delimiter = "tab";
-				    }
-				    else {
-					List<configurationTransport> delimList = configurationtransportmanager.getDistinctDelimCharForFileExt(fileExt, transportMethodId);
+                                        configurationTransport ct = configurationtransportmanager.getTransportDetails(batchDetails.getConfigId());
 
-					if(!delimList.isEmpty()) {
-					    delimiter = delimList.get(0).getDelimChar();
-					}
-				    }
-				}
+                                        if(ct.getfileDelimiter() == 12) {
+                                            delimiter = "tab";
+                                        }
+                                        else {
+                                            List<configurationTransport> delimList = configurationtransportmanager.getDistinctDelimCharForFileExt(fileExt, transportMethodId);
+
+                                            if(!delimList.isEmpty()) {
+                                                delimiter = delimList.get(0).getDelimChar();
+                                            }
+                                        }
+                                    }
+                                }
 				
 				if (encodingId < 2 && !filemanager.isFileBase64Encoded(file, delimiter)) { 
 				    String encodedOldFile = filemanager.encodeFileToBase64Binary(file);
