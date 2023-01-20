@@ -152,13 +152,15 @@
 								    View Batch Activities
 								</a>
 							    </li>
-							    <li class="divider"></li>
-							    <li>
-								<a href="<c:url value='/administrator/processing-activity/invalidIn/auditReport/${batch.utBatchName}' />" title="View Audit Report">
-								    <span class="glyphicon glyphicon-edit"></span>
-								    View Audit Report
-								</a>
-							    </li>
+                                                            <c:if test="${batch.configId > 0}">
+                                                                <li class="divider"></li>
+                                                                <li>
+                                                                    <a href="<c:url value='/administrator/processing-activity/invalidIn/auditReport/${batch.utBatchName}' />" title="View Audit Report">
+                                                                        <span class="glyphicon glyphicon-edit"></span>
+                                                                        View Audit Report
+                                                                    </a>
+                                                                </li>
+                                                            </c:if>
 							</c:if>
 							<c:if test="${sessionScope.userDetails.roleId == 1}">
 							    <li class="divider"></li>
