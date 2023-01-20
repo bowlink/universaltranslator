@@ -502,10 +502,10 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    dateSQLString += "a.id > 0";
 	}
 	
-	String sqlQuery = "select id, orgId, utBatchName, transportMethodId, originalFileName, totalRecordCount, errorRecordCount, totalErrorRows, configName, threshold, inboundBatchConfigurationType, statusId, dateSubmitted,"
+	String sqlQuery = "select id, configId, orgId, utBatchName, transportMethodId, originalFileName, totalRecordCount, errorRecordCount, totalErrorRows, configName, threshold, inboundBatchConfigurationType, statusId, dateSubmitted,"
 	    + "startDateTime,endDateTime,statusValue, endUserDisplayText, orgName, case when dmConfigKeyWord != '' then 'File Drop (Direct)' when transportMethod != 'Online Form' && restAPIUsername != '' then 'File Drop (Rest)' else transportMethod end as transportMethod, totalMessages, 'On Demand' as uploadType, dmConfigKeyWord "
 	    + "FROM ("
-	    + "select a.id, a.orgId, a.utBatchName, a.transportMethodId, a.originalFileName, a.totalRecordCount, a.errorRecordCount, b.configName, b.threshold, b.configurationType as inboundBatchConfigurationType,"
+	    + "select a.id, a.configId, a.orgId, a.utBatchName, a.transportMethodId, a.originalFileName, a.totalRecordCount, a.errorRecordCount, b.configName, b.threshold, b.configurationType as inboundBatchConfigurationType,"
 	    + "a.statusId, a.dateSubmitted, a.startDateTime, a.endDateTime, c.displayCode as statusValue, c.endUserDisplayText as endUserDisplayText,d.orgName, e.transportMethod,"
 	    + "(select count(id) as total from batchuploads where "+dateSQLStringTotal+") as totalMessages, "
 	    + "(select count(distinct rowNumber) as totalRows from batchuploadauditerrors where batchUploadId = a.id and rowNumber > 0) as totalErrorRows, "
@@ -520,7 +520,8 @@ public class transactionInDAOImpl implements transactionInDAO {
 	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery)
 	    .addScalar("id", StandardBasicTypes.INTEGER)
-	    .addScalar("orgId", StandardBasicTypes.INTEGER)
+	    .addScalar("configId", StandardBasicTypes.INTEGER)
+            .addScalar("orgId", StandardBasicTypes.INTEGER)
 	    .addScalar("utBatchName", StandardBasicTypes.STRING)
 	    .addScalar("transportMethodId", StandardBasicTypes.INTEGER)
 	    .addScalar("originalFileName", StandardBasicTypes.STRING)
