@@ -5706,11 +5706,11 @@ public class adminConfigController {
 		if(cwName.contains("_")) {
 		    String[] cwNameArray = cwName.split("\\_");
 		    cw.setName(configId+"_"+cwNameArray[1]);
-		    cwName = cwNameArray[1];
                     checkForExistingCW = false;
 		}
 		else {
 		    cw.setName(configId+"_"+cwName);
+                    cwName = configId+"_"+cwName;
 		}
 		cw.setOrgId(orgId);
 	    }
