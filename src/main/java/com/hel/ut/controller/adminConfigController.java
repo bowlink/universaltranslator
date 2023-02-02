@@ -5697,6 +5697,7 @@ public class adminConfigController {
 	    String cwName = strArrayValues[2].trim();
 	    Integer cwId = 0;
 	    boolean newCW = false;
+            boolean checkForExistingCW = true;
 	    
 	    cw.setFileDelimiter(Integer.parseInt(strArrayValues[3]));
 	    cw.setfileName(strArrayValues[4]);
@@ -5705,10 +5706,11 @@ public class adminConfigController {
 		if(cwName.contains("_")) {
 		    String[] cwNameArray = cwName.split("\\_");
 		    cw.setName(configId+"_"+cwNameArray[1]);
-		    cwName = cwNameArray[1];
+                    checkForExistingCW = false;
 		}
 		else {
 		    cw.setName(configId+"_"+cwName);
+                    cwName = configId+"_"+cwName;
 		}
 		cw.setOrgId(orgId);
 	    }
@@ -5718,14 +5720,16 @@ public class adminConfigController {
 		cw.setName(cwName);
 	    }
 	    
-	    //Need to check if the generic CW already exists
-	    Crosswalks cwDetails = messagetypemanager.getCrosswalkByNameAndOrg(cwName,orgId,strArrayValues[4].trim());
+            if(checkForExistingCW) {
+                //Need to check if the generic CW already exists
+                Crosswalks cwDetails = messagetypemanager.getCrosswalkByNameAndOrg(cwName,orgId,strArrayValues[4].trim());
 
-	    if(cwDetails != null) {
-		if(cwDetails.getId() > 0) {
-		    cwId = cwDetails.getId();
-		}
-	    }
+                if(cwDetails != null) {
+                    if(cwDetails.getId() > 0) {
+                        cwId = cwDetails.getId();
+                    }
+                }
+            }
 	
 	    if(cwId == 0) {
 		newCW = true;
