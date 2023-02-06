@@ -2074,13 +2074,18 @@ public class transactionOutManagerImpl implements transactionOutManager {
 				    transactionOutDAO.submitBatchActivityLog(ba);
 				}
 				else {
-				    //Need to update the Registry submitted message entry to capture the created file name
-				    submittedmessagemanager.updateSubmittedMessage(registryDetails.getDbschemaname(),batchDownload.getBatchUploadId(),batchDownload.getOutputFileName(),utOrgDetails.getHelRegistryOrgId());
+                                    if(batchUploadDetails.getTransportMethodId() != 13) {
+                                        //Need to update the Registry submitted message entry to capture the created file name
+                                        submittedmessagemanager.updateSubmittedMessage(registryDetails.getDbschemaname(),batchDownload.getBatchUploadId(),batchDownload.getOutputFileName(),utOrgDetails.getHelRegistryOrgId());
 
-				    ba = new batchdownloadactivity();
-				    ba.setActivity("Updated eReferral online form entry for messageId:" + existingRegistrySubmittedMessage.getId());
-				    ba.setBatchDownloadId(batchDownload.getId());
-				    transactionOutDAO.submitBatchActivityLog(ba);
+                                        ba = new batchdownloadactivity();
+                                        ba.setActivity("Updated eReferral online form entry for messageId:" + existingRegistrySubmittedMessage.getId());
+                                        ba.setBatchDownloadId(batchDownload.getId());
+                                        transactionOutDAO.submitBatchActivityLog(ba);
+                                    }
+                                    else {
+                                        createSubmittedMessage = true;
+                                    }
 				}
 			    }
 			    else {
