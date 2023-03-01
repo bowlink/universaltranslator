@@ -4102,42 +4102,63 @@ public class transactionInManagerImpl implements transactionInManager {
 		    List<configurationConnection> connections = configurationManager.getConnectionsBySrcAndTargetConfigurations(batchUploadDetails.getConfigId(), configDetails.getId());
 
 		    int userId = 0;
+                    
+                    if(transportDetails.gettransportMethodId() == 12) {
+                        
+                        if(batchUploadDetails.getAssociatedBatchId() > 0) {
+                            batchUploads originalbatchUploadDetails = getBatchDetails(batchUploadDetails.getAssociatedBatchId());
+                            
+                            if(originalbatchUploadDetails != null) {
+                                if(originalbatchUploadDetails.getSenderEmail() == null) {
+                                    targetsInserted = false;
+                                }
+                                else {
+                                    if("".equals(originalbatchUploadDetails.getSenderEmail())) {
+                                        targetsInserted = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    if(targetsInserted) {
 
-		    //we create a batchDownloads
-		    batchDownloads batchDownload = new batchDownloads();
+                        //we create a batchDownloads
+                        batchDownloads batchDownload = new batchDownloads();
 
-		    //set batch download details
-		    batchDownload.setUtBatchName(utbatchName);
+                        //set batch download details
+                        batchDownload.setUtBatchName(utbatchName);
 
-		    //Need to get the schedule for the configuration to find out if the targets need to be processed automatically
-		    configurationSchedules configurationScheduleDetails = configurationManager.getScheduleDetails(configId);
+                        //Need to get the schedule for the configuration to find out if the targets need to be processed automatically
+                        configurationSchedules configurationScheduleDetails = configurationManager.getScheduleDetails(configId);
 
-		    if(configurationScheduleDetails.gettype() == 5) {
-		       batchDownload.setStatusId(61);
-		    }
-		    else if (configurationScheduleDetails.gettype() == 1) {
-			batchDownload.setStatusId(64);
-		    }
-		    else {
-			batchDownload.setStatusId(59);
-		    }
+                        if(configurationScheduleDetails.gettype() == 5) {
+                           batchDownload.setStatusId(61);
+                        }
+                        else if (configurationScheduleDetails.gettype() == 1) {
+                            batchDownload.setStatusId(64);
+                        }
+                        else {
+                            batchDownload.setStatusId(59);
+                        }
 
-		    //we determine output file name
-		    batchDownload.setOutputFileName(transactionoutmanager.generateDLBatchName(utbatchName,transportDetails, configDetails, batchUploadDetails, date) + "." + transportDetails.getfileExt());
-		    batchDownload.setMergeable(false);
-		    //batchDownload.setStartDateTime(new Date());
-		    batchDownload.setTransportMethodId(transportDetails.gettransportMethodId());
-		    batchDownload.setOrgId(useTargetOrgId);
-		    batchDownload.setUserId(userId);
-		    batchDownload.setTotalErrorCount(0);
-		    batchDownload.setTotalRecordCount(0);
-		    batchDownload.setDeleted(false);
-		    batchDownload.setDateCreated(new Date());
-		    batchDownload.setBatchUploadId(batchUploadId);
-		    batchDownload.setConfigId(configId);
+                        //we determine output file name
+                        batchDownload.setOutputFileName(transactionoutmanager.generateDLBatchName(utbatchName,transportDetails, configDetails, batchUploadDetails, date) + "." + transportDetails.getfileExt());
+                        batchDownload.setMergeable(false);
+                        //batchDownload.setStartDateTime(new Date());
+                        batchDownload.setTransportMethodId(transportDetails.gettransportMethodId());
+                        batchDownload.setOrgId(useTargetOrgId);
+                        batchDownload.setUserId(userId);
+                        batchDownload.setTotalErrorCount(0);
+                        batchDownload.setTotalRecordCount(0);
+                        batchDownload.setDeleted(false);
+                        batchDownload.setDateCreated(new Date());
+                        batchDownload.setBatchUploadId(batchUploadId);
+                        batchDownload.setConfigId(configId);
 
-		    /* Submit a new batch */
-		    int batchDLId = (int) transactionOutDAO.submitBatchDownload(batchDownload);
+                        // Submit a new batch
+                        int batchDLId = (int) transactionOutDAO.submitBatchDownload(batchDownload);
+                    }
 		}
 		else {
 		    //No batches found
