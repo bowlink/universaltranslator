@@ -4092,8 +4092,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		}
 		
 		if(useTarget && useTargetOrgId > 0) {
-		    targetsInserted = true;
-		    
+		   
 		    configurationTransport transportDetails = configurationtransportmanager.getTransportDetails(configDetails.getId());
 
 		    String utbatchName = new StringBuilder().append(transportDetails.gettransportMethodId()).append("_m_").append(batchUploadId).append(configDetails.getorgId()).append(configDetails.getMessageTypeId()).append(dateFormat.format(date)).toString();
@@ -4110,18 +4109,20 @@ public class transactionInManagerImpl implements transactionInManager {
                             
                             if(originalbatchUploadDetails != null) {
                                 if(originalbatchUploadDetails.getSenderEmail() == null) {
-                                    targetsInserted = false;
+                                    useTarget = false;
                                 }
                                 else {
                                     if("".equals(originalbatchUploadDetails.getSenderEmail())) {
-                                        targetsInserted = false;
+                                        useTarget = false;
                                     }
                                 }
                             }
                         }
                     }
                     
-                    if(targetsInserted) {
+                    if(useTarget) {
+                        
+                        targetsInserted = true;
 
                         //we create a batchDownloads
                         batchDownloads batchDownload = new batchDownloads();
