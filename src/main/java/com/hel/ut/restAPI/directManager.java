@@ -10,6 +10,7 @@ import com.hel.ut.dao.transactionInDAO;
 import com.hel.ut.dao.transactionOutDAO;
 import com.hel.ut.model.batchDownloads;
 import com.hel.ut.model.batchUploads;
+import com.hel.ut.model.batchdownloadactivity;
 import com.hel.ut.model.configurationTransport;
 import com.hel.ut.model.directmessagesin;
 import com.hel.ut.model.directmessagesout;
@@ -399,96 +400,94 @@ public class directManager {
 		    
 		    jsonContentAsString = "";
 
-			if (response.getStatus() == 200) {
-			    if (transportDetails.isWaitForResponse()) {
-				batchStatusId = 59;
-			    } else {
-				batchStatusId = 28;
-			    }
-			    directMessageOut.setStatusId(2);
-			} else {
-			    batchStatusId = 58;
-			    directMessageOut.setStatusId(3);
-			}
+                    if (response.getStatus() == 200) {
+                        if (transportDetails.isWaitForResponse()) {
+                            batchStatusId = 59;
+                        } else {
+                            batchStatusId = 28;
+                        }
+                        directMessageOut.setStatusId(2);
+                    } else {
+                        batchStatusId = 58;
+                        directMessageOut.setStatusId(3);
+                    }
 
-			response.close();
-			client.destroy();
-		    } 
-		    catch (ClientHandlerException | UniformInterfaceException ex) {
-			batchStatusId = 58;
-			directMessageOut.setStatusId(3);
-			responseMessage = ex.getMessage();
-			directMessageOut.setResponseMessage(responseMessage);
-			client.destroy();
-		    }
-
-		}
-		else {
-		    batchStatusId = 58;
-		    directMessageOut.setResponseStatus(0);
-		    directMessageOut.setStatusId(3);
-		    directMessageOut.setResponseMessage("No File Sent because file (" + myProps.getProperty("ut.directory.utRootDir") + filelocation + fileName + ") was not Found");
-		}
+                    response.close();
+                    client.destroy();
+                } 
+                catch (ClientHandlerException | UniformInterfaceException ex) {
+                    batchStatusId = 58;
+                    directMessageOut.setStatusId(3);
+                    responseMessage = ex.getMessage();
+                    directMessageOut.setResponseMessage(responseMessage);
+                    client.destroy();
+                }
+            }
+            else {
+                batchStatusId = 58;
+                directMessageOut.setResponseStatus(0);
+                directMessageOut.setStatusId(3);
+                directMessageOut.setResponseMessage("No File Sent because file (" + myProps.getProperty("ut.directory.utRootDir") + filelocation + fileName + ") was not Found");
+            }
             
-		transactionoutmanager.updateTargetBatchStatus(batchDownloadId, batchStatusId, "endDateTime");
-		transactionOutDAO.insertDMMessage(directMessageOut);
+            transactionoutmanager.updateTargetBatchStatus(batchDownloadId, batchStatusId, "endDateTime");
+            transactionOutDAO.insertDMMessage(directMessageOut);
 
-		if(batchStatusId == 28) {
-		    //Delete all transaction target tables
-		    transactionInManager.deleteBatchTransactionTables(batchUploadId);
-		    transactionOutDAO.deleteBatchDownloadTables(batchDownloadId);
-                    
-                    //Send out email notification
-                    if(transportDetails.getErrorEmailAddresses() != null) {
-                        if(!"".equals(transportDetails.getErrorEmailAddresses().trim())) {
-                            mailMessage mail = new mailMessage();
-                            mail.setfromEmailAddress("helpdesk@health-e-link.net");
+            if(batchStatusId == 28) {
+                //Delete all transaction target tables
+                transactionInManager.deleteBatchTransactionTables(batchUploadId);
+                transactionOutDAO.deleteBatchDownloadTables(batchDownloadId);
 
-                            List<String> ccAddresses = new ArrayList<>();
+                //Send out email notification
+                if(transportDetails.getErrorEmailAddresses() != null) {
+                    if(!"".equals(transportDetails.getErrorEmailAddresses().trim())) {
+                        mailMessage mail = new mailMessage();
+                        mail.setfromEmailAddress("helpdesk@health-e-link.net");
 
-                            String[] emails = transportDetails.getErrorEmailAddresses().trim().split(",");
-                            List<String> emailAddressList = Arrays.asList(emails);
+                        List<String> ccAddresses = new ArrayList<>();
 
-                            if(!emailAddressList.isEmpty()) {
-                                mail.settoEmailAddress(emailAddressList.get(0).trim());
-                                if(emailAddressList.size() > 1) {
-                                    for(Integer i = 1; i < emailAddressList.size(); i++) {
-                                        if(!"".equals(emailAddressList.get(i).trim())) {
-                                            ccAddresses.add(emailAddressList.get(i).trim());
-                                        }
+                        String[] emails = transportDetails.getErrorEmailAddresses().trim().split(",");
+                        List<String> emailAddressList = Arrays.asList(emails);
+
+                        if(!emailAddressList.isEmpty()) {
+                            mail.settoEmailAddress(emailAddressList.get(0).trim());
+                            if(emailAddressList.size() > 1) {
+                                for(Integer i = 1; i < emailAddressList.size(); i++) {
+                                    if(!"".equals(emailAddressList.get(i).trim())) {
+                                        ccAddresses.add(emailAddressList.get(i).trim());
                                     }
                                 }
                             }
-
-                            List<String> bccAddresses = new ArrayList<>();
-                            bccAddresses.add("cmccue@health-e-link.net");
-
-                            utConfiguration configDetails = configurationmanager.getConfigurationById(transportDetails.getconfigId());
-                            
-                            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
-                            Date date = new Date();
-
-                            //build message
-                            String message = "A Community eConnect feedback report was sent to your organization on " + dateFormat.format(date) + " via direct messaging for feedback report configuration " + configDetails.getconfigName().trim() + ".";
-                            mail.setmessageBody(message);
-                            mail.setmessageSubject("New Community eConnect feedback report");
-
-                            if (!ccAddresses.isEmpty()) {
-                                String[] ccEmailAddresses = new String[ccAddresses.size()];
-                                ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
-                                mail.setccEmailAddress(ccEmailAddresses);
-                            }
-
-                            if (!bccAddresses.isEmpty()) {
-                                String[] bccEmailAddresses = new String[bccAddresses.size()];
-                                bccEmailAddresses = ccAddresses.toArray(bccEmailAddresses);
-                                mail.setBccEmailAddress(bccEmailAddresses);
-                            }
-
-                            emailManager.sendEmail(mail);
                         }
+
+                        List<String> bccAddresses = new ArrayList<>();
+                        bccAddresses.add("cmccue@health-e-link.net");
+
+                        utConfiguration configDetails = configurationmanager.getConfigurationById(transportDetails.getconfigId());
+
+                        DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
+                        Date date = new Date();
+
+                        //build message
+                        String message = "A Community eConnect feedback report was sent to your organization on " + dateFormat.format(date) + " via direct messaging for feedback report configuration " + configDetails.getconfigName().trim() + ".";
+                        mail.setmessageBody(message);
+                        mail.setmessageSubject("New Community eConnect feedback report");
+
+                        if (!ccAddresses.isEmpty()) {
+                            String[] ccEmailAddresses = new String[ccAddresses.size()];
+                            ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
+                            mail.setccEmailAddress(ccEmailAddresses);
+                        }
+
+                        if (!bccAddresses.isEmpty()) {
+                            String[] bccEmailAddresses = new String[bccAddresses.size()];
+                            bccEmailAddresses = ccAddresses.toArray(bccEmailAddresses);
+                            mail.setBccEmailAddress(bccEmailAddresses);
+                        }
+
+                        emailManager.sendEmail(mail);
                     }
-		}
+                }
 	    }
 	    else {
 		batchStatusId = 58;
