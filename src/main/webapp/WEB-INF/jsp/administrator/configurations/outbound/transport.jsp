@@ -21,7 +21,6 @@
     <form:hidden path="mergeBatches" />
     <form:hidden path="restAPIType" value = "0" />
     <form:hidden path="maxFileSize" />
-    <form:hidden path="errorEmailAddresses" value="" />
     <section class="panel panel-default">
 	<div class="panel-heading">
 	    <h3 class="panel-title">
@@ -333,6 +332,14 @@
 		   </select>
 		   <span id="encodingMsg" class="control-label"></span>
 	       </div>
+               <spring:bind path="errorEmailAddresses">
+		    <div id="errorEmailAddressesDiv" class="form-group">
+			<label class="control-label" for="errorEmailAddresses">Enter email address(es) to receive a notification email</label>
+                        <p>Separate multiple emails with a comma.</p>
+			<form:input path="errorEmailAddresses" id="errorEmailAddresses" class="form-control" type="text" maxLength="750" />
+			<span id="errorEmailAddressesMsg" class="control-label"></span>
+		    </div>
+		</spring:bind>    
 	    </div>
 	</div>
     </section>
