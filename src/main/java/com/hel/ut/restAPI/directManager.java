@@ -458,8 +458,8 @@ public class directManager {
                     if(transportDetails.getErrorEmailAddresses() != null) {
                         if(!"".equals(transportDetails.getErrorEmailAddresses().trim())) {
                             mailMessage mail = new mailMessage();
-                            mail.setfromEmailAddress("helpdesk@health-e-link.net");
-
+                            mail.setfromEmailAddress("notifications@health-e-link.net");
+                            
                             List<String> ccAddresses = new ArrayList<>();
 
                             String[] emails = transportDetails.getErrorEmailAddresses().trim().split(",");
