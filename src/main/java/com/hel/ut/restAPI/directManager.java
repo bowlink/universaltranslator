@@ -259,14 +259,29 @@ public class directManager {
 	    Integer batchUploadId = batchUploadDetails.getId();
 	    
 	    if(batchUploadDetails.getAssociatedBatchId() > 0) {
+		
+		batchdownloadactivity ba = new batchdownloadactivity();
+		ba.setActivity("Found original source batch for this reply message.  Souce batch upload batchId:" + batchUploadDetails.getId());
+		ba.setBatchDownloadId(batchDownloadId);
+		transactionOutDAO.submitBatchActivityLog(ba);
+		
 		batchUploadDetails = transactionInManager.getBatchDetails(batchUploadDetails.getAssociatedBatchId());
 	    }
 	    
-	    String directAPIURL = hispDetails.getHispAPIURL();
-	    String directAPIUsername = hispDetails.getHispAPIUsername();
-	    String directAPIPassword = hispDetails.getHispAPIPassword();
+	    boolean directAddressesFound = false;
 	    
-	    String fileName = null;
+	    if(batchUploadDetails.getRecipientEmail() != null && batchUploadDetails.getSenderEmail() != null) {
+		if(!"".equals(batchUploadDetails.getRecipientEmail()) && !"".equals(batchUploadDetails.getSenderEmail())) {
+		    directAddressesFound = true;
+		}
+	    }
+	    
+	    if(directAddressesFound) {
+		String directAPIURL = hispDetails.getHispAPIURL();
+		String directAPIUsername = hispDetails.getHispAPIUsername();
+		String directAPIPassword = hispDetails.getHispAPIPassword();
+
+		String fileName = null;
 
 	    int findExt = batchDownloadDetails.getOutputFileName().lastIndexOf(".");
 
@@ -433,18 +448,18 @@ public class directManager {
             transactionoutmanager.updateTargetBatchStatus(batchDownloadId, batchStatusId, "endDateTime");
             transactionOutDAO.insertDMMessage(directMessageOut);
 
-            if(batchStatusId == 28) {
-                //Delete all transaction target tables
-                transactionInManager.deleteBatchTransactionTables(batchUploadId);
-                transactionOutDAO.deleteBatchDownloadTables(batchDownloadId);
-
-                //Send out email notification
-                if(transportDetails.getErrorEmailAddresses() != null) {
-                    if(!"".equals(transportDetails.getErrorEmailAddresses().trim())) {
-                        mailMessage mail = new mailMessage();
-                        mail.setfromEmailAddress("helpdesk@health-e-link.net");
-
-                        List<String> ccAddresses = new ArrayList<>();
+		if(batchStatusId == 28) {
+		    //Delete all transaction target tables
+		    transactionInManager.deleteBatchTransactionTables(batchUploadId);
+		    transactionOutDAO.deleteBatchDownloadTables(batchDownloadId);
+                    
+                    //Send out email notification
+                    if(transportDetails.getErrorEmailAddresses() != null) {
+                        if(!"".equals(transportDetails.getErrorEmailAddresses().trim())) {
+                            mailMessage mail = new mailMessage();
+                            mail.setfromEmailAddress("notifications@health-e-link.net");
+                            
+                            List<String> ccAddresses = new ArrayList<>();
 
                         String[] emails = transportDetails.getErrorEmailAddresses().trim().split(",");
                         List<String> emailAddressList = Arrays.asList(emails);
