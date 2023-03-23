@@ -461,46 +461,47 @@ public class directManager {
                             
                             List<String> ccAddresses = new ArrayList<>();
 
-                        String[] emails = transportDetails.getErrorEmailAddresses().trim().split(",");
-                        List<String> emailAddressList = Arrays.asList(emails);
+                            String[] emails = transportDetails.getErrorEmailAddresses().trim().split(",");
+                            List<String> emailAddressList = Arrays.asList(emails);
 
-                        if(!emailAddressList.isEmpty()) {
-                            mail.settoEmailAddress(emailAddressList.get(0).trim());
-                            if(emailAddressList.size() > 1) {
-                                for(Integer i = 1; i < emailAddressList.size(); i++) {
-                                    if(!"".equals(emailAddressList.get(i).trim())) {
-                                        ccAddresses.add(emailAddressList.get(i).trim());
+                            if(!emailAddressList.isEmpty()) {
+                                mail.settoEmailAddress(emailAddressList.get(0).trim());
+                                if(emailAddressList.size() > 1) {
+                                    for(Integer i = 1; i < emailAddressList.size(); i++) {
+                                        if(!"".equals(emailAddressList.get(i).trim())) {
+                                            ccAddresses.add(emailAddressList.get(i).trim());
+                                        }
                                     }
                                 }
                             }
+
+                            List<String> bccAddresses = new ArrayList<>();
+                            bccAddresses.add("cmccue@health-e-link.net");
+
+                            utConfiguration configDetails = configurationmanager.getConfigurationById(transportDetails.getconfigId());
+
+                            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
+                            Date date = new Date();
+
+                            //build message
+                            String message = "A Community eConnect feedback report was sent to your organization on " + dateFormat.format(date) + " via direct messaging for feedback report configuration " + configDetails.getconfigName().trim() + ".";
+                            mail.setmessageBody(message);
+                            mail.setmessageSubject("New Community eConnect feedback report");
+
+                            if (!ccAddresses.isEmpty()) {
+                                String[] ccEmailAddresses = new String[ccAddresses.size()];
+                                ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
+                                mail.setccEmailAddress(ccEmailAddresses);
+                            }
+
+                            if (!bccAddresses.isEmpty()) {
+                                String[] bccEmailAddresses = new String[bccAddresses.size()];
+                                bccEmailAddresses = ccAddresses.toArray(bccEmailAddresses);
+                                mail.setBccEmailAddress(bccEmailAddresses);
+                            }
+
+                            emailManager.sendEmail(mail);
                         }
-
-                        List<String> bccAddresses = new ArrayList<>();
-                        bccAddresses.add("cmccue@health-e-link.net");
-
-                        utConfiguration configDetails = configurationmanager.getConfigurationById(transportDetails.getconfigId());
-
-                        DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
-                        Date date = new Date();
-
-                        //build message
-                        String message = "A Community eConnect feedback report was sent to your organization on " + dateFormat.format(date) + " via direct messaging for feedback report configuration " + configDetails.getconfigName().trim() + ".";
-                        mail.setmessageBody(message);
-                        mail.setmessageSubject("New Community eConnect feedback report");
-
-                        if (!ccAddresses.isEmpty()) {
-                            String[] ccEmailAddresses = new String[ccAddresses.size()];
-                            ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
-                            mail.setccEmailAddress(ccEmailAddresses);
-                        }
-
-                        if (!bccAddresses.isEmpty()) {
-                            String[] bccEmailAddresses = new String[bccAddresses.size()];
-                            bccEmailAddresses = ccAddresses.toArray(bccEmailAddresses);
-                            mail.setBccEmailAddress(bccEmailAddresses);
-                        }
-
-                        emailManager.sendEmail(mail);
                     }
                 }
 	    }
