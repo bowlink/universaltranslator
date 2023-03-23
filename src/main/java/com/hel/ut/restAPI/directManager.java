@@ -283,227 +283,228 @@ public class directManager {
 
 		String fileName = null;
 
-	    int findExt = batchDownloadDetails.getOutputFileName().lastIndexOf(".");
+                int findExt = batchDownloadDetails.getOutputFileName().lastIndexOf(".");
 
-	    if (findExt >= 0) {
-		fileName = batchDownloadDetails.getOutputFileName();
-	    } else {
-		fileName = new StringBuilder().append(batchDownloadDetails.getOutputFileName()).append(".").append(transportDetails.getfileExt()).toString();
-	    }
-	    
-	    //Submit the restAPImessageOut
-	    directmessagesout directMessageOut = new directmessagesout();
-	    directMessageOut.setConfigId(transportDetails.getconfigId());
-	    directMessageOut.setBatchDownloadId(batchDownloadId);
-	    directMessageOut.setBatchUploadId(batchDownloadDetails.getBatchUploadId());
-	    directMessageOut.setOrgId(batchDownloadDetails.getOrgId());
-	    directMessageOut.setOutputFileName(batchDownloadDetails.getOutputFileName());
-	    directMessageOut.setFromDirectAddress(batchUploadDetails.getRecipientEmail());
-	    directMessageOut.setToDirectAddress(batchUploadDetails.getSenderEmail());
-	    directMessageOut.setHispId(hispDetails.getId());
+                if (findExt >= 0) {
+                    fileName = batchDownloadDetails.getOutputFileName();
+                } else {
+                    fileName = new StringBuilder().append(batchDownloadDetails.getOutputFileName()).append(".").append(transportDetails.getfileExt()).toString();
+                }
 
-	    String filelocation = transportDetails.getfileLocation().trim();
-	    
-	    File file = new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getfileLocation().trim() + fileName);
-	   
-	    String responseMessage = "";
-	    
-	    if (file.exists()) {
-		
-		InputStream fileInput = new FileInputStream(file);
+                //Submit the restAPImessageOut
+                directmessagesout directMessageOut = new directmessagesout();
+                directMessageOut.setConfigId(transportDetails.getconfigId());
+                directMessageOut.setBatchDownloadId(batchDownloadId);
+                directMessageOut.setBatchUploadId(batchDownloadDetails.getBatchUploadId());
+                directMessageOut.setOrgId(batchDownloadDetails.getOrgId());
+                directMessageOut.setOutputFileName(batchDownloadDetails.getOutputFileName());
+                directMessageOut.setFromDirectAddress(batchUploadDetails.getRecipientEmail());
+                directMessageOut.setToDirectAddress(batchUploadDetails.getSenderEmail());
+                directMessageOut.setHispId(hispDetails.getId());
 
-		BufferedReader reader = new BufferedReader(new InputStreamReader(fileInput));
-		
-		String line;
-		StringBuilder jsonContent = new StringBuilder();
-		while ((line = reader.readLine()) != null) {
-		    line = line.trim();
-		    jsonContent.append(line);
-		}
-		
-		String jsonContentAsString = jsonContent.toString().replace("\\","\\\\");
-		String encodedContent = utilmanager.encodeStringToBase64Binary(jsonContentAsString);
-		
-		JSONObject jsonObjectToSend = new JSONObject();
-		
-		if(patientFirstname != null && patientLastname != null && patientId != null && patientDOB != null) {
-		    jsonObjectToSend.put("messageSubject","Patient: " + patientFirstname + " " + patientLastname + "; DOB: " + patientDOB);
-		    jsonObjectToSend.put("patientId",patientId);
-		    jsonObjectToSend.put("patientDOB",patientDOB);
-		    jsonObjectToSend.put("patientFirstname",patientFirstname);
-		    jsonObjectToSend.put("patientLastname",patientLastname);
-		}
-		
-		JSONArray emailAttachmentListArray = new JSONArray();
-		
-		JSONObject emailAttachmentListObject = new JSONObject();
-		emailAttachmentListObject.put("attachmentClass","text/xml");
-		emailAttachmentListObject.put("attachmentContent", encodedContent);
-		emailAttachmentListObject.put("attachmentTitle",batchDownloadDetails.getUtBatchName()+".xml");
-		
-		emailAttachmentListArray.add(emailAttachmentListObject);
-		
-		jsonObjectToSend.put("emailAttachmentList", emailAttachmentListArray);
-		
-		JSONObject envelopeInfoObject = new JSONObject();
-		
-		UUID uuid = UUID.randomUUID();
-		
-		envelopeInfoObject.put("fromDirectAddress",batchUploadDetails.getRecipientEmail());
-		envelopeInfoObject.put("messageId","urn:uuid:"+uuid);
-		
-		JSONArray envelopeInfoToAddressArray = new JSONArray();
-		envelopeInfoToAddressArray.add(batchUploadDetails.getSenderEmail());
-		envelopeInfoObject.put("toDirectAddress",envelopeInfoToAddressArray);
-		
-		//envelopeInfoObject.put("toDirectAddress",batchUploadDetails.getSenderEmail());
-		
-		jsonObjectToSend.put("envelopeInfo", envelopeInfoObject);
-		
-		final ClientConfig config = new DefaultClientConfig();
-	
-		TrustManager[] trustManager = new X509TrustManager[] { new X509TrustManager() {
+                String filelocation = transportDetails.getfileLocation().trim();
 
-		    @Override
-		    public X509Certificate[] getAcceptedIssuers() {
-			return null;
-		    }
+                File file = new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getfileLocation().trim() + fileName);
 
-		    @Override
-		    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                String responseMessage = "";
 
-		    }
+                if (file.exists()) {
 
-		    @Override
-		    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                    InputStream fileInput = new FileInputStream(file);
 
-		    }
-		}};
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(fileInput));
 
-		HostnameVerifier hostnameVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
-		SSLContext ctx = SSLContext.getInstance("SSL");
-		ctx.init(null, trustManager, null);
-		config.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(hostnameVerifier, ctx));
-		
-		final Client client = Client.create(config);
-		
-		client.setConnectTimeout(120000);
-		client.setReadTimeout(120000);
-		client.addFilter(new HTTPBasicAuthFilter(hispDetails.getHispAPIUsername(), hispDetails.getHispAPIPassword()));
-
-		WebResource webResource = client.resource(hispDetails.getHispAPIURL());
-		
-		try {
-		    //Save the sending JSON into the archives folder
-		    String sentJSONFileName = batchDownloadDetails.getUtBatchName()+".json";
-		    File sentJSONFile = new File(myProps.getProperty("ut.directory.utRootDir") + "medAlliesArchives/" + sentJSONFileName);
-		    FileWriter writer = new FileWriter(sentJSONFile);
-		    writer.write(jsonObjectToSend.toString().replace("\\/", "/"));
-		    writer.close();
-		    
-		    ClientResponse response = webResource.type("application/json").post(ClientResponse.class, jsonObjectToSend.toString().replace("\\/", "/"));
-		    directMessageOut.setResponseStatus(response.getStatus());
-		    
-		    StringBuilder apiResponse = new StringBuilder();
-		    apiResponse.append("Status: ").append(response.getStatus()).append(System.getProperty("line.separator"));
-		    apiResponse.append("Response: ").append(System.getProperty("line.separator"));
-		    apiResponse.append(response.getEntity(String.class)); 
-		    
-		    responseMessage = apiResponse.toString();
-		    
-		    directMessageOut.setResponseMessage(responseMessage);
-		    
-		    jsonContentAsString = "";
-
-                    if (response.getStatus() == 200) {
-                        if (transportDetails.isWaitForResponse()) {
-                            batchStatusId = 59;
-                        } else {
-                            batchStatusId = 28;
-                        }
-                        directMessageOut.setStatusId(2);
-                    } else {
-                        batchStatusId = 58;
-                        directMessageOut.setStatusId(3);
+                    String line;
+                    StringBuilder jsonContent = new StringBuilder();
+                    while ((line = reader.readLine()) != null) {
+                        line = line.trim();
+                        jsonContent.append(line);
                     }
 
-                    response.close();
-                    client.destroy();
-                } 
-                catch (ClientHandlerException | UniformInterfaceException ex) {
-                    batchStatusId = 58;
-                    directMessageOut.setStatusId(3);
-                    responseMessage = ex.getMessage();
-                    directMessageOut.setResponseMessage(responseMessage);
-                    client.destroy();
-                }
-            }
-            else {
-                batchStatusId = 58;
-                directMessageOut.setResponseStatus(0);
-                directMessageOut.setStatusId(3);
-                directMessageOut.setResponseMessage("No File Sent because file (" + myProps.getProperty("ut.directory.utRootDir") + filelocation + fileName + ") was not Found");
-            }
-            
-            transactionoutmanager.updateTargetBatchStatus(batchDownloadId, batchStatusId, "endDateTime");
-            transactionOutDAO.insertDMMessage(directMessageOut);
+                    String jsonContentAsString = jsonContent.toString().replace("\\","\\\\");
+                    String encodedContent = utilmanager.encodeStringToBase64Binary(jsonContentAsString);
 
-		if(batchStatusId == 28) {
-		    //Delete all transaction target tables
-		    transactionInManager.deleteBatchTransactionTables(batchUploadId);
-		    transactionOutDAO.deleteBatchDownloadTables(batchDownloadId);
-                    
+                    JSONObject jsonObjectToSend = new JSONObject();
+
+                    if(patientFirstname != null && patientLastname != null && patientId != null && patientDOB != null) {
+                        jsonObjectToSend.put("messageSubject","Patient: " + patientFirstname + " " + patientLastname + "; DOB: " + patientDOB);
+                        jsonObjectToSend.put("patientId",patientId);
+                        jsonObjectToSend.put("patientDOB",patientDOB);
+                        jsonObjectToSend.put("patientFirstname",patientFirstname);
+                        jsonObjectToSend.put("patientLastname",patientLastname);
+                    }
+
+                    JSONArray emailAttachmentListArray = new JSONArray();
+
+                    JSONObject emailAttachmentListObject = new JSONObject();
+                    emailAttachmentListObject.put("attachmentClass","text/xml");
+                    emailAttachmentListObject.put("attachmentContent", encodedContent);
+                    emailAttachmentListObject.put("attachmentTitle",batchDownloadDetails.getUtBatchName()+".xml");
+
+                    emailAttachmentListArray.add(emailAttachmentListObject);
+
+                    jsonObjectToSend.put("emailAttachmentList", emailAttachmentListArray);
+
+                    JSONObject envelopeInfoObject = new JSONObject();
+
+                    UUID uuid = UUID.randomUUID();
+
+                    envelopeInfoObject.put("fromDirectAddress",batchUploadDetails.getRecipientEmail());
+                    envelopeInfoObject.put("messageId","urn:uuid:"+uuid);
+
+                    JSONArray envelopeInfoToAddressArray = new JSONArray();
+                    envelopeInfoToAddressArray.add(batchUploadDetails.getSenderEmail());
+                    envelopeInfoObject.put("toDirectAddress",envelopeInfoToAddressArray);
+
+                    //envelopeInfoObject.put("toDirectAddress",batchUploadDetails.getSenderEmail());
+
+                    jsonObjectToSend.put("envelopeInfo", envelopeInfoObject);
+
+                    final ClientConfig config = new DefaultClientConfig();
+
+                    TrustManager[] trustManager = new X509TrustManager[] { new X509TrustManager() {
+
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
+
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+
+                        }
+
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+
+                        }
+                    }};
+
+                    HostnameVerifier hostnameVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
+                    SSLContext ctx = SSLContext.getInstance("SSL");
+                    ctx.init(null, trustManager, null);
+                    config.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(hostnameVerifier, ctx));
+
+                    final Client client = Client.create(config);
+
+                    client.setConnectTimeout(120000);
+                    client.setReadTimeout(120000);
+                    client.addFilter(new HTTPBasicAuthFilter(hispDetails.getHispAPIUsername(), hispDetails.getHispAPIPassword()));
+
+                    WebResource webResource = client.resource(hispDetails.getHispAPIURL());
+
+                    try {
+                        //Save the sending JSON into the archives folder
+                        String sentJSONFileName = batchDownloadDetails.getUtBatchName()+".json";
+                        File sentJSONFile = new File(myProps.getProperty("ut.directory.utRootDir") + "medAlliesArchives/" + sentJSONFileName);
+                        FileWriter writer = new FileWriter(sentJSONFile);
+                        writer.write(jsonObjectToSend.toString().replace("\\/", "/"));
+                        writer.close();
+
+                        ClientResponse response = webResource.type("application/json").post(ClientResponse.class, jsonObjectToSend.toString().replace("\\/", "/"));
+                        directMessageOut.setResponseStatus(response.getStatus());
+
+                        StringBuilder apiResponse = new StringBuilder();
+                        apiResponse.append("Status: ").append(response.getStatus()).append(System.getProperty("line.separator"));
+                        apiResponse.append("Response: ").append(System.getProperty("line.separator"));
+                        apiResponse.append(response.getEntity(String.class)); 
+
+                        responseMessage = apiResponse.toString();
+
+                        directMessageOut.setResponseMessage(responseMessage);
+
+                        jsonContentAsString = "";
+
+                        if (response.getStatus() == 200) {
+                            if (transportDetails.isWaitForResponse()) {
+                                batchStatusId = 59;
+                            } else {
+                                batchStatusId = 28;
+                            }
+                            directMessageOut.setStatusId(2);
+                        } else {
+                            batchStatusId = 58;
+                            directMessageOut.setStatusId(3);
+                        }
+
+                        response.close();
+                        client.destroy();
+                    } 
+                    catch (ClientHandlerException | UniformInterfaceException ex) {
+                        batchStatusId = 58;
+                        directMessageOut.setStatusId(3);
+                        responseMessage = ex.getMessage();
+                        directMessageOut.setResponseMessage(responseMessage);
+                        client.destroy();
+                    }
+                }
+                else {
+                    batchStatusId = 58;
+                    directMessageOut.setResponseStatus(0);
+                    directMessageOut.setStatusId(3);
+                    directMessageOut.setResponseMessage("No File Sent because file (" + myProps.getProperty("ut.directory.utRootDir") + filelocation + fileName + ") was not Found");
+                }
+
+                transactionoutmanager.updateTargetBatchStatus(batchDownloadId, batchStatusId, "endDateTime");
+                transactionOutDAO.insertDMMessage(directMessageOut);
+
+                if(batchStatusId == 28) {
+                    //Delete all transaction target tables
+                    transactionInManager.deleteBatchTransactionTables(batchUploadId);
+                    transactionOutDAO.deleteBatchDownloadTables(batchDownloadId);
+
                     //Send out email notification
                     if(transportDetails.getErrorEmailAddresses() != null) {
                         if(!"".equals(transportDetails.getErrorEmailAddresses().trim())) {
                             mailMessage mail = new mailMessage();
                             mail.setfromEmailAddress("notifications@health-e-link.net");
-                            
+
                             List<String> ccAddresses = new ArrayList<>();
 
-                        String[] emails = transportDetails.getErrorEmailAddresses().trim().split(",");
-                        List<String> emailAddressList = Arrays.asList(emails);
+                            String[] emails = transportDetails.getErrorEmailAddresses().trim().split(",");
+                            List<String> emailAddressList = Arrays.asList(emails);
 
-                        if(!emailAddressList.isEmpty()) {
-                            mail.settoEmailAddress(emailAddressList.get(0).trim());
-                            if(emailAddressList.size() > 1) {
-                                for(Integer i = 1; i < emailAddressList.size(); i++) {
-                                    if(!"".equals(emailAddressList.get(i).trim())) {
-                                        ccAddresses.add(emailAddressList.get(i).trim());
+                            if(!emailAddressList.isEmpty()) {
+                                mail.settoEmailAddress(emailAddressList.get(0).trim());
+                                if(emailAddressList.size() > 1) {
+                                    for(Integer i = 1; i < emailAddressList.size(); i++) {
+                                        if(!"".equals(emailAddressList.get(i).trim())) {
+                                            ccAddresses.add(emailAddressList.get(i).trim());
+                                        }
                                     }
                                 }
                             }
+
+                            List<String> bccAddresses = new ArrayList<>();
+                            bccAddresses.add("cmccue@health-e-link.net");
+
+                            utConfiguration configDetails = configurationmanager.getConfigurationById(transportDetails.getconfigId());
+
+                            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
+                            Date date = new Date();
+
+                            //build message
+                            String message = "A Community eConnect feedback report was sent to your organization on " + dateFormat.format(date) + " via direct messaging for feedback report configuration " + configDetails.getconfigName().trim() + ".";
+                            mail.setmessageBody(message);
+                            mail.setmessageSubject("New Community eConnect feedback report");
+
+                            if (!ccAddresses.isEmpty()) {
+                                String[] ccEmailAddresses = new String[ccAddresses.size()];
+                                ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
+                                mail.setccEmailAddress(ccEmailAddresses);
+                            }
+
+                            if (!bccAddresses.isEmpty()) {
+                                String[] bccEmailAddresses = new String[bccAddresses.size()];
+                                bccEmailAddresses = ccAddresses.toArray(bccEmailAddresses);
+                                mail.setBccEmailAddress(bccEmailAddresses);
+                            }
+
+                            emailManager.sendEmail(mail);
                         }
-
-                        List<String> bccAddresses = new ArrayList<>();
-                        bccAddresses.add("cmccue@health-e-link.net");
-
-                        utConfiguration configDetails = configurationmanager.getConfigurationById(transportDetails.getconfigId());
-
-                        DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
-                        Date date = new Date();
-
-                        //build message
-                        String message = "A Community eConnect feedback report was sent to your organization on " + dateFormat.format(date) + " via direct messaging for feedback report configuration " + configDetails.getconfigName().trim() + ".";
-                        mail.setmessageBody(message);
-                        mail.setmessageSubject("New Community eConnect feedback report");
-
-                        if (!ccAddresses.isEmpty()) {
-                            String[] ccEmailAddresses = new String[ccAddresses.size()];
-                            ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
-                            mail.setccEmailAddress(ccEmailAddresses);
-                        }
-
-                        if (!bccAddresses.isEmpty()) {
-                            String[] bccEmailAddresses = new String[bccAddresses.size()];
-                            bccEmailAddresses = ccAddresses.toArray(bccEmailAddresses);
-                            mail.setBccEmailAddress(bccEmailAddresses);
-                        }
-
-                        emailManager.sendEmail(mail);
                     }
                 }
-	    }
+            }
 	    else {
 		batchStatusId = 58;
 		
