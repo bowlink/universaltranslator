@@ -64,7 +64,8 @@ require(['./main'], function () {
         var cwId = $(this).attr('rel');
         
         if((dtsId*1) > 0) {
-             alert("The crosswalk you are trying to delete is associated to a field within the data translations section of one or more of your configurations. \n\nIn order to modify the crosswalks existing values you can click 'view' and upload a new crosswalk file. \n\nTo delete the crosswalk you must first remove its association with any of your configuration fields.");
+            alert("The crosswalk you are trying to delete is associated to a field within the data translations section of one or more of your configurations. \n\nIn order to modify the crosswalks existing values you can click 'view' and upload a new crosswalk file. \n\nTo delete the crosswalk you must first remove its association with any of your configuration fields.");
+            location.reload();
         }
         else {
             if(confirm("Are you sure you want to remove this crosswalk?")) {
@@ -397,10 +398,7 @@ require(['./main'], function () {
     });
 
     $(document).on('click', '.cwClose', function() {
-        $('.showCrosswalks').attr('rel',0);
-        $('.showCrosswalks').html('Show Only In Use Crosswalks');
-        $('#crosswalkTitle').html("Available");
-        populateCrosswalks(1,0);
+        location.reload();
     });
 
     //This function will launch the crosswalk overlay with the selected
