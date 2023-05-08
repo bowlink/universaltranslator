@@ -2364,5 +2364,15 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	    return null;
 	}
     }
+    
+    @Override
+    public configurationDataTranslations getDataTranslationById(Integer translationId) throws Exception {
+	return utConfigurationDAO.getDataTranslationById(translationId);
+    }
+    
+    @Override
+    public void executeSQLStatement(String sqlStatement) throws Exception {
+	utConfigurationDAO.executeSQLStatement(sqlStatement);
+    }
 }
 
