@@ -21,42 +21,42 @@
     <tbody>
         <c:choose>
             <c:when test="${dataTranslations.size() > 0}">
-                <c:forEach items="${dataTranslations}" var="trans" varStatus="tStatus">
+                <c:forEach items="${dataTranslations}" var="translation" varStatus="tStatus">
                     <tr>
                         <td scope="row">
-                            ${dataTranslations[tStatus.index].fieldName} <c:if test="${dataTranslations[tStatus.index].fieldNo > 0}">- F${dataTranslations[tStatus.index].fieldNo}</c:if>
+                            ${translation.fieldName} <c:if test="${translation.fieldNo > 0}">- F${translation.fieldNo}</c:if>
                         </td>
                         <td>
-                            ${dataTranslations[tStatus.index].macroName}
+                            ${translation.macroName}
                         </td>
                         <td>
-                            ${dataTranslations[tStatus.index].crosswalkName}
+                            ${translation.crosswalkName}
                         </td>
                         <td class="center-text">
-                            <c:choose><c:when test="${dataTranslations[tStatus.index].passClear == 1}">Pass</c:when><c:otherwise>Clear</c:otherwise></c:choose>
+                            <c:choose><c:when test="${translation.passClear == 1}">Pass</c:when><c:otherwise>Clear</c:otherwise></c:choose>
 			</td>
 			<td class="center-text">
-                            ${dataTranslations[tStatus.index].fieldA} 
+                            ${translation.fieldA} 
                         </td>
                         <td class="center-text">
-                            ${dataTranslations[tStatus.index].fieldB} 
+                            ${translation.fieldB} 
                         </td>
                         <td class="center-text">
-                            ${dataTranslations[tStatus.index].constant1} 
+                            ${translation.constant1} 
                         </td>
                         <td class="center-text">
-                            ${dataTranslations[tStatus.index].constant2} 
+                            ${translation.constant2} 
                         </td>
                         <td class="center-text">
-                            <select rel="${dataTranslations[tStatus.index].processOrder}" name="processOrder" class="processOrder">
+                            <select data-id="${translation.id}" name="processOrder" class="processOrder">
                                 <option value="">- Select -</option>
                                 <c:forEach begin="1" end="${dataTranslations.size()}" var="i">
-                                    <option value="${i}" <c:if test="${dataTranslations[tStatus.index].processOrder  == i}">selected</c:if>>${i}</option>
+                                    <option value="${i}" <c:if test="${translation.processOrder  == i}">selected</c:if>>${i}</option>
                                 </c:forEach>
                             </select>
                         </td>
                         <td class="center-text">
-                            <a href="javascript:void(0);" class="btn btn-link removeTranslation" rel2="${dataTranslations[tStatus.index].processOrder}" rel="${dataTranslations[tStatus.index].fieldId}" title="Remove this field translation.">
+                            <a href="javascript:void(0);" class="btn btn-link removeTranslation" data-id="${translation.id}" title="Remove this field translation.">
                                 <span class="glyphicon glyphicon-edit"></span>
                                 Remove
                             </a>

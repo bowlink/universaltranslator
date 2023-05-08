@@ -1163,7 +1163,6 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         } else {
             return null;
         }
-
     }
     
     /**
@@ -2421,6 +2420,26 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         Query query = sessionFactory.getCurrentSession().createSQLQuery("DELETE from rel_transportftpdetails where transportId = :transportId")
 	.setParameter("transportId", transportId);
 
+        query.executeUpdate();
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public configurationDataTranslations getDataTranslationById(Integer translationId) throws Exception {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationDataTranslations.class);
+        criteria.add(Restrictions.eq("id", translationId));
+
+        if (criteria.list().size() > 0) {
+            return (configurationDataTranslations) criteria.uniqueResult();
+        } else {
+            return null;
+        }
+    }
+    
+    @Override
+    @Transactional(readOnly = false)
+    public void executeSQLStatement(String sqlStatement) throws Exception {
+        Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlStatement);
         query.executeUpdate();
     }
 }

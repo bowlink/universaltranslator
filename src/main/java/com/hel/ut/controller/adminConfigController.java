@@ -1542,14 +1542,14 @@ public class adminConfigController {
     public ModelAndView getConfigurationTranslations(HttpSession session, Authentication authentication) throws Exception {
 
         //Set the data translations array to get ready to hold data=
-        List<configurationDataTranslations> translations = new CopyOnWriteArrayList<>();
+        /*List<configurationDataTranslations> translations = new CopyOnWriteArrayList<>();
 	session.setAttribute("confgirationDataTranslastions", translations);
 	
 	List<configurationDataTranslations> preProcessingTranslations = new CopyOnWriteArrayList<>();
 	session.setAttribute("confgirationDataPreProcessingTranslastions", preProcessingTranslations);
 	
 	List<configurationDataTranslations> postProcessingTranslations = new CopyOnWriteArrayList<>();
-	session.setAttribute("confgirationDataPostProcessingTranslastions", postProcessingTranslations);
+	session.setAttribute("confgirationDataPostProcessingTranslastions", postProcessingTranslations);*/
 	
 	Integer configId = 0;
 	
@@ -1749,31 +1749,6 @@ public class adminConfigController {
 	    }
 	}
 	
-        //Delete all the data translations before creating
-        //This will help with the jquery removing translations
-        utconfigurationmanager.deleteDataTranslations(configId, categoryId);
-	
-	List<configurationDataTranslations> translations;
-	
-	if(categoryId == 1) {
-	    translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataTranslastions");
-	}
-	else if(categoryId == 2) {
-	    translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPreProcessingTranslastions");
-	}
-	else {
-	    translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPostProcessingTranslastions");
-	}
-	
-	if(translations != null) {
-	    if(!translations.isEmpty()) {
-		 //Loop through the list of translations
-		for (configurationDataTranslations translation : translations) {
-		    utconfigurationmanager.saveDataTranslations(translation);
-		}
-	    }
-	}
-	
 	//Log the update
 	utUser userDetails = userManager.getUserByUserName(authentication.getName());
 	configurationUpdateLogs updateLog = new configurationUpdateLogs();
@@ -1797,7 +1772,6 @@ public class adminConfigController {
      * The '/getTranslations.do' function will return the list of existing translations set up for the selected utConfiguration/transportMethod.
      *
      * @param session
-     * @param reload
      * @param categoryId
      * @return 
      * @throws java.lang.Exception 
@@ -1805,145 +1779,110 @@ public class adminConfigController {
      */
     @RequestMapping(value = "/getTranslations.do", method = RequestMethod.GET)
     public @ResponseBody
-    ModelAndView getTranslations(HttpSession session,@RequestParam(value = "reload", required = true) boolean reload, @RequestParam(value = "categoryId", required = true) Integer categoryId) throws Exception {
+    ModelAndView getTranslations(HttpSession session) throws Exception {
 
         ModelAndView mav = new ModelAndView();
 	
 	Integer configId = (Integer) session.getAttribute("manageconfigId");
         mav.setViewName("/administrator/configurations/existingTranslations");
 	
-	List<configurationDataTranslations> translations;
-	if(null == categoryId) {
-	    translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataTranslastions");
-	}
-	else switch (categoryId) {
-	    case 1:
-		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataTranslastions");
-		break;
-	    case 2:
-		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPreProcessingTranslastions");
-		break;
-	    case 3:
-		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPostProcessingTranslastions");
-		break;
-	    default:
-		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataTranslastions");
-		break;
-	}
+	List<configurationDataTranslations> translations = new ArrayList<>();
 	
-        //only get the saved translations if reload == 0
-        //We only want to retrieve the saved ones on initial load
-        if (reload == false) {
-	    
-            //Need to get a list of existing translations
-            List<configurationDataTranslations> existingTranslations = utconfigurationmanager.getDataTranslationsWithFieldNo(configId, categoryId);
+        //Need to get a list of existing translations
+        List<configurationDataTranslations> existingTranslations = utconfigurationmanager.getDataTranslationsWithFieldNo(configId, 1);
 
-            String fieldName;
-            String crosswalkName;
-            String macroName;
-            Map<String, String> defaultValues;
-            String optionDesc;
-            String optionValue;
-	    Integer cwId = 0;
-	    
-            for (configurationDataTranslations translation : existingTranslations) {
-		cwId = 0;
-		
-                //Get the field name by id
-                fieldName = utconfigurationmanager.getFieldName(translation.getFieldId());
-                translation.setfieldName(fieldName);
-		
-		if (translation.getCrosswalkId() != 0) {
-		    cwId = translation.getCrosswalkId();
-		}
-		
-		//Get the macro name by id
-                if (translation.getMacroId() > 0) {
-                    Macros macroDetails = utconfigurationmanager.getMacroById(translation.getMacroId());
-                    macroName = macroDetails.getMacroName();
-                    if (macroName.contains("DATE")) {
-                        macroName = macroDetails.getMacroName()+ " " + macroDetails.getdateDisplay();
-                    }
-                    translation.setMacroName(macroName);
-		    
-		    if(macroDetails.getcon1Question() != null) {
-			if(macroDetails.getcon1Question().contains("crosswalk")) {
-			    if(translation.getConstant1() != null) {
-				if(!"".equals(translation.getConstant1())) {
-				    cwId = Integer.parseInt(translation.getConstant1());
-				}
-			    }
-			}
-		    }
+        String fieldName;
+        String crosswalkName;
+        String macroName;
+        Map<String, String> defaultValues;
+        String optionDesc;
+        String optionValue;
+        Integer cwId = 0;
 
-		    if(macroDetails.getcon2Question() != null) {
-			if(macroDetails.getcon2Question().contains("crosswalk")) {
-			    if(translation.getConstant2() != null) {
-				if(!"".equals(translation.getConstant2())) {
-				    cwId = Integer.parseInt(translation.getConstant2());
-				}
-			    }
-			}
-		    }
+        for (configurationDataTranslations translation : existingTranslations) {
+            cwId = 0;
 
-		    if(macroDetails.getfieldAQuestion() != null) {
-			if(macroDetails.getfieldAQuestion().contains("crosswalk")) {
-			    if(translation.getFieldA() != null) {
-				if(!"".equals(translation.getFieldA())) {
-				    cwId = Integer.parseInt(translation.getFieldA());
-				}
-			    }
-			}
-		    }
+            //Get the field name by id
+            fieldName = utconfigurationmanager.getFieldName(translation.getFieldId());
+            translation.setfieldName(fieldName);
 
-		    if(macroDetails.getfieldBQuestion() != null) {
-			if(macroDetails.getfieldBQuestion().contains("crosswalk")) {
-			    if(translation.getFieldB() != null) {
-				if(!"".equals(translation.getFieldB())) {
-				    cwId = Integer.parseInt(translation.getFieldB());
-				}
-			    }
-			}
-		    }
-                }
-		
-                //Get the crosswalk name by id
-                if (cwId > 0) {
-                    defaultValues = new HashMap<>();
-                    crosswalkName = messagetypemanager.getCrosswalkName(cwId);
-                    translation.setcrosswalkName(crosswalkName);
-
-                    /* Get values of crosswalk */
-                    List crosswalkdata = messagetypemanager.getCrosswalkData(cwId);
-
-                    Iterator cwDataIt = crosswalkdata.iterator();
-                    while (cwDataIt.hasNext()) {
-                        Object cwDatarow[] = (Object[]) cwDataIt.next();
-                        optionDesc = (String) cwDatarow[2];
-                        optionValue = (String) cwDatarow[0];
-
-                        defaultValues.put(optionValue, optionDesc);
-
-                    }
-                    translation.setDefaultValues(defaultValues);
-                }
-                translations.add(translation);
+            if (translation.getCrosswalkId() != 0) {
+                cwId = translation.getCrosswalkId();
             }
+
+            //Get the macro name by id
+            if (translation.getMacroId() > 0) {
+                Macros macroDetails = utconfigurationmanager.getMacroById(translation.getMacroId());
+                macroName = macroDetails.getMacroName();
+                if (macroName.contains("DATE")) {
+                    macroName = macroDetails.getMacroName()+ " " + macroDetails.getdateDisplay();
+                }
+                translation.setMacroName(macroName);
+
+                if(macroDetails.getcon1Question() != null) {
+                    if(macroDetails.getcon1Question().contains("crosswalk")) {
+                        if(translation.getConstant1() != null) {
+                            if(!"".equals(translation.getConstant1())) {
+                                cwId = Integer.parseInt(translation.getConstant1());
+                            }
+                        }
+                    }
+                }
+
+                if(macroDetails.getcon2Question() != null) {
+                    if(macroDetails.getcon2Question().contains("crosswalk")) {
+                        if(translation.getConstant2() != null) {
+                            if(!"".equals(translation.getConstant2())) {
+                                cwId = Integer.parseInt(translation.getConstant2());
+                            }
+                        }
+                    }
+                }
+
+                if(macroDetails.getfieldAQuestion() != null) {
+                    if(macroDetails.getfieldAQuestion().contains("crosswalk")) {
+                        if(translation.getFieldA() != null) {
+                            if(!"".equals(translation.getFieldA())) {
+                                cwId = Integer.parseInt(translation.getFieldA());
+                            }
+                        }
+                    }
+                }
+
+                if(macroDetails.getfieldBQuestion() != null) {
+                    if(macroDetails.getfieldBQuestion().contains("crosswalk")) {
+                        if(translation.getFieldB() != null) {
+                            if(!"".equals(translation.getFieldB())) {
+                                cwId = Integer.parseInt(translation.getFieldB());
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Get the crosswalk name by id
+            if (cwId > 0) {
+                defaultValues = new HashMap<>();
+                crosswalkName = messagetypemanager.getCrosswalkName(cwId);
+                translation.setcrosswalkName(crosswalkName);
+
+                /* Get values of crosswalk */
+                List crosswalkdata = messagetypemanager.getCrosswalkData(cwId);
+
+                Iterator cwDataIt = crosswalkdata.iterator();
+                while (cwDataIt.hasNext()) {
+                    Object cwDatarow[] = (Object[]) cwDataIt.next();
+                    optionDesc = (String) cwDatarow[2];
+                    optionValue = (String) cwDatarow[0];
+
+                    defaultValues.put(optionValue, optionDesc);
+
+                }
+                translation.setDefaultValues(defaultValues);
+            }
+            translations.add(translation);
         }
-	
-	if(translations != null) {
-	    switch(categoryId) {
-		case 1:
-		    session.setAttribute("confgirationDataTranslastions", translations);
-		case 2:
-		    session.setAttribute("confgirationDataPreProcessingTranslastions", translations);
-		case 3:
-		    session.setAttribute("confgirationDataPostProcessingTranslastions", translations);
-		default:
-		    session.setAttribute("confgirationDataTranslastions", translations);
-	    }
-	}
-	
+        
         mav.addObject("dataTranslations", translations);
 
         return mav;
@@ -1964,50 +1903,31 @@ public class adminConfigController {
      * @param passClear
      * @param constant2
      * @param constant1
-     * @param categoryId
-     * @return 
      * @throws java.lang.Exception 
      *
      */
     @RequestMapping(value = "/setTranslations{params}", method = RequestMethod.GET)
-    public @ResponseBody
-    ModelAndView setTranslations(HttpSession session,
+    public @ResponseBody Integer setTranslations(HttpSession session,
 	@RequestParam(value = "f", required = true) Integer field, @RequestParam(value = "cw", required = true) Integer cwId, @RequestParam(value = "fText", required = true) String fieldText,
 	@RequestParam(value = "CWText", required = true) String cwText, @RequestParam(value = "macroId", required = true) Integer macroId,
 	@RequestParam(value = "macroName", required = true) String macroName, @RequestParam(value = "fieldA", required = false) String fieldA,
 	@RequestParam(value = "fieldB") String fieldB, @RequestParam(value = "constant1") String constant1,
-	@RequestParam(value = "constant2", required = false) String constant2, @RequestParam(value = "passClear") Integer passClear,
-	@RequestParam(value = "categoryId", required = true) Integer categoryId) throws Exception {
+	@RequestParam(value = "constant2", required = false) String constant2, @RequestParam(value = "passClear") Integer passClear) throws Exception {
 	
 	Integer configId = (Integer) session.getAttribute("manageconfigId");
 	
-	List<configurationDataTranslations> translations;
-	
-	if(null == categoryId) {
-	    translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPostProcessingTranslastions");
-	}
-	else switch (categoryId) {
-	    case 1:
-		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataTranslastions");
-		break;
-	    case 2:
-		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPreProcessingTranslastions");
-		break;
-	    default:
-		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPostProcessingTranslastions");
-		break;
-	}
+        List<configurationDataTranslations> existingTranslations = utconfigurationmanager.getDataTranslationsWithFieldNo(configId, 1);
 	
 	Integer processOrder = 0;
 	
-	if(translations == null) {
+	if(existingTranslations == null) {
 	    processOrder = 1;
 	}
-	else if(translations.isEmpty()) {
+	else if(existingTranslations.isEmpty()) {
 	    processOrder = 1;
 	}
 	else {
-	    processOrder = translations.size() + 1;
+	    processOrder = existingTranslations.size() + 1;
 	}
 
         if (macroId == null) {
@@ -2021,18 +1941,15 @@ public class adminConfigController {
         configurationDataTranslations translation = new configurationDataTranslations();
         translation.setconfigId(configId);
         translation.setFieldId(field);
-        translation.setfieldName(fieldText);
         translation.setMacroId(macroId);
-        translation.setMacroName(macroName);
         translation.setCrosswalkId(cwId);
-        translation.setcrosswalkName(cwText);
         translation.setFieldA(fieldA);
         translation.setFieldB(fieldB);
         translation.setConstant1(constant1);
         translation.setConstant2(constant2);
         translation.setProcessOrder(processOrder);
         translation.setPassClear(passClear);
-        translation.setCategoryId(categoryId);
+        translation.setCategoryId(1);
 	
         if (cwId > 0) {
             Map<String, String> defaultValues = new HashMap<>();
@@ -2053,112 +1970,98 @@ public class adminConfigController {
             translation.setDefaultValues(defaultValues);
         }
 	
-	translations.add(translation);
-	
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/existingTranslations");
-        mav.addObject("dataTranslations", translations);
-
-        return mav;
+	utconfigurationmanager.saveDataTranslations(translation);
+        
+        return 1;
     }
 
     /**
      * The 'removeTranslations{params}' function will handle removing a translation from translations array.
      *
      * @param session
-     * @param	fieldId This will hold the field that is being removed
-     * @param	processOrder	This will hold the process order of the field to be removed so we remove the correct field number as the same field could be in the list with different crosswalks
-     * @param categoryId
-      *
+     * @param	translationId This will hold the translation that is being removed
+     *
      * @return	1	The function will simply return a 1 back to the ajax call
      * @throws java.lang.Exception
      */
-    @RequestMapping(value = "/removeTranslations{params}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/removeTranslations.do", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
-    Integer removeTranslation(HttpSession session,@RequestParam(value = "fieldId", required = true) Integer fieldId, 
-	@RequestParam(value = "processOrder", required = true) Integer processOrder,
-	@RequestParam(value = "categoryId", required = true) Integer categoryId) throws Exception {
+    Integer removeTranslation(HttpSession session,@RequestParam(value = "translationId", required = true) Integer translationId) throws Exception {
 
-	List<configurationDataTranslations> translations;
-	
-	if(null == categoryId) {
-	    translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPostProcessingTranslastions");
-	}
-	else switch (categoryId) {
-	    case 1:
-		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataTranslastions");
-		break;
-	    case 2:
-		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPreProcessingTranslastions");
-		break;
-	    default:
-		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPostProcessingTranslastions");
-		break;
-	}
-	
-        Iterator<configurationDataTranslations> it = translations.iterator();
-        int currProcessOrder;
-
-        while (it.hasNext()) {
-            configurationDataTranslations translation = it.next();
-            if (translation.getFieldId() == fieldId && translation.getProcessOrder() == processOrder) {
-                translations.remove(translation);
-            } else if (translation.getProcessOrder() > processOrder) {
-                currProcessOrder = translation.getProcessOrder();
-                translation.setProcessOrder(currProcessOrder - 1);
+        //Get the existing tranlsation details
+        configurationDataTranslations translationDetails = utconfigurationmanager.getDataTranslationById(translationId);
+        
+        if(translationDetails != null) {
+            List<configurationDataTranslations> existingTranslations = utconfigurationmanager.getDataTranslationsWithFieldNo(translationDetails.getconfigId(), 1);
+            
+            if(!existingTranslations.isEmpty()) {
+                String sqlStatement = "";
+                Integer processOrder = 0;
+                for(configurationDataTranslations translation : existingTranslations) {
+                    if(translation.getProcessOrder() > translationDetails.getProcessOrder()) {
+                        processOrder = translation.getProcessOrder() - 1;
+                        sqlStatement += "update configurationdatatranslations set processOrder = " + processOrder + " where id = " + translation.getId() + ";";
+                    }
+                }
+                
+                sqlStatement += "delete from configurationdatatranslations where id = " +translationId+ ";";
+                
+                if(!"".equals(sqlStatement)) {
+                    utconfigurationmanager.executeSQLStatement(sqlStatement);
+                }
             }
         }
+        
         return 1;
     }
 
     /**
-     * The 'updateTranslationProcessOrder{params}' function will handle removing a translation from translations array.
+     * The 'updateTranslationProcessOrder.do' function will handle removing a translation from translations array.
      *
      * @param session
-     * @param currProcessOrder
+     * @param translationId
      * @param newProcessOrder
-     * @param categoryId
      * @return 
      * @throws java.lang.Exception 
      *
      * @Return	1	The function will simply return a 1 back to the ajax call
      */
-    @RequestMapping(value = "/updateTranslationProcessOrder{params}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/updateTranslationProcessOrder.do", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
-    Integer updateTranslationProcessOrder(HttpSession session,@RequestParam(value = "currProcessOrder", required = true) Integer currProcessOrder, 
-	@RequestParam(value = "newProcessOrder", required = true) Integer newProcessOrder,
-	@RequestParam(value = "categoryId", required = true) Integer categoryId) throws Exception {
-
-        List<configurationDataTranslations> translations;
-	if(null == categoryId) {
-	    translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPostProcessingTranslastions");
-	}
-	else switch (categoryId) {
-	    case 1:
-		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataTranslastions");
-		break;
-	    case 2:
-		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPreProcessingTranslastions");
-		break;
-	    default:
-		translations = (List<configurationDataTranslations>) session.getAttribute("confgirationDataPostProcessingTranslastions");
-		break;
-	}
-	
-	Iterator<configurationDataTranslations> it = translations.iterator();
-
-	while (it.hasNext()) {
-	    configurationDataTranslations translation = it.next();
-	    if(translation.getProcessOrder() >= newProcessOrder && translation.getProcessOrder() < currProcessOrder) {
-		translation.setProcessOrder(translation.getProcessOrder()+1);
-	    }
-	    else if(translation.getProcessOrder() <= newProcessOrder && translation.getProcessOrder() > currProcessOrder) {
-		translation.setProcessOrder(translation.getProcessOrder()-1);
-	    }
-	    else if(translation.getProcessOrder() == currProcessOrder) {
-		translation.setProcessOrder(newProcessOrder);
-	    }
-	}
+    Integer updateTranslationProcessOrder(HttpSession session,@RequestParam(value = "translationId", required = true) Integer translationId, 
+	@RequestParam(value = "newProcessOrder", required = true) Integer newProcessOrder) throws Exception {
+        
+        //Get the existing tranlsation details
+        configurationDataTranslations translationDetails = utconfigurationmanager.getDataTranslationById(translationId);
+        
+        if(translationDetails != null) {
+            List<configurationDataTranslations> existingTranslations = utconfigurationmanager.getDataTranslationsWithFieldNo(translationDetails.getconfigId(), 1);
+            
+            if(!existingTranslations.isEmpty()) {
+                String sqlStatement = "";
+                Integer processOrder = 0;
+                for(configurationDataTranslations translation : existingTranslations) {
+                    processOrder = 0;
+                    if(translation.getProcessOrder() >= newProcessOrder && translation.getProcessOrder() < translationDetails.getProcessOrder()) {
+                        processOrder = translation.getProcessOrder() + 1;
+                    }
+                    else if(translation.getProcessOrder() <= newProcessOrder && translation.getProcessOrder() > translationDetails.getProcessOrder()) {
+                        processOrder = translation.getProcessOrder() - 1;
+                    }
+                    else if(translation.getProcessOrder() == translationDetails.getProcessOrder()) {
+                        processOrder = newProcessOrder;
+                    }
+                    if(processOrder > 0) {
+                        sqlStatement += "update configurationdatatranslations set processOrder = " + processOrder + " where id = " + translation.getId() + ";";
+                    }
+                }
+                
+                if(!"".equals(sqlStatement)) {
+                    utconfigurationmanager.executeSQLStatement(sqlStatement);
+                }
+            }
+        }
+        
         return 1;
     }
 

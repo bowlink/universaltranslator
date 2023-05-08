@@ -258,4 +258,8 @@ public interface utConfigurationManager {
     StringBuffer exportConnectionFields(Integer connectionId) throws Exception;
     
     File generateCrosswalkTempDownloadFile(Integer crosswalkId, Integer delim) throws Exception;
+    
+    configurationDataTranslations getDataTranslationById(Integer translationId) throws Exception;
+    
+    void executeSQLStatement(String sqlStatement) throws Exception;
 }
