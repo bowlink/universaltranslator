@@ -69,10 +69,10 @@ require(['./main'], function () {
         }
         else {
             if(confirm("Are you sure you want to remove this crosswalk?")) {
-                /*$('body').overlay({
+                $('body').overlay({
                     glyphicon : 'floppy-disk',
                     message : 'Deleting...'
-                });*/
+                });
 
                 $.ajax({
                     url: 'deleteCrosswalk.do',
@@ -81,8 +81,7 @@ require(['./main'], function () {
                     },
                     type: 'POST',
                     success: function(data) {
-                       //$('.overlay').css('display','none');
-                       populateCrosswalks(1,1);
+                      location.reload();
                     }
                 });
             }
@@ -90,10 +89,10 @@ require(['./main'], function () {
     });
         
     $(document).on('click','.printConfig',function() {
-       /* $('body').overlay({
+        $('body').overlay({
             glyphicon : 'print',
             message : 'Gathering Details...'
-        });*/
+        });
 
         var configId = $(this).attr('rel');
 
@@ -108,8 +107,7 @@ require(['./main'], function () {
             success: function(data) {
                 if(data !== '') {
                     window.location.href = '/administrator/configurations/printConfig/'+ data;
-                    $('#successMsg').show();
-                    //$('#dtDownloadModal').modal('toggle');
+                    $('.overlay').css('display','none');
                 }
                 else {
                     $('#errorMsg').show();
