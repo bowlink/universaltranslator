@@ -4,7 +4,7 @@ require(['./main'], function () {
     
     $("input:text,form").attr("autocomplete", "off");
     populateCrosswalks(1,1);
-    populateExistingTranslations(0);
+    populateExistingTranslations();
 
     //Fade out the updated/created message after being displayed.
     if ($('.alert').length > 0) {
@@ -69,10 +69,10 @@ require(['./main'], function () {
         }
         else {
             if(confirm("Are you sure you want to remove this crosswalk?")) {
-                /*$('body').overlay({
+                $('body').overlay({
                     glyphicon : 'floppy-disk',
                     message : 'Deleting...'
-                });*/
+                });
 
                 $.ajax({
                     url: 'deleteCrosswalk.do',
@@ -81,8 +81,7 @@ require(['./main'], function () {
                     },
                     type: 'POST',
                     success: function(data) {
-                       //$('.overlay').css('display','none');
-                       populateCrosswalks(1,1);
+                      location.reload();
                     }
                 });
             }
@@ -90,10 +89,10 @@ require(['./main'], function () {
     });
         
     $(document).on('click','.printConfig',function() {
-       /* $('body').overlay({
+        $('body').overlay({
             glyphicon : 'print',
             message : 'Gathering Details...'
-        });*/
+        });
 
         var configId = $(this).attr('rel');
 
@@ -108,8 +107,7 @@ require(['./main'], function () {
             success: function(data) {
                 if(data !== '') {
                     window.location.href = '/administrator/configurations/printConfig/'+ data;
-                    $('#successMsg').show();
-                    //$('#dtDownloadModal').modal('toggle');
+                    $('.overlay').css('display','none');
                 }
                 else {
                     $('#errorMsg').show();
@@ -538,6 +536,15 @@ require(['./main'], function () {
         $('#fieldB').val("");
         $('#constant1').val("");
         $('#constant2').val("");
+        $('#fieldDiv').removeClass("has-error");
+        $('#fieldMsg').removeClass("has-error");
+        $('#fieldMsg').html("");
+        $('#crosswalkDiv').removeClass("has-error");
+        $('#crosswalkMsg').removeClass("has-error");
+        $('#crosswalkMsg').html("");
+        $('#macroDiv').removeClass("has-error");
+        $('#macroMsg').removeClass("has-error");
+        $('#macroMsg').html("");
     });
 
     //This function will handle populating the data translation table
@@ -604,25 +611,10 @@ require(['./main'], function () {
                     'fieldB': $('#fieldB').val(), 
                     'constant1': $('#constant1').val(), 
                     'constant2': $('#constant2').val(),
-                    'passClear': $('.passclear:checked').val(),
-                    'categoryId': 1
+                    'passClear': $('.passclear:checked').val()
                 },
                 success: function (data) {
-                    $('#translationMsgDiv').show();
-                    $("#existingTranslations").html(data);
-                    //Need to clear out the select boxes
-                    $('#field option:eq("")').prop('selected', true);
-                    $('#crosswalk option:eq("")').prop('selected', true);
-                    $('#macro option:eq("")').prop('selected', true);
-                    //Need to clear out fields
-                    $('#fieldA').val("");
-                    $('#fieldB').val("");
-                    $('#constant1').val("");
-                    $('#constant2').val("");
-                    $("#fieldA").removeAttr("rel");
-                    $("#fieldB").removeAttr("rel");
-                    $("#constant1").removeAttr("rel");
-                    $("#constant2").removeAttr("rel");
+                    location.reload();
                 }
             });
         }
@@ -633,68 +625,63 @@ require(['./main'], function () {
     //order selected. It will swap display position
     //values with the requested position.
     $(document).on('change', '.processOrder', function () {
-        //Store the current position
-        var currDspPos = $(this).attr('rel');
+        
+        var translationId = $(this).data('id');
         var newDspPos = $(this).val();
         
-        $.ajax({
-            url: 'updateTranslationProcessOrder?currProcessOrder=' + currDspPos + '&categoryId=1&newProcessOrder=' + newDspPos,
-            type: "POST",
-            success: function (data) {
-                $('#translationMsgDiv').show();
-                populateExistingTranslations(1);
-            }
-        });
-        
+        if(confirm("Are you sure you want to move this configuration translation process position?")) {
+
+            $.ajax({
+                url: 'updateTranslationProcessOrder.do',
+                type: "POST",
+                data: {
+                    'newProcessOrder': newDspPos,
+                    'translationId': translationId
+                },
+                success: function (data) {
+                     location.reload();
+                }
+            });
+        }
     });
 
     //Function that will handle removing a line item from the
     //existing data translations. Function will also update the
     //processing orders for each displayed.
     $(document).on('click', '.removeTranslation', function () {
-        var currPos = $(this).attr('rel2');
-        var fieldId = $(this).attr('rel');
-
-        //Need to remove the translation
-        $.ajax({
-            url: 'removeTranslations?fieldId=' + fieldId + '&categoryId=1&processOrder=' + currPos,
-            type: "POST",
-            success: function (data) {
-                $('#translationMsgDiv').show();
-                populateExistingTranslations(1);
-            }
-        });
+        var translationId = $(this).data('id');
+        
+        if(confirm("Are you sure you want to remove this configuration translation?")) {
+            //Need to remove the translation
+            $.ajax({
+                url: 'removeTranslations.do',
+                type: "POST",
+                data: {
+                    'translationId': translationId
+                },
+                success: function (data) {
+                     location.reload();
+                }
+            });
+        }
     });
 });
 
 
-function populateExistingTranslations(reload) {
+function populateExistingTranslations() {
     
     //Disable the save buttons (will be reactivated when the existing DTS are loaded)
     $('#saveDetails').addClass( "disabled" );
     $('#next').addClass( "disabled" );
-    
-    $('#loadingModal').html('<div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h3 class="panel-title">Data Translations are loading</h3></div></div></div>');
-    $('#loadingModal').modal(
-        {
-            backdrop: 'static', 
-            keyboard: false
-        }
-    ); 
-    
+   
     $.ajax({
         url: 'getTranslations.do',
         type: "GET",
-        data: {
-            'reload': reload, 
-            'categoryId': 1
-        },
         success: function (data) {
             $("#existingTranslations").html(data);
 	    $('.dtDownloadLink').show();
             $('#saveDetails').removeClass( "disabled" );
             $('#next').removeClass( "disabled" );
-            $('#loadingModal').modal('toggle');
         }
     });
 }

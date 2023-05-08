@@ -215,4 +215,8 @@ public interface utConfigurationDAO {
     void deletConfigurationNote(Integer noteId) throws Exception;
     
     void deleteConfigurationFTPInformation(int transportId) throws Exception;
+    
+    configurationDataTranslations getDataTranslationById(Integer translationId) throws Exception;
+    
+    void executeSQLStatement(String sqlStatement) throws Exception;
 }
