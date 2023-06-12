@@ -22,12 +22,6 @@ require(['./main'], function () {
        populateHELRegistries($(this).val());
     });
 
-    var helRegistry = $('#helRegistry').attr('rel');
-    
-    if(typeof helRegistry !== "undefined" && helRegistry != 0 && helRegistry !== "0-") {
-        populateHELRegistryOrgs(helRegistry);
-    }
-
     //Registry is selected we need to go get the organizations set up for that organization
     $(document).on('change','#helRegistry', function() {
         populateHELRegistryOrgs($(this).val());
@@ -36,7 +30,7 @@ require(['./main'], function () {
 
     //A registry organization was selected need to get the details to populate the fields
     $(document).on('change','#helRegistryOrgId', function() {
-
+        
         var selRegistryOrg = $(this).val();
         var selRegistrySchemaName = $(this).attr('schema');
         
@@ -202,9 +196,8 @@ function populateHELRegistries(isHELRegistry) {
 }
 
 function populateHELRegistryOrgs(selRegistry) {
-    
     if(selRegistry != 0) {
-		
+	
 	var selRegistrySchemaName = selRegistry.split("-")[1];
         var selRegistryId = selRegistry.split("-")[0];
         var selRegistryType = selRegistry.split("-")[2];

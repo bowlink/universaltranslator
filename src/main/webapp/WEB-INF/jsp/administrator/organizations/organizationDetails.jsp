@@ -24,7 +24,6 @@
             <form:hidden path="dateCreated" />
 	    <form:hidden path="helRegistrySchemaName" id="helRegistrySchemaName" />
 	    <form:hidden path="helRegistryId" id="helRegistryId" />
-	    <form:hidden path="helRegistryOrgId" value="0" />
 
             <section class="panel panel-default">
                 <div class="panel-heading">
