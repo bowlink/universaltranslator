@@ -181,29 +181,14 @@ function populateHELRegistries(isHELRegistry) {
 	$('#orgDetails').hide();
 
 	var selRegistry = $('#helRegistry').attr('rel');
+        
+        $('#HELRegistryDetails').show();
+        
+        var helRegistrySelect = $('#helRegistry');
+        helRegistrySelect.append($('<option selected></option>').val('38-eahfp-2').html('CDS Family Planning'));
+        
+        populateHELRegistryOrgs('38-eahfp-2');
 
-	$.ajax({
-	     url: 'getHELRegistries?tenantId=registries',
-	     type: "GET",
-	     data: {},
-	     dataType: 'json',
-	     success: function (data) {
-		 $('#HELRegistryDetails').show();
-		 
-		 var selRegistryId = selRegistry.split("-")[0];
-
-		 var helRegistrySelect = $('#helRegistry');
-
-		 $.each(data, function(index) {
-		    if(data[index].id == selRegistryId) {
-			helRegistrySelect.append($('<option selected></option>').val(data[index].id+'-'+data[index].dbschemaname+'-'+data[index].registryType).html(data[index].registryName));
-		    }
-		    else {
-			helRegistrySelect.append($('<option></option>').val(data[index].id+'-'+data[index].dbschemaname+'-'+data[index].registryType).html(data[index].registryName));
-		    }
-		 });
-	     }
-	 });
     }
     else {
 	$('#helRegistryId').val(0);
@@ -250,13 +235,13 @@ function populateHELRegistryOrgs(selRegistry) {
 		    var helRegistryOrgSelect = $('#helRegistryOrgId');
 		    
 		    var selRegistryOrgId = helRegistryOrgSelect.attr('rel');
-		    
+                   
 		    if(data.length > 0) {
                         
                         helRegistryOrgSelect.append($('<option></option>').val(0).html('N/A'));
                         
                         if(selRegistryType == 2) {
-                            $('<optgroup/>').attr('label', 'Tier 2 - Subrecipients').appendTo(helRegistryOrgSelect);
+                            $('<optgroup/>').attr('label', 'Tier 2 - Agencies').appendTo(helRegistryOrgSelect);
                         }
                         
 			$.each(data, function(index) {
@@ -283,6 +268,7 @@ function populateHELRegistryOrgs(selRegistry) {
                             },
                             dataType: 'json',
                             success: function (data) {
+                                
                                 if(data.length > 0) {
 
                                     if(selRegistryType == 2) {
