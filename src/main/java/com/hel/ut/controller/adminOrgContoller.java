@@ -552,14 +552,14 @@ public class adminOrgContoller {
 	if(registryType == null) {
 	    registryType = 1;
 	}
-	
+        
 	if(registryType == 1) {
 	
 	    tiers lastRegistryTier = tiermanager.getLastTier();
 
 	    if(lastRegistryTier != null) {
 		List<tierOrganizationDetails> tierOrganizations = tiermanager.getTierEntries(lastRegistryTier.getId());
-
+                
 		if(tierOrganizations != null) {
 		    return tierOrganizations;
 		}
@@ -572,7 +572,7 @@ public class adminOrgContoller {
 	    }
 	}
 	else {
-	    
+            
 	    //Get FP Tier orgs bt passed in Tier level (2 or 3)
 	    programOrgHierarchy tierLevelOrgs = tiermanager.getsFPRegistryTierBydspPos(tierLevel);
 	    
@@ -580,7 +580,7 @@ public class adminOrgContoller {
 	    
 	    if(tierLevelOrgs != null) {
 		List<programOrgHierarchyDetails> fpOrgs = tiermanager.getFPRegistryTierEntries(tierLevelOrgs.getId());
-		
+                
 		if(fpOrgs != null) {
 		    
 		    for(programOrgHierarchyDetails org : fpOrgs) {
