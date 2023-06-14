@@ -904,7 +904,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
                                     if (field.getFieldNo() == maxFieldNo) {
                                         sb.append(recordRow).append(fieldValue);
                                         if(targetConfigDetails.getMessageTypeId() == 2 && orgDetails.getOrgType() == 5) {
-                                            System.out.println("Appdend Id: " + record.getTransactionInRecordsId());
                                             sb.append(delimChar).append(record.getTransactionInRecordsId());
                                         }
                                         sb.append(System.getProperty("line.separator"));
