@@ -274,6 +274,7 @@
                                                                 <c:param name="foldername" value="archivesOut" />
                                                                 <c:param name="orgId" value="${targetBatch.orgId}" />
                                                                 <c:param name="utBatchId" value="${batchDetails.utBatchName}" />
+                                                                <c:param name="utBatchName" value="${batchDetails.utBatchName}" />
                                                             </c:url>
                                                             <a href="${hrefLink}" title="View Generated Target File">Generated Target File - ${targetBatch.outputFileName}</a><br />
                                                         </c:if>
