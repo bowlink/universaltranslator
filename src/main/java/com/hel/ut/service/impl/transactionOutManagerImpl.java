@@ -1134,7 +1134,19 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
     @Override
     public Integer writeOutputToTextFile(configurationTransport transportDetails, Integer batchDownLoadId, String filePathAndName, String fieldNos, Integer batchUploadId) throws Exception {
-	return transactionOutDAO.writeOutputToTextFile(transportDetails, batchDownLoadId, filePathAndName, fieldNos, batchUploadId);
+	
+        batchDownloads batchDetails = transactionOutDAO.getBatchDetails(batchDownLoadId);
+	
+	utConfiguration targetConfigDetails = configurationManager.getConfigurationById(batchDetails.getConfigId());
+        
+        Organization orgDetails = organizationManager.getOrganizationById(batchDetails.getOrgId());
+	
+	if(targetConfigDetails.getMessageTypeId() == 2 && orgDetails.getOrgType() == 5) {
+	    return transactionOutDAO.writeFPOutputToTextFile(transportDetails, batchDownLoadId, filePathAndName, fieldNos);
+	}
+	else {
+	    return transactionOutDAO.writeOutputToTextFile(transportDetails, batchDownLoadId, filePathAndName, fieldNos, batchUploadId);
+	}
     }
 
     @Override
