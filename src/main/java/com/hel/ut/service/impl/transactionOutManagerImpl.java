@@ -927,6 +927,8 @@ public class transactionOutManagerImpl implements transactionOutManager {
                 } else {
                     recordRow = sb.toString();
                 }
+                
+                System.out.println(recordRow);
 
                 if (!"".equals(recordRow)) {
                     try {
