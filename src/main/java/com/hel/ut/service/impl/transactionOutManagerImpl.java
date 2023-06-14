@@ -932,6 +932,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
                     recordRow = sb.toString();
                 }
                 
+
                 if (!"".equals(recordRow)) {
                     try {
                         if (encrypt == true) {
