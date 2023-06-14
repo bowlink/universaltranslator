@@ -932,9 +932,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
                     recordRow = sb.toString();
                 }
                 
-                System.out.println(recordRow);
-                
-
                 if (!"".equals(recordRow)) {
                     try {
                         if (encrypt == true) {
@@ -956,7 +953,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	}
 	
 	strFileLoc = file.getAbsolutePath();
-        System.out.println(strFileLoc);
 	return strFileLoc;
     }
 
