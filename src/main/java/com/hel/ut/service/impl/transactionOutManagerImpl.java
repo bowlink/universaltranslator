@@ -864,6 +864,10 @@ public class transactionOutManagerImpl implements transactionOutManager {
                 StringBuilder sb = new StringBuilder("");
 
                 boolean addHeader = true;
+                
+                if(transportDetails != null) {
+                    addHeader = transportDetails.isAddTargetFileHeaderRow();
+                }
 
                 if(addHeader) {
                     for (configurationFormFields field : formFields) {
@@ -929,6 +933,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
                 }
                 
                 System.out.println(recordRow);
+                
 
                 if (!"".equals(recordRow)) {
                     try {
@@ -951,6 +956,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	}
 	
 	strFileLoc = file.getAbsolutePath();
+        System.out.println(strFileLoc);
 	return strFileLoc;
     }
 
