@@ -902,12 +902,10 @@ public class transactionOutManagerImpl implements transactionOutManager {
                                     }
 
                                     if (field.getFieldNo() == maxFieldNo) {
-                                        System.out.println("END OF MAX FIELDS");
-                                        System.out.println(targetConfigDetails.getMessageTypeId());
-                                        System.out.println(orgDetails.getOrgType());
                                         sb.append(recordRow).append(fieldValue);
                                         if(targetConfigDetails.getMessageTypeId() == 2 && orgDetails.getOrgType() == 5) {
-                                            sb.append(delimChar).append("test");
+                                            System.out.println("Appdend Id: " + record.getTransactionInRecordsId());
+                                            sb.append(delimChar).append(record.getTransactionInRecordsId());
                                         }
                                         sb.append(System.getProperty("line.separator"));
                                     } else {
