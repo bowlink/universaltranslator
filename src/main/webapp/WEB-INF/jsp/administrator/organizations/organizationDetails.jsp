@@ -67,7 +67,7 @@
 				    <option value="4" <c:if test="${organization.orgType == 4}">selected</c:if>>Data Warehouse</option>
 				    <option value="1" <c:if test="${organization.orgType == 1}">selected</c:if>>Health Care Provider</option>
 				    <option value="3" <c:if test="${organization.orgType == 3}">selected</c:if>>Health Management Information System</option>
-				    <!--<option value="5" <c:if test="${organization.orgType == 5}">selected</c:if>>Internal Health-e-Link Registry</option>-->
+				    <option value="5" <c:if test="${organization.orgType == 5}">selected</c:if>>Internal Health-e-Link Registry</option>
 				</form:select>
 				<form:errors path="orgType" cssClass="control-label" element="label" />
 			    </div>
