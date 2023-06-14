@@ -892,13 +892,13 @@ public class transactionOutManagerImpl implements transactionOutManager {
                                     String fieldValue = BeanUtils.getProperty(record, colName);
 
                                     if (fieldValue == null) {
-                                            fieldValue = "test";
+                                            fieldValue = "";
                                     } else if ("null".equals(fieldValue)) {
-                                            fieldValue = "test";
+                                            fieldValue = "";
                                     } else if (fieldValue.isEmpty()) {
-                                            fieldValue = "test";
+                                            fieldValue = "";
                                     } else if (fieldValue.length() == 0) {
-                                            fieldValue = "test";
+                                            fieldValue = "";
                                     }
 
                                     if (field.getFieldNo() == maxFieldNo) {
