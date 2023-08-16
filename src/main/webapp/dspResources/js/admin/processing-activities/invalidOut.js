@@ -97,7 +97,7 @@ require(['./main'], function () {
             var today = new Date();
             var isDST = 0;
             if (today.isDstObserved()) { 
-               isDST = 1;
+               //isDST = 1;
             }
             $('#DTS').val(isDST);
             searchByDateRange();

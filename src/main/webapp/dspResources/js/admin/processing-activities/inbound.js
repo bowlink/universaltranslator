@@ -257,7 +257,7 @@ function populateMessages(fromDate,toDate) {
                         var dateS = new Date(row.startDateTime);
                         minutes = dateS.getMinutes();
                        
-                        if(isDST == 1) {
+                        /*if(isDST == 1) {
                             hours = dateS.getHours()-1;
                             if(hours < 0) {
                                 hours = 11;
@@ -268,7 +268,9 @@ function populateMessages(fromDate,toDate) {
                         }
                         else {
                             hours = dateS.getHours();
-                        }
+                        }*/
+                        hours = dateS.getHours();
+                       
                         
                         ampm =  hours >= 12 ? 'pm' : 'am';
                         hours = hours % 12;
@@ -285,7 +287,7 @@ function populateMessages(fromDate,toDate) {
                     if(row.endDateTime != null) {
                         dateC = new Date(row.endDateTime);
                         minutes = dateC.getMinutes();
-                        if(isDST == 1) {
+                        /*if(isDST == 1) {
                             if(hours < 0) {
                                 hours = 11;
                             }
@@ -295,7 +297,8 @@ function populateMessages(fromDate,toDate) {
                         }
                         else {
                             hours = dateC.getHours();
-                        }
+                        }*/
+                        hours = dateC.getHours();
                         ampm =  hours >= 12 ? 'pm' : 'am';
                         hours = hours % 12;
                         hours = hours ? hours : 12;
