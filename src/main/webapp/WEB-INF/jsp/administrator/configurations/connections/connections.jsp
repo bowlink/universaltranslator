@@ -40,18 +40,18 @@
                                         <tr>
 					     <td scope="row">${connection.id}</td>
                                             <td scope="row">
-                                                Organization: <strong>${connection.srcConfigDetails.getOrgName()}</strong>
+                                                Organization: <strong>${connection.sourceOrgName}</strong>
 						<br />
-						Configuration: <strong>${connection.srcConfigDetails.getconfigName()} (Id: ${connection.srcConfigDetails.getId()})</strong>
+						Configuration: <strong>${connection.sourceConfigName} (Id: ${connection.sourceConfigId})</strong>
 						<br />
-						Transport Method: <strong>${connection.srcConfigDetails.gettransportMethod()}</strong>
+						Transport Method: <strong>${connection.sourceTransportMethod}</strong>
                                             </td>
 					    <td scope="row">
-                                                Organization: <strong>${connection.tgtConfigDetails.getOrgName()}</strong>
+                                                Organization: <strong>${connection.targetOrgName}</strong>
 						<br />
-						Configuration: <strong>${connection.tgtConfigDetails.getconfigName()} (Id: ${connection.tgtConfigDetails.getId()})</strong>
+						Configuration: <strong>${connection.targetConfigName} (Id: ${connection.targetConfigId})</strong>
 						<br />
-						Transport Method: <strong>${connection.tgtConfigDetails.gettransportMethod()}</strong>
+						Transport Method: <strong>${connection.targetTransportMethod}</strong>
                                             </td>
                                             <td class="center-text"><fmt:formatDate value="${connection.dateCreated}" type="date" pattern="M/dd/yyyy" /></td>
                                             <td class="center-text actions-col">

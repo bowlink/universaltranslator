@@ -262,4 +262,6 @@ public interface utConfigurationManager {
     configurationDataTranslations getDataTranslationById(Integer translationId) throws Exception;
     
     void executeSQLStatement(String sqlStatement) throws Exception;
+
+List<configurationConnection> getAllConnectionsSingleQuery();
 }
