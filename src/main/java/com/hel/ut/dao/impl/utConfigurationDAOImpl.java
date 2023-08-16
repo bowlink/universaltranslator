@@ -1608,7 +1608,6 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 				     }
 				 }
 				 else {
-				    cell.setCellType(Cell.CELL_TYPE_STRING);
 				    sampleData = cell.getStringCellValue();
 				 }
 			    }
@@ -2241,52 +2240,77 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     public List<utConfiguration>  getAllSourceConfigurations() throws Exception {
 	
-	String sql = "select *, (select dateCreated from configurationupdatelogs where configId = configurations.id order by id desc limit 1) as dateUpdated " 
-	    + "from configurations where deleted = 0 and type = 1";
+	String sql = "select a.*, b.orgName, b.helRegistryId, b.cleanURL as cleanOrgURL, IFNULL(c.id ,0) as transportDetailId, IFNULL(c.transportMethodId, 0) as transportMethodId,"
+        + "(select dateCreated from configurationupdatelogs where configId = a.id order by id desc limit 1) as dateUpdated," 
+        + "IFNULL(d.transportMethod,'N/A') as transportMethod,"
+        + "IFNULL(e.type, 0) as scheduleType,"
+        + "CASE WHEN f.id is null then 0 else 1 end as allowFTPLink,"
+        + "CASE WHEN g.id is null then '' else g.directory end as fileDropLocation "        
+        + "from configurations a inner join "
+        + "organizations b on b.id = a.orgId left outer join "
+        + "configurationtransportdetails c on c.configId = a.id left outer join "
+        + "ref_transportmethods d on d.id = c.transportMethodId left outer join "
+        + "configurationschedule e on e.configId = a.id left outer join "
+        + "rel_transportftpdetails f on f.transportId = c.id and f.method = 1 left outer join "
+        + "rel_transportfiledropdetails g on g.transportId = c.id and g.method = 1 "
+        + "where a.deleted = 0 and a.type = 1";
 	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
-	    .addScalar("id", StandardBasicTypes.INTEGER)
-	    .addScalar("type", StandardBasicTypes.INTEGER)
-	    .addScalar("orgId", StandardBasicTypes.INTEGER)
-	    .addScalar("messageTypeId", StandardBasicTypes.INTEGER)
-	    .addScalar("configName", StandardBasicTypes.STRING)
-	    .addScalar("status", StandardBasicTypes.BOOLEAN)	
-	    .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
-	    .addScalar("dateUpdated", StandardBasicTypes.TIMESTAMP)
-	    .setResultTransformer(Transformers.aliasToBean(utConfiguration.class));
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("type", StandardBasicTypes.INTEGER)
+        .addScalar("orgId", StandardBasicTypes.INTEGER)
+        .addScalar("messageTypeId", StandardBasicTypes.INTEGER)
+        .addScalar("configName", StandardBasicTypes.STRING)
+        .addScalar("status", StandardBasicTypes.BOOLEAN)	
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
+        .addScalar("dateUpdated", StandardBasicTypes.TIMESTAMP)
+        .addScalar("orgName", StandardBasicTypes.STRING)
+        .addScalar("cleanOrgURL", StandardBasicTypes.STRING)
+        .addScalar("transportMethodId", StandardBasicTypes.INTEGER)
+        .addScalar("transportDetailId", StandardBasicTypes.INTEGER)
+        .addScalar("helRegistryId", StandardBasicTypes.INTEGER)
+        .addScalar("scheduleType", StandardBasicTypes.INTEGER)
+        .addScalar("transportMethod", StandardBasicTypes.STRING)
+        .addScalar("allowFTPLink", StandardBasicTypes.BOOLEAN)
+        .addScalar("fileDropLocation", StandardBasicTypes.STRING)
+        .setResultTransformer(Transformers.aliasToBean(utConfiguration.class));
 	
 	return query.list();
-	
-	//Query query = sessionFactory.getCurrentSession().createQuery("from utConfiguration where deleted = 0 and type = 1");
-
-        //List<utConfiguration> sourceConfigurations = query.list();
-        //return sourceConfigurations;
     }
     
     @Override
     @Transactional(readOnly = true)
     public List<utConfiguration>  getAllTargetConfigurations() throws Exception {
 	
-	String sql = "select *, (select dateCreated from configurationupdatelogs where configId = configurations.id order by id desc limit 1) as dateUpdated " 
-	    + "from configurations where deleted = 0 and type = 2";
+	String sql = "select a.*, b.orgName, b.cleanURL as cleanOrgURL, IFNULL(c.id ,0) as transportDetailId, IFNULL(c.transportMethodId, 0) as transportMethodId,"
+        + "(select dateCreated from configurationupdatelogs where configId = a.id order by id desc limit 1) as dateUpdated," 
+        + "IFNULL(d.transportMethod,'N/A') as transportMethod,"
+        + "IFNULL(e.type, 0) as scheduleType "
+        + "from configurations a inner join "
+        + "organizations b on b.id = a.orgId left outer join "
+        + "configurationtransportdetails c on c.configId = a.id left outer join "
+        + "ref_transportmethods d on d.id = c.transportMethodId left outer join "
+        + "configurationschedule e on e.configId = a.id "
+        + "where a.deleted = 0 and a.type = 2";
 	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
-	    .addScalar("id", StandardBasicTypes.INTEGER)
-	    .addScalar("type", StandardBasicTypes.INTEGER)
-	    .addScalar("orgId", StandardBasicTypes.INTEGER)
-	    .addScalar("messageTypeId", StandardBasicTypes.INTEGER)
-	    .addScalar("configName", StandardBasicTypes.STRING)
-	    .addScalar("status", StandardBasicTypes.BOOLEAN)	
-	    .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
-	    .addScalar("dateUpdated", StandardBasicTypes.TIMESTAMP)
-	    .setResultTransformer(Transformers.aliasToBean(utConfiguration.class));
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("type", StandardBasicTypes.INTEGER)
+        .addScalar("orgId", StandardBasicTypes.INTEGER)
+        .addScalar("messageTypeId", StandardBasicTypes.INTEGER)
+        .addScalar("configName", StandardBasicTypes.STRING)
+        .addScalar("status", StandardBasicTypes.BOOLEAN)	
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
+        .addScalar("dateUpdated", StandardBasicTypes.TIMESTAMP)
+        .addScalar("orgName", StandardBasicTypes.STRING)
+        .addScalar("transportMethodId", StandardBasicTypes.INTEGER)
+        .addScalar("transportDetailId", StandardBasicTypes.INTEGER)
+        .addScalar("transportMethod", StandardBasicTypes.STRING)
+        .addScalar("cleanOrgURL", StandardBasicTypes.STRING)
+        .addScalar("scheduleType", StandardBasicTypes.INTEGER)
+        .setResultTransformer(Transformers.aliasToBean(utConfiguration.class));
 	
 	return query.list();
-	
-	/*Query query = sessionFactory.getCurrentSession().createQuery("from utConfiguration where deleted = 0 and type = 2");
-
-        List<utConfiguration> targetConfigurations = query.list();
-        return targetConfigurations;*/
     }
     
     @Override

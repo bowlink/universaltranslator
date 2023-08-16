@@ -210,9 +210,6 @@ public class adminConfigController {
 	//Get all target configurations
         List<utConfiguration> targetconfigurations = utconfigurationmanager.getAllTargetConfigurations();
 
-        Organization org;
-        configurationTransport transportDetails;
-	
 	TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
 	DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -232,49 +229,30 @@ public class adminConfigController {
 		dateinTZ = requiredFormat.format(config.getDateUpdated());
 	    }
 	    config.setDateUpdated(dft.parse(dateinTZ));
-	    
-            org = organizationmanager.getOrganizationById(config.getorgId());
-            config.setOrgName(org.getOrgName());
-	    
-	    if(org.getHelRegistryId() > 0) {
+            
+	    if(config.getHelRegistryId() > 0) {
 		if(helRegistries != null) {
 		    for(helRegistry reg : helRegistries) {
-			if(reg.getId() == org.getHelRegistryId()) {
+			if(reg.getId() == config.getHelRegistryId()) {
 			    config.setHelRegistry(reg.getRegistryName());
 			}
 		    }
 		}
 	    }
-	    
-            transportDetails = utconfigurationTransportManager.getTransportDetails(config.getId());
-            if (transportDetails != null) {
-                config.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
-		
-		configurationFileDropFields fileDropLocation = utconfigurationTransportManager.getTransFileDropDetailsPull(transportDetails.getId());
-		
-		if(fileDropLocation != null) {
-		    //Make sure the configuration has at least 1 connection before we allow file upload
-		    List<configurationConnection> getConectionsByConfiguration = utconfigurationmanager.getConnectionsByConfiguration(config.getId(), 0);
-		    if(!getConectionsByConfiguration.isEmpty()) {
-			config.setFileDropLocation(fileDropLocation.getDirectory());
-		    }
-		}
-		
+            
+            if(config.gettransportDetailId() > 0) {
 		//Check to see if configuration has any FTP connection set up
-		configurationFTPFields ftpDetails = utconfigurationTransportManager.getTransportFTPDetailsPull(transportDetails.getId());
-		if(ftpDetails != null) {
+		if(config.isAllowFTPLink()) {
 		    config.setAllowFTPLink(true);
-		    config.settransportDetailId(transportDetails.getId());
+		    config.settransportDetailId(config.gettransportDetailId());
 		}
             }
 	    
-	    configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(config.getId());
-	    
-	    if(scheduleDetails != null && !config.isDeleted() && config.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+	    if(config.getScheduleType() > 0 && config.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
 		config.setAllowExport(true);
 	    }
 	    
-	    if(!"bowlinktest".equals(org.getCleanURL().trim().toLowerCase())) {
+	    if(!"bowlinktest".equals(config.getCleanOrgURL().trim().toLowerCase())) {
 		validSourceConfigurations.add(config);
 	    }
         }
@@ -291,22 +269,12 @@ public class adminConfigController {
 		dateinTZ = requiredFormat.format(config.getDateUpdated());
 	    }
 	    config.setDateUpdated(dft.parse(dateinTZ));
-	    
-            org = organizationmanager.getOrganizationById(config.getorgId());
-            config.setOrgName(org.getOrgName());
-	    
-            transportDetails = utconfigurationTransportManager.getTransportDetails(config.getId());
-            if (transportDetails != null) {
-                config.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
-            }
-	    
-	    configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(config.getId());
-	    
-	    if(scheduleDetails != null && !config.isDeleted() && config.getStatus()) {
+            
+	    if(config.getScheduleType() > 0 && config.getStatus()) {
 		config.setAllowExport(true);
 	    }
 	    
-	    if(!"bowlinktest".equals(org.getCleanURL().trim().toLowerCase())) {
+	    if(!"bowlinktest".equals(config.getCleanOrgURL().trim().toLowerCase())) {
 		validTargetConfigurations.add(config);
 	    }
         }

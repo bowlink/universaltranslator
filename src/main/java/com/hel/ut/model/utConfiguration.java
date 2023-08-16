@@ -19,10 +19,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class utConfiguration {
 
     @Transient
-    private String orgName = null, messageTypeName = null, transportMethod = null, fileDropLocation = null, helRegistry = "";
+    private String orgName = null, messageTypeName = null, transportMethod = null, fileDropLocation = null, helRegistry = "", cleanOrgURL = "";
 
     @Transient
-    private Integer transportDetailId = 0, scheduleType = 5;
+    private Integer transportDetailId = 0, scheduleType = 5, helRegistryId = 0, transportMethodId = 0;
 
     @Transient
     private List<configurationConnection> connections = null;
@@ -246,5 +246,29 @@ public class utConfiguration {
 
     public void setHelRegistry(String helRegistry) {
 	this.helRegistry = helRegistry;
+    }
+
+    public Integer getHelRegistryId() {
+        return helRegistryId;
+    }
+
+    public void setHelRegistryId(Integer helRegistryId) {
+        this.helRegistryId = helRegistryId;
+    }
+
+    public String getCleanOrgURL() {
+        return cleanOrgURL;
+    }
+
+    public void setCleanOrgURL(String cleanOrgURL) {
+        this.cleanOrgURL = cleanOrgURL;
+    }
+
+    public Integer getTransportMethodId() {
+        return transportMethodId;
+    }
+
+    public void setTransportMethodId(Integer transportMethodId) {
+        this.transportMethodId = transportMethodId;
     }
 }
