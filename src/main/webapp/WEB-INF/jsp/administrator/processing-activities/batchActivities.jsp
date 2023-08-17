@@ -22,8 +22,7 @@
     <div class="col-md-12">
         <section class="panel panel-default">
             <div class="panel-body">
-
-                <div class="form-container scrollable">
+                <div class="form-container scrollable" style="max-height:550px; overflow: auto">
                     <table class="table table-striped table-hover table-default" id="batchActivitiesDataTable">
                             <thead>
                                 <tr>
