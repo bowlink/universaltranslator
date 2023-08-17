@@ -1538,6 +1538,12 @@ public class transactionInManagerImpl implements transactionInManager {
 						ba.setBatchUploadId(batchId);
 						transactionInDAO.submitBatchActivityLog(ba);
 					    }
+                                            else {
+                                                //Quick Processing Update
+                                                if(statusId == 42) {
+                                                    loadMassBatches();
+                                                }
+                                            }
 					}
 				    }
 				}
@@ -2981,6 +2987,11 @@ public class transactionInManagerImpl implements transactionInManager {
 		ba.setActivity("Uploaded batchId:"+batchId+" status was set to " + batchStatusId);
 		ba.setBatchUploadId(batchId);
 		transactionInDAO.submitBatchActivityLog(ba);
+                
+                //Quick Processing Update
+                if(batchStatusId == 43) {
+                    processMassBatches();
+                }
 		
 	    } catch (Exception ex1) {
 		Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ("loadBatch error at updating batch status - " + ex1));
