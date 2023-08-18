@@ -28,10 +28,10 @@ public class configurationConnection {
     private utConfiguration srcConfigDetails = null, tgtConfigDetails = null;
 
     @Transient
-    private String targetOrgName = null;
+    private String targetOrgName = null, sourceConfigName = "", targetConfigName = "", sourceOrgName = "", sourceTransportMethod = "", targetTransportMethod = "";
 
     @Transient
-    private int targetOrgId = 0, messageTypeId = 0;
+    private int targetOrgId = 0, messageTypeId = 0, sourceConfigType = 0, targetConfigType = 0;
 
     @Transient
     private List<utUser> connectionSenders = null, connectionReceivers = null;
@@ -187,4 +187,70 @@ public class configurationConnection {
     public void setAllowExport(boolean allowExport) {
 	this.allowExport = allowExport;
     }
+
+    public String getSourceConfigName() {
+        return sourceConfigName;
+    }
+
+    public void setSourceConfigName(String sourceConfigName) {
+        this.sourceConfigName = sourceConfigName;
+    }
+
+    public String getTargetConfigName() {
+        return targetConfigName;
+    }
+
+    public void setTargetConfigName(String targetConfigName) {
+        this.targetConfigName = targetConfigName;
+    }
+
+    public String getTargetOrgName() {
+        return targetOrgName;
+    }
+
+    public void setTargetOrgName(String targetOrgName) {
+        this.targetOrgName = targetOrgName;
+    }
+
+    public String getSourceOrgName() {
+        return sourceOrgName;
+    }
+
+    public void setSourceOrgName(String sourceOrgName) {
+        this.sourceOrgName = sourceOrgName;
+    }
+
+    public int getSourceConfigType() {
+        return sourceConfigType;
+    }
+
+    public void setSourceConfigType(int sourceConfigType) {
+        this.sourceConfigType = sourceConfigType;
+    }
+
+    public int getTargetConfigType() {
+        return targetConfigType;
+    }
+
+    public void setTargetConfigType(int targetConfigType) {
+        this.targetConfigType = targetConfigType;
+    }
+
+    public String getSourceTransportMethod() {
+        return sourceTransportMethod;
+    }
+
+    public void setSourceTransportMethod(String sourceTransportMethod) {
+        this.sourceTransportMethod = sourceTransportMethod;
+    }
+
+    public String getTargetTransportMethod() {
+        return targetTransportMethod;
+    }
+
+    public void setTargetTransportMethod(String targetTransportMethod) {
+        this.targetTransportMethod = targetTransportMethod;
+    }
+    
+    
 }

@@ -2374,5 +2374,10 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
     public void executeSQLStatement(String sqlStatement) throws Exception {
 	utConfigurationDAO.executeSQLStatement(sqlStatement);
     }
+
+@Override
+    public List<configurationConnection> getAllConnectionsSingleQuery() {
+	return utConfigurationDAO.getAllConnectionsSingleQuery();
+    }
 }
 

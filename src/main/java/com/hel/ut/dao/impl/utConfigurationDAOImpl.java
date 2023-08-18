@@ -2442,4 +2442,35 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlStatement);
         query.executeUpdate();
     }
+
+/**
+     * The 'getAllConnectionsSingleQuery' function will return the list of utConfiguration connections in the system.
+     *
+     * @Table	configurationConnections
+     *
+     *
+     * @return	This function will return a list of configurationConnection objects
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    @Transactional(readOnly = true)
+    public List<configurationConnection> getAllConnectionsSingleQuery() {
+        
+        String sqlStatement = "select a.*, b.configName as sourceConfigName, b.type as sourceConfigType, "
+        + "c.configName as targetConfigName, c.type as targetConfigType,"
+        + "(select orgName from organizations where id = (select orgId from configurations where id = a.sourceConfigId)) as sourceOrgName,"
+        + "(select orgName from organizations where id = (select orgId from configurations where id = a.targetConfigId)) as targetOrgName,"
+        + "(select transportMethod from ref_transportmethods where id = (select transportMethodId from configurationtransportdetails where configId = a.sourceConfigId)) as sourceTransportMethod,"
+        + "(select transportMethod from ref_transportmethods where id = (select transportMethodId from configurationtransportdetails where configId = a.targetConfigId)) as targetTransportMethod "
+        + "from configurationconnections a inner join "
+        + "configurations b on b.id = a.sourceConfigId inner join "
+        + "configurations c on c.id = a.targetConfigId "
+        + "order by a.dateCreated desc";
+        
+         Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlStatement)
+        .setResultTransformer(Transformers.aliasToBean(configurationConnection.class));
+         
+        List<configurationConnection> connections = query.list();
+        return connections;
+    }
 }

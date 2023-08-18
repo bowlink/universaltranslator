@@ -155,7 +155,7 @@ public class adminConfigConnectionController {
 	mav.addObject("showAllConfigOptions",session.getAttribute("showAllConfigOptions"));
 
         // get a list of all connections in the sysetm
-        List<configurationConnection> connections = utconfigurationmanager.getAllConnections();
+        List<configurationConnection> connections = utconfigurationmanager.getAllConnectionsSingleQuery();
 
         Long totalConnections = (long) 0;
 	
@@ -165,39 +165,16 @@ public class adminConfigConnectionController {
         if (connections != null) {
 	    
             for (configurationConnection connection : connections) {
-                /* Array to holder the users */
-                List<utUser> connectionSenders = new ArrayList<utUser>();
-                List<utUser> connectonReceivers = new ArrayList<utUser>();
 		
-                utConfiguration srcconfigDetails = utconfigurationmanager.getConfigurationById(connection.getsourceConfigId());
-                configurationTransport srctransportDetails = utconfigurationTransportManager.getTransportDetails(srcconfigDetails.getId());
-		
-		Organization srcOrg = organizationmanager.getOrganizationById(srcconfigDetails.getorgId());
-		
-		if(!"bowlinktest".equals(srcOrg.getCleanURL().trim().toLowerCase())) {
-		    srcconfigDetails.setOrgName(srcOrg.getOrgName());
-		
-		    srcconfigDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(srctransportDetails.gettransportMethodId()));
-		    if (srctransportDetails.gettransportMethodId() == 1 && srcconfigDetails.getType() == 2) {
-			srcconfigDetails.settransportMethod("File Download");
-		    } else {
-			srcconfigDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(srctransportDetails.gettransportMethodId()));
-		    }
-
-		    connection.setsrcConfigDetails(srcconfigDetails);
-
-		    utConfiguration tgtconfigDetails = utconfigurationmanager.getConfigurationById(connection.gettargetConfigId());
-		    configurationTransport tgttransportDetails = utconfigurationTransportManager.getTransportDetails(tgtconfigDetails.getId());
-
-		    tgtconfigDetails.setOrgName(organizationmanager.getOrganizationById(tgtconfigDetails.getorgId()).getOrgName());
-
-		    if (tgttransportDetails.gettransportMethodId() == 1 && tgtconfigDetails.getType() == 2) {
-			tgtconfigDetails.settransportMethod("File Download");
-		    } else {
-			tgtconfigDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(tgttransportDetails.gettransportMethodId()));
-		    }
-
-		    connection.settgtConfigDetails(tgtconfigDetails);
+		if(!connection.getSourceOrgName().toLowerCase().contains("bowlink")) {
+		    
+		    if (connection.getSourceTransportMethod().equals("File Upload") && connection.getSourceConfigType() == 2) {
+			connection.setSourceTransportMethod("File Download");
+		    } 
+                    
+                    if (connection.getTargetTransportMethod().equals("File Upload") && connection.getTargetConfigType() == 2) {
+			connection.setTargetTransportMethod("File Download");
+		    } 
 		    
 		    if(connection.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
 			connection.setAllowExport(true);
