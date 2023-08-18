@@ -30,12 +30,11 @@ require(['./main'], function () {
     });
         
     $(document).on('click','.printConfig',function() {
-       /* $('body').overlay({
-            glyphicon : 'print',
-            message : 'Gathering Details...'
-        });*/
+        $('body').overlay({
+           glyphicon : 'print',
+           message : 'Gathering Details...'
+        });
         
-
         var configId = $(this).attr('rel');
 
         $.ajax({
@@ -48,9 +47,8 @@ require(['./main'], function () {
             contentType : 'application/json;charset=UTF-8',
             success: function(data) {
                 if(data !== '') {
-                    window.location.href = '/administrator/configurations/printConfig/'+ data;
-                    $('#successMsg').show();
-                    //$('#dtDownloadModal').modal('toggle');
+                   window.location.href = '/administrator/configurations/printConfig/'+ data;
+                   $('.overlay').css('display','none');
                 }
                 else {
                     $('#errorMsg').show();

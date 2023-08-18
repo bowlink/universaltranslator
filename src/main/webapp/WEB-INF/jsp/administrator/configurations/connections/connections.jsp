@@ -71,7 +71,7 @@
 						    </button>
 						    <ul class="dropdown-menu pull-right">
                                                         <li>
-                                                            <a href="javascript:void(0);" class="printConfig" rel="${connection.id}" title="Print this Connection">
+                                                            <a href="#" class="printConfig" rel="${connection.id}" title="Print this Connection">
                                                                 <span class="glyphicon glyphicon-print"></span>
                                                                 Print
                                                             </a>
@@ -86,7 +86,7 @@
                                                         <c:if test="${connection.allowExport}">
                                                             <li class="divider"></li>
                                                             <li>
-                                                                <a href="javascript:void(0);" class="exportConnection" rel="${connection.id}" title="Export this Connection">
+                                                                <a href="#" class="exportConnection" rel="${connection.id}" title="Export this Connection">
                                                                     <span class="glyphicon glyphicon-export"></span>
                                                                     Export Connection
                                                                 </a>
@@ -94,7 +94,7 @@
                                                         </c:if>
 							<li class="divider"></li>
 							<li>
-							    <a href="javascript:void(0);" class="deleteConnection" rel="${connection.id}" title="Delete this connection">
+							    <a href="#" class="deleteConnection" rel="${connection.id}" title="Delete this connection">
 								<span class="glyphicon glyphicon-remove-circle"></span>
 								Delete
 							    </a>

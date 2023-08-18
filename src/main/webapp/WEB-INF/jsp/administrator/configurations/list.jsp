@@ -72,7 +72,7 @@
                                                      </c:if>
 						 </td>
 						 <td >
-						     <a href="javascript:void(0);" class="editConfig" rel="${config.id}" title="Edit this configuration">${config.configName}</a>
+						     <a href="#" class="editConfig" rel="${config.id}" title="Edit this configuration">${config.configName}</a>
 						     <br />
 						     (<c:choose><c:when test="${config.status == true}">active</c:when><c:otherwise>inactive</c:otherwise></c:choose>)
 						 </td>
@@ -100,7 +100,7 @@
 							 <ul class="dropdown-menu pull-right">
 							     <c:if test="${config.type == 1 && config.status == true}">
 								 <li>
-								     <a href="javascript:void(0);" class="copyConfig" rel="${config.id}" title="Copy this Configuration">
+								     <a href="#" class="copyConfig" rel="${config.id}" title="Copy this Configuration">
 									 <span class="glyphicon glyphicon-transfer"></span>
 									 Copy
 								     </a>
@@ -124,27 +124,27 @@
                                                                 <li class="divider"></li>
 							     </c:if>
                                                              <li>
-								 <a href="javascript:void(0);" class="editConfig" rel="${config.id}" title="Edit this configuration">
+								 <a href="#" class="editConfig" rel="${config.id}" title="Edit this configuration">
 								     <span class="glyphicon glyphicon-edit"></span>
 								     Edit
 								 </a>
 							     </li>       
                                                              <li>
-                                                                <a href="javascript:void(0);" class="printConfig" rel="${config.id}" title="Print this Configuration">
+                                                                <a href="#" class="printConfig" rel="${config.id}" title="Print this Configuration">
                                                                     <span class="glyphicon glyphicon-print"></span>
                                                                     Print
                                                                 </a>
                                                              </li>
                                                              <c:if test="${config.allowExport}">
                                                                 <li>
-                                                                    <a href="javascript:void(0);" class="exportConfig" rel="${config.id}" title="Export this Configuration">
+                                                                    <a href="#" class="exportConfig" rel="${config.id}" title="Export this Configuration">
                                                                         <span class="glyphicon glyphicon-export"></span>
                                                                         Export
                                                                     </a>
                                                                  </li> 
                                                              </c:if>
 							     <li>
-								 <a href="javascript:void(0);" class="deleteConfig" rel="${config.id}" title="Delete this configuration">
+								 <a href="#" class="deleteConfig" rel="${config.id}" title="Delete this configuration">
 								     <span class="glyphicon glyphicon-remove-circle"></span>
 								     Delete
 								 </a>

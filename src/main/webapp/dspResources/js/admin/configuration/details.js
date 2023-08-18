@@ -2,10 +2,11 @@
 require(['./main'], function () {
         
     $(document).on('click','.printConfig',function() {
-      /* $('body').overlay({
+       
+       $('body').overlay({
            glyphicon : 'print',
            message : 'Gathering Details...'
-       });*/
+       });
 
        var configId = $(this).attr('rel');
 
@@ -20,8 +21,7 @@ require(['./main'], function () {
            success: function(data) {
                if(data !== '') {
                    window.location.href = '/administrator/configurations/printConfig/'+ data;
-                   $('#successMsg').show();
-                   //$('#dtDownloadModal').modal('toggle');
+                   $('.overlay').css('display','none');
                }
                else {
                    $('#errorMsg').show();
