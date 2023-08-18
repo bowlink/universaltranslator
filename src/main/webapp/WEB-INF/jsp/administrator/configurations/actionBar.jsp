@@ -2,51 +2,52 @@
 <nav class="navbar navbar-default actions-nav" role="navigation">
     <div class="contain">
         <div class="navbar-header">
-            <h1 class="section-title navbar-brand">
+            <h1 class="section-title navbar-brand" style="color:black">
                 <c:choose>
                     <c:when test="${param['page'] == 'listConfigs'}">
-                        <a href="javascript:void(0);" title="Configuration List" class="unstyled-link">Configurations</a>
+                        Configurations
                     </c:when>
                     <c:when test="${param['page'] == 'configDetails'}">
-                        <a href="javascript:void(0);" title="Configuration Details" class="unstyled-link">
-                            Configuration - Details
-                        </a>
+                        Configuration - Details
                     </c:when>
                     <c:when test="${param['page'] == 'transport'}">
-                        <a href="javascript:void(0);" title="Configuration Transport Details" class="unstyled-link">Configuration - Transport Method</a>
+                        Configuration - Transport Method
                     </c:when>
                     <c:when test="${param['page'] == 'mappings'}">
-			<a href="javascript:void(0);" title="Configuration Field Mappings" class="unstyled-link">Configuration - Field Settings</a>
+                        Configuration - Field Settings
                     </c:when>
                     <c:when test="${param['page'] == 'ERGCustomize'}">
-                        <a href="javascript:void(0);" title="Configuration ERG Customization" class="unstyled-link">Configuration - ERG Customization</a>
+                        Configuration - ERG Customization
                     </c:when>
                     <c:when test="${param['page'] == 'translations'}">
-                        <a href="javascript:void(0);" title="Configuration Data Translations" class="unstyled-link">Configuration - Data Translations</a>
+                       Configuration - Data Translations
                     </c:when>
                     <c:when test="${param['page'] == 'specs'}">
-                        <a href="javascript:void(0);" title="Detailed Message Specs" class="unstyled-link">Configuration - Message Specs</a>
+                        Configuration - Message Specs
                     </c:when>
                     <c:when test="${param['page'] == 'schedule'}">
-                        <a href="javascript:void(0);" title="Configuration Schedule" class="unstyled-link">Configuration - Schedule</a>
+                        Configuration - Schedule
                     </c:when>  
                     <c:when test="${param['page'] == 'connections'}">
-                        <a href="javascript:void(0);" title="Configuration Connection List" class="unstyled-link">Configuration Connections</a>
+                       Configuration Connections
                     </c:when> 
+                    <c:when test="${param['page'] == 'connectiondetails'}">
+                       Configuration Connection Details
+                    </c:when>    
                     <c:when test="${param['page'] == 'HL7'}">
-                        <a href="javascript:void(0);" title="HL7 Customization" class="unstyled-link">Configuration - HL7 Customization</a>
+                        Configuration - HL7 Customization
                     </c:when>  
                     <c:when test="${param['page'] == 'CCD'}">
-                        <a href="javascript:void(0);" title="CCD/XML/JSON Customization" class="unstyled-link">Configuration - CCD/XML/JSON Customization</a>
+                        Configuration - CCD/XML/JSON Customization
                     </c:when>     
                     <c:when test="${param['page'] == 'preprocessing'}">
-                        <a href="javascript:void(0);" title="Configuration Pre-Processing Macros" class="unstyled-link">Configuration - Pre-Process Macros</a>
+                        Configuration - Pre-Process Macros
                     </c:when>   
                     <c:when test="${param['page'] == 'postprocessing'}">
-                        <a href="javascript:void(0);" title="Configuration Post-Processing Macros" class="unstyled-link">Configuration - Post-Process Macros</a>
+                        Configuration - Post-Process Macros
                     </c:when>   
                     <c:when test="${param['page'] == 'notes'}">
-                        <a href="javascript:void(0);" title="Configuration Notes" class="unstyled-link">Configuration Notes</a>
+                        Configuration Notes
                     </c:when>       
                 </c:choose>
             </h1>
@@ -57,7 +58,7 @@
                     <c:if test="${not empty allowConfigImport}">
                         <li role="menuitem" class="importConfigBtn"><a href="#configFileUploadModal" data-toggle="modal" class="importConfig" title="Import Configuration" role="button"><span class="glyphicon icon-stacked glyphicon glyphicon-import"></span>Import Configuration</a></li>
                     </c:if>
-                    <li role="menuitem"><a href="create" title="Create New Configuration" role="button"><span class="glyphicon icon-stacked glyphicon glyphicon-plus"></span>Create New</a></li>
+                    <li role="menuitem"><a href="/administrator/configurations/create" title="Create New Configuration" role="button"><span class="glyphicon icon-stacked glyphicon glyphicon-plus"></span>Create New</a></li>
                 </c:when>
                 <c:when test="${param['page'] == 'connections'}">
                     <c:if test="${not empty allowConnectionImport}">
@@ -67,13 +68,13 @@
                 </c:when>  
 		<c:when test="${param['page'] == 'connectiondetails'}">
                     <c:if test="${not empty allowExport}">
-                        <li role="menuitem" class="exportConnectionnBtn"> <a href="javascript:void(0);" class="exportConnection" rel="${connectionId}" title="Export this Connection"><span class="glyphicon icon-stacked glyphicon glyphicon-export"></span>Export Connection</a></li>
+                        <li role="menuitem" class="exportConnectionnBtn"> <a href="#" class="exportConnection" rel="${connectionId}" title="Export this Connection"><span class="glyphicon icon-stacked glyphicon glyphicon-export"></span>Export Connection</a></li>
                     </c:if>
                     <li role="menuitem">
-			<a href="javascript:void(0);" class="printConfig" title="Print this Connection" rel="${connectionId}" role="button"><span class="glyphicon glyphicon-print icon-stacked"></span> Print </a>
+			<a href="#" class="printConfig" title="Print this Connection" rel="${connectionId}" role="button"><span class="glyphicon glyphicon-print icon-stacked"></span> Print </a>
 		    </li>
-                    <li role="menuitem"><a href="javascript:void(0);" id="saveDetails" title="Save this Connection" role="button"><span class="glyphicon glyphicon-ok icon-stacked"></span> Save </a></li>
-                    <li role="menuitem"><a href="javascript:void(0);" id="saveCloseDetails" title="Save &amp; Close" role="button"><span class="glyphicon glyphicon-floppy-disk icon-stacked"></span> Save &amp; Close</a></li>
+                    <li role="menuitem"><a href="#" id="saveDetails" title="Save this Connection" role="button"><span class="glyphicon glyphicon-ok icon-stacked"></span> Save </a></li>
+                    <li role="menuitem"><a href="#" id="saveCloseDetails" title="Save &amp; Close" role="button"><span class="glyphicon glyphicon-floppy-disk icon-stacked"></span> Save &amp; Close</a></li>
                     <li role="menuitem"><a href="<c:url value='/administrator/configurations/connections' />" title="Cancel" role="button"><span class="glyphicon glyphicon-remove icon-stacked"></span>Cancel</a></li>
                 </c:when>     
                 <c:when test="${param['page'] == 'CCD'}">
@@ -82,20 +83,20 @@
                 <c:otherwise>
                     <c:if test="${configurationDetails.allowExport}">
                         <li>
-                            <a href="javascript:void(0);" class="exportConfig" rel="${configurationDetails.id}" title="Export this Configuration" role="button"><span class="glyphicon glyphicon-export icon-stacked"></span>Export</a>
+                            <a href="#" class="exportConfig" rel="${configurationDetails.id}" title="Export this Configuration" role="button"><span class="glyphicon glyphicon-export icon-stacked"></span>Export</a>
                          </li> 
                     </c:if>
                     <li>
-			<a href="javascript:void(0);" class="printConfig" title="Print this Configuration" rel="${configurationDetails.id}" role="button"><span class="glyphicon glyphicon-print icon-stacked"></span> Print </a>
+			<a href="#" class="printConfig" title="Print this Configuration" rel="${configurationDetails.id}" role="button"><span class="glyphicon glyphicon-print icon-stacked"></span> Print </a>
 		    </li>
                     <c:if test="${param['page'] != 'notes'}">
                         <li>
-                            <a href="javascript:void(0);" id="saveDetails" title="Save this Configuration initial setup" role="button"><span class="glyphicon glyphicon-ok icon-stacked"></span> Save </a>
+                            <a href="#" id="saveDetails" title="Save this Configuration initial setup" role="button"><span class="glyphicon glyphicon-ok icon-stacked"></span> Save </a>
                         </li>
                     </c:if>
 		    <c:if test="${configurationDetails.configurationType == 1 || (configurationDetails.configurationType == 2 && param['page'] != 'schedule')}">
 			 <c:if test="${param['page'] != 'postprocessing' && param['page'] != 'notes'}">
-			    <li><a href="javascript:void(0);" id="next" title="Save and Proceed to the Next Step"><span class="glyphicon glyphicon-forward icon-stacked" role="button"></span>Next Step</a></li>
+			    <li><a href="#" id="next" title="Save and Proceed to the Next Step"><span class="glyphicon glyphicon-forward icon-stacked" role="button"></span>Next Step</a></li>
 			</c:if>
 		    </c:if>
                     <%--<c:if test="${not empty id}"><li><a href="#confirmationOrgDelete" data-toggle="modal" rel="${id}" title="Delete this Configuration"><span class="glyphicon glyphicon-remove icon-stacked"></span>Delete</a></li></c:if>--%>

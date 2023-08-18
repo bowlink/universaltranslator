@@ -5,61 +5,61 @@
             <h1 class="section-title navbar-brand">
                <c:choose>
                     <c:when test="${param['page'] == 'waiting'}">
-                        <a href="javascript:void(0);" title="Transactions Waiting to be Processed" class="unstyled-link">Transactions Waiting to be Processed</a>
+                        <a href="#" title="Transactions Waiting to be Processed" class="unstyled-link">Transactions Waiting to be Processed</a>
                     </c:when>
                     <c:when test="${param['page'] == 'inbound' || page == 'inbound'}">
-                        <a href="javascript:void(0);" title="Inbound Batches" class="unstyled-link">Inbound Batches</a>
+                        <a href="#" title="Inbound Batches" class="unstyled-link">Inbound Batches</a>
                     </c:when>
                     <c:when test="${param['page'] == 'auditReport' && page == 'rejected'}">
-                        <a href="javascript:void(0);" title="Inbound Batches with Rejected Transactions / Audit Report" class="unstyled-link">Inbound Batches with Rejected Transactions / Audit Report</a>
+                        <a href="#" title="Inbound Batches with Rejected Transactions / Audit Report" class="unstyled-link">Inbound Batches with Rejected Transactions / Audit Report</a>
                     </c:when>       
                     <c:when test="${param['page'] == 'rejected' || page == 'rejected'}">
-                        <a href="javascript:void(0);" title="Inbound Batches with Rejected Transactions" class="unstyled-link">Inbound Batches with Rejected Transactions</a>
+                        <a href="#" title="Inbound Batches with Rejected Transactions" class="unstyled-link">Inbound Batches with Rejected Transactions</a>
                     </c:when>    
                     <c:when test="${param['page'] == 'outbound' || page == 'outbound'}">
-                        <a href="javascript:void(0);" title="Outbound Batches" class="unstyled-link">Outbound Batches</a>
+                        <a href="#" title="Outbound Batches" class="unstyled-link">Outbound Batches</a>
                     </c:when>
                     <c:when test="${param['page'] == 'edit'}">
-                        <a href="javascript:void(0);" title="Edit Batch Transaction" class="unstyled-link">Edit Batch Transaction</a>
+                        <a href="#" title="Edit Batch Transaction" class="unstyled-link">Edit Batch Transaction</a>
                     </c:when>
                     <c:when test="${param['page'] == 'refActivityExport'}">
-                        <a href="javascript:void(0);" title="Referral Activity Export" class="unstyled-link">Referral Activity Export</a>
+                        <a href="#" title="Referral Activity Export" class="unstyled-link">Referral Activity Export</a>
                     </c:when>  
                     <c:when test="${param['page'] == 'auditReport' && page == 'invalid'}">
-                        <a href="javascript:void(0);" title="Invalid Inbound Batches / Audit Report" class="unstyled-link">Invalid Inbound Batches / Audit Report</a>
+                        <a href="#" title="Invalid Inbound Batches / Audit Report" class="unstyled-link">Invalid Inbound Batches / Audit Report</a>
                     </c:when>    
 		    <c:when test="${param['page'] == 'auditReport'}">
-                        <a href="javascript:void(0);" title="Inbound Batches / Audit Report" class="unstyled-link">Inbound Batches / Audit Report</a>
+                        <a href="#" title="Inbound Batches / Audit Report" class="unstyled-link">Inbound Batches / Audit Report</a>
                     </c:when>
                     <c:when test="${param['page'] == 'auditReportOutbound'}">
-                        <a href="javascript:void(0);" title="Outbound Batches / Audit Report" class="unstyled-link">Outbound Batches / Audit Report</a>
+                        <a href="#" title="Outbound Batches / Audit Report" class="unstyled-link">Outbound Batches / Audit Report</a>
                     </c:when>    
 		    <c:when test="${param['page'] == 'wsmessage'}">
-                        <a href="javascript:void(0);" title="Web Service Messages" class="unstyled-link">Web Service Messages</a>
+                        <a href="#" title="Web Service Messages" class="unstyled-link">Web Service Messages</a>
                     </c:when>
 		    <c:when test="${param['page'] == 'apimessages'}">
-                        <a href="javascript:void(0);" title="Rest API Messages In" class="unstyled-link">Rest API Messages In</a>
+                        <a href="#" title="Rest API Messages In" class="unstyled-link">Rest API Messages In</a>
                     </c:when>
 		   <c:when test="${param['page'] == 'apimessagesout'}">
-                        <a href="javascript:void(0);" title="Rest API Messages Out" class="unstyled-link">Rest API Messages Out</a>
+                        <a href="#" title="Rest API Messages Out" class="unstyled-link">Rest API Messages Out</a>
                     </c:when>
 		    <c:when test="${param['page'] == 'report'}">
-                        <a href="javascript:void(0);" title="Activity Report" class="unstyled-link">Activity Report</a>
+                        <a href="#" title="Activity Report" class="unstyled-link">Activity Report</a>
                     </c:when>
 		    <c:when test="${param['page'] == 'invalidin' || page == 'invalidIn'}">
-                        <a href="javascript:void(0);" title="Invalid Inbound Batches" class="unstyled-link">Invalid Inbound Batches</a>
+                        <a href="#" title="Invalid Inbound Batches" class="unstyled-link">Invalid Inbound Batches</a>
                     </c:when>
 		    <c:when test="${param['page'] == 'invalidout'}">
-                        <a href="javascript:void(0);" title="Invalid Outbound Batches" class="unstyled-link">Invalid Outbound Batches</a>
+                        <a href="#" title="Invalid Outbound Batches" class="unstyled-link">Invalid Outbound Batches</a>
                     </c:when>
 		    <c:when test="${param['page'] == 'directmessages'}">
-                        <a href="javascript:void(0);" title="Direct Messages In" class="unstyled-link">Direct Messages In</a>
+                        <a href="#" title="Direct Messages In" class="unstyled-link">Direct Messages In</a>
                     </c:when>
 		   <c:when test="${param['page'] == 'directmessagesout'}">
-                        <a href="javascript:void(0);" title="Direct Messages Out" class="unstyled-link">Direct Messages Out</a>
+                        <a href="#" title="Direct Messages Out" class="unstyled-link">Direct Messages Out</a>
                     </c:when>
                     <c:when test="${param['page'] == 'generateReport'}">
-                        <a href="javascript:void(0);" title="Generate Activity Report" class="unstyled-link">Generate Activity Report</a>
+                        <a href="#" title="Generate Activity Report" class="unstyled-link">Generate Activity Report</a>
                     </c:when>
                 </c:choose>
             </h1>
@@ -76,7 +76,7 @@
                     <li role="menuitem"><a href="/administrator/processing-activity/activityReport" class="" title="Back to Activity Report" role="button"><span class="glyphicon glyphicon-backward icon-stacked"></span> Back</a></li>
                 </c:when>
                 <c:when test="${param['page'] == 'edit'}">
-                    <li role="menuitem"><a href="javascript:void(0);" id="saveCloseDetails" class="submitMessage" title="Save &amp; Close" role="button"><span class="glyphicon glyphicon-floppy-disk icon-stacked"></span> Save &amp; Close</a></li>
+                    <li role="menuitem"><a href="#" id="saveCloseDetails" class="submitMessage" title="Save &amp; Close" role="button"><span class="glyphicon glyphicon-floppy-disk icon-stacked"></span> Save &amp; Close</a></li>
                 </c:when>
                 <c:when test="${param['page'] == 'auditReport' && page == 'invalid'}">
                     <li role="menuitem"><a href="/administrator/processing-activity/invalidIn" class="submitMessage" title="Close" role="button"><span class="glyphicon glyphicon-remove icon-stacked"></span> Close</a></li>
