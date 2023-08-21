@@ -158,6 +158,11 @@ public class excelToTxt {
                             hasErrorCell = true;
                             //text = "CELL ERROR";
                             text = "CELL ERROR FOUND HERE ";
+                            try {
+                            	text = text + formatter.formatCellValue(cell);
+                            } catch (Exception ex) {
+                            	System.out.println("Cell error cannot get value. Batch Id - " + batch.getId());
+                            }
                             int errorRow  = row.getRowNum()+1;
                             int errorCell = cn + 1;
                             cellErrorLocation = "row " + errorRow + ", cell " + errorCell;
