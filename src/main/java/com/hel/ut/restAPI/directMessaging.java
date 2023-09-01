@@ -90,11 +90,11 @@ public class directMessaging {
 		if(credvalues.length == 2) {
                     
                     if(jsonSent == null) {
-                        sendErrorEmail("Invalid JSON Payload");
+                        sendErrorEmail("Invalid JSON Payload",0);
                         return new ResponseEntity("Invalid JSON Payload!", HttpStatus.BAD_REQUEST);
                     }
                     else if(jsonSent.isEmpty()) {
-                        sendErrorEmail("Invalid JSON Payload");
+                        sendErrorEmail("Invalid JSON Payload",0);
                         return new ResponseEntity("Invalid JSON Payload!", HttpStatus.BAD_REQUEST);
                     }
                     else {
@@ -118,7 +118,7 @@ public class directMessaging {
                         }
                         catch (Exception ex) {
                             //Need to send email of error
-                            sendErrorEmail("Invalid JSON Payload");
+                            sendErrorEmail("Invalid JSON Payload",0);
                             return new ResponseEntity("Invalid JSON Payload!", HttpStatus.BAD_REQUEST);
                         }
                         
@@ -131,7 +131,7 @@ public class directMessaging {
                             }
                             catch (Exception ex) {
                                 //Need to send email of error
-                                sendErrorEmail("Invalid JSON Attachment List!");
+                                sendErrorEmail("Invalid JSON Attachment List!",0);
                                 return new ResponseEntity("Invalid JSON Attachment List!", HttpStatus.BAD_REQUEST);
                             }
 			    
@@ -175,7 +175,7 @@ public class directMessaging {
 						directMessageDetails.setSendingResponse("Invalid Credentials");
 						transactionInManager.updateDirectAPIMessage(directMessageDetails);
                                                 
-                                                sendErrorEmail("Invalid Credentials!");
+                                                sendErrorEmail("Invalid Credentials!",newDMMessageID);
                                                 return new ResponseEntity("Invalid Credentials!", HttpStatus.UNAUTHORIZED);
                                             } 
                                             else {
@@ -294,7 +294,7 @@ public class directMessaging {
 							    directMessageDetails.setSendingResponse(sendingResponse);
 							    transactionInManager.updateDirectAPIMessage(directMessageDetails);
                                                             
-                                                            sendErrorEmail(sendingResponse);
+                                                            sendErrorEmail(sendingResponse,newDMMessageID);
 							    
                                                             return new ResponseEntity(responseObject, HttpStatus.EXPECTATION_FAILED);
                                                         }
@@ -316,7 +316,7 @@ public class directMessaging {
 							directMessageDetails.setSendingResponse("Received attachment extension (" + FilenameUtils.getExtension(CCDATitle).toLowerCase()+ ") does not match the expected file extension - ." + directDetails.getExpectedFileExt());
 							transactionInManager.updateDirectAPIMessage(directMessageDetails);
                                                         
-                                                        sendErrorEmail("Received attachment extension (" + FilenameUtils.getExtension(CCDATitle).toLowerCase()+ ") does not match the expected file extension - ." + directDetails.getExpectedFileExt());
+                                                        sendErrorEmail("Received attachment extension (" + FilenameUtils.getExtension(CCDATitle).toLowerCase()+ ") does not match the expected file extension - ." + directDetails.getExpectedFileExt(),newDMMessageID);
 							
 							return new ResponseEntity(responseObject, HttpStatus.BAD_REQUEST);
                                                     }
@@ -337,7 +337,7 @@ public class directMessaging {
 						    directMessageDetails.setSendingResponse("missing message attachments");
 						    transactionInManager.updateDirectAPIMessage(directMessageDetails);
                                                     
-                                                    sendErrorEmail("missing message attachments!");
+                                                    sendErrorEmail("missing message attachments!",newDMMessageID);
 						    
                                                     return new ResponseEntity(responseObject, HttpStatus.BAD_REQUEST);
                                                 }
@@ -359,7 +359,7 @@ public class directMessaging {
 					    directMessageDetails.setSendingResponse("sending direct message is invalid - " + messageInfo.getFromDirectAddress());
 					    transactionInManager.updateDirectAPIMessage(directMessageDetails);
                                             
-                                            sendErrorEmail("sending direct message is invalid - " + messageInfo.getFromDirectAddress());
+                                            sendErrorEmail("sending direct message is invalid - " + messageInfo.getFromDirectAddress(),newDMMessageID);
 					    
                                             return new ResponseEntity(responseObject, HttpStatus.BAD_REQUEST);
                                         }
@@ -380,7 +380,7 @@ public class directMessaging {
 					directMessageDetails.setSendingResponse("sending direct message is invalid - " + messageInfo.getFromDirectAddress());
 					transactionInManager.updateDirectAPIMessage(directMessageDetails);
                                         
-                                        sendErrorEmail("sending direct message is invalid - " + messageInfo.getFromDirectAddress());
+                                        sendErrorEmail("sending direct message is invalid - " + messageInfo.getFromDirectAddress(),newDMMessageID);
 					
                                         return new ResponseEntity(responseObject, HttpStatus.BAD_REQUEST);
                                     }
@@ -401,7 +401,7 @@ public class directMessaging {
 				    directMessageDetails.setSendingResponse("recipient direct message is invalid - " + messageInfo.getToDirectAddress());
 				    transactionInManager.updateDirectAPIMessage(directMessageDetails);
                                     
-                                    sendErrorEmail("recipient direct message is invalid - " + messageInfo.getToDirectAddress());
+                                    sendErrorEmail("recipient direct message is invalid - " + messageInfo.getToDirectAddress(),newDMMessageID);
 				    
                                     return new ResponseEntity(responseObject, HttpStatus.BAD_REQUEST);
                                 }
@@ -420,7 +420,7 @@ public class directMessaging {
 				directMessageDetails.setSendingResponse("missing message attachments");
 				transactionInManager.updateDirectAPIMessage(directMessageDetails);
                                 
-                                sendErrorEmail("missing message attachments");
+                                sendErrorEmail("missing message attachments",newDMMessageID);
 				
                                 return new ResponseEntity(responseObject, HttpStatus.BAD_REQUEST);
                             }
@@ -436,7 +436,7 @@ public class directMessaging {
 			    responseObject.put("status","FAILED");
 			    responseObject.put("result","Invalid JSON Payload!");
                             
-                            sendErrorEmail("Invalid JSON Payload!");
+                            sendErrorEmail("Invalid JSON Payload!",0);
                             
                             return new ResponseEntity(responseObject, HttpStatus.BAD_REQUEST);
                         }
@@ -447,7 +447,7 @@ public class directMessaging {
 		    responseObject.put("status","UNAUTHORIZED");
 		    responseObject.put("result","Invalid Credentials!");
                     
-                    sendErrorEmail("Invalid Credentials!");
+                    sendErrorEmail("Invalid Credentials!",0);
                     
                     return new ResponseEntity(responseObject, HttpStatus.UNAUTHORIZED);
                 }
@@ -457,7 +457,7 @@ public class directMessaging {
 		responseObject.put("status","UNAUTHORIZED");
 		responseObject.put("result","Invalid Credentials!");
                 
-                sendErrorEmail("Invalid Credentials!");
+                sendErrorEmail("Invalid Credentials!",0);
                 
                 return new ResponseEntity(responseObject, HttpStatus.UNAUTHORIZED);
             }
@@ -467,7 +467,7 @@ public class directMessaging {
 	    responseObject.put("status","UNAUTHORIZED");
 	    responseObject.put("result","Invalid Credentials!");
             
-            sendErrorEmail("Invalid Credentials!");
+            sendErrorEmail("Invalid Credentials!",0);
             
             return new ResponseEntity(responseObject, HttpStatus.UNAUTHORIZED);
         }
@@ -505,7 +505,7 @@ public class directMessaging {
     }
     
     
-    private void sendErrorEmail(String errorDesc) throws Exception {
+    private void sendErrorEmail(String errorDesc, Integer messageId) throws Exception {
         mailMessage mail = new mailMessage();
         mail.setfromEmailAddress("notifications@health-e-link.net");
         mail.settoEmailAddress("cmccue@health-e-link.net");
@@ -516,6 +516,10 @@ public class directMessaging {
         //build message
         String message = "A new UT message was received via direct messaging but errored on " + dateFormat.format(date) + ".";
         message += "<br /><br />Error: " + errorDesc;
+        
+        if(messageId > 0) {
+            message += "<br /><br />Message Id: " + messageId;
+        }
         
         mail.setmessageBody(message);
         mail.setmessageSubject("Rejected UT Direct Message");
