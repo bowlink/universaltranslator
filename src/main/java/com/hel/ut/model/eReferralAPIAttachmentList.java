@@ -18,10 +18,11 @@ public class eReferralAPIAttachmentList {
     private String attachmentClass;
     private String attachmentContent;
     private String attachmentHash;
-    private String attachmentSize;
-    private String attachmentTitle;
+    private String attachmentSize = "";
+    private String attachmentTitle = "";
     private String attachmentTypeCode;
     private String attachmentTypeCodeText;
+    private String attachmentFileName = "";
     
     public String getAttachmentClass() {
         return attachmentClass;
@@ -84,5 +85,13 @@ public class eReferralAPIAttachmentList {
     @JsonProperty("attachmentTypeCodeText")
     public void setAttachmentTypeCodeText(String attachmentTypeCodeText) {
         this.attachmentTypeCodeText = attachmentTypeCodeText;
+    }
+
+    public String getAttachmentFileName() {
+        return attachmentFileName;
+    }
+
+    public void setAttachmentFileName(String attachmentFileName) {
+        this.attachmentFileName = attachmentFileName;
     }
 }
