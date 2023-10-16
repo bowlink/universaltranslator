@@ -4750,7 +4750,7 @@ public class adminProcessingActivity {
 				.append("<td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>");
 				
 				if(errorsRow[5] != null) {
-				   reportBody.append(errorsRow[5].toString());
+				   reportBody.append(errorsRow[5].toString().replace("<","&#60;").replace(">","&#62;"));
 				}
 				else {
 				   reportBody.append("");
@@ -4758,28 +4758,28 @@ public class adminProcessingActivity {
 				
 				reportBody.append("</td><td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>");
 				if(errorsRow[6] != null) {
-				   reportBody.append(errorsRow[6].toString());
+				   reportBody.append(errorsRow[6].toString().replace("<","&#60;").replace(">","&#62;"));
 				}
 				else {
 				   reportBody.append("");
 				}
 				reportBody.append("</td><td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>");
 				if(errorsRow[7] != null) {
-				   reportBody.append(errorsRow[7].toString());
+				   reportBody.append(errorsRow[7].toString().replace("<","&#60;").replace(">","&#62;"));
 				}
 				else {
 				   reportBody.append("");
 				}
 				reportBody.append("</td><td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>");
 				if(errorsRow[8] != null) {
-				   reportBody.append(errorsRow[8].toString());
+				   reportBody.append(errorsRow[8].toString().replace("<","&#60;").replace(">","&#62;"));
 				}
 				else {
 				   reportBody.append("");
 				}
 				reportBody.append("</td><td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>");
 				if(errorsRow[9] != null) {
-				   reportBody.append(errorsRow[9].toString()).append("</td></tr>");
+				   reportBody.append(errorsRow[9].toString().replace("<","&#60;").replace(">","&#62;")).append("</td></tr>");
 				}
 				else {
 				   reportBody.append("").append("</td></tr>");
@@ -4848,35 +4848,35 @@ public class adminProcessingActivity {
 				.append(errorsRow[4].toString()).append("</td>")
 				.append("<td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>");
 				if(errorsRow[5] != null) {
-				   reportBody.append(errorsRow[5].toString());
+				   reportBody.append(errorsRow[5].toString().replace("<","&#60;").replace(">","&#62;"));
 				}
 				else {
 				   reportBody.append("");
 				}
 				reportBody.append("</td><td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>");
 				if(errorsRow[6] != null) {
-				    reportBody.append(errorsRow[6].toString());
+				    reportBody.append(errorsRow[6].toString().replace("<","&#60;").replace(">","&#62;"));
 				}
 				else {
 				    reportBody.append("");
 				}
 				reportBody.append("</td><td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>");
 				if(errorsRow[7] != null) {
-				    reportBody.append(errorsRow[7].toString());
+				    reportBody.append(errorsRow[7].toString().replace("<","&#60;").replace(">","&#62;"));
 				}
 				else {
 				    reportBody.append("");
 				}
 				reportBody.append("</td><td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>");
 				if(errorsRow[8] != null) {
-				    reportBody.append(errorsRow[8].toString());
+				    reportBody.append(errorsRow[8].toString().replace("<","&#60;").replace(">","&#62;"));
 				}
 				else {
 				    reportBody.append("");
 				}
 				reportBody.append("</td><td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>");
 				if(errorsRow[9] != null) {
-				    reportBody.append(errorsRow[9].toString()).append("</td></tr>");
+				    reportBody.append(errorsRow[9].toString().replace("<","&#60;").replace(">","&#62;")).append("</td></tr>");
 				}
 				else {
 				    reportBody.append("").append("</td></tr>");

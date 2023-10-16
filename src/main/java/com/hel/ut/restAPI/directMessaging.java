@@ -127,7 +127,7 @@ public class directMessaging {
                             try {
                                 Configuration conf = Configuration.builder().mappingProvider(new JacksonMappingProvider()).jsonProvider(new JacksonJsonProvider()).build();
                                 TypeRef<List<eReferralAPIAttachmentList>> type = new TypeRef<List<eReferralAPIAttachmentList>>() {};
-                                attachmentList = JsonPath.using(conf).parse(jsonSent).read("$.messageAttachmentList.*", type);    
+                                attachmentList = JsonPath.using(conf).parse(jsonSent).read("$.emailAttachmentList.*", type);    
                             }
                             catch (Exception ex) {
                                 //Need to send email of error
@@ -184,10 +184,28 @@ public class directMessaging {
                                                 String CCDATitle = "";
                                                 Integer attachmentSize = 0;
                                                 for(eReferralAPIAttachmentList attachment : attachmentList) {
-                                                    if(Integer.parseInt(attachment.getAttachmentSize()) > attachmentSize && "text/xml".equals(attachment.getAttachmentClass())) {
-                                                        CCDAContent = attachment.getAttachmentContent();
-                                                        attachmentSize = Integer.parseInt(attachment.getAttachmentSize());
-                                                        CCDATitle = attachment.getAttachmentTitle();
+                                                    if(!"".equals(attachment.getAttachmentSize())) {
+                                                        if(Integer.parseInt(attachment.getAttachmentSize()) > attachmentSize && "text/xml".equals(attachment.getAttachmentClass())) {
+                                                            CCDAContent = attachment.getAttachmentContent();
+                                                            attachmentSize = Integer.parseInt(attachment.getAttachmentSize());
+                                                            if(!"".equals(attachment.getAttachmentFileName()) && "".equals(attachment.getAttachmentTitle())) {
+                                                                CCDATitle = attachment.getAttachmentFileName();
+                                                            }
+                                                            else if(!"".equals(attachment.getAttachmentTitle()) && "".equals(attachment.getAttachmentFileName())) {
+                                                                CCDATitle = attachment.getAttachmentTitle();
+                                                            }
+                                                        }
+                                                    }
+                                                    else {
+                                                        if("".equals(CCDATitle) && ("clinicaldocument.xml".equals(attachment.getAttachmentFileName().toLowerCase()) || "clinicaldocument.xml".equals(attachment.getAttachmentTitle().toLowerCase())) && "text/xml".equals(attachment.getAttachmentClass())) {
+                                                            CCDAContent = attachment.getAttachmentContent();
+                                                            if(!"".equals(attachment.getAttachmentFileName()) && "".equals(attachment.getAttachmentTitle())) {
+                                                                CCDATitle = attachment.getAttachmentFileName();
+                                                            }
+                                                            else if(!"".equals(attachment.getAttachmentTitle()) && "".equals(attachment.getAttachmentFileName())) {
+                                                                CCDATitle = attachment.getAttachmentTitle();
+                                                            }
+                                                        }
                                                     }
                                                 }
 
