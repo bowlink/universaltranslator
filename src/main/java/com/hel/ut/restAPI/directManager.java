@@ -409,6 +409,8 @@ public class directManager {
 
                             String[] emails = transportDetails.getErrorEmailAddresses().trim().split(",");
                             List<String> emailAddressList = Arrays.asList(emails);
+                            
+                            List<String> bccAddresses = new ArrayList<>();
 
                             if(!emailAddressList.isEmpty()) {
                                 mail.settoEmailAddress(emailAddressList.get(0).trim());
@@ -419,11 +421,12 @@ public class directManager {
                                         }
                                     }
                                 }
+                                bccAddresses.add("cmccue@health-e-link.net");
                             }
-
-                            List<String> bccAddresses = new ArrayList<>();
-                            bccAddresses.add("cmccue@health-e-link.net");
-
+                            else {
+                                mail.settoEmailAddress("cmccue@health-e-link.net");
+                            }
+                            
                             //build message
                             String message = "The following error occurred while authenticating with MedAllies. <br /><br />"+ apiResponse;
                             mail.setmessageBody(message);
