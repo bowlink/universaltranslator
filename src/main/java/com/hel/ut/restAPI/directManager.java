@@ -379,6 +379,11 @@ public class directManager {
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .header("Authorization", "Basic "+ encodedData)
                     .post(ClientResponse.class);
+                    
+                    ba = new batchdownloadactivity();
+                    ba.setActivity("Encoded Data: " + encodedData);
+                    ba.setBatchDownloadId(batchDownloadId);
+                    transactionOutDAO.submitBatchActivityLog(ba);
 
                     String accessToken = "";
 
@@ -390,6 +395,11 @@ public class directManager {
 
                         response.close();
                         oAuthClient.destroy();
+                        
+                        ba = new batchdownloadactivity();
+                        ba.setActivity("MedAllies API Response: " + response.getStatus());
+                        ba.setBatchDownloadId(batchDownloadId);
+                        transactionOutDAO.submitBatchActivityLog(ba);
 
                         if(response.getStatus() != 200) {
                             mailMessage mail = new mailMessage();
@@ -487,7 +497,7 @@ public class directManager {
                     if(!"".equals(accessToken)) {
                         
                         ba = new batchdownloadactivity();
-                        ba.setActivity("Reived medAllies access token: " + accessToken);
+                        ba.setActivity("Received medAllies access token: " + accessToken);
                         ba.setBatchDownloadId(batchDownloadId);
                         transactionOutDAO.submitBatchActivityLog(ba);
 
