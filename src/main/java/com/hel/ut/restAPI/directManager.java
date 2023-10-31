@@ -397,7 +397,12 @@ public class directManager {
                         oAuthClient.destroy();
                         
                         ba = new batchdownloadactivity();
-                        ba.setActivity("MedAllies API Response: " + response.getStatus());
+                        ba.setActivity("MedAllies API Response Status: " + response.getStatus());
+                        ba.setBatchDownloadId(batchDownloadId);
+                        transactionOutDAO.submitBatchActivityLog(ba);
+                        
+                         ba = new batchdownloadactivity();
+                        ba.setActivity("MedAllies API Response: " + apiResponse);
                         ba.setBatchDownloadId(batchDownloadId);
                         transactionOutDAO.submitBatchActivityLog(ba);
 
