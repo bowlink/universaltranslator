@@ -269,7 +269,7 @@ public class directManager {
 	    if(batchUploadDetails.getAssociatedBatchId() > 0) {
 		
 		batchdownloadactivity ba = new batchdownloadactivity();
-		ba.setActivity("Found original source batch for this reply message.  Souce batch upload batchId:" + batchUploadDetails.getId());
+		ba.setActivity("Found original source batch for this reply message.  Souce batch upload batchId:" + batchUploadDetails.getAssociatedBatchId());
 		ba.setBatchDownloadId(batchDownloadId);
 		transactionOutDAO.submitBatchActivityLog(ba);
 		
@@ -285,9 +285,20 @@ public class directManager {
 	    }
 	    
 	    if(directAddressesFound) {
+                
+                batchdownloadactivity ba = new batchdownloadactivity();
+		ba.setActivity("Found the direct address to send message back to. Recipient Direct Address: " + batchUploadDetails.getSenderEmail());
+		ba.setBatchDownloadId(batchDownloadId);
+		transactionOutDAO.submitBatchActivityLog(ba);
+                
 		String directAPIURL = hispDetails.getHispAPIURL();
 		String directAPIUsername = hispDetails.getHispAPIUsername();
 		String directAPIPassword = hispDetails.getHispAPIPassword();
+                
+                ba = new batchdownloadactivity();
+		ba.setActivity("Found the HISP API URL: " + hispDetails.getHispAPIURL());
+		ba.setBatchDownloadId(batchDownloadId);
+		transactionOutDAO.submitBatchActivityLog(ba);
 
 		String fileName = null;
 
@@ -298,6 +309,11 @@ public class directManager {
                 } else {
                     fileName = new StringBuilder().append(batchDownloadDetails.getOutputFileName()).append(".").append(transportDetails.getfileExt()).toString();
                 }
+                
+                ba = new batchdownloadactivity();
+		ba.setActivity("Output file name found, File Name: " + fileName);
+		ba.setBatchDownloadId(batchDownloadId);
+		transactionOutDAO.submitBatchActivityLog(ba);
 	    
                 //Submit the restAPImessageOut
                 directmessagesout directMessageOut = new directmessagesout();
@@ -317,6 +333,11 @@ public class directManager {
                 String responseMessage = "";
 	    
                 if (file.exists()) {
+                    
+                    ba = new batchdownloadactivity();
+                    ba.setActivity("Output file found, File Name: " + file.getAbsolutePath());
+                    ba.setBatchDownloadId(batchDownloadId);
+                    transactionOutDAO.submitBatchActivityLog(ba);
 
                     final ClientConfig config = new DefaultClientConfig();
 
