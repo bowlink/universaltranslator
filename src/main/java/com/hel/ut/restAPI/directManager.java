@@ -72,6 +72,7 @@ import javax.xml.bind.DatatypeConverter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  *
@@ -433,7 +434,7 @@ public class directManager {
                             }
                             
                             //build message
-                            String message = "The following error occurred while authenticating with MedAllies. <br /><br />"+ apiResponse;
+                            String message = "The following error occurred while authenticating with MedAllies. <br /><br />"+ HtmlUtils.htmlEscape(apiResponse.toString());
                             mail.setmessageBody(message);
                             mail.setmessageSubject("MedAllies Authentication Error");
 
@@ -603,6 +604,18 @@ public class directManager {
                             response.close();
                             client.destroy();
                         }
+                    }
+                    else {
+                        batchStatusId = 58;
+                        
+                        directMessageOut.setResponseStatus(0);
+                        directMessageOut.setStatusId(3);
+                        directMessageOut.setResponseMessage("No File Sent because file (" + myProps.getProperty("ut.directory.utRootDir") + filelocation + fileName + ") was not Found");
+		
+                        ba = new batchdownloadactivity();
+                        ba.setActivity("Could not connect to medAllies API to get the access token. Souce batch upload batchId:" + batchUploadDetails.getId());
+                        ba.setBatchDownloadId(batchDownloadId);
+                        transactionOutDAO.submitBatchActivityLog(ba);
                     }
                 }
                 else {
