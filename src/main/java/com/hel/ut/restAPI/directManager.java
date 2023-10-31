@@ -485,6 +485,11 @@ public class directManager {
                     }
 
                     if(!"".equals(accessToken)) {
+                        
+                        ba = new batchdownloadactivity();
+                        ba.setActivity("Reived medAllies access token: " + accessToken);
+                        ba.setBatchDownloadId(batchDownloadId);
+                        transactionOutDAO.submitBatchActivityLog(ba);
 
                         InputStream fileInput = new FileInputStream(file);
 
