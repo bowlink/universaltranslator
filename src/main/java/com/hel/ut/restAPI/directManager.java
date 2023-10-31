@@ -530,13 +530,23 @@ public class directManager {
                             directMessageOut.setResponseMessage(responseMessage);
 
                             jsonContentAsString = "";
+                            
+                            ba = new batchdownloadactivity();
+                            ba.setActivity("MedAllies send message API Response Status: " + response.getStatus());
+                            ba.setBatchDownloadId(batchDownloadId);
+                            transactionOutDAO.submitBatchActivityLog(ba);
+
+                            ba = new batchdownloadactivity();
+                            ba.setActivity("MedAllies end message API Response: " + apiResponse);
+                            ba.setBatchDownloadId(batchDownloadId);
+                            transactionOutDAO.submitBatchActivityLog(ba);
 
                             if (response.getStatus() == 200) {
                                 if (transportDetails.isWaitForResponse()) {
                                     batchStatusId = 59;
                                 } 
                                 else {
-                                        batchStatusId = 28;
+                                    batchStatusId = 28;
                                 }
                                 directMessageOut.setStatusId(2);
                             } 
