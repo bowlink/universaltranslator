@@ -402,55 +402,13 @@ public class directManager {
                         ba.setBatchDownloadId(batchDownloadId);
                         transactionOutDAO.submitBatchActivityLog(ba);
                         
-                         ba = new batchdownloadactivity();
+                        ba = new batchdownloadactivity();
                         ba.setActivity("MedAllies API Response: " + apiResponse);
                         ba.setBatchDownloadId(batchDownloadId);
                         transactionOutDAO.submitBatchActivityLog(ba);
 
                         if(response.getStatus() != 200) {
-                            mailMessage mail = new mailMessage();
-                            mail.setfromEmailAddress("notifications@health-e-link.net");
-
-                            List<String> ccAddresses = new ArrayList<>();
-
-                            String[] emails = transportDetails.getErrorEmailAddresses().trim().split(",");
-                            List<String> emailAddressList = Arrays.asList(emails);
-                            
-                            List<String> bccAddresses = new ArrayList<>();
-
-                            if(!emailAddressList.isEmpty()) {
-                                mail.settoEmailAddress(emailAddressList.get(0).trim());
-                                if(emailAddressList.size() > 1) {
-                                    for(Integer i = 1; i < emailAddressList.size(); i++) {
-                                        if(!"".equals(emailAddressList.get(i).trim())) {
-                                            ccAddresses.add(emailAddressList.get(i).trim());
-                                        }
-                                    }
-                                }
-                                bccAddresses.add("cmccue@health-e-link.net");
-                            }
-                            else {
-                                mail.settoEmailAddress("cmccue@health-e-link.net");
-                            }
-                            
-                            //build message
-                            String message = "The following error occurred while authenticating with MedAllies. <br /><br />"+ HtmlUtils.htmlEscape(apiResponse.toString());
-                            mail.setmessageBody(message);
-                            mail.setmessageSubject("MedAllies Authentication Error");
-
-                            if (!ccAddresses.isEmpty()) {
-                                String[] ccEmailAddresses = new String[ccAddresses.size()];
-                                ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
-                                mail.setccEmailAddress(ccEmailAddresses);
-                            }
-
-                            if (!bccAddresses.isEmpty()) {
-                                String[] bccEmailAddresses = new String[bccAddresses.size()];
-                                bccEmailAddresses = ccAddresses.toArray(bccEmailAddresses);
-                                mail.setBccEmailAddress(bccEmailAddresses);
-                            }
-
-                            emailManager.sendEmail(mail);
+                            accessToken = "";
                         }
                         else {
                             accessToken = apiResponse.substring(apiResponse.indexOf("access_token")+15, apiResponse.length());
@@ -610,7 +568,7 @@ public class directManager {
                         
                         directMessageOut.setResponseStatus(0);
                         directMessageOut.setStatusId(3);
-                        directMessageOut.setResponseMessage("No File Sent because file (" + myProps.getProperty("ut.directory.utRootDir") + filelocation + fileName + ") was not Found");
+                        directMessageOut.setResponseMessage("Could not connect to medAllies API to get the access token. Souce batch upload batchId:" + batchUploadDetails.getId());
 		
                         ba = new batchdownloadactivity();
                         ba.setActivity("Could not connect to medAllies API to get the access token. Souce batch upload batchId:" + batchUploadDetails.getId());
