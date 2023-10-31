@@ -401,14 +401,14 @@ public class directManager {
                         ba.setActivity("MedAllies API Response Status: " + response.getStatus());
                         ba.setBatchDownloadId(batchDownloadId);
                         transactionOutDAO.submitBatchActivityLog(ba);
-                        
-                        ba = new batchdownloadactivity();
-                        ba.setActivity("MedAllies API Response: " + apiResponse);
-                        ba.setBatchDownloadId(batchDownloadId);
-                        transactionOutDAO.submitBatchActivityLog(ba);
 
                         if(response.getStatus() != 200) {
                             accessToken = "";
+                            
+                            ba = new batchdownloadactivity();
+                            ba.setActivity("MedAllies API Response: " + apiResponse);
+                            ba.setBatchDownloadId(batchDownloadId);
+                            transactionOutDAO.submitBatchActivityLog(ba);
                         }
                         else {
                             accessToken = apiResponse.substring(apiResponse.indexOf("access_token")+15, apiResponse.length());
