@@ -72,6 +72,7 @@ import javax.xml.bind.DatatypeConverter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  *
@@ -269,7 +270,7 @@ public class directManager {
 	    if(batchUploadDetails.getAssociatedBatchId() > 0) {
 		
 		batchdownloadactivity ba = new batchdownloadactivity();
-		ba.setActivity("Found original source batch for this reply message.  Souce batch upload batchId:" + batchUploadDetails.getId());
+		ba.setActivity("Found original source batch for this reply message.  Souce batch upload batchId:" + batchUploadDetails.getAssociatedBatchId());
 		ba.setBatchDownloadId(batchDownloadId);
 		transactionOutDAO.submitBatchActivityLog(ba);
 		
@@ -285,9 +286,20 @@ public class directManager {
 	    }
 	    
 	    if(directAddressesFound) {
+                
+                batchdownloadactivity ba = new batchdownloadactivity();
+		ba.setActivity("Found the direct address to send message back to. Recipient Direct Address: " + batchUploadDetails.getSenderEmail());
+		ba.setBatchDownloadId(batchDownloadId);
+		transactionOutDAO.submitBatchActivityLog(ba);
+                
 		String directAPIURL = hispDetails.getHispAPIURL();
 		String directAPIUsername = hispDetails.getHispAPIUsername();
 		String directAPIPassword = hispDetails.getHispAPIPassword();
+                
+                ba = new batchdownloadactivity();
+		ba.setActivity("Found the HISP API URL: " + hispDetails.getHispAPIURL());
+		ba.setBatchDownloadId(batchDownloadId);
+		transactionOutDAO.submitBatchActivityLog(ba);
 
 		String fileName = null;
 
@@ -298,6 +310,11 @@ public class directManager {
                 } else {
                     fileName = new StringBuilder().append(batchDownloadDetails.getOutputFileName()).append(".").append(transportDetails.getfileExt()).toString();
                 }
+                
+                ba = new batchdownloadactivity();
+		ba.setActivity("Output file name found, File Name: " + fileName);
+		ba.setBatchDownloadId(batchDownloadId);
+		transactionOutDAO.submitBatchActivityLog(ba);
 	    
                 //Submit the restAPImessageOut
                 directmessagesout directMessageOut = new directmessagesout();
@@ -317,6 +334,11 @@ public class directManager {
                 String responseMessage = "";
 	    
                 if (file.exists()) {
+                    
+                    ba = new batchdownloadactivity();
+                    ba.setActivity("Output file found, File Name: " + file.getAbsolutePath());
+                    ba.setBatchDownloadId(batchDownloadId);
+                    transactionOutDAO.submitBatchActivityLog(ba);
 
                     final ClientConfig config = new DefaultClientConfig();
 
@@ -358,6 +380,11 @@ public class directManager {
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .header("Authorization", "Basic "+ encodedData)
                     .post(ClientResponse.class);
+                    
+                    ba = new batchdownloadactivity();
+                    ba.setActivity("Encoded Data: " + encodedData);
+                    ba.setBatchDownloadId(batchDownloadId);
+                    transactionOutDAO.submitBatchActivityLog(ba);
 
                     String accessToken = "";
 
@@ -369,48 +396,19 @@ public class directManager {
 
                         response.close();
                         oAuthClient.destroy();
+                        
+                        ba = new batchdownloadactivity();
+                        ba.setActivity("MedAllies API Response Status: " + response.getStatus());
+                        ba.setBatchDownloadId(batchDownloadId);
+                        transactionOutDAO.submitBatchActivityLog(ba);
 
                         if(response.getStatus() != 200) {
-                            mailMessage mail = new mailMessage();
-                            mail.setfromEmailAddress("notifications@health-e-link.net");
-
-                            List<String> ccAddresses = new ArrayList<>();
-
-                            String[] emails = transportDetails.getErrorEmailAddresses().trim().split(",");
-                            List<String> emailAddressList = Arrays.asList(emails);
-
-                            if(!emailAddressList.isEmpty()) {
-                                mail.settoEmailAddress(emailAddressList.get(0).trim());
-                                if(emailAddressList.size() > 1) {
-                                    for(Integer i = 1; i < emailAddressList.size(); i++) {
-                                        if(!"".equals(emailAddressList.get(i).trim())) {
-                                            ccAddresses.add(emailAddressList.get(i).trim());
-                                        }
-                                    }
-                                }
-                            }
-
-                            List<String> bccAddresses = new ArrayList<>();
-                            bccAddresses.add("cmccue@health-e-link.net");
-
-                            //build message
-                            String message = "The following error occurred while authenticating with MedAllies. <br /><br />"+ apiResponse;
-                            mail.setmessageBody(message);
-                            mail.setmessageSubject("MedAllies Authentication Error");
-
-                            if (!ccAddresses.isEmpty()) {
-                                String[] ccEmailAddresses = new String[ccAddresses.size()];
-                                ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
-                                mail.setccEmailAddress(ccEmailAddresses);
-                            }
-
-                            if (!bccAddresses.isEmpty()) {
-                                String[] bccEmailAddresses = new String[bccAddresses.size()];
-                                bccEmailAddresses = ccAddresses.toArray(bccEmailAddresses);
-                                mail.setBccEmailAddress(bccEmailAddresses);
-                            }
-
-                            emailManager.sendEmail(mail);
+                            accessToken = "";
+                            
+                            ba = new batchdownloadactivity();
+                            ba.setActivity("MedAllies API Response: " + apiResponse);
+                            ba.setBatchDownloadId(batchDownloadId);
+                            transactionOutDAO.submitBatchActivityLog(ba);
                         }
                         else {
                             accessToken = apiResponse.substring(apiResponse.indexOf("access_token")+15, apiResponse.length());
@@ -464,7 +462,7 @@ public class directManager {
                     }
 
                     if(!"".equals(accessToken)) {
-
+                        
                         InputStream fileInput = new FileInputStream(file);
 
                         BufferedReader reader = new BufferedReader(new InputStreamReader(fileInput));
@@ -532,13 +530,23 @@ public class directManager {
                             directMessageOut.setResponseMessage(responseMessage);
 
                             jsonContentAsString = "";
+                            
+                            ba = new batchdownloadactivity();
+                            ba.setActivity("MedAllies send message API Response Status: " + response.getStatus());
+                            ba.setBatchDownloadId(batchDownloadId);
+                            transactionOutDAO.submitBatchActivityLog(ba);
+
+                            ba = new batchdownloadactivity();
+                            ba.setActivity("MedAllies end message API Response: " + apiResponse);
+                            ba.setBatchDownloadId(batchDownloadId);
+                            transactionOutDAO.submitBatchActivityLog(ba);
 
                             if (response.getStatus() == 200) {
                                 if (transportDetails.isWaitForResponse()) {
                                     batchStatusId = 59;
                                 } 
                                 else {
-                                        batchStatusId = 28;
+                                    batchStatusId = 28;
                                 }
                                 directMessageOut.setStatusId(2);
                             } 
@@ -559,6 +567,18 @@ public class directManager {
                             response.close();
                             client.destroy();
                         }
+                    }
+                    else {
+                        batchStatusId = 58;
+                        
+                        directMessageOut.setResponseStatus(0);
+                        directMessageOut.setStatusId(3);
+                        directMessageOut.setResponseMessage("Could not connect to medAllies API to get the access token. Souce batch upload batchId:" + batchUploadDetails.getId());
+		
+                        ba = new batchdownloadactivity();
+                        ba.setActivity("Could not connect to medAllies API to get the access token. Souce batch upload batchId:" + batchUploadDetails.getId());
+                        ba.setBatchDownloadId(batchDownloadId);
+                        transactionOutDAO.submitBatchActivityLog(ba);
                     }
                 }
                 else {
