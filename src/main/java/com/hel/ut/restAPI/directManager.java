@@ -490,7 +490,8 @@ public class directManager {
                         jsonObjectToSend.put("emailAttachmentList", emailAttachmentListArray);
 
                         UUID uuid = UUID.randomUUID();
-
+                        
+                        jsonObjectToSend.put("asmEnabled",true);
                         jsonObjectToSend.put("fromDirectAddress",batchUploadDetails.getRecipientEmail());
                         jsonObjectToSend.put("messageId","urn:uuid:"+uuid);
                         jsonObjectToSend.put("toDirectAddress",batchUploadDetails.getSenderEmail());
