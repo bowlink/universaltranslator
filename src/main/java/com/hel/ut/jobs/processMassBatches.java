@@ -36,7 +36,7 @@ public class processMassBatches implements Job {
 
         try {
             SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
-            transactionInManager.processMassBatches();
+            //transactionInManager.processMassBatches();
         } catch (Exception ex) {
         	try {
             	try {
