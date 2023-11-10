@@ -2103,9 +2103,9 @@ public class transactionInManagerImpl implements transactionInManager {
 	
 	if (run) {
 	    List<batchUploads> batches = getBatchesByStatusIds(Arrays.asList(42, 2));
+            
 	    if (batches != null) {
 		if (!batches.isEmpty()) {
-		    
 		    for (batchUploads batch : batches) {
 			executor.execute(new Runnable() {
 			    @Override
@@ -2990,7 +2990,8 @@ public class transactionInManagerImpl implements transactionInManager {
                 
                 //Quick Processing Update
                 if(batchStatusId == 43) {
-                    processMassBatches();
+                    processBatch(batchId,false);
+                   // processMassBatches();
                 }
 		
 	    } catch (Exception ex1) {
@@ -3362,7 +3363,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		cleanAuditErrorTable(batch.getId());
 
 		//populate
-		populateAuditReport(batch.getId(), configurationManager.getMessageSpecs(batch.getConfigId()));
+                populateAuditReport(batch.getId(), configurationManager.getMessageSpecs(batch.getConfigId()));
 		
 		//populate dropped values 
 		populateDroppedValues(batch.getId(), batch.getConfigId(), false);
@@ -3440,7 +3441,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		ba.setActivity("Populate Audit Error table for batchId:" + batchUploadId);
 		ba.setBatchUploadId(batchUploadId);
 		transactionInDAO.submitBatchActivityLog(ba);
-
+                
 		populateAuditReport(batch.getId(), configurationManager.getMessageSpecs(batch.getConfigId()));
 
 		//log batch activity
