@@ -63,6 +63,9 @@ public class batchDownloadDroppedValues {
     
     @Column(name = "translatedReportField1Data", nullable = false)
     private String translatedReportField1Data;
+    
+    @Column(name = "crosswalkId", nullable = true)
+    private int crosswalkId = 0;
 
     public int getId() {
 	return id;
@@ -176,4 +179,11 @@ public class batchDownloadDroppedValues {
 	this.translatedReportField1Data = translatedReportField1Data;
     }
 
+	public int getCrosswalkId() {
+		return crosswalkId;
+	}
+
+	public void setCrosswalkId(int crosswalkId) {
+		this.crosswalkId = crosswalkId;
+	}
 }
