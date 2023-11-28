@@ -3051,7 +3051,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    // create tables to track dropped values from macros
 	    String transactioninmacrodroppedvalues = ""
 	    		+ "drop table if exists transactioninmacrodroppedvalues_" + batchUploadId + ";"
-	    		+ "CREATE TABLE transactioninmacrodroppedvalues_" + batchUploadId + " ( id int(11) NOT NULL AUTO_INCREMENT, batchUploadId int(11) not null, transactionInRecordsId int(11) NOT NULL, configId int(11) not null, fieldNo int(11) NOT NULL, fieldValue text, matchId varchar(255) NULL, PRIMARY KEY (id), KEY inDrop (matchId));"
+	    		+ "CREATE TABLE transactioninmacrodroppedvalues_" + batchUploadId + " ( id int(11) NOT NULL AUTO_INCREMENT, batchUploadId int(11) not null, transactionInRecordsId int(11) NOT NULL, configId int(11) not null, fieldNo int(11) NOT NULL, fieldValue text, matchId varchar(255) NULL, crosswalkId int(11) not null default 0, PRIMARY KEY (id), KEY inDrop (matchId));"
 	    		;
 	    query = sessionFactory.getCurrentSession().createSQLQuery(transactioninmacrodroppedvalues);
 	    query.executeUpdate();
@@ -3551,9 +3551,9 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    String sql;
 	    if (foroutboundProcessing == false) {
 		sql = "insert into batchuploaddroppedvalues (batchUploadId, configId, "
-		    + "transactionInRecordsId, fieldNo, fieldname, fieldValue)"
+		    + "transactionInRecordsId, fieldNo, fieldname, fieldValue, crosswalkId)"
 		    + " select " + batchId + ", " + configId + ",a.transactionInRecordsId, " + cdt.getFieldNo() 
-		    + ", '" + cdt.getFieldDesc() + "', b.F"+cdt.getFieldNo()+" from transactiontranslatedin_"+batchId+" a "
+		    + ", '" + cdt.getFieldDesc() + "', b.F"+cdt.getFieldNo()+" , "+ cdt.getCrosswalkId() +" from transactiontranslatedin_"+batchId+" a "
 		    + "inner join transactioninrecords_"+batchId+" b on a.transactionInRecordsId = b.id where "
 		    + "a.configId = :configId "
 		    + "and (a.F" + cdt.getFieldNo() + " is not null and length(a.F" + cdt.getFieldNo() + ") != 0  and a.forcw is null)"
@@ -3563,9 +3563,9 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    else {
 
 		sql = "insert into batchdownloaddroppedvalues  (batchDownloadId, configId, "
-		    + "transactionOutRecordsId, fieldNo, fieldname, fieldValue)"
+		    + "transactionOutRecordsId, fieldNo, fieldname, fieldValue, crosswalkId)"
 		    + " select " + batchId + ", " + configId + ",a.transactionOutRecordsId, " + cdt.getFieldNo()
-		    + ", '" + cdt.getFieldDesc() + "', b.F"+cdt.getFieldNo()+" from transactiontranslatedout_"+batchId+" a "
+		    + ", '" + cdt.getFieldDesc() + "', b.F"+cdt.getFieldNo()+", "+ cdt.getCrosswalkId()+" from transactiontranslatedout_"+batchId+" a "
 		    + "inner join transactionoutrecords_"+batchId+" b on a.transactionOutRecordsId = b.id where "
 		    + "a.configId = :configId "
 		    + "and (a.F" + cdt.getFieldNo() + " is not null and length(a.F" + cdt.getFieldNo() + ") != 0  and a.forcw is null)"
