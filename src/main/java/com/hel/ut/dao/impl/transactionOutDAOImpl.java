@@ -1022,9 +1022,9 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    
 	    // create tables to track dropped values from macros
 	    String transactionoutmacrodroppedvalues = ""
-	    		+ "drop table if exists transactionoutmacrodroppedvalues_" + batchDownloadId + ";"
-	    		+ "CREATE TABLE transactionoutmacrodroppedvalues_" + batchDownloadId + " ( id int(11) NOT NULL AUTO_INCREMENT, batchDownloadId int(11) not null, transactionOutRecordsId int(11) NOT NULL, configId int(11) not null, fieldNo int(11) NOT NULL, fieldValue text, matchId varchar(255) NULL, PRIMARY KEY (id), KEY outDrop (matchId));"
-	    		;
+	    + "drop table if exists transactionoutmacrodroppedvalues_" + batchDownloadId + ";"
+	    + "CREATE TABLE transactionoutmacrodroppedvalues_" + batchDownloadId + " ( id int(11) NOT NULL AUTO_INCREMENT, batchDownloadId int(11) not null, transactionOutRecordsId int(11) NOT NULL, configId int(11) not null, fieldNo int(11) NOT NULL, fieldValue text, matchId varchar(255) NULL, crosswalkId int(11) not null default 0, PRIMARY KEY (id), KEY outDrop (matchId));";
+	    
 	    query = sessionFactory.getCurrentSession().createSQLQuery(transactionoutmacrodroppedvalues);
 	    query.executeUpdate();
 	    

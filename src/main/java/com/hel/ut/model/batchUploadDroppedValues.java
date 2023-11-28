@@ -67,6 +67,8 @@ public class batchUploadDroppedValues {
     @Column(name = "targetFieldNo", nullable = true)
     private boolean targetFieldNo = true;
     
+    @Column(name = "crosswalkId", nullable = true)
+    private int crosswalkId = 0;
 
     public int getId() {
 	return id;
@@ -187,4 +189,12 @@ public class batchUploadDroppedValues {
     public void setTargetFieldNo(boolean targetFieldNo) {
         this.targetFieldNo = targetFieldNo;
     }
+
+	public int getCrosswalkId() {
+		return crosswalkId;
+	}
+
+	public void setCrosswalkId(int crosswalkId) {
+		this.crosswalkId = crosswalkId;
+	}
 }
