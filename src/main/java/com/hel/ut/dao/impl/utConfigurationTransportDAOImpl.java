@@ -1262,7 +1262,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public organizationDirectDetails getDirectMessagingDetails(String DMDomain) throws Exception {
-        Query query = sessionFactory.getCurrentSession().createQuery("from organizationDirectDetails where directDomain= :directDomain");
+        Query query = sessionFactory.getCurrentSession().createQuery("from organizationDirectDetails where FIND_IN_SET(:directDomain,directDomain) <> 0");
         query.setParameter("directDomain", DMDomain);
 	
 	if(query.list().size() > 1) {

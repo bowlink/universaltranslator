@@ -46,7 +46,7 @@
 		    <spring:bind path="hispAPIPassword">
                         <div id="hispAPIPasswordDiv" class="form-group ${status.error ? 'has-error' : '' }">
                             <label class="control-label" for="hispAPIPassword">HISP API Password *</label>
-                            <form:input path="hispAPIPassword" id="hispAPIPassword" class="form-control" type="text" maxLength="45" />
+                            <form:input path="hispAPIPassword" id="hispAPIPassword" class="form-control" type="text" maxLength="255" />
                             <span id="hispAPIPasswordMsg" class="control-label"></span>
                         </div>
                     </spring:bind>
