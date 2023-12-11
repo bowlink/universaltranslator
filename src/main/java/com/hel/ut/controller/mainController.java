@@ -69,7 +69,7 @@ public class mainController {
      */
     @RequestMapping(value = {"/", "/login"}, method = RequestMethod.GET)
 	public ModelAndView login() throws Exception {
-	
+        
 	ModelAndView mav = new ModelAndView();
 	mav.setViewName("/login");
 
