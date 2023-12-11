@@ -861,84 +861,91 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	    } 
 	    else {
 
-			StringBuilder sb = new StringBuilder("");
+                StringBuilder sb = new StringBuilder("");
 
-			boolean addHeader = true;
+                boolean addHeader = true;
+                
+                if(transportDetails != null) {
+                    addHeader = transportDetails.isAddTargetFileHeaderRow();
+                }
 
-			if(addHeader) {
-				for (configurationFormFields field : formFields) {
-					if (field.getUseField() == true) {
-						if (field.getFieldNo() == maxFieldNo) {
-							sb.append(field.getFieldDesc().trim()).append(System.getProperty("line.separator"));
-						} else {
-							sb.append(field.getFieldDesc().trim()).append(delimChar);
-						}
-					}
-				}
-			}
+                if(addHeader) {
+                    for (configurationFormFields field : formFields) {
+                        if (field.getUseField() == true) {
+                            if (field.getFieldNo() == maxFieldNo) {
+                                    sb.append(field.getFieldDesc().trim()).append(System.getProperty("line.separator"));
+                            } else {
+                                    sb.append(field.getFieldDesc().trim()).append(delimChar);
+                            }
+                        }
+                    }
+                }
+                
+                utConfiguration targetConfigDetails = configurationManager.getConfigurationById(batchDetails.getConfigId());
+                
+                Organization orgDetails = organizationManager.getOrganizationById(batchDetails.getOrgId());
 
-			for(transactionOutRecords record : records) {
+                for(transactionOutRecords record : records) {
 
-				for (configurationFormFields field : formFields) {
+                    for (configurationFormFields field : formFields) {
 
-					//String colName = new StringBuilder().append("f").append(i).toString();
-					//NEW
-					if (field.getUseField() == true) {
-						//NEW
-						String colName = new StringBuilder().append("f").append(field.getFieldNo()).toString();
+                        if (field.getUseField() == true) {
+                            String colName = new StringBuilder().append("f").append(field.getFieldNo()).toString();
 
-						try {
-							String fieldValue = BeanUtils.getProperty(record, colName);
+                            try {
+                                    String fieldValue = BeanUtils.getProperty(record, colName);
 
-							if (fieldValue == null) {
-								fieldValue = "";
-							} else if ("null".equals(fieldValue)) {
-								fieldValue = "";
-							} else if (fieldValue.isEmpty()) {
-								fieldValue = "";
-							} else if (fieldValue.length() == 0) {
-								fieldValue = "";
-							}
+                                    if (fieldValue == null) {
+                                            fieldValue = "";
+                                    } else if ("null".equals(fieldValue)) {
+                                            fieldValue = "";
+                                    } else if (fieldValue.isEmpty()) {
+                                            fieldValue = "";
+                                    } else if (fieldValue.length() == 0) {
+                                            fieldValue = "";
+                                    }
 
-							//if (i == maxFieldNo) {
-							//New
-							if (field.getFieldNo() == maxFieldNo) {
-								sb.append(recordRow).append(fieldValue).append(System.getProperty("line.separator"));
-							} else {
-								sb.append(recordRow).append(fieldValue).append(delimChar);
-							}
+                                    if (field.getFieldNo() == maxFieldNo) {
+                                        sb.append(recordRow).append(fieldValue);
+                                        if(targetConfigDetails.getMessageTypeId() == 2 && orgDetails.getOrgType() == 5) {
+                                            sb.append(delimChar).append(record.getTransactionInRecordsId());
+                                        }
+                                        sb.append(System.getProperty("line.separator"));
+                                    } else {
+                                        sb.append(recordRow).append(fieldValue).append(delimChar);
+                                    }
 
-						} catch (IllegalAccessException ex) {
-							Logger.getLogger(transactionOutManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
-						} catch (InvocationTargetException ex) {
-							Logger.getLogger(transactionOutManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
-						} catch (NoSuchMethodException ex) {
-							Logger.getLogger(transactionOutManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
-						}
-						//NEW
-					}
-				}
-			}
+                            } catch (IllegalAccessException ex) {
+                                    Logger.getLogger(transactionOutManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
+                            } catch (InvocationTargetException ex) {
+                                    Logger.getLogger(transactionOutManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
+                            } catch (NoSuchMethodException ex) {
+                                    Logger.getLogger(transactionOutManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    }
+                }
 
-			if ("".equals(sb.toString())) {
-				recordRow = "";
-			} else {
-				recordRow = sb.toString();
-			}
+                if ("".equals(sb.toString())) {
+                    recordRow = "";
+                } else {
+                    recordRow = sb.toString();
+                }
+                
 
-			if (!"".equals(recordRow)) {
-				try {
-					if (encrypt == true) {
-						byte[] encoded = Base64.encode(recordRow.getBytes());
-						fw.write(new String(encoded));
-					} else {
-						fw.write(recordRow);
-					}
-					fw.close();
-				} catch (IOException ex) {
-					throw new IOException(ex);
-				}
-			}
+                if (!"".equals(recordRow)) {
+                    try {
+                        if (encrypt == true) {
+                                byte[] encoded = Base64.encode(recordRow.getBytes());
+                                fw.write(new String(encoded));
+                        } else {
+                                fw.write(recordRow);
+                        }
+                        fw.close();
+                    } catch (IOException ex) {
+                        throw new IOException(ex);
+                    }
+                }
 	    }
 	}
 	
@@ -1127,7 +1134,19 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
     @Override
     public Integer writeOutputToTextFile(configurationTransport transportDetails, Integer batchDownLoadId, String filePathAndName, String fieldNos, Integer batchUploadId) throws Exception {
-	return transactionOutDAO.writeOutputToTextFile(transportDetails, batchDownLoadId, filePathAndName, fieldNos, batchUploadId);
+	
+        batchDownloads batchDetails = transactionOutDAO.getBatchDetails(batchDownLoadId);
+	
+	utConfiguration targetConfigDetails = configurationManager.getConfigurationById(batchDetails.getConfigId());
+        
+        Organization orgDetails = organizationManager.getOrganizationById(batchDetails.getOrgId());
+	
+	if(targetConfigDetails.getMessageTypeId() == 2 && orgDetails.getOrgType() == 5) {
+	    return transactionOutDAO.writeFPOutputToTextFile(transportDetails, batchDownLoadId, filePathAndName, fieldNos);
+	}
+	else {
+	    return transactionOutDAO.writeOutputToTextFile(transportDetails, batchDownLoadId, filePathAndName, fieldNos, batchUploadId);
+	}
     }
 
     @Override

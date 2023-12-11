@@ -125,7 +125,11 @@ require(['./main'], function () {
                     "bSortable":true,
                     "sWidth": "15%",
                     "render": function ( data, type, row, meta ) {
-                        return data;
+                        var orgName = data;
+                        if(orgName  == 'EAH Family Planning') {
+                            orgName = 'EAH/CDS Family Planning';
+                        }
+                        return orgName;
                     },
                     'createdCell':  function (td, cellData, rowData, row, col) {
                         $(td).attr('rel', rowData.cleanURL);

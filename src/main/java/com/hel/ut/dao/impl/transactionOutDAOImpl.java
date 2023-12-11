@@ -330,9 +330,11 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	String sql = "select ";
 		
 	for (int i = 1; i <= totalFields; i++) {
-	    sql += "f" + i + ",";
+	    sql += "a.f" + i + ",";
 	}	
-	sql += "id FROM transactiontranslatedout_" + batchId + " order by id asc";
+	sql += "a.id, b.transactionInRecordsId from transactiontranslatedout_" + batchId + " a inner join "
+	+ "transactionoutrecords_" + batchId + " b on b.id = a.transactionOutRecordsId "
+	+ "order by a.id asc";
 	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
 	Transformers.aliasToBean(transactionOutRecords.class));
