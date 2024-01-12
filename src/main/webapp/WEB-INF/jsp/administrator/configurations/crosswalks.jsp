@@ -1,7 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-<table class="table table-hover table-default" id="cwDataTable">
+<table class="table table-hover table-default" <c:if test="${availableCrosswalks.size() > 0}">id="cwDataTable"</c:if>>
     <thead>
         <tr>
 	    <th scope="col" class="center-text">ID</th>
@@ -54,7 +54,7 @@
             </c:when>
             <c:otherwise>
                 <tr>
-                    <td scope="row" colspan="5" style="text-align:center">No Crosswalks Found</td>
+                    <td scope="row" colspan="5" style="text-align:center">No Crosswalks are in use for this configuration.</td>
                 </tr>
             </c:otherwise>
             </c:choose>
