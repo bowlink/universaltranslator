@@ -360,6 +360,10 @@ public class messageTypeManagerImpl implements messageTypeManager {
 		executeSQLStatement("delete from rel_crosswalkData where crosswalkId = "+cwId);
 		executeSQLStatement("delete from crosswalks where Id = "+cwId);
             }
+            else {
+                executeSQLStatement("delete from rel_crosswalkData where crosswalkId = "+cwId);
+		executeSQLStatement("delete from crosswalks where Id = "+cwId);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
