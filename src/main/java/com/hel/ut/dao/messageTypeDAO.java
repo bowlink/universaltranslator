@@ -75,4 +75,6 @@ public interface messageTypeDAO {
     List getConfigCrosswalksWithDataForPrint(Integer configId);
     
     List getConfigCrosswalkDownloadWithData(Integer crosswalkId);
+    
+    String checkIfCWIsInUse(Integer crosswalkId);
 }

@@ -446,5 +446,10 @@ public class messageTypeManagerImpl implements messageTypeManager {
 		}
 	    }
 	}
-    }	    
+    }
+    
+    @Override
+    public String checkIfCWIsInUse(Integer crosswalkId) {
+	return messageTypeDAO.checkIfCWIsInUse(crosswalkId);
+    }
 }
