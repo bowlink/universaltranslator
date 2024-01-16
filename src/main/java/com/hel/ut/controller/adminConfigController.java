@@ -5886,4 +5886,16 @@ public class adminConfigController {
             return "1";
         }
     }
+    
+    /**
+     *
+     * @param cwId
+     * @return 
+     * @throws java.lang.Exception
+     */
+    @RequestMapping(value = "/checkIfCWInUse.do", method = RequestMethod.POST)
+    public @ResponseBody
+    String checkIfCWInUse(@RequestParam(value = "cwId", required = true) Integer cwId) throws Exception {
+	return messagetypemanager.checkIfCWIsInUse(cwId);
+    }
 }

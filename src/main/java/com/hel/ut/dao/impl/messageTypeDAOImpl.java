@@ -596,4 +596,27 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	
         return query.list();
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public String checkIfCWIsInUse(Integer crosswalkId) {
+        
+        String inUse = "0";
+        
+	String sql = "select group_concat(configId) from configurationdatatranslations where crosswalkId = :crosswalkId or (macroId in (129,160,177,195,199) and (constant1 = :crosswalkId or constant2 = :crosswalkId))";
+	
+        Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+        query.setParameter("crosswalkId", crosswalkId);
+        
+        if(!query.list().isEmpty()) {
+            if(query.list().get(0) == null) {
+                inUse = "0";
+            }
+            else {
+                inUse = query.list().get(0).toString();
+            }
+        }
+        
+        return inUse;
+    }
 }
