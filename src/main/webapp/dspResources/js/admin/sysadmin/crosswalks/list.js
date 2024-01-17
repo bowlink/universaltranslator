@@ -144,7 +144,66 @@ require(['./main'], function () {
         //$('#crosswalkdetailsform').submit();
 
     });
+    
+    $(document).on('click','.deleteCrosswalk',function() {
+        var cwId = $(this).attr('rel');
+        
+        if(confirm("Are you sure you want to remove this crosswalk?")) {
+            $.ajax({
+                url: '/administrator/configurations/checkIfCWInUse.do',
+                data: {
+                    'cwId': cwId
+                },
+                type: 'POST',
+                success: function(data) {
+                    console.log("IN");
+                    console.log(data);
+                    if(data === "0") {
+                        $('body').overlay({
+                            glyphicon : 'floppy-disk',
+                            message : 'Deleting...'
+                        });
+
+                        $.ajax({
+                            url: '/administrator/configurations/deleteCrosswalk.do',
+                            data: {
+                                'cwId': cwId
+                            },
+                            type: 'POST',
+                            success: function(data) {
+                              location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        alert("This crosswalk is being used in the follwing configurations (" + data + ").");
+                    }
+                }
+            });
+        }
+        
+        /*if((dtsId*1) > 0) {
+            alert("The crosswalk you are trying to delete is associated to a field within the data translations section of one or more of your configurations. \n\nIn order to modify the crosswalks existing values you can click 'view' and upload a new crosswalk file. \n\nTo delete the crosswalk you must first remove its association with any of your configuration fields.");
+            location.reload();
+        }
+        else {
+            if(confirm("Are you sure you want to remove this crosswalk?")) {
+                $('body').overlay({
+                    glyphicon : 'floppy-disk',
+                    message : 'Deleting...'
+                });
+
+                $.ajax({
+                    url: '/administrator/configurations/deleteCrosswalk.do',
+                    data: {
+                        'cwId': cwId
+                    },
+                    type: 'POST',
+                    success: function(data) {
+                      location.reload();
+                    }
+                });
+            }
+        }*/
+    });
 });
-
-
-

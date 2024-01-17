@@ -25,18 +25,16 @@
             </div>
             <div class="panel-body">
                 <div class="table-actions">
-                    <div class="form form-inline pull-left">
-
-                    </div>
+                    <div class="form form-inline pull-left"></div>
                     <a href="#crosswalkModal" id="createNewCrosswalk" data-toggle="modal" class="btn btn-primary btn-sm pull-right" title="Create new Crosswalk">  
                         <span class="glyphicon glyphicon-plus"></span>
                     </a>
                 </div>
-
                 <div class="form-container scrollable">
                     <table class="table table-striped table-hover table-default" <c:if test="${not empty crosswalkList}">id="dataTable"</c:if>>
                             <thead>
                                 <tr>
+                                    <th scope="col">Id</th>
                                     <th scope="col">Name</th>
                                     <th scope="col">File Name</th>
                                     <th scope="col">Date Created</th>
@@ -48,20 +46,30 @@
                                 <c:when test="${not empty crosswalkList}">
                                     <c:forEach var="crosswalk" items="${crosswalkList}">
                                         <tr id="dataRow">
-                                            <td>
-                                                ${crosswalk.name}
-                                            </td>
-                                            <td>
-                                                ${crosswalk.fileName}
-                                            </td>
+                                            <td>${crosswalk.id}</td>
+                                            <td>${crosswalk.name}</td>
+                                            <td>${crosswalk.fileName}</td>
                                             <td>
                                                 <fmt:formatDate value="${crosswalk.dateCreated}" type="date" pattern="M/dd/yyyy" />
                                             </td>
-                                            <td class="actions-col">
-                                                <a href="#crosswalkModal" data-toggle="modal" rel="?i=${crosswalk.id}" class="viewCrosswalk" title="Edit this Crosswalk">
-                                                    <span class="glyphicon glyphicon-edit"></span>
-                                                    Edit	
-                                                </a>
+                                            <td>
+                                                <div class="dropdown pull-left">
+                                                    <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                                                        <i class="fa fa-cog"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu pull-right">
+                                                        <li>
+                                                            <a href="#crosswalkModal" data-toggle="modal" class="btn btn-link viewCrosswalk" rel="?i=${crosswalk.id}" title="Edit this Crosswalk">
+                                                                <span class="glyphicon glyphicon-edit"></span> View
+                                                            </a>
+                                                        </li>  
+                                                        <li>
+                                                            <a href="#!" class="btn btn-link deleteCrosswalk" rel="${crosswalk.id}" title="Delete this Crosswalk">
+                                                                <span class="glyphicon glyphicon-remove"></span> Delete
+                                                            </a>
+                                                        </li> 
+                                                    </ul>
+                                                </div>
                                             </td>
                                         </tr>
                                     </c:forEach>
