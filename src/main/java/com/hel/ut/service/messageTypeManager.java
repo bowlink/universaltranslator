@@ -65,4 +65,5 @@ public interface messageTypeManager {
     
     void moveCWForConfigToNewOrg(Integer newOrgId, Integer currOrgId, Integer configId, String oldOrgCleanURL, String newOrgCleanURL) throws Exception;
     
+    String checkIfCWIsInUse(Integer crosswalkId);
 }

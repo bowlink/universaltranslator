@@ -39,11 +39,13 @@ require(['./main'], function () {
     });
     
     $(document).on('change','#delimiter', function() {
-        var cwFileLink = $('#cwFileLink').attr('href');
-        
-        cwFileLink = cwFileLink.replace('&delim='+$('#delimiter').data("delim"),'&delim='+$(this).val());
-        $('#delimiter').data("delim",$(this).val());
-        $('#cwFileLink').attr('href',cwFileLink);
+        if($("#cwFileLink").length > 0) {
+            var cwFileLink = $('#cwFileLink').attr('href');
+
+            cwFileLink = cwFileLink.replace('&delim='+$('#delimiter').data("delim"),'&delim='+$(this).val());
+            $('#delimiter').data("delim",$(this).val());
+            $('#cwFileLink').attr('href',cwFileLink);
+        }
     });
     
     $(document).on('click', '.showMore', function() {
@@ -424,6 +426,24 @@ require(['./main'], function () {
             }
         });
     });
+    
+    //This function will launch the new crosswalk form to upload multiple crosswalks at once
+    $(document).on('click', '#uploadMultiCrosswalks', function () {
+        var orgId = $('#orgId').val();
+        var cwId = $(this).data('cwid');
+
+        $.ajax({
+            url: 'multipleCrosswalkUpload',
+            type: "GET",
+            data: {
+                'orgId': orgId,
+                'cwId': cwId
+            },
+            success: function (data) {
+                $("#crosswalkModal").html(data);
+            }
+        });
+    });
 
     //The function to submit the new crosswalk
     $(document).on('click', '#submitCrosswalkButton', function (event) {
@@ -522,10 +542,6 @@ require(['./main'], function () {
                 }
             });
         }
-
-        //$('#crosswalkdetailsform').attr('action', actionValue + 'Crosswalk');
-        //$('#crosswalkdetailsform').submit();
-
     });
     
     $(document).on('click', '#clearTranslationButton', function() {
@@ -665,6 +681,98 @@ require(['./main'], function () {
             });
         }
     });
+    
+    
+    $(document).on('click', '.reloadMultiForm', function (event) {
+        $('#crosswalkDelimDiv').removeClass("has-error");
+        $('#crosswalkDelimMsg').removeClass("has-error");
+        $('#crosswalkDelimMsg').html('');
+        $('#crosswalkFileDiv').removeClass("has-error");
+        $('#crosswalkFileMsg').removeClass("has-error");
+        $('#crosswalkFileMsg').html('');
+        
+        $('.cwUploadForm').show();
+        $('.uploadResults').hide();
+        $('#crosswalkFile').val('');
+        $('.uploadResults').html('');
+    });
+    
+    //The function to upload all the selected crosswalks
+    $(document).on('click', '#submitMultiCrosswalkButton', function (event) {
+        $('.uploadError').hide();
+        $('.uploadSuccess').hide();
+        $('#crosswalkDelimDiv').removeClass("has-error");
+        $('#crosswalkDelimMsg').removeClass("has-error");
+        $('#crosswalkDelimMsg').html('');
+        $('#crosswalkFileDiv').removeClass("has-error");
+        $('#crosswalkFileMsg').removeClass("has-error");
+        $('#crosswalkFileMsg').html('');
+        
+        var errorFound = 0;
+
+        //Need to make sure the crosswalk name doesn't already exist.
+        var orgId = $('#orgId').val();
+
+        //Make sure a delimiter is selected
+        if ($('#delimiter').val() == '') {
+            $('#crosswalkDelimDiv').addClass("has-error");
+            $('#crosswalkDelimMsg').addClass("has-error");
+            $('#crosswalkDelimMsg').html('The file delimiter is a required field!');
+            errorFound = 1;
+        }
+
+        //Make sure a file is selected and is a text file
+        if ($('#crosswalkFile').val() == '') {
+            $('#crosswalkFileDiv').addClass("has-error");
+            $('#crosswalkFileMsg').addClass("has-error");
+            $('#crosswalkFileMsg').html('At least one crosswalk file must be selected!');
+            errorFound = 1;
+        }
+        else {
+            var selection = document.getElementById('crosswalkFile');
+            for (var i=0; i<selection.files.length; i++) {
+                var ext = selection.files[i].name.substr(-3);
+                if(ext!== "txt" )  {
+                    $('#crosswalkFileDiv').addClass("has-error");
+                    $('#crosswalkFileMsg').addClass("has-error");
+                    $('#crosswalkFileMsg').html('All selected crosswalk files must be a txt file!');
+                    errorFound = 1;
+                    return false;
+                }
+            } 
+        }
+        
+        if (errorFound == 1) {
+            event.preventDefault();
+            return false;
+        }
+        else {
+
+            //check and submit form
+            var form = $('#multiCWForm')[0];
+            var formData = new FormData(form);
+            
+            $.ajax({
+                url: '/administrator/configurations/submitMultiCrosswalks',
+                type: "POST",
+                enctype: 'multipart/form-data',
+                processData: false,  // Important!
+                contentType: false,
+                cache: false,
+                data: formData,
+                success: function(data) {
+                   if(data != '1') {
+                       $('.cwUploadForm').hide();
+                       $('.uploadResults').show();
+                       $('.uploadResults').html(data);
+                   }
+                   else {
+                       location.reload();
+                   }
+                }
+            });
+        }
+    });
 });
 
 
@@ -717,11 +825,11 @@ function populateCrosswalks(page,inuseonly) {
                     { "width": "10%" }
                  ],
                 sPaginationType: "bootstrap", 
-                searching: false,
+                searching: true,
                 bLengthChange: false,
                 oLanguage: {
-                   sEmptyTable: "There were no files submitted for the selected date range.", 
-                   sSearch: "Filter Results: ",
+                   sEmptyTable: "No Crosswalks are in use for this configuration.", 
+                   sSearch: "Filter: ",
                    sLengthMenu: '<select class="form-control" style="width:150px">' +
                         '<option value="10">10 Records</option>' +
                         '<option value="20">20 Records</option>' +
@@ -732,6 +840,8 @@ function populateCrosswalks(page,inuseonly) {
                         '</select>'
                 }
             });
+            
+            $('.dataTables_filter').addClass('pull-left');
         }
     });
 }

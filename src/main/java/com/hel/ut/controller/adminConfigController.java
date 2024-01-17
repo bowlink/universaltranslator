@@ -128,6 +128,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 @Controller
 @RequestMapping("/administrator/configurations")
@@ -5777,5 +5778,156 @@ public class adminConfigController {
 	configurationFTPFields ftpDetails = utconfigurationTransportManager.getTransportFTPDetailsPull(transportId);
 	String ftpCheckResults = transactioninmanager.checkSingleRemoteFTPConnection(ftpDetails);
         return ftpCheckResults;
+    }
+    
+    /**
+     * The '/multipleCrosswalkUpload' GET request will be used to return the form to upload multiple croswalks at once.
+     *
+     *
+     * @param orgId
+     * @param cwId
+     * @return	The crosswalk details page
+     * @throws java.lang.Exception
+     *
+     * @Objects	(1) An object that will hold all the details of the clicked crosswalk
+     *
+     */
+    @RequestMapping(value = "/multipleCrosswalkUpload", method = RequestMethod.GET)
+    public @ResponseBody
+    ModelAndView multipleCrosswalkUpload(@RequestParam(value = "orgId", required = false) Integer orgId,@RequestParam(value = "cwId", required = true) Integer cwId) throws Exception {
+
+        if (orgId == null) {
+            orgId = 0;
+        }
+
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("/administrator/configurations/multipleCrosswalkUpload");
+
+        mav.addObject("orgId", orgId);
+        mav.addObject("cwId", cwId);
+
+        //Get the list of available file delimiters
+        @SuppressWarnings("rawtypes")
+        List delimiters = messagetypemanager.getDelimiters();
+        mav.addObject("delimiters", delimiters);
+
+        return mav;
+    }
+    
+    @RequestMapping(value = "/submitMultiCrosswalks", method = RequestMethod.POST)
+    public @ResponseBody String submitMultiCrosswalks(Authentication authentication, @RequestParam(value = "orgId", required = false) Integer orgId,
+        @RequestParam(value = "cwId", required = true) Integer cwId, @RequestParam(value = "fileDelimiter", required = true) Integer fileDelimiter, @RequestParam("crosswalkFile") CommonsMultipartFile[] crosswalkFiles) throws Exception {
+
+        if(crosswalkFiles != null) {
+            String cwName = "";
+            String originalFileName = "";
+            Integer newCWId = 0;
+
+            List<String> goodFiles = new ArrayList<>();
+            List<String> badFiles = new ArrayList<>();
+            List<String> skippedFiles = new ArrayList<>();
+
+            for(CommonsMultipartFile cwfile : crosswalkFiles) {
+                originalFileName = cwfile.getOriginalFilename();
+                
+                cwName = cwId+"_"+originalFileName.substring(0,originalFileName.indexOf("."));
+                cwName = cwName.replace(" ", "");
+
+                //Check to see if the crosswalk already exists
+                Long nameExists = messagetypemanager.checkCrosswalkName(cwName, orgId);
+
+                if(nameExists == 0) {
+                    Crosswalks cwDetails = new Crosswalks();
+                    cwDetails.setOrgId(orgId);
+                    cwDetails.setFileDelimiter(fileDelimiter);
+                    cwDetails.setName(cwName);
+                    cwDetails.setfileName(originalFileName);
+                    cwDetails.setFile(cwfile);
+
+                    newCWId = messagetypemanager.createCrosswalk(cwDetails);
+
+                    if(newCWId > 0) {
+                        goodFiles.add(originalFileName);
+                    }
+                    else {
+                        badFiles.add(originalFileName);
+                    }
+                } 
+                else {
+                    skippedFiles.add(originalFileName);
+                }
+            }
+                
+            utConfiguration configDetails = utconfigurationmanager.getConfigurationById(cwId);
+           
+            String delimiter = "";
+            
+            if(fileDelimiter == 1) {
+                delimiter = "Comma";
+            }
+            else if(fileDelimiter == 2) {
+                delimiter = "Pipe";
+            }
+            else if(fileDelimiter == 3) {
+                delimiter = "Colon";
+            }
+            else if(fileDelimiter == 11) {
+                delimiter = "Semi-colon";
+            }
+            else if(fileDelimiter == 13) {
+                delimiter = "Tab";
+            }
+
+                
+            String returnValue = "<strong>Delimiter Selected:</strong> " + delimiter + "<br/></br><strong>Successfully Uploaded Crosswalk Files:</strong>";
+       
+            if(!goodFiles.isEmpty()) {
+                for(String goodFile : goodFiles) {
+                    returnValue += "<br />- " + goodFile;
+                }
+            }
+            else {
+                returnValue += "<br />None of the selected crosswalk files were successfully uploaded.";
+            }
+
+            returnValue += "<br /><br /><strong>Rejected Crosswalk Files (Invalid extension or delimiter):</strong>";
+            if(!badFiles.isEmpty()) {
+                for(String badFile : badFiles) {
+                    returnValue += "<br />- " + badFile;
+                }
+            }
+            else {
+                returnValue += "<br />No crosswalk uploaded files were rejected.";
+            }
+
+            returnValue += "<br /><br /><strong>Skipped Crosswalk Files (Crosswalk already exists for this organization):</strong>";
+            if(!skippedFiles.isEmpty()) {
+                for(String skippedFile : skippedFiles) {
+                    returnValue += "<br />- " + skippedFile;
+                }
+            }
+            else {
+                returnValue += "<br />No crosswalk uploaded files were skipped.";
+            }
+            
+            returnValue += "<br /><br /><div class=\"form-group\"><input type=\"button\"  class=\"btn btn-primary reloadMultiForm\" value=\"Upload More Files\"/></div>";
+            
+            return returnValue;
+        }
+        else {
+            return "1";
+        }
+    }
+    
+    /**
+     *
+     * @param cwId
+     * @return 
+     * @throws java.lang.Exception
+     */
+    @RequestMapping(value = "/checkIfCWInUse.do", method = RequestMethod.POST)
+    public @ResponseBody
+    String checkIfCWInUse(@RequestParam(value = "cwId", required = true) Integer cwId) throws Exception {
+	return messagetypemanager.checkIfCWIsInUse(cwId);
     }
 }
