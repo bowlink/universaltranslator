@@ -4075,4 +4075,48 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    return null;
 	}
     }
+    
+    @Override
+    @Transactional(readOnly = true) 
+    public List<batchUploads> finDNPBatchesToCleanUp() throws Exception {
+	
+	String sql = "select * from batchuploads where statusId = 21";
+	
+	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
+        .setResultTransformer(Transformers.aliasToBean(batchUploads.class));
+	
+	return query.list();
+    }
+    
+    @Override
+    @Transactional(readOnly = false)
+    public void DNPBatchUploadTableCleanUp(List<batchUploads> batchesToCleanup) throws Exception {
+	
+	if(batchesToCleanup != null) {
+	    
+	    if(!batchesToCleanup.isEmpty()) {
+		
+		String deleteSQL = "";
+		Query deleteQuery;
+		
+		for(batchUploads batch : batchesToCleanup) {
+		     
+		    if(batch.getId() > 0) {
+			deleteSQL += "DROP TABLE IF EXISTS `transactiontranslatedin_" + batch.getId()+ "`;";
+			deleteSQL += "DROP TABLE IF EXISTS `transactionindetailauditerrors_" + batch.getId() + "`;";
+			deleteSQL += "DROP TABLE IF EXISTS `transactiontranslatedlistin_" + batch.getId() + "`;";
+			deleteSQL += "DROP TABLE IF EXISTS `transactioninrecords_" + batch.getId() + "`;";
+			deleteSQL += "DROP TABLE IF EXISTS `transactioninerrors_" + batch.getId() + "`;";
+			deleteSQL += "DROP TABLE IF EXISTS `transactioninmacrodroppedvalues_" + batch.getId() + "`;";
+			deleteSQL += "DROP TABLE IF EXISTS `transactioninmacrokeptvalues_" + batch.getId() + "`;";
+		    }
+		}
+		
+		if(!"".equals(deleteSQL)) {
+		    deleteQuery = sessionFactory.getCurrentSession().createSQLQuery(deleteSQL);
+		    deleteQuery.executeUpdate();
+		}
+	    }
+	}
+    }
 }
