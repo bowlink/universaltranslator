@@ -123,9 +123,7 @@
             <name>BatchUploadTableCleanUp</name>
             <group>processGroup</group>
             <description>
-		This process will run every 10 minutes and check for fully completed inbound batches and delete the
-		transactiontranslatedin_*batchId* table. A fully completed inbound batch means all associated 
-		batchDownload entries are at a status of 28.
+		This process will run every morning at 1:30AM EST to check for abadndoned processing tables (fully completed, DNP and SRJ) inbound batches.
 	    </description>
             <job-class>com.hel.ut.jobs.BatchUploadTableCleanUp</job-class>
         </job>
@@ -135,7 +133,7 @@
                 <name>BatchUploadTableCleanUpTrigger</name>
                 <job-name>BatchUploadTableCleanUp</job-name>
                 <job-group>processGroup</job-group>
-                <cron-expression>0 0/10 * * * ?</cron-expression>
+                <cron-expression>0 30 1 1/1 * ? *</cron-expression>
             </cron>
         </trigger>
     </schedule>
