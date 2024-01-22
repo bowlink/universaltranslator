@@ -4080,7 +4080,7 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Transactional(readOnly = true) 
     public List<batchUploads> finDNPBatchesToCleanUp() throws Exception {
 	
-	String sql = "select * from batchuploads where statusId = 21";
+	String sql = "select * from batchuploads where statusId = 21 or statusId = 7";
 	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
         .setResultTransformer(Transformers.aliasToBean(batchUploads.class));
