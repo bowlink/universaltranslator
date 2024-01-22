@@ -337,4 +337,8 @@ public interface transactionInDAO {
     void deleteActivityReport(Integer activityReportId) throws Exception;
     
     List<batchUploads> getBatchesByOrgId(Integer orgId) throws Exception;
+    
+    List<batchUploads> finDNPBatchesToCleanUp() throws Exception;
+    
+    void DNPBatchUploadTableCleanUp(List<batchUploads> batchesToCleanup) throws Exception;
 }

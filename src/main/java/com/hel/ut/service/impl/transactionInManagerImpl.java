@@ -4255,6 +4255,14 @@ public class transactionInManagerImpl implements transactionInManager {
 		transactionInDAO.rejectedBatchUploadTableCleanUp(rejectedInboundBatchesToCleanup);
 	    }
 	}
+        
+        List<batchUploads> DNPInboundBatchesToCleanup = transactionInDAO.finDNPBatchesToCleanUp();
+	
+	if (DNPInboundBatchesToCleanup != null) {
+	    if (!DNPInboundBatchesToCleanup.isEmpty()) {
+		transactionInDAO.DNPBatchUploadTableCleanUp(DNPInboundBatchesToCleanup);
+	    }
+	}
     }
 
     @Override
