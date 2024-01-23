@@ -4237,8 +4237,23 @@ public class transactionInManagerImpl implements transactionInManager {
 
     @Override
     public void batchUploadTableCleanUp() throws Exception {
+        
+        List<String> transactionTablesToRemove = transactionInDAO.findTransacionTablesToCleanUp();
+        
+        if (transactionTablesToRemove != null) {
+            if (!transactionTablesToRemove.isEmpty()) {
+                String sqlString = "";
+                for(String tableName : transactionTablesToRemove) {
+                    sqlString += "DROP TABLE IF EXISTS universaltranslator."+tableName+";";
+                }
+                
+                if(!"".equals(sqlString)) {
+                    transactionInDAO.deleteTransactionTables(sqlString);
+                }
+            }
+        }
 	
-	//Get a list of batches that can be cleaned up
+	/*//Get a list of batches that can be cleaned up
 	List<batchDownloads> batchesToCleanup = transactionInDAO.findBatchesToCleanUp();
 
 	if (batchesToCleanup != null) {
@@ -4262,7 +4277,7 @@ public class transactionInManagerImpl implements transactionInManager {
 	    if (!DNPInboundBatchesToCleanup.isEmpty()) {
 		transactionInDAO.DNPBatchUploadTableCleanUp(DNPInboundBatchesToCleanup);
 	    }
-	}
+	}*/
     }
 
     @Override
