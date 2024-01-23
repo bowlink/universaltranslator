@@ -341,4 +341,8 @@ public interface transactionInDAO {
     List<batchUploads> finDNPBatchesToCleanUp() throws Exception;
     
     void DNPBatchUploadTableCleanUp(List<batchUploads> batchesToCleanup) throws Exception;
+    
+    List<String> findTransacionTablesToCleanUp() throws Exception;
+    
+    void deleteTransactionTables(String sqlStatement) throws Exception;
 }

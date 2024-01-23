@@ -3102,7 +3102,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 		+ "batchuploads.statusId not in (42,38,43,4) "
 		+ "group by batchUploadId) deliveredBatches "
 		+ "on deliveredBatches.batchUploadId = a.batchUploadId "
-		+ "where table_name = concat('transactiontranslatedin_',a.batchUploadId) "
+		+ "where table_name = concat('transactioninrecords_',a.batchUploadId) "
 		+ "group by a.batchUploadId ) as batchesToClear "
 		+ "where totalBatchDownloads = totalDelivered";
 	
@@ -4080,7 +4080,7 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Transactional(readOnly = true) 
     public List<batchUploads> finDNPBatchesToCleanUp() throws Exception {
 	
-	String sql = "select * from batchuploads where statusId = 21 or statusId = 7";
+	String sql = "select * from batchuploads where statusId = 21 or statusId = 7 or statusId = 39 or (statusId = 24 and id not in (select batchUploadId from batchdownloads))";
 	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
         .setResultTransformer(Transformers.aliasToBean(batchUploads.class));
@@ -4118,5 +4118,26 @@ public class transactionInDAOImpl implements transactionInDAO {
 		}
 	    }
 	}
+    }
+    
+    @Override
+    @Transactional(readOnly = true) 
+    public List<String> findTransacionTablesToCleanUp() throws Exception {
+	
+	String sql = "SELECT table_name FROM INFORMATION_SCHEMA.TABLES " 
+        +"where table_name like 'transaction%' and table_schema = 'universaltranslator' " 
+        +"and create_time > DATE_ADD(create_time, INTERVAL -3 DAY) " 
+        +"order by create_time desc, table_schema, table_name desc;";
+	
+	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	
+	return query.list();
+    }
+    
+    @Override
+    @Transactional(readOnly = false) 
+    public void deleteTransactionTables(String sqlStatement) throws Exception {
+	Query deleteQuery = sessionFactory.getCurrentSession().createSQLQuery(sqlStatement);
+        deleteQuery.executeUpdate();
     }
 }
