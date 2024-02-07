@@ -171,33 +171,4 @@ require(['./main'], function () {
         });   
         table.columns.adjust().draw();
     });
-
-
-
-
-
-
-    /*$("#searchTerm").keyup(function(event) {
-     var term = $(this).val();
-
-     if(term.length >= 3 || term.length == 0) {
-     if(searchTimeout) {clearTimeout(searchTimeout);}
-     searchTimeout = setInterval("orglookup()",500);
-     }
-     });*/
-
-
-    /*function orglookup() {
-     if(searchTimeout) {clearTimeout(searchTimeout);}
-
-     var term = $('#searchTerm').val().toLowerCase();
-
-     if(term.length >= 3 || term.length == 0) {
-     $('#searchForm').submit();
-     }
-     }*/
 });
-
-
-
-

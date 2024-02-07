@@ -417,7 +417,8 @@ public class organizationDAOImpl implements organizationDAO {
 	
 	if(!"".equals(searchTerm)){
 	    query += " and ("
-	    + "address like '%"+searchTerm+"%' "
+            + "id like '%"+searchTerm+"%' "        
+	    + "OR address like '%"+searchTerm+"%' "
 	    + "OR address2 like '%"+searchTerm+"%' "
 	    + "OR city like '%"+searchTerm+"%' "
 	    + "OR state like '%"+searchTerm+"%' "
