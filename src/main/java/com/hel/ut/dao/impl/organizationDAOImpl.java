@@ -398,7 +398,11 @@ public class organizationDAOImpl implements organizationDAO {
     @Transactional(readOnly = true)
     public List<Organization> getOrganizationsPaged(Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
         
-	String query = "select id, orgName, address, address2, city, state, postalCode, fax, phone, dateCreated, cleanURL, orgType, helRegistryId, organizationType "
+	if(displayRecords < 0) {
+            displayRecords = 999999;
+        }
+        
+        String query = "select id, orgName, address, address2, city, state, postalCode, fax, phone, dateCreated, cleanURL, orgType, helRegistryId, organizationType "
 	    + "FROM (select id, orgName, address, address2, city, state, postalCode, fax, phone, dateCreated, cleanURL, orgType, helRegistryId, "
 	    + "CASE WHEN helRegistryId > 0 THEN (select registryName from registries.registries where id = organizations.helRegistryId) "
 		+ "ELSE '' "
