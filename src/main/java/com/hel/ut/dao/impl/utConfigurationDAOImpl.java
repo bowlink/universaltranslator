@@ -1608,7 +1608,6 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 				     }
 				 }
 				 else {
-				    cell.setCellType(Cell.CELL_TYPE_STRING);
 				    sampleData = cell.getStringCellValue();
 				 }
 			    }
