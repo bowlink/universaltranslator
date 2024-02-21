@@ -144,9 +144,9 @@ public class excelToTxt {
                     String text = "";
                     
                     //need to review cells for formula and reject entire file
-                    if (cell != null && cell.getCellType()!= CellType.BLANK) {
+                    if (cell != null && cell.getCellTypeEnum() != CellType.BLANK) {
                         //formula 
-                        if (cell.getCellType() == CellType.FORMULA) {			
+                        if (cell.getCellTypeEnum() == CellType.FORMULA) {			
                             hasFormulaCell = true;
                             //text = "FORMULA";
                             text = "FORMULA FOUND HERE " + formatter.formatCellValue(cell);
@@ -154,7 +154,7 @@ public class excelToTxt {
                             int errorCell = cn + 1;
                             formulaErrorLocation = "row " + errorRow + ", cell " + errorCell;
                         } 
-                        else if (cell.getCellType() == CellType.ERROR) {
+                        else if (cell.getCellTypeEnum() == CellType.ERROR) {
                             hasErrorCell = true;
                             //text = "CELL ERROR";
                             text = "CELL ERROR FOUND HERE ";
