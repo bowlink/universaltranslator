@@ -34,7 +34,7 @@
 	<jackson-core.version>2.12.7</jackson-core.version>
 	<jackson-annotations.version>2.12.7</jackson-annotations.version>
 	<poi.version>5.2.5</poi.version>
-	<poi-ooxml.version>5.2.5</poi-ooxml.version>
+	<poi-ooxml.version>4.1.2</poi-ooxml.version>
         <poi-ooxml-schemas.version>4.1.2</poi-ooxml-schemas.version>
 	<quartz.version>2.3.2</quartz.version>
 	<commons-validator.version>1.6</commons-validator.version>
