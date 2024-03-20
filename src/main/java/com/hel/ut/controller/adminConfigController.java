@@ -520,13 +520,13 @@ public class adminConfigController {
 	    configNameChanged = true;
 	}
 	
-	if(currentConfigDetails.getorgId() != configurationDetails.getorgId()) {
+	if(!currentConfigDetails.getorgId().equals(configurationDetails.getorgId())) {
 	    organizationChanged = true;
 	}
 	
         //submit the updates
 	utconfigurationmanager.updateConfiguration(configurationDetails);
-	
+        
 	if(configNameChanged || organizationChanged) {
 	    configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configurationDetails.getId());
 	    
