@@ -38,6 +38,7 @@ import com.hel.ut.model.Organization;
 import com.hel.ut.model.appenedNewconfigurationFormFields;
 import com.hel.ut.model.utUser;
 import com.hel.ut.model.configurationCCDElements;
+import com.hel.ut.model.configurationConnection;
 import com.hel.ut.model.configurationFTPFields;
 import com.hel.ut.model.configurationMessageSpecs;
 import com.hel.ut.model.configurationSchedules;

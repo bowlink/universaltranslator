@@ -2457,8 +2457,8 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         
         String sqlStatement = "select a.*, b.configName as sourceConfigName, b.type as sourceConfigType, "
         + "c.configName as targetConfigName, c.type as targetConfigType,"
-        + "(select ifnull(concat(orgName,' - ',r.registryName),orgName) as orgName from organizations o left outer join registries.registries r on r.id = o.helRegistryId where o.id = (select orgId from configurations where id = a.sourceConfigId)) as sourceOrgName,"
-        + "(select ifnull(concat(orgName,' - ',r.registryName),orgName) as orgName from organizations o left outer join registries.registries r on r.id = o.helRegistryId where o.id = (select orgId from configurations where id = a.targetConfigId)) as targetOrgName,"
+        + "(select orgName from organizations where id = (select orgId from configurations where id = a.sourceConfigId)) as sourceOrgName,"
+        + "(select orgName from organizations where id = (select orgId from configurations where id = a.targetConfigId)) as targetOrgName,"
         + "(select transportMethod from ref_transportmethods where id = (select transportMethodId from configurationtransportdetails where configId = a.sourceConfigId)) as sourceTransportMethod,"
         + "(select transportMethod from ref_transportmethods where id = (select transportMethodId from configurationtransportdetails where configId = a.targetConfigId)) as targetTransportMethod "
         + "from configurationconnections a inner join "

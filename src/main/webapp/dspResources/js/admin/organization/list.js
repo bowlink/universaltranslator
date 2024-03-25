@@ -78,7 +78,11 @@ require(['./main'], function () {
                     "bSortable":true,
                     "sWidth": "15%",
                     "render": function ( data, type, row, meta ) {
-                        return data;
+                        var orgName = data;
+                        if(orgName  == 'EAH Family Planning') {
+                            orgName = 'EAH/CDS Family Planning';
+                        }
+                        return orgName;
                     },
                     'createdCell':  function (td, cellData, rowData, row, col) {
                         $(td).attr('rel', rowData.cleanURL);
@@ -120,23 +124,6 @@ require(['./main'], function () {
                      }
                 },
                 {
-                    "mData": "helRegistry", 
-                    "defaultContent": "",
-                    "bSortable":true,
-                    "sWidth": "15%",
-                    "render": function ( data, type, row, meta ) {
-                        var orgName = data;
-                        if(orgName  == 'EAH Family Planning') {
-                            orgName = 'EAH/CDS Family Planning';
-                        }
-                        return orgName;
-                    },
-                    'createdCell':  function (td, cellData, rowData, row, col) {
-                        $(td).attr('rel', rowData.cleanURL);
-                        $(td).addClass('orgRow');
-                     }
-                },
-                 {
                     "mData": "dateCreated", 
                     "defaultContent": "",
                     "bSortable":true,
