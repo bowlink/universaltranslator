@@ -29,7 +29,7 @@ require(['./main'], function () {
             bServerSide: true,
             bProcessing: false, 
             deferRender: true,
-            aaSorting: [[5,'desc']],
+            aaSorting: [[0,'desc']],
             sPaginationType: "bootstrap", 
             oLanguage: {
                sSearch: "_INPUT_",
@@ -73,15 +73,15 @@ require(['./main'], function () {
                      }
                 },
                 {
-                    "mData": "organizationType", 
+                    "mData": "helRegistry", 
                     "defaultContent": "",
                     "bSortable":true,
-                    "sWidth": "20%",
+                    "sWidth": "15%",
                     "render": function ( data, type, row, meta ) {
-                       return data;
+                        return data;
                     },
                     'createdCell':  function (td, cellData, rowData, row, col) {
-                        $(td).attr('rel', rowData.cleanURL); 
+                        $(td).attr('rel', rowData.cleanURL);
                         $(td).addClass('orgRow');
                      }
                 },

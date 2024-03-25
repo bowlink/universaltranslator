@@ -242,7 +242,7 @@ public class adminConfigConnectionController {
 	mav.addObject("targetConfigId", targetConfigId);
 
         //Need to get a list of active organizations.
-        List<Organization> organizations = organizationmanager.getAllActiveOrganizations();
+        List<Organization> organizations = organizationmanager.getAllActiveOrganizationsWithSystemName();
 	
 	List<Organization> sourceOrganizations = new ArrayList<>();
 	List<Organization> targetOrganizations = new ArrayList<>();
@@ -359,7 +359,7 @@ public class adminConfigConnectionController {
         mav.addObject("connectionDetails", connectionDetails);
 
         //Need to get a list of active organizations.
-        List<Organization> organizations = organizationmanager.getAllActiveOrganizations();
+        List<Organization> organizations = organizationmanager.getAllActiveOrganizationsWithSystemName();
         
 	List<Organization> sourceOrganizations = new ArrayList<>();
 	List<Organization> targetOrganizations = new ArrayList<>();

@@ -38,7 +38,6 @@ import com.hel.ut.model.Organization;
 import com.hel.ut.model.appenedNewconfigurationFormFields;
 import com.hel.ut.model.utUser;
 import com.hel.ut.model.configurationCCDElements;
-import com.hel.ut.model.configurationConnection;
 import com.hel.ut.model.configurationFTPFields;
 import com.hel.ut.model.configurationMessageSpecs;
 import com.hel.ut.model.configurationSchedules;
@@ -337,15 +336,15 @@ public class adminConfigController {
         mav.addObject("configurationDetails", new utConfiguration());
 
         //Need to get a list of active organizations.
-        List<Organization> organizations = organizationmanager.getAllActiveOrganizations();
+        List<Organization> organizations = organizationmanager.getAllActiveOrganizationsWithSystemName();
 	List<Organization> validOrganizations = new ArrayList<>();
-	
+        
 	for(Organization org : organizations) {
 	    if(!"bowlinktest".equals(org.getCleanURL().trim().toLowerCase())) {
 		validOrganizations.add(org);
 	    }
 	}
-	
+        
         mav.addObject("organizations", validOrganizations);
 
         mav.addObject("mappings", 1);
@@ -381,7 +380,7 @@ public class adminConfigController {
             mav.addObject("configurationDetails", configurationDetails);
 
             //Need to get a list of active organizations.
-            List<Organization> organizations = organizationmanager.getAllActiveOrganizations();
+            List<Organization> organizations = organizationmanager.getAllActiveOrganizationsWithSystemName();
             mav.addObject("organizations", organizations);
 
             mav.addObject("existingName", "The configuration name " + configurationDetails.getconfigName().trim() + " already exists.");
@@ -464,7 +463,7 @@ public class adminConfigController {
         mav.addObject("configurationDetails", configurationDetails);
 
         //Need to get a list of active organizations.
-        List<Organization> organizations = organizationmanager.getAllActiveOrganizations();
+        List<Organization> organizations = organizationmanager.getAllActiveOrganizationsWithSystemName();
 	
 	List<Organization> validOrganizations = new ArrayList<>();
 	for(Organization org : organizations) {
@@ -536,7 +535,7 @@ public class adminConfigController {
     public ModelAndView updateConfigurationDetails(HttpSession session,@ModelAttribute(value = "configurationDetails") utConfiguration configurationDetails, BindingResult result, RedirectAttributes redirectAttr, @RequestParam String action, Authentication authentication) throws Exception {
 
         //Need to get a list of active organizations.
-        List<Organization> organizations = organizationmanager.getAllActiveOrganizations();
+        List<Organization> organizations = organizationmanager.getAllActiveOrganizationsWithSystemName();
 
         //Need to get a list of organization users 
         List<utUser> users = userManager.getUsersByOrganization(configurationDetails.getorgId());

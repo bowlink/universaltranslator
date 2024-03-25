@@ -80,10 +80,18 @@
                         <spring:bind path="orgId">
                             <div id="orgDiv" class="form-group ${status.error ? 'has-error' : '' }">
                                 <label class="control-label" for="organization">Organization *</label>
+                                <c:set var="helRegName" value="" />
                                 <form:select path="orgId" id="organization" class="form-control half">
                                     <option value="">- Select -</option>
                                     <c:forEach items="${organizations}" var="org" varStatus="oStatus">
-                                        <option value="${organizations[oStatus.index].id}" <c:if test="${configurationDetails.orgId == organizations[oStatus.index].id}">selected</c:if>>${organizations[oStatus.index].orgName} </option>
+                                        <c:if test="${helRegName == '' || helRegName != organizations[oStatus.index].helRegistry}">
+                                            <c:if test="${helRegName != ''}">
+                                                </optgroup>
+                                            </c:if>
+                                            <optgroup label="${organizations[oStatus.index].helRegistry}">
+                                        </c:if>
+                                        <option value="${organizations[oStatus.index].id}" <c:if test="${configurationDetails.orgId == organizations[oStatus.index].id}">selected</c:if>>${organizations[oStatus.index].orgName}</option>
+                                         <c:set var="helRegName" value="${organizations[oStatus.index].helRegistry}" />
                                     </c:forEach>
                                 </form:select>
                                 <c:if test="${configurationDetails.id > 0}">

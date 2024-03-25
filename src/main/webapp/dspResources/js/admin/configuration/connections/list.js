@@ -142,20 +142,27 @@ require(['./main'], function () {
         "bStateSave": true,
         "iCookieDuration": 60,
         "sPaginationType": "bootstrap",
+        "columns": [
+            { "width": "5%" },
+            { "width": "35%" },
+            { "width": "35%" },
+            { "width": "10%", "type": "date" },
+            { "width": "10%" },
+            { "width": "5%" }
+         ],
         "oLanguage": {
             "sSearch": "_INPUT_",
             "sLengthMenu": '<select class="form-control" style="width:150px">' +
-                    '<option value="10">10 Records</option>' +
-                    '<option value="20">20 Records</option>' +
-                    '<option value="30">30 Records</option>' +
-                    '<option value="40">40 Records</option>' +
-                    '<option value="50">50 Records</option>' +
-                    '<option value="-1">All</option>' +
-                    '</select>'
+                '<option value="10">10 Records</option>' +
+                '<option value="20">20 Records</option>' +
+                '<option value="30">30 Records</option>' +
+                '<option value="40">40 Records</option>' +
+                '<option value="50">50 Records</option>' +
+                '<option value="-1">All</option>' +
+                '</select>'
         }
     });
-    connectiondataTable.fnSort([[0, 'desc']]);
-
+    connectiondataTable.fnSort([[3, 'desc']]);
 
     $(document).on('click', '.deleteConnection', function() {
 

@@ -440,8 +440,8 @@ public class messageTypeManagerImpl implements messageTypeManager {
 			
 			//Update the data transation CW id to the new id
 			messageTypeDAO.executeSQLStatement("update configurationdatatranslations set crosswalkId = " + newCWID + " where configId = " + configId + " and crosswalkId = " + cw.getId());
-			messageTypeDAO.executeSQLStatement("update configurationdatatranslations set constant1 = " + newCWID + " where configId = " + configId + " and macroId in (129,160,177,195,199) and constant1 = '" + cw.getId() + "'");
-			messageTypeDAO.executeSQLStatement("update configurationdatatranslations set constant2 = " + newCWID + " where configId = " + configId + " and macroId in (129,160,177,195,199) and constant2 = '" + cw.getId() + "'");
+			messageTypeDAO.executeSQLStatement("update configurationdatatranslations set constant1 = " + newCWID + " where configId = " + configId + " and macroId in (129,160,177,195,199,201) and constant1 = '" + cw.getId() + "'");
+			messageTypeDAO.executeSQLStatement("update configurationdatatranslations set constant2 = " + newCWID + " where configId = " + configId + " and macroId in (129,160,177,195,199,201) and constant2 = '" + cw.getId() + "'");
 		    }
 		}
 	    }
