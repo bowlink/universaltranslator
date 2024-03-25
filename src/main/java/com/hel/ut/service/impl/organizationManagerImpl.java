@@ -158,4 +158,9 @@ public class organizationManagerImpl implements organizationManager {
     public  List<Organization> getAgenciesForReport(Integer registryType) throws Exception {
 	return organizationDAO.getAgenciesForReport(registryType);
     }
+    
+    @Override
+    public  List<Organization> getAllActiveOrganizationsWithSystemName() throws Exception {
+	return organizationDAO.getAllActiveOrganizationsWithSystemName();
+    }
 }

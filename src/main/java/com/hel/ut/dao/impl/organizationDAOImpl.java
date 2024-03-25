@@ -457,4 +457,19 @@ public class organizationDAOImpl implements organizationDAO {
 
 	return q1.list();
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public  List<Organization> getAllActiveOrganizationsWithSystemName() throws Exception {
+	
+        String sqlQuery = "select a.*, case when r.registryName like '%CeC' then concat(r.registryName,' (eReferral)') else r.registryName end as helRegistry "
+        + "from organizations a inner join "
+        + "registries.registries r on r.id = a.helRegistryId "
+        + "order by helRegistry asc, a.orgName asc";
+        
+        Query q1 = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery);
+        q1.setResultTransformer(Transformers.aliasToBean(Organization.class));
+        
+        return q1.list();
+    }
 }

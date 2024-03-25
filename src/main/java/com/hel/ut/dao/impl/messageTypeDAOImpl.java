@@ -412,7 +412,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	+ "from crosswalks a ";
 	
 	if(inUseOnly) {
-	    sql += "inner join configurationdatatranslations b on (b.crosswalkid = a.id or (b.macroId in (129,160,177,195,199) and b.constant1 = a.id)) and b.configId = :configId ";
+	    sql += "inner join configurationdatatranslations b on (b.crosswalkid = a.id or (b.macroId in (129,160,177,195,199,201) and b.constant1 = a.id)) and b.configId = :configId ";
 	}	  
 	
 	if(orgId > 0) {
@@ -546,7 +546,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	
 	String sql = "select distinct a.* "
 	+ "from crosswalks a "
-	+ "inner join configurationdatatranslations b on (b.crosswalkid = a.id or (b.macroId in (129,160,177,195,199) and (b.constant1 = a.id or b.constant2 = a.id))) and b.configId = :configId "
+	+ "inner join configurationdatatranslations b on (b.crosswalkid = a.id or (b.macroId in (129,160,177,195,199,201) and (b.constant1 = a.id or b.constant2 = a.id))) and b.configId = :configId "
 	+ "where a.orgId > 0 and a.orgId != :newOrgId order by a.name asc";
 	
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
@@ -572,7 +572,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	
 	String sql = "select a.name, b.sourceValue, b.targetValue, b.descValue, a.id, a.fileDelimiter, a.dateCreated, ifnull(a.lastUpdated,a.dateCreated) as lastUpdated "
 	+ "from crosswalks a inner join rel_crosswalkdata b on b.crosswalkId = a.id inner join " 
-	+ "configurationdatatranslations c on (c.crosswalkid = a.id or (c.macroId in (129,160,177,195,199) and (c.constant1 = a.id or c.constant2 = a.id))) and c.configId = :configId "
+	+ "configurationdatatranslations c on (c.crosswalkid = a.id or (c.macroId in (129,160,177,195,199,201) and (c.constant1 = a.id or c.constant2 = a.id))) and c.configId = :configId "
 	+ "order by a.name asc";
 	
         Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
@@ -603,7 +603,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
         
         String inUse = "0";
         
-	String sql = "select group_concat(configId) from configurationdatatranslations where crosswalkId = :crosswalkId or (macroId in (129,160,177,195,199) and (constant1 = :crosswalkId or constant2 = :crosswalkId))";
+	String sql = "select group_concat(configId) from configurationdatatranslations where crosswalkId = :crosswalkId or (macroId in (129,160,177,195,199,201) and (constant1 = :crosswalkId or constant2 = :crosswalkId))";
 	
         Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
         query.setParameter("crosswalkId", crosswalkId);
