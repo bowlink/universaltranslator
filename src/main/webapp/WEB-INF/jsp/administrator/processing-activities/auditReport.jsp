@@ -234,7 +234,7 @@
                                                 <c:param name="filename" value="${batchDetails.outputFileName}" />
                                                 <c:param name="foldername" value="archivesOut" />
                                                 <c:param name="orgId" value="${batchDetails.orgId}" />
-                                                <c:param name="utBatchId" value="${batchDetails.utBatchName}" />
+                                                <c:param name="utBatchName" value="${batchDetails.utBatchName}" />
                                             </c:url>
                                               <p><strong>Associated File:</strong>
 					    <br />
