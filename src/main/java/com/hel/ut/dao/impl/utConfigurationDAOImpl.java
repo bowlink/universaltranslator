@@ -2464,6 +2464,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         + "from configurationconnections a inner join "
         + "configurations b on b.id = a.sourceConfigId inner join "
         + "configurations c on c.id = a.targetConfigId "
+        + "where b.deleted = 0 and c.deleted = 0 "
         + "order by a.dateCreated desc";
         
          Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlStatement)

@@ -38,7 +38,7 @@
                                 <c:when test="${not empty connections}">
                                     <c:forEach var="connection" items="${connections}">
                                         <tr>
-					     <td scope="row">${connection.id}</td>
+					    <td scope="row">${connection.id}</td>
                                             <td scope="row">
                                                 Organization: <strong>${connection.sourceOrgName}</strong>
 						<br />
