@@ -220,5 +220,5 @@ public interface utConfigurationDAO {
     
     void executeSQLStatement(String sqlStatement) throws Exception;
 
- List<configurationConnection> getAllConnectionsSingleQuery();
+    List<configurationConnection> getAllConnectionsSingleQuery();
 }

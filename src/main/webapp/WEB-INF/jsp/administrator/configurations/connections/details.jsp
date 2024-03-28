@@ -27,11 +27,19 @@
 		    <div class="form-container scrollable">
 			<div id="srcorgDiv" class="form-group ${status.error ? 'has-error' : '' }">
 			    <label class="control-label" for="organization">Organization *</label>
+                            <c:set var="helRegName" value="" />
 			    <select id="organization" class="form-control selSendingOrganization" <c:if test="${connectionId > 0}">disabled="true"</c:if>>
 				<option value="">- Select -</option>
 				<c:forEach items="${sourceOrganizations}" var="org" varStatus="oStatus">
-				    <option value="${sourceOrganizations[oStatus.index].id}" <c:if test="${sourceOrganizations[oStatus.index].id == sourceOrgId}">selected</c:if>>${sourceOrganizations[oStatus.index].orgName} </option>
-				</c:forEach>
+                                    <c:if test="${helRegName == '' || helRegName != sourceOrganizations[oStatus.index].helRegistry}">
+                                        <c:if test="${helRegName != ''}">
+                                            </optgroup>
+                                        </c:if>
+                                        <optgroup label="${sourceOrganizations[oStatus.index].helRegistry}">    
+                                    </c:if>
+                                    <option value="${sourceOrganizations[oStatus.index].id}" <c:if test="${sourceOrganizations[oStatus.index].id == sourceOrgId}">selected</c:if>>${sourceOrganizations[oStatus.index].orgName} </option>
+                                    <c:set var="helRegName" value="${sourceOrganizations[oStatus.index].helRegistry}" />
+                                </c:forEach>
 			    </select>
 			    <span id="srcOrgMsg" class="control-label"></span>
 			</div>  
@@ -54,11 +62,19 @@
 		<div class="panel-body">
 		    <div id="tgtorgDiv" class="form-group ${status.error ? 'has-error' : '' }">
 			<label class="control-label" for="organization">Organization *</label>
+                        <c:set var="helRegName" value="" />
 			<select id="organization" class="form-control seltgtOrganization" <c:if test="${connectionId > 0}">disabled="true"</c:if>>
 			    <option value="">- Select -</option>
 			    <c:forEach items="${targetOrganizations}" var="org" varStatus="oStatus">
+                                <c:if test="${helRegName == '' || helRegName != targetOrganizations[oStatus.index].helRegistry}">
+                                    <c:if test="${helRegName != ''}">
+                                        </optgroup>
+                                    </c:if>
+                                    <optgroup label="${targetOrganizations[oStatus.index].helRegistry}">    
+                                </c:if>
 				<option value="${targetOrganizations[oStatus.index].id}" <c:if test="${targetOrganizations[oStatus.index].id == targetOrgId}">selected</c:if>>${targetOrganizations[oStatus.index].orgName} </option>
-			    </c:forEach>
+                                <c:set var="helRegName" value="${targetOrganizations[oStatus.index].helRegistry}" />
+                            </c:forEach>
 			</select>
 			<span id="tgtOrgMsg" class="control-label"></span>
 		    </div>   
@@ -72,8 +88,7 @@
                 </div>
             </section>
         </div>
-    </div>
-			    
+    </div>	    
     <div class="row-fluid dataElementDivs" style="display:none">
 	<div class="col-md-6" >
 	    <section class="panel panel-default sourceDataElementDiv" style="display:none">
