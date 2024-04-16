@@ -17,6 +17,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Service;
 
 import com.hel.ut.service.fileManager;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FilenameUtils;
 
 @Service
@@ -40,7 +41,19 @@ public class fileManagerImpl implements fileManager {
         try {
             byte[] bytes = fileToBytes(file);
             byte[] decoded = Base64.decodeBase64(bytes);
-            String decodedString = new String(decoded);
+            
+            String decodedString = null;
+            
+            if(new String(bytes).startsWith("//")) {
+                decodedString = new String(decoded, StandardCharsets.UTF_16);
+            }
+            else if(new String(bytes).startsWith("/")) {
+                decodedString = new String(decoded, StandardCharsets.UTF_16);
+            }
+            else {
+                decodedString = new String(decoded);
+            }
+            
             return decodedString;
         } catch (Exception ex) {
             System.err.println("decodeFileToBase64Binary -" + ex.getLocalizedMessage());
@@ -132,6 +145,7 @@ public class fileManagerImpl implements fileManager {
 	else {
 	    decodedBytes = fileAsBytes;
 	}
+        
         writeByteArraysToFile(targetFile, decodedBytes);
     }
     
@@ -175,15 +189,29 @@ public class fileManagerImpl implements fileManager {
 		//Read the first line of the file
 		BufferedReader brTest = new BufferedReader(new FileReader(file));
 		String firstLineText = brTest.readLine().substring(0,10);
-		
-		String test = new String(Base64.decodeBase64(firstLineText));
-
-		if(firstLineText.equals(Base64.encodeBase64String(test.getBytes()))) {
-		    isEncoded = true;
-		}
-		else {
-		    isEncoded = false;
-		}
+                
+                byte[] decodedBytes = Base64.decodeBase64(firstLineText);
+                
+                String test = "";
+                
+                if(firstLineText.startsWith("//")) {
+                    isEncoded = true;
+                }
+                else if(firstLineText.startsWith("/")) {
+                    isEncoded = true;
+                }
+                else {
+                    test = new String(decodedBytes);
+                }
+                
+                if(!isEncoded) {
+                    if(firstLineText.equals(Base64.encodeBase64String(test.getBytes()))) {
+                        isEncoded = true;
+                    }
+                    else {
+                        isEncoded = false;
+                    }
+                }
 		brTest.close();
 	    }
 	    catch(IOException ex) {

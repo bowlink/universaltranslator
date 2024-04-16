@@ -26,6 +26,7 @@ import com.hel.ut.service.userManager;
 import com.hel.ut.service.utConfigurationManager;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import javax.annotation.Resource;
 
@@ -428,17 +429,32 @@ public class fileDownloadController {
 		//Check if the file is base64 Encoded
 		isBase64Encoded = filemanager.isFileBase64Encoded(new File(directory + actualFileName),"");
 	    }
-
+            
 	    if(isBase64Encoded) {
 		byte[] fileAsBytes = filemanager.loadFileAsBytesArray(directory + actualFileName);
 		byte[] decodedBytes = Base64.decodeBase64(fileAsBytes);
 		String decodedString = new String(decodedBytes);
-		response.setContentLength((int) decodedString.length());
+		
                 
                 if(actualFileName.contains(".xls") || actualFileName.contains(".xlsx")) {
+                    response.setContentLength((int) decodedString.length());
                     outputStream.write(decodedBytes);
                 }
                 else {
+                    
+                    if(new String(fileAsBytes).startsWith("//")) {
+                        decodedString = new String(decodedBytes, StandardCharsets.UTF_16LE);
+                        response.setContentLength((int) decodedString.length());
+                    }
+                    else if(new String(fileAsBytes).startsWith("/")) {
+                        decodedString = new String(decodedBytes, StandardCharsets.UTF_16);
+                        response.setContentLength((int) decodedString.length());
+                    }
+                    else {
+                        decodedString = new String(decodedBytes);
+                        response.setContentLength((int) decodedString.length());
+                    }
+                    
                     outputStream.write(decodedString.getBytes());
                 }
 		in.close();

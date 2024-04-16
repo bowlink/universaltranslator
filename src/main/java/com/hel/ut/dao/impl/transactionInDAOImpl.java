@@ -11,9 +11,17 @@ import com.hel.ut.model.custom.ConfigErrorInfo;
 import com.hel.ut.model.custom.ConfigForInsert;
 import com.hel.ut.model.custom.IdAndFieldValue;
 import com.hel.ut.model.custom.batchErrorSummary;
+import com.hel.ut.service.fileManager;
 import com.hel.ut.service.sysAdminManager;
 import com.hel.ut.service.userManager;
 import com.hel.ut.service.utConfigurationTransportManager;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
@@ -27,6 +35,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -48,6 +57,9 @@ public class transactionInDAOImpl implements transactionInDAO {
 
     @Autowired
     private userManager usermanager;
+    
+    @Autowired
+    private fileManager filemanager;
 
     @Autowired
     private utConfigurationTransportManager configurationtransportmanager;
@@ -1217,11 +1229,48 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    Integer totalFields = 50;
 	    
 	    if (configFormFields != null) {
-			if (!configFormFields.isEmpty()) {
-			    //totalFields = configFormFields.size() + 10;
-	                    totalFields = configFormFields.size();
-			}
+                if (!configFormFields.isEmpty()) {
+                    //totalFields = configFormFields.size() + 10;
+                    totalFields = configFormFields.size();
+                }
 	    }
+            
+            //If txt or csv need to open it and resave it to ensure UTF-8 encoding
+            if (fileWithPath.endsWith(".txt") || fileWithPath.endsWith(".csv")) {
+                
+                byte[] fileAsBytes = filemanager.loadFileAsBytesArray(fileWithPath);
+
+                if(fileAsBytes[0] == -1 || fileAsBytes[0] == -2) {
+                    
+                    String newFileNameWithPath = "";
+
+                    if(fileWithPath.endsWith(".txt")) {
+                        newFileNameWithPath = fileWithPath.replace(".txt", " NEW.txt");
+                    }
+                    else if(fileWithPath.endsWith(".csv")) {
+                        newFileNameWithPath = fileWithPath.replace(".csv", " NEW.csv");
+                    }
+                    File srcFile = new File(fileWithPath);
+                    File tgtFile = new File(newFileNameWithPath);
+                    File newTgtFile = new File(fileWithPath);
+
+                    FileInputStream inFile = new FileInputStream(srcFile);
+
+                    BufferedReader br = new BufferedReader(new InputStreamReader(inFile, Charset.forName("UTF-16")));
+                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tgtFile), Charset.forName("UTF-8")));
+
+                    char[] buffer = new char[16384];
+                    int read;
+                    while ((read = br.read(buffer)) != -1)
+                        bw.write(buffer, 0, read);
+
+                    br.close();
+                    bw.close();
+
+                    srcFile.delete();
+                    tgtFile.renameTo(newTgtFile);
+                }
+            }
 	    
 	    String sql = ("LOAD DATA LOCAL INFILE '" + fileWithPath + "' INTO TABLE " + loadTableName + " fields terminated by '" + delimChar + "' "
 	    + " optionally ENCLOSED BY '\"' ESCAPED BY '\\b' LINES TERMINATED BY '" + lineTerminator + "'  " + ignoreSyntax  + " (");
