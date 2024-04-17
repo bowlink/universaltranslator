@@ -27,7 +27,7 @@
 		    <c:if test="${userDetails.roleId == 3}">
                         <li role="menuitem" class="${param['sect'] == 'dash' ? 'active' : 'none'}"><a href="<c:url value='/administrator' />" title="Dashboard">Dashboard</a><c:if test="${param['sect'] == 'dash'}"><span class="indicator-active arrow-up"></span></c:if></li>
                     </c:if>
-		    <li role="menuitem" class="${param['sect'] == 'activity' ? 'active' : 'none'}"><a href="<c:url value='/administrator/processing-activity/activityReport' />" title="Processing Activity">Processing Activity</a><c:if test="${param['sect'] == 'activity'}"><span class="indicator-active arrow-up"></span></c:if></li>
+		    <li role="menuitem" class="${param['sect'] == 'activity' ? 'active' : 'none'}"><a href="<c:url value='/administrator/processing-activity/inbound' />" title="Processing Activity">Processing Activity</a><c:if test="${param['sect'] == 'activity'}"><span class="indicator-active arrow-up"></span></c:if></li>
 		    <c:if test="${userDetails.roleId == 1}">
                         <li role="menuitem" class="${param['sect'] == 'sysadmin' ? 'active' : 'none'}"><a href="<c:url value='/administrator/sysadmin/' />" title="System Administration">System Admin</a><c:if test="${param['sect'] == 'sysadmin'}"><span class="indicator-active arrow-up"></span></c:if></li>
 		    </c:if>

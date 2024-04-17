@@ -12,6 +12,9 @@
             <div class="alert alert-danger uploadError" role="alert" style="display:none;">
                 The uploaded file did not have the delimiter you selected.
             </div>
+            <div class="alert alert-danger uploadDupError" role="alert" style="display:none;">
+                The uploaded file contained duplicate source values.
+            </div>
             <div class="alert alert-success uploadSuccess" role="alert" style="display:none;">
                 The crosswalk file was successfully uploaded.
             </div>

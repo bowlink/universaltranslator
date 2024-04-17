@@ -6,12 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-
 import com.hel.ut.dao.messageTypeDAO;
 import com.hel.ut.dao.organizationDAO;
 import com.hel.ut.dao.utConfigurationDAO;
@@ -21,9 +18,14 @@ import com.hel.ut.model.Crosswalks;
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.validationType;
 import com.hel.ut.reference.fileSystem;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Properties;
 import javax.annotation.Resource;
 import org.apache.commons.io.FileUtils;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 @Service
 public class messageTypeManagerImpl implements messageTypeManager {
@@ -176,8 +178,17 @@ public class messageTypeManagerImpl implements messageTypeManager {
 	    //Set the directory that holds the crosswalk files
 	    fileSystem dir = new fileSystem();
 	    int delimCount = (Integer) dir.checkFileDelimiter(directory, fileName, delimChar);
+            
+            boolean multipleSrcValuesExists = checkForMultipleSrcValues(null,newFile,crosswalkDetails.getFileDelimiter());
+        
+            if(multipleSrcValuesExists) {
+                //Need to delete the file
+                newFile.delete();
 
-	    if (delimCount > 0) {
+                //Need to return an error
+                return -1;
+            }
+            else if (delimCount > 0) {
 		//Submit the new message type to the database
 		lastId = (Integer) messageTypeDAO.createCrosswalk(crosswalkDetails);
 
@@ -263,8 +274,17 @@ public class messageTypeManagerImpl implements messageTypeManager {
         //Set the directory that holds the crosswalk files
 	fileSystem dir = new fileSystem();
         int delimCount = (Integer) dir.checkFileDelimiter(directory, fileName, delimChar);
-
-        if (delimCount > 0) {
+        
+        boolean multipleSrcValuesExists = checkForMultipleSrcValues(null,newFile,crosswalkDetails.getFileDelimiter());
+        
+        if(multipleSrcValuesExists) {
+            //Need to delete the file
+            newFile.delete();
+            
+            //Need to return an error
+            return -1;
+        }
+        else if (delimCount > 0) {
             //Submit the new message type to the database
             messageTypeDAO.updateCrosswalk(crosswalkDetails);
 
@@ -452,4 +472,54 @@ public class messageTypeManagerImpl implements messageTypeManager {
     public String checkIfCWIsInUse(Integer crosswalkId) {
 	return messageTypeDAO.checkIfCWIsInUse(crosswalkId);
     }
+    
+    @Override
+    public boolean checkForMultipleSrcValues(CommonsMultipartFile cwfile, File uploadedFile, Integer fileDelimiter) throws Exception {       
+        
+        boolean multipleValuesFound = false;
+        
+        InputStream inputStream = null;
+        
+        if(cwfile != null) {
+            inputStream = cwfile.getInputStream();
+        }
+        else {
+            inputStream = new FileInputStream(uploadedFile);
+        }
+        
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        BufferedReader buffer = new BufferedReader(inputStreamReader);
+        
+        List<String> srcValues = new ArrayList<>();
+        String srcValue = "";
+        String delimChar = "|";
+        
+        if(fileDelimiter > 0) {
+            delimChar = messageTypeDAO.getDelimiterChar(fileDelimiter);
+        } 
+        
+        String line = buffer.readLine();
+        
+        while( (line != null) && (!line.isEmpty()) ){
+            
+            if ("t".equals(delimChar)) {
+                srcValue = line.split("\t", -1)[0];
+            } 
+            else {
+                srcValue = line.split("\\" + delimChar)[0];
+            }
+            
+            if(srcValues.indexOf(srcValue) == -1) {
+                srcValues.add(srcValue);
+            }
+            else {
+                multipleValuesFound = true;
+                break;
+            }
+            line = buffer.readLine();
+        }
+        
+        return multipleValuesFound;
+    }
 }
+

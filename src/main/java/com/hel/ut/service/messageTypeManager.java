@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.hel.ut.model.Crosswalks;
 import com.hel.ut.model.validationType;
+import java.io.File;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 public interface messageTypeManager {
 
@@ -66,4 +68,6 @@ public interface messageTypeManager {
     void moveCWForConfigToNewOrg(Integer newOrgId, Integer currOrgId, Integer configId, String oldOrgCleanURL, String newOrgCleanURL) throws Exception;
     
     String checkIfCWIsInUse(Integer crosswalkId);
+    
+    boolean checkForMultipleSrcValues(CommonsMultipartFile cwfile,File uploadedFile,Integer fileDelimiter) throws Exception;
 }

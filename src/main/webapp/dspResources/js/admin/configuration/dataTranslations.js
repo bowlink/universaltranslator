@@ -448,6 +448,7 @@ require(['./main'], function () {
     //The function to submit the new crosswalk
     $(document).on('click', '#submitCrosswalkButton', function (event) {
         $('.uploadError').hide();
+        $('.uploadDupError').hide();
         $('.uploadSuccess').hide();
         $('#crosswalkNameDiv').removeClass("has-error");
         $('#crosswalkNameMsg').removeClass("has-error");
@@ -535,6 +536,9 @@ require(['./main'], function () {
                                 $("#crosswalkModal").html(data);
                             }
                         });
+                   }
+                   else if(data < 0) {
+                       $('.uploadDupError').show();
                    }
                    else {
                        $('.uploadError').show();
@@ -700,6 +704,7 @@ require(['./main'], function () {
     //The function to upload all the selected crosswalks
     $(document).on('click', '#submitMultiCrosswalkButton', function (event) {
         $('.uploadError').hide();
+        $('.uploadDupError').hide();
         $('.uploadSuccess').hide();
         $('#crosswalkDelimDiv').removeClass("has-error");
         $('#crosswalkDelimMsg').removeClass("has-error");

@@ -4,9 +4,7 @@ package com.hel.ut.controller;
 import com.hel.ut.model.CrosswalkData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,12 +15,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.hel.ut.model.Crosswalks;
 import com.hel.ut.model.HL7Details;
 import com.hel.ut.model.HL7ElementComponents;
@@ -5793,6 +5789,7 @@ public class adminConfigController {
             List<String> goodFiles = new ArrayList<>();
             List<String> badFiles = new ArrayList<>();
             List<String> skippedFiles = new ArrayList<>();
+            List<String> multipleSrcValues = new ArrayList<>();
 
             for(CommonsMultipartFile cwfile : crosswalkFiles) {
                 originalFileName = cwfile.getOriginalFilename();
@@ -5802,22 +5799,30 @@ public class adminConfigController {
 
                 //Check to see if the crosswalk already exists
                 Long nameExists = messagetypemanager.checkCrosswalkName(cwName, orgId);
-
+                
                 if(nameExists == 0) {
-                    Crosswalks cwDetails = new Crosswalks();
-                    cwDetails.setOrgId(orgId);
-                    cwDetails.setFileDelimiter(fileDelimiter);
-                    cwDetails.setName(cwName);
-                    cwDetails.setfileName(originalFileName);
-                    cwDetails.setFile(cwfile);
-
-                    newCWId = messagetypemanager.createCrosswalk(cwDetails);
-
-                    if(newCWId > 0) {
-                        goodFiles.add(originalFileName);
+                    
+                    boolean multipleSrcValuesExists = messagetypemanager.checkForMultipleSrcValues(cwfile,null,fileDelimiter);
+                    
+                    if(multipleSrcValuesExists) {
+                        multipleSrcValues.add(originalFileName);
                     }
                     else {
-                        badFiles.add(originalFileName);
+                        Crosswalks cwDetails = new Crosswalks();
+                        cwDetails.setOrgId(orgId);
+                        cwDetails.setFileDelimiter(fileDelimiter);
+                        cwDetails.setName(cwName);
+                        cwDetails.setfileName(originalFileName);
+                        cwDetails.setFile(cwfile);
+
+                        newCWId = messagetypemanager.createCrosswalk(cwDetails);
+
+                        if(newCWId > 0) {
+                            goodFiles.add(originalFileName);
+                        }
+                        else {
+                            badFiles.add(originalFileName);
+                        }
                     }
                 } 
                 else {
@@ -5875,6 +5880,16 @@ public class adminConfigController {
             }
             else {
                 returnValue += "<br />No crosswalk uploaded files were skipped.";
+            }
+            
+            returnValue += "<br /><br /><strong>Invalid Crosswalk Files (Crosswalk file contained duplicate source values):</strong>";
+            if(!multipleSrcValues.isEmpty()) {
+                for(String invalidFile : multipleSrcValues) {
+                    returnValue += "<br />- " + invalidFile;
+                }
+            }
+            else {
+                returnValue += "<br />No crosswalk uploaded files had duplicate source values.";
             }
             
             returnValue += "<br /><br /><div class=\"form-group\"><input type=\"button\"  class=\"btn btn-primary reloadMultiForm\" value=\"Upload More Files\"/></div>";

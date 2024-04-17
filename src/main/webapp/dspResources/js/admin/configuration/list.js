@@ -269,7 +269,7 @@ require(['./main'], function () {
                          '</select>'
              }
          });
-         sourceconfigdatatable.fnSort([[0, 'desc']]);
+         sourceconfigdatatable.fnSort([[5, 'desc']]);
      }
      catch(err) {}
 
@@ -291,7 +291,7 @@ require(['./main'], function () {
                          '</select>'
              }
          });
-         targetconfigdatatable.fnSort([[0, 'desc']]);
+         targetconfigdatatable.fnSort([[5, 'desc']]);
      }
      catch(err) {}
 
