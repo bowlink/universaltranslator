@@ -499,6 +499,7 @@ public class messageTypeManagerImpl implements messageTypeManager {
         } 
         
         String line = buffer.readLine();
+        boolean found = false;
         
         while( (line != null) && (!line.isEmpty()) ){
             
@@ -509,17 +510,25 @@ public class messageTypeManagerImpl implements messageTypeManager {
                 srcValue = line.split("\\" + delimChar)[0];
             }
             
-            if(srcValues.indexOf(srcValue) == -1) {
+            if(srcValues.isEmpty()) {
                 srcValues.add(srcValue);
             }
             else {
-                multipleValuesFound = true;
-                break;
+                for(String srcVal : srcValues) {
+                    if(srcVal.equals(srcValue)) {
+                        found = true;
+                    }
+                }
+                if(found) {
+                    multipleValuesFound = true;
+                    break;
+                }
+                else {
+                    srcValues.add(srcValue);
+                }
             }
             line = buffer.readLine();
         }
-        
         return multipleValuesFound;
     }
 }
-

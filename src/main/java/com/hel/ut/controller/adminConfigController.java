@@ -5790,9 +5790,12 @@ public class adminConfigController {
             List<String> badFiles = new ArrayList<>();
             List<String> skippedFiles = new ArrayList<>();
             List<String> multipleSrcValues = new ArrayList<>();
+             boolean multipleSrcValuesExists = false;
 
             for(CommonsMultipartFile cwfile : crosswalkFiles) {
                 originalFileName = cwfile.getOriginalFilename();
+                
+                multipleSrcValuesExists = false;
                 
                 cwName = cwId+"_"+originalFileName.substring(0,originalFileName.indexOf("."));
                 cwName = cwName.replace(" ", "");
@@ -5802,7 +5805,7 @@ public class adminConfigController {
                 
                 if(nameExists == 0) {
                     
-                    boolean multipleSrcValuesExists = messagetypemanager.checkForMultipleSrcValues(cwfile,null,fileDelimiter);
+                    multipleSrcValuesExists = messagetypemanager.checkForMultipleSrcValues(cwfile,null,fileDelimiter);
                     
                     if(multipleSrcValuesExists) {
                         multipleSrcValues.add(originalFileName);
