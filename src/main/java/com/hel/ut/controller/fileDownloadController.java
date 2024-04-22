@@ -437,7 +437,6 @@ public class fileDownloadController {
 		
                 
                 if(actualFileName.contains(".xls") || actualFileName.contains(".xlsx")) {
-                    response.setContentLength((int) decodedString.length());
                     outputStream.write(decodedBytes);
                 }
                 else {
