@@ -1570,6 +1570,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	reportBody.append("<thead><tr><th style='width:5%'>No</th><th>Name</th><th style='width:5%'>R/O</th></tr></thead><tbody>");
 	String required = "O";
 	for(configurationFormFields srcFormField : sourceconfigurationDataElements) {
+            required = "O";
 	    if(srcFormField.getRequired()) {required = "R"; }
 	    if(!srcFormField.getUseField()) {
 		reportBody.append("<tr><td style='color:red;'>").append(srcFormField.getFieldNo()).append("</td><td style='color:red;'>").append(srcFormField.getFieldDesc()).append("</td><td style='color:red;'>").append(required).append("</td></tr>");
@@ -1587,7 +1588,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	required = "O";
 	String mappedField = "";
 	for(configurationFormFields tgtFormField : targetconfigurationDataElements) {
-	    
+	    required = "O";
 	    if(tgtFormField.getMappedToField() == 0 && tgtFormField.getDefaultValue() != null && !"".equals(tgtFormField.getDefaultValue())) {
 		mappedField = "Default Value - " + tgtFormField.getDefaultValue();
 	    }
