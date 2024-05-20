@@ -3225,6 +3225,12 @@ public class transactionInManagerImpl implements transactionInManager {
 			    crosswalkErrors = processCrosswalk(batch.getConfigId(), batchUploadId, cdt, false);
 			    
 			    if(crosswalkErrors == 9999999) {
+                                //log batch activity
+				ba = new batchuploadactivity();
+				ba.setActivity("Crosswalk System Error. CWId:" + cdt.getCrosswalkId() + " for configId:" + batch.getConfigId() + " total records with CW error: " + crosswalkErrors);
+				ba.setBatchUploadId(batchUploadId);
+				transactionInDAO.submitBatchActivityLog(ba);
+                                
 				systemErrorCount++; 
 			    }
 			    else if(crosswalkErrors > 0) {
@@ -3240,6 +3246,20 @@ public class transactionInManagerImpl implements transactionInManager {
 			    macroError = processMacro(batch.getConfigId(), batchUploadId, cdt, false);
 			    
 			    if(macroError == 9999999) {
+                                if(!macroList.isEmpty()) {
+				    for(Macros macro : macroList) {
+					if(macro.getId() == cdt.getMacroId()) {
+					    macroName = macro.getMacroName().trim();
+					}
+				    }
+				}
+				
+				//log batch activity
+				ba = new batchuploadactivity();
+				ba.setActivity("Macro System Error. macro: " + macroName + " macroId: " + cdt.getMacroId() + " for configId:" + batch.getConfigId() + " total records with Macro error: " + macroError);
+				ba.setBatchUploadId(batchUploadId);
+				transactionInDAO.submitBatchActivityLog(ba);
+                                
 				systemErrorCount++; 
 			    }
 			    else if(macroError > 0) {
