@@ -3227,7 +3227,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			    if(crosswalkErrors == 9999999) {
                                 //log batch activity
 				ba = new batchuploadactivity();
-				ba.setActivity("Crosswalk System Error. CWId:" + cdt.getCrosswalkId() + " for configId:" + batch.getConfigId() + " total records with CW error: " + crosswalkErrors);
+				ba.setActivity("Crosswalk System Error. CW Id:" + cdt.getCrosswalkId() + " Config Id:" + batch.getConfigId() + " Field NO:" + cdt.getFieldNo()+" Total Records with CW error: " + crosswalkErrors);
 				ba.setBatchUploadId(batchUploadId);
 				transactionInDAO.submitBatchActivityLog(ba);
                                 
@@ -3236,7 +3236,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			    else if(crosswalkErrors > 0) {
 				//log batch activity
 				ba = new batchuploadactivity();
-				ba.setActivity("Crosswalk Error. CWId:" + cdt.getCrosswalkId() + " for configId:" + batch.getConfigId() + " total records with CW error: " + crosswalkErrors);
+				ba.setActivity("Crosswalk Error. CW Id:" + cdt.getCrosswalkId() + " Config Id:" + batch.getConfigId() + " Field NO:" + cdt.getFieldNo()+" Total Records with CW error: " + crosswalkErrors);
 				ba.setBatchUploadId(batchUploadId);
 				transactionInDAO.submitBatchActivityLog(ba);
 			    }
@@ -3256,7 +3256,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				
 				//log batch activity
 				ba = new batchuploadactivity();
-				ba.setActivity("Macro System Error. macro: " + macroName + " macroId: " + cdt.getMacroId() + " for configId:" + batch.getConfigId() + " total records with Macro error: " + macroError);
+				ba.setActivity("Macro System Error. Macro: " + macroName + " Macro Id: " + cdt.getMacroId() + " Config Id:" + batch.getConfigId() + " Field NO:" + cdt.getFieldNo()+" Total Records with Macro error: " + macroError);
 				ba.setBatchUploadId(batchUploadId);
 				transactionInDAO.submitBatchActivityLog(ba);
                                 
@@ -3273,7 +3273,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				
 				//log batch activity
 				ba = new batchuploadactivity();
-				ba.setActivity("Macro Error. macro: " + macroName + " macroId: " + cdt.getMacroId() + " for configId:" + batch.getConfigId() + " total records with Macro error: " + macroError);
+				ba.setActivity("Macro Error. Macro: " + macroName + " Macro Id: " + cdt.getMacroId() + " Config Id:" + batch.getConfigId() + " Field NO:" + cdt.getFieldNo()+" Total Records with Macro error: " + macroError);
 				ba.setBatchUploadId(batchUploadId);
 				transactionInDAO.submitBatchActivityLog(ba);
 			    }
