@@ -4189,4 +4189,34 @@ public class transactionInDAOImpl implements transactionInDAO {
 	Query deleteQuery = sessionFactory.getCurrentSession().createSQLQuery(sqlStatement);
         deleteQuery.executeUpdate();
     }
+    
+    @Override
+    @Transactional(readOnly = false) 
+    public void updateRRImportStatus(batchUploads batch, Integer statusId, String HELRRSchemaName) throws Exception {
+        
+        Integer errorId = 29;
+        
+        switch(statusId) {
+            case 39: case 7:
+                errorId = 39;
+                break;
+            
+            default:
+                errorId = 29;
+                break;
+        }
+        
+        String sql = "update " + HELRRSchemaName + ".programuploads set statusId = :errorId where helBatchUploadId = :batchId";
+        
+        Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+        query.setParameter("errorId", errorId);
+        query.setParameter("batchId", batch.getId());
+        
+        try {
+            query.executeUpdate();
+        }
+        catch (Exception ex) {
+            
+        }
+    }
 }

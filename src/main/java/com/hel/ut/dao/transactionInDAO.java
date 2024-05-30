@@ -345,4 +345,6 @@ public interface transactionInDAO {
     List<String> findTransacionTablesToCleanUp() throws Exception;
     
     void deleteTransactionTables(String sqlStatement) throws Exception;
+    
+    void updateRRImportStatus(batchUploads batch, Integer statusId, String HELRRSchemaName) throws Exception;
 }
