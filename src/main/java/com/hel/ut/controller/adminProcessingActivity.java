@@ -114,6 +114,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.Properties;
@@ -3983,13 +3985,13 @@ public class adminProcessingActivity {
 	    Date date = new Date();
 	    
 	    if(configDetails != null) {
-		fileName = configDetails.getconfigName().toLowerCase().replaceAll(" ","-")+"-"+batchName;
+		fileName = configDetails.getconfigName().toLowerCase().replaceAll(" ","-")+"-"+batchName+ "-auditErrors";
 	    }
 	    else {
 		fileName = batchName + "-auditErrors";
 	    }
 
-	    File file = new File("/tmp/" + fileName + ".xlsx");
+	    File file = new File(System.getProperty("java.io.tmpdir") + "/" + fileName + ".xlsx");
 	    file.createNewFile();
 
 	    FileWriter fw = null;
@@ -4556,14 +4558,14 @@ public class adminProcessingActivity {
 	    emailMessageManager.sendEmail(mail);
 	    fileName = "";
 	}
-
+        
 	return fileName;
     }
     
     @RequestMapping(value = "/printAuditErrorsToExcel/{file}", method = RequestMethod.GET)
     public void printAuditErrorsToExcel(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
-	
-	File templatePrintFile = new File ("/tmp/" + file + ".xlsx");
+        
+	File templatePrintFile = new File (System.getProperty("java.io.tmpdir") + "/" + file + ".xlsx");
 	InputStream is = new FileInputStream(templatePrintFile);
 
 	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".xlsx\"");
@@ -4644,12 +4646,12 @@ public class adminProcessingActivity {
 	    }
 	}
 	
-	String auditReportDetailFile = "/tmp/" + batchName + "-auditErrors.txt";
+	String auditReportDetailFile = System.getProperty("java.io.tmpdir") + "/" + batchName + "-auditErrors.txt";
 	
-	String auditReportPrintFile = "/tmp/";
+	String auditReportPrintFile = System.getProperty("java.io.tmpdir") + "/";
 	
 	if(configDetails != null) {
-	    auditReportPrintFile = auditReportPrintFile + configDetails.getconfigName().toLowerCase().replaceAll(" ","-")+"-"+batchName + ".pdf";
+	    auditReportPrintFile = auditReportPrintFile + configDetails.getconfigName().toLowerCase().replaceAll(" ","-")+"-"+batchName + "-auditErrors.pdf";
 	}
 	else {
 	    auditReportPrintFile = auditReportPrintFile + batchName + "-auditErrors.pdf";
@@ -5207,7 +5209,7 @@ public class adminProcessingActivity {
 	auditReportDetailsFile.delete();
 	
 	if(configDetails != null) {
-	    return configDetails.getconfigName().toLowerCase().replaceAll(" ","-")+"-"+batchName;
+	    return configDetails.getconfigName().toLowerCase().replaceAll(" ","-")+"-"+batchName +"-auditErrors";
 	}
 	else {
 	    return batchName + "-auditErrors";
@@ -5217,7 +5219,7 @@ public class adminProcessingActivity {
     @RequestMapping(value = "/printAuditErrorsToPDF/{file}", method = RequestMethod.GET)
     public void printAuditErrorsToPDF(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
 	
-	File configPrintFile = new File ("/tmp/" + file + ".pdf");
+	File configPrintFile = new File (System.getProperty("java.io.tmpdir") + "/" + file + ".pdf");
 	InputStream is = new FileInputStream(configPrintFile);
 
 	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".pdf\"");
