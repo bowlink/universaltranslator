@@ -4566,18 +4566,21 @@ public class adminProcessingActivity {
     public void printAuditErrorsToExcel(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
         
 	File templatePrintFile = new File (System.getProperty("java.io.tmpdir") + "/" + file + ".xlsx");
-	InputStream is = new FileInputStream(templatePrintFile);
+        
+        if(templatePrintFile.exists()) {
+            InputStream is = new FileInputStream(templatePrintFile);
 
-	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".xlsx\"");
-	FileCopyUtils.copy(is, response.getOutputStream());
-	
-	is.close();
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".xlsx\"");
+            FileCopyUtils.copy(is, response.getOutputStream());
 
-	//Delete the file
-	templatePrintFile.delete();
+            is.close();
 
-	 // close stream and return to view
-	response.flushBuffer();
+            //Delete the file
+            templatePrintFile.delete();
+            
+            // close stream and return to view
+            response.flushBuffer();
+        }
     } 
     
     /**
@@ -5220,18 +5223,21 @@ public class adminProcessingActivity {
     public void printAuditErrorsToPDF(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
 	
 	File configPrintFile = new File (System.getProperty("java.io.tmpdir") + "/" + file + ".pdf");
-	InputStream is = new FileInputStream(configPrintFile);
+        
+        if(configPrintFile.exists()) {
+            InputStream is = new FileInputStream(configPrintFile);
 
-	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".pdf\"");
-	FileCopyUtils.copy(is, response.getOutputStream());
-	
-	is.close();
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".pdf\"");
+            FileCopyUtils.copy(is, response.getOutputStream());
 
-	//Delete the file
-	configPrintFile.delete();
+            is.close();
 
-	// close stream and return to view
-	response.flushBuffer();
+            //Delete the file
+            configPrintFile.delete();
+            
+            // close stream and return to view
+            response.flushBuffer();
+        }
     } 
     
     /**
