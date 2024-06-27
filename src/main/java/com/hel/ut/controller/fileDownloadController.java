@@ -460,6 +460,7 @@ public class fileDownloadController {
 		outputStream.close();
 	    }
 	    else {
+                
 		response.setContentLength((int) f.length());
 		while (0 < (bytesRead = in.read(buffer))) {
 		    outputStream.write(buffer, 0, bytesRead);
@@ -467,6 +468,14 @@ public class fileDownloadController {
 		in.close();
 		outputStream.close();
 	    }
+            
+            if(f.getAbsoluteFile().toString().contains("temp") || f.getAbsolutePath().toString().contains("tmp")) {
+                if(f.exists()) {
+                    f.delete();
+                }
+            }
+            
+            response.flushBuffer();
 	}
 	catch (Exception ex) {
 	    response.setContentLength((int) f.length());
@@ -475,6 +484,13 @@ public class fileDownloadController {
 	    }
 	    in.close();
 	    outputStream.close();
+            response.flushBuffer();
+            
+            if(f.getAbsoluteFile().toString().contains("temp") || f.getAbsolutePath().toString().contains("tmp")) {
+                if(f.exists()) {
+                    f.delete();
+                }
+            }
 	}
     }
 }

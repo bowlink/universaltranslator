@@ -817,8 +817,8 @@ public class adminConfigConnectionController {
         utConfiguration srcconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.getsourceConfigId());
         utConfiguration tgtconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.gettargetConfigId());
         
-	String connectionDetailFile = "/tmp/connectionId-" + connectionId + ".txt";
-	String connectionPrintFile = "/tmp/UT-connection-" + connectionId + ".pdf";
+        String connectionDetailFile = System.getProperty("java.io.tmpdir") + "/connectionId-" + connectionId + ".txt";
+	String connectionPrintFile = System.getProperty("java.io.tmpdir") + "/UT-connection-" + connectionId + ".pdf";
 	
 	File detailsFile = new File(connectionDetailFile);
 	detailsFile.delete();
@@ -867,19 +867,22 @@ public class adminConfigConnectionController {
     @RequestMapping(value = "/printConfig/{file}", method = RequestMethod.GET)
     public void printConfig(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
 	
-	File connectionPrintFile = new File ("/tmp/" + file + ".pdf");
-	InputStream is = new FileInputStream(connectionPrintFile);
+	File connectionPrintFile = new File (System.getProperty("java.io.tmpdir") + "/" + file + ".pdf");
+        
+        if(connectionPrintFile.exists()) {
+            InputStream is = new FileInputStream(connectionPrintFile);
 
-	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".pdf\"");
-	FileCopyUtils.copy(is, response.getOutputStream());
-	
-	is.close();
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".pdf\"");
+            FileCopyUtils.copy(is, response.getOutputStream());
 
-	//Delete the file
-	connectionPrintFile.delete();
+            is.close();
 
-	 // close stream and return to view
-	response.flushBuffer();
+            //Delete the file
+            connectionPrintFile.delete();
+
+             // close stream and return to view
+            response.flushBuffer();
+        }
     } 
     
     /**
@@ -901,7 +904,7 @@ public class adminConfigConnectionController {
         utConfiguration tgtconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.gettargetConfigId());
 	Organization tgtorgDetails = organizationmanager.getOrganizationById(tgtconfigDetails.getorgId());
 
-	String connectionDetailFile = "/tmp/connectionExport-" + connectionDetails.getId() + ".txt";
+	String connectionDetailFile = System.getProperty("java.io.tmpdir") +"/connectionExport-" + connectionDetails.getId() + ".txt";
 	
 	File detailsFile = new File(connectionDetailFile);
 	detailsFile.delete();
@@ -949,19 +952,22 @@ public class adminConfigConnectionController {
     @RequestMapping(value = "/printConnectionExport/{file}", method = RequestMethod.GET)
     public void printConnectionExport(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
 	
-	File connectionExportFile = new File ("/tmp/" + file + ".txt");
-	InputStream is = new FileInputStream(connectionExportFile);
+	File connectionExportFile = new File (System.getProperty("java.io.tmpdir") + "/" + file + ".txt");
+        
+        if(connectionExportFile.exists()) {
+            InputStream is = new FileInputStream(connectionExportFile);
 
-	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".txt\"");
-	FileCopyUtils.copy(is, response.getOutputStream());
-	
-	is.close();
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".txt\"");
+            FileCopyUtils.copy(is, response.getOutputStream());
 
-	//Delete the file
-	connectionExportFile.delete();
+            is.close();
 
-	 // close stream and return to view
-	response.flushBuffer();
+            //Delete the file
+            connectionExportFile.delete();
+
+             // close stream and return to view
+            response.flushBuffer();
+        }
     } 
     
     /**

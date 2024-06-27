@@ -921,7 +921,7 @@ public class adminSysAdminController {
 	try {
 	    List<Macros> macroList = sysAdminManager.getMarcoList("");
 
-	    File file = new File("/tmp/" + fileName + ".xlsx");
+	    File file = new File(System.getProperty("java.io.tmpdir") + "/" + fileName + ".xlsx");
 	    file.createNewFile();
 
 	    FileWriter fw = null;
@@ -1093,19 +1093,22 @@ public class adminSysAdminController {
     public void printMacroExcelFile(@PathVariable("file") String file,HttpServletResponse response
     ) throws Exception {
 	
-	File templatePrintFile = new File ("/tmp/" + file + ".xlsx");
-	InputStream is = new FileInputStream(templatePrintFile);
+	File templatePrintFile = new File (System.getProperty("java.io.tmpdir") + "/" + file + ".xlsx");
+        
+        if(templatePrintFile.exists()) {
+            InputStream is = new FileInputStream(templatePrintFile);
 
-	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".xlsx\"");
-	FileCopyUtils.copy(is, response.getOutputStream());
-	
-	is.close();
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".xlsx\"");
+            FileCopyUtils.copy(is, response.getOutputStream());
 
-	//Delete the file
-	templatePrintFile.delete();
+            is.close();
 
-	 // close stream and return to view
-	response.flushBuffer();
+            //Delete the file
+            templatePrintFile.delete();
+
+             // close stream and return to view
+            response.flushBuffer();
+        }
     } 
     
     /**

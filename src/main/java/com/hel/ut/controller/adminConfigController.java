@@ -3413,7 +3413,7 @@ public class adminConfigController {
 	
 	if(configurationDetails != null) {
 	   
-	    File dtFile = new File ("/tmp/" + fileName.replaceAll("\\s+","") + ".csv");
+	    File dtFile = new File (System.getProperty("java.io.tmpdir") + "/" + fileName.replaceAll("\\s+","") + ".csv");
 	    
 	    try (BufferedWriter writer = new BufferedWriter(new FileWriter(dtFile))) {
 		
@@ -3535,7 +3535,7 @@ public class adminConfigController {
 	
 	if(configurationDetails != null) {
 	   
-	    File dtFile = new File ("/tmp/" + fileName.replaceAll("\\s+","") + ".csv");
+	    File dtFile = new File (System.getProperty("java.io.tmpdir") + "/" + fileName.replaceAll("\\s+","") + ".csv");
 	    
 	    try (BufferedWriter writer = new BufferedWriter(new FileWriter(dtFile))) {
 		
@@ -3593,19 +3593,22 @@ public class adminConfigController {
     @RequestMapping(value = "/downloadDTCWFile/{file}", method = RequestMethod.GET)
     public void downloadDTCWFile(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
 	
-	File dtFile = new File ("/tmp/" + file + ".csv");
-	InputStream is = new FileInputStream(dtFile);
+	File dtFile = new File (System.getProperty("java.io.tmpdir") + "/" + file + ".csv");
+        
+        if(dtFile.exists()) {
+            InputStream is = new FileInputStream(dtFile);
 
-	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".csv\"");
-	FileCopyUtils.copy(is, response.getOutputStream());
-	
-	is.close();
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".csv\"");
+            FileCopyUtils.copy(is, response.getOutputStream());
 
-	//Delete the file
-	dtFile.delete();
+            is.close();
 
-	// close stream and return to view
-	response.flushBuffer();
+            //Delete the file
+            dtFile.delete();
+
+            // close stream and return to view
+            response.flushBuffer();
+        }
     } 
     
     /**
@@ -3765,8 +3768,8 @@ public class adminConfigController {
         utConfiguration configDetails = utconfigurationmanager.getConfigurationById(configId);
 	Organization orgDetails = organizationmanager.getOrganizationById(configDetails.getorgId());
 	
-	String configDetailFile = "/tmp/configDetails-" + configId + ".txt";
-	String configPrintFile = "/tmp/" + configDetails.getconfigName().toLowerCase().replaceAll(" ", "-") + ".pdf";
+	String configDetailFile = System.getProperty("java.io.tmpdir") + "/" + "configDetails-" + configId + ".txt";
+	String configPrintFile = System.getProperty("java.io.tmpdir") + "/" + configDetails.getconfigName().toLowerCase().replaceAll(" ", "-") + ".pdf";
 	
 	File detailsFile = new File(configDetailFile);
 	detailsFile.delete();
@@ -3820,19 +3823,22 @@ public class adminConfigController {
     @RequestMapping(value = "/printConfig/{file}", method = RequestMethod.GET)
     public void printConfig(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
 	
-	File configPrintFile = new File ("/tmp/" + file + ".pdf");
-	InputStream is = new FileInputStream(configPrintFile);
+	File configPrintFile = new File (System.getProperty("java.io.tmpdir") + "/" + file + ".pdf");
+        
+        if(configPrintFile.exists()) {
+            InputStream is = new FileInputStream(configPrintFile);
 
-	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".pdf\"");
-	FileCopyUtils.copy(is, response.getOutputStream());
-	
-	is.close();
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".pdf\"");
+            FileCopyUtils.copy(is, response.getOutputStream());
 
-	//Delete the file
-	configPrintFile.delete();
+            is.close();
 
-	 // close stream and return to view
-	response.flushBuffer();
+            //Delete the file
+            configPrintFile.delete();
+
+             // close stream and return to view
+            response.flushBuffer();
+        }
     } 
     
     /**
@@ -3937,7 +3943,7 @@ public class adminConfigController {
 
 	    fileName = dateFormat.format(date) + "-" + configDetails.getconfigName().toLowerCase().replace(" ", "-");
 
-	    File file = new File("/tmp/" + fileName + ".xlsx");
+	    File file = new File(System.getProperty("java.io.tmpdir") + "/" + fileName + ".xlsx");
 	    file.createNewFile();
 
 	    FileWriter fw = null;
@@ -4052,19 +4058,22 @@ public class adminConfigController {
     @RequestMapping(value = "/printNewFieldSettingsTemplate/{file}", method = RequestMethod.GET)
     public void printNewFieldSettingsTemplate(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
 	
-	File templatePrintFile = new File ("/tmp/" + file + ".xlsx");
-	InputStream is = new FileInputStream(templatePrintFile);
+	File templatePrintFile = new File (System.getProperty("java.io.tmpdir") + "/" + file + ".xlsx");
+        
+        if(templatePrintFile.exists()) {
+            InputStream is = new FileInputStream(templatePrintFile);
 
-	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".xlsx\"");
-	FileCopyUtils.copy(is, response.getOutputStream());
-	
-	is.close();
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".xlsx\"");
+            FileCopyUtils.copy(is, response.getOutputStream());
 
-	//Delete the file
-	templatePrintFile.delete();
+            is.close();
 
-	// close stream and return to view
-	response.flushBuffer();
+            //Delete the file
+            templatePrintFile.delete();
+
+            // close stream and return to view
+            response.flushBuffer();
+        }
     } 
     
     /**
@@ -4086,7 +4095,7 @@ public class adminConfigController {
 
 	    fileName = dateFormat.format(date) + "-" + configDetails.getconfigName().replace(" ", "-");
 
-	    File file = new File("/tmp/" + fileName + ".xlsx");
+	    File file = new File(System.getProperty("java.io.tmpdir") + "/" + fileName + ".xlsx");
 	    file.createNewFile();
 
 	    FileWriter fw = null;
@@ -4444,7 +4453,7 @@ public class adminConfigController {
 		}
 	    }
 	   
-	    File dtFile = new File ("/tmp/" + fileName.replaceAll("\\s+","") + "." + fileExt);
+	    File dtFile = new File (System.getProperty("java.io.tmpdir") + "/" + fileName.replaceAll("\\s+","") + "." + fileExt);
 	    
 	    List crosswalks = utconfigurationmanager.getCrosswalksForDownload(configId,inUseOnly);
 	    
@@ -4653,27 +4662,29 @@ public class adminConfigController {
     @RequestMapping(value = "/downloadDTCWExcelFile/{file}", method = RequestMethod.GET)
     public void downloadDTCWExcelFile(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
 	
-	File cwFile = new File ("/tmp/" + file + ".xlsx");
+	File cwFile = new File (System.getProperty("java.io.tmpdir") + "/" + file + ".xlsx");
 	
 	String fileExt = ".xlsx";
 	
 	if(!cwFile.exists()) {
 	    fileExt = ".txt";
-	    cwFile = new File ("/tmp/" + file + ".txt");
+	    cwFile = new File (System.getProperty("java.io.tmpdir") + "/" + file + ".txt");
 	}
-	
-	InputStream is = new FileInputStream(cwFile);
+        
+        if(cwFile.exists()) {
+            InputStream is = new FileInputStream(cwFile);
 
-	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + fileExt + "\"");
-	FileCopyUtils.copy(is, response.getOutputStream());
-	
-	is.close();
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + file + fileExt + "\"");
+            FileCopyUtils.copy(is, response.getOutputStream());
 
-	//Delete the file
-	cwFile.delete();
+            is.close();
 
-	 // close stream and return to view
-	response.flushBuffer();
+            //Delete the file
+            cwFile.delete();
+
+             // close stream and return to view
+            response.flushBuffer();
+        }
     } 
     
     /**
@@ -4712,7 +4723,7 @@ public class adminConfigController {
 	    configType = "tgtConfigExport";
 	}
 	
-	String configDetailFile = "/tmp/"+configType+"-"+configDetails.getconfigName().toLowerCase().replaceAll(" ", "-") + ".txt";
+	String configDetailFile = System.getProperty("java.io.tmpdir") + "/" +configType+"-"+configDetails.getconfigName().toLowerCase().replaceAll(" ", "-") + ".txt";
 	
 	File detailsFile = new File(configDetailFile);
 	detailsFile.delete();
@@ -4784,19 +4795,22 @@ public class adminConfigController {
     @RequestMapping(value = "/printConfigExport/{file}", method = RequestMethod.GET)
     public void printConfigExport(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
 	
-	File configExportFile = new File ("/tmp/" + file + ".txt");
-	InputStream is = new FileInputStream(configExportFile);
+	File configExportFile = new File (System.getProperty("java.io.tmpdir") + "/" + file + ".txt");
+        
+        if(configExportFile.exists()) {
+            InputStream is = new FileInputStream(configExportFile);
 
-	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".txt\"");
-	FileCopyUtils.copy(is, response.getOutputStream());
-	
-	is.close();
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".txt\"");
+            FileCopyUtils.copy(is, response.getOutputStream());
 
-	//Delete the file
-	configExportFile.delete();
+            is.close();
 
-	// close stream and return to view
-	response.flushBuffer();
+            //Delete the file
+            configExportFile.delete();
+
+            // close stream and return to view
+            response.flushBuffer();
+        }
     } 
     
     /**
