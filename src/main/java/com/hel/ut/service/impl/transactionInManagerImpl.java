@@ -2687,7 +2687,7 @@ public class transactionInManagerImpl implements transactionInManager {
 
 				if (newfilename.equals("ERRORERRORERROR")) {
 				    ba = new batchuploadactivity();
-				    ba.setActivity("Error parsing the txt fixed length file");
+				    ba.setActivity("Error parsing the text file with the fixed length parsing script.");
 				    ba.setBatchUploadId(batchId);
 				    transactionInDAO.submitBatchActivityLog(ba);
 
@@ -2696,6 +2696,10 @@ public class transactionInManagerImpl implements transactionInManager {
                                     
                                     //Update original RR submission to show rejected status
                                     if(!"".equals(HELRRSchemaName)) {
+                                        ba = new batchuploadactivity();
+                                        ba.setActivity("Update original batch: " + batch.getId() + " to status 39 on DB: " + HELRRSchemaName);
+                                        ba.setBatchUploadId(batchId);
+                                        transactionInDAO.submitBatchActivityLog(ba);
                                         transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName);
                                     }
                                     
