@@ -2265,6 +2265,10 @@ public class transactionInManagerImpl implements transactionInManager {
                     
                     //Update original RR submission to show rejected status
                     if(!"".equals(HELRRSchemaName)) {
+                        ba = new batchuploadactivity();
+                        ba.setActivity("Update original batch: " + batch.getId() + " to status 39 on DB: " + HELRRSchemaName);
+                        ba.setBatchUploadId(batchId);
+                        transactionInDAO.submitBatchActivityLog(ba);
                         transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName);
                     }
 		    
@@ -2535,6 +2539,10 @@ public class transactionInManagerImpl implements transactionInManager {
                             
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
+                                ba = new batchuploadactivity();
+                                ba.setActivity("Update original batch: " + batch.getId() + " to status 39 on DB: " + HELRRSchemaName);
+                                ba.setBatchUploadId(batchId);
+                                transactionInDAO.submitBatchActivityLog(ba);
                                 transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName);
                             }
                             
@@ -2554,6 +2562,10 @@ public class transactionInManagerImpl implements transactionInManager {
                             
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
+                                ba = new batchuploadactivity();
+                                ba.setActivity("Update original batch: " + batch.getId() + " to status 7 on DB: " + HELRRSchemaName);
+                                ba.setBatchUploadId(batchId);
+                                transactionInDAO.submitBatchActivityLog(ba);
                                 transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
                             }
                             
@@ -2576,6 +2588,10 @@ public class transactionInManagerImpl implements transactionInManager {
                             
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
+                                ba = new batchuploadactivity();
+                                ba.setActivity("Update original batch: " + batch.getId() + " to status 7 on DB: " + HELRRSchemaName);
+                                ba.setBatchUploadId(batchId);
+                                transactionInDAO.submitBatchActivityLog(ba);
                                 transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
                             }
                             
@@ -2606,6 +2622,10 @@ public class transactionInManagerImpl implements transactionInManager {
 			    
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
+                                ba = new batchuploadactivity();
+                                ba.setActivity("Update original batch: " + batch.getId() + " to status 7 on DB: " + HELRRSchemaName);
+                                ba.setBatchUploadId(batchId);
+                                transactionInDAO.submitBatchActivityLog(ba);
                                 transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
                             }
                             
@@ -2716,6 +2736,10 @@ public class transactionInManagerImpl implements transactionInManager {
                                     
                                     //Update original RR submission to show rejected status
                                     if(!"".equals(HELRRSchemaName)) {
+                                        ba = new batchuploadactivity();
+                                        ba.setActivity("Update original batch: " + batch.getId() + " to status 7 on DB: " + HELRRSchemaName);
+                                        ba.setBatchUploadId(batchId);
+                                        transactionInDAO.submitBatchActivityLog(ba);
                                         transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
                                     }
                                     
@@ -2784,6 +2808,10 @@ public class transactionInManagerImpl implements transactionInManager {
                             
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
+                                ba = new batchuploadactivity();
+                                ba.setActivity("Update original batch: " + batch.getId() + " to status 7 on DB: " + HELRRSchemaName);
+                                ba.setBatchUploadId(batchId);
+                                transactionInDAO.submitBatchActivityLog(ba);
                                 transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
                             }
                             
@@ -2812,6 +2840,10 @@ public class transactionInManagerImpl implements transactionInManager {
                             
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
+                                ba = new batchuploadactivity();
+                                ba.setActivity("Update original batch: " + batch.getId() + " to status 39 on DB: " + HELRRSchemaName);
+                                ba.setBatchUploadId(batchId);
+                                transactionInDAO.submitBatchActivityLog(ba);
                                 transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName);
                             }
                             
@@ -2878,6 +2910,10 @@ public class transactionInManagerImpl implements transactionInManager {
                                 
                                 //Update original RR submission to show rejected status
                                 if(!"".equals(HELRRSchemaName)) {
+                                    ba = new batchuploadactivity();
+                                    ba.setActivity("Update original batch: " + batch.getId() + " to status 7 on DB: " + HELRRSchemaName);
+                                    ba.setBatchUploadId(batchId);
+                                    transactionInDAO.submitBatchActivityLog(ba);
                                     transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
                                 }
 				
@@ -2894,6 +2930,10 @@ public class transactionInManagerImpl implements transactionInManager {
                            
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
+                                ba = new batchuploadactivity();
+                                ba.setActivity("Update original batch: " + batch.getId() + " to status 7 on DB: " + HELRRSchemaName);
+                                ba.setBatchUploadId(batchId);
+                                transactionInDAO.submitBatchActivityLog(ba);
                                 transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
                             }
 
@@ -2910,6 +2950,10 @@ public class transactionInManagerImpl implements transactionInManager {
 
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
+                                ba = new batchuploadactivity();
+                                ba.setActivity("Update original batch: " + batch.getId() + " to status 7 on DB: " + HELRRSchemaName);
+                                ba.setBatchUploadId(batchId);
+                                transactionInDAO.submitBatchActivityLog(ba);
                                 transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
                             }
 			   
@@ -3011,6 +3055,10 @@ public class transactionInManagerImpl implements transactionInManager {
                     
                     //Update original RR submission to show rejected status
                     if(!"".equals(HELRRSchemaName)) {
+                        ba = new batchuploadactivity();
+                        ba.setActivity("Update original batch: " + batch.getId() + " to status 7 on DB: " + HELRRSchemaName);
+                        ba.setBatchUploadId(batchId);
+                        transactionInDAO.submitBatchActivityLog(ba);
                         transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
                     }
                     
@@ -3059,6 +3107,10 @@ public class transactionInManagerImpl implements transactionInManager {
                 
                 //Update original RR submission to show rejected status
                 if(!"".equals(HELRRSchemaName)) {
+                    batchuploadactivity ba = new batchuploadactivity();
+                    ba.setActivity("Update original batch: " + batch.getId() + " to status 39 on DB: " + HELRRSchemaName);
+                    ba.setBatchUploadId(batchId);
+                    transactionInDAO.submitBatchActivityLog(ba);
                     transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName);
                 }
 		
