@@ -4192,7 +4192,7 @@ public class transactionInDAOImpl implements transactionInDAO {
     
     @Override
     @Transactional(readOnly = false) 
-    public void updateRRImportStatus(batchUploads batch, Integer statusId, String HELRRSchemaName) throws Exception {
+    public void updateRRImportStatus(batchUploads batch, Integer statusId, String HELRRSchemaName, String assignedFileName) throws Exception {
         
         Integer errorId = 29;
         
@@ -4206,17 +4206,36 @@ public class transactionInDAOImpl implements transactionInDAO {
                 break;
         }
         
-        String sql = "update " + HELRRSchemaName + ".programuploads set statusId = :errorId where helBatchUploadId = :batchId";
-        
+        String sql = "select id from " + HELRRSchemaName + ".programuploads where helBatchUploadId = :batchId";
         Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
-        query.setParameter("errorId", errorId);
         query.setParameter("batchId", batch.getId());
         
-        try {
-            query.executeUpdate();
-        }
-        catch (Exception ex) {
+        if(!query.list().isEmpty()) {
+            sql = "update " + HELRRSchemaName + ".programuploads set statusId = :errorId where helBatchUploadId = :batchId";
+            query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+            query.setParameter("errorId", errorId);
+            query.setParameter("batchId", batch.getId());
             
+            try {
+                query.executeUpdate();
+            }
+            catch (Exception ex) {
+
+            }
+        }
+        else {
+            sql = "update " + HELRRSchemaName + ".programuploads set helBatchUploadId = :batchId, statusId = :errorId where assignedFileName = :assignedFileName"; 
+            query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+            query.setParameter("errorId", errorId);
+            query.setParameter("batchId", batch.getId());
+            query.setParameter("assignedFileName", assignedFileName);
+           
+            try {
+                query.executeUpdate();
+            }
+            catch (Exception ex) {
+
+            }
         }
     }
 }

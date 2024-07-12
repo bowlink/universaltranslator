@@ -2266,10 +2266,10 @@ public class transactionInManagerImpl implements transactionInManager {
                     //Update original RR submission to show rejected status
                     if(!"".equals(HELRRSchemaName)) {
                         ba = new batchuploadactivity();
-                        ba.setActivity("Update original batch: " + batch.getId() + " to status 39 in database - " + HELRRSchemaName);
+                        ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 39 in database - " + HELRRSchemaName);
                         ba.setBatchUploadId(batchId);
                         transactionInDAO.submitBatchActivityLog(ba);
-                        transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName);
+                        transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                     }
 		    
 		    //log batch activity
@@ -2540,10 +2540,10 @@ public class transactionInManagerImpl implements transactionInManager {
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
                                 ba = new batchuploadactivity();
-                                ba.setActivity("Update original batch: " + batch.getId() + " to status 39 in database: " + HELRRSchemaName);
+                                ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 39 in database: " + HELRRSchemaName);
                                 ba.setBatchUploadId(batchId);
                                 transactionInDAO.submitBatchActivityLog(ba);
-                                transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName);
+                                transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                             }
                             
 			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load Excel Batch Failed");
@@ -2563,10 +2563,10 @@ public class transactionInManagerImpl implements transactionInManager {
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
                                 ba = new batchuploadactivity();
-                                ba.setActivity("Update original batch: " + batch.getId() + " to status 7 in database: " + HELRRSchemaName);
+                                ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 7 in database: " + HELRRSchemaName);
                                 ba.setBatchUploadId(batchId);
                                 transactionInDAO.submitBatchActivityLog(ba);
-                                transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
+                                transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                             }
                             
 			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load Excel Batch Failed");
@@ -2589,10 +2589,10 @@ public class transactionInManagerImpl implements transactionInManager {
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
                                 ba = new batchuploadactivity();
-                                ba.setActivity("Update original batch: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
+                                ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
                                 ba.setBatchUploadId(batchId);
                                 transactionInDAO.submitBatchActivityLog(ba);
-                                transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
+                                transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                             }
                             
 			    sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Formula found, first instance found at " + newfilename + ".  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Formula Error");
@@ -2623,10 +2623,10 @@ public class transactionInManagerImpl implements transactionInManager {
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
                                 ba = new batchuploadactivity();
-                                ba.setActivity("Update original batch: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
+                                ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
                                 ba.setBatchUploadId(batchId);
                                 transactionInDAO.submitBatchActivityLog(ba);
-                                transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
+                                transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                             }
                             
                             cleanAuditErrorTable(batch.getId());
@@ -2717,10 +2717,10 @@ public class transactionInManagerImpl implements transactionInManager {
                                     //Update original RR submission to show rejected status
                                     if(!"".equals(HELRRSchemaName)) {
                                         ba = new batchuploadactivity();
-                                        ba.setActivity("Update original batch: " + batch.getId() + " to status 39 in database - " + HELRRSchemaName);
+                                        ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 39 in database - " + HELRRSchemaName);
                                         ba.setBatchUploadId(batchId);
                                         transactionInDAO.submitBatchActivityLog(ba);
-                                        transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName);
+                                        transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                                     }
                                     
 				    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), " txt fixed length parsing failed.");
@@ -2737,10 +2737,10 @@ public class transactionInManagerImpl implements transactionInManager {
                                     //Update original RR submission to show rejected status
                                     if(!"".equals(HELRRSchemaName)) {
                                         ba = new batchuploadactivity();
-                                        ba.setActivity("Update original batch: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
+                                        ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
                                         ba.setBatchUploadId(batchId);
                                         transactionInDAO.submitBatchActivityLog(ba);
-                                        transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
+                                        transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                                     }
                                     
 				    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), " txt fixed length parsing failed.");
@@ -2809,10 +2809,10 @@ public class transactionInManagerImpl implements transactionInManager {
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
                                 ba = new batchuploadactivity();
-                                ba.setActivity("Update original batch: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
+                                ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
                                 ba.setBatchUploadId(batchId);
                                 transactionInDAO.submitBatchActivityLog(ba);
-                                transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
+                                transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                             }
                             
 			    insertProcessingError(7, null, batchId, null, null, null, null, false, false, "insertLoadData, please login and check logs.");
@@ -2841,10 +2841,10 @@ public class transactionInManagerImpl implements transactionInManager {
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
                                 ba = new batchuploadactivity();
-                                ba.setActivity("Update original batch: " + batch.getId() + " to status 39 in database - " + HELRRSchemaName);
+                                ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 39 in database - " + HELRRSchemaName);
                                 ba.setBatchUploadId(batchId);
                                 transactionInDAO.submitBatchActivityLog(ba);
-                                transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName);
+                                transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                             }
                             
 			    //need to insert error on why we are rejecting
@@ -2911,10 +2911,10 @@ public class transactionInManagerImpl implements transactionInManager {
                                 //Update original RR submission to show rejected status
                                 if(!"".equals(HELRRSchemaName)) {
                                     ba = new batchuploadactivity();
-                                    ba.setActivity("Update original batch: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
+                                    ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
                                     ba.setBatchUploadId(batchId);
                                     transactionInDAO.submitBatchActivityLog(ba);
-                                    transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
+                                    transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                                 }
 				
 				insertProcessingError(6, null, batchId, null, null, null, null, false, false, "No valid configurations were found for loading batch.");
@@ -2931,10 +2931,10 @@ public class transactionInManagerImpl implements transactionInManager {
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
                                 ba = new batchuploadactivity();
-                                ba.setActivity("Update original batch: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
+                                ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
                                 ba.setBatchUploadId(batchId);
                                 transactionInDAO.submitBatchActivityLog(ba);
-                                transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
+                                transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                             }
 
                             insertProcessingError(6, null, batchId, null, null, null, null, false, false, "No valid configurations were found for loading batch."); 
@@ -2951,10 +2951,10 @@ public class transactionInManagerImpl implements transactionInManager {
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
                                 ba = new batchuploadactivity();
-                                ba.setActivity("Update original batch: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
+                                ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
                                 ba.setBatchUploadId(batchId);
                                 transactionInDAO.submitBatchActivityLog(ba);
-                                transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
+                                transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                             }
 			   
                             insertProcessingError(6, null, batchId, null, null, null, null, false, false, "No valid configurations were found for loading batch."); 
@@ -3056,10 +3056,10 @@ public class transactionInManagerImpl implements transactionInManager {
                     //Update original RR submission to show rejected status
                     if(!"".equals(HELRRSchemaName)) {
                         ba = new batchuploadactivity();
-                        ba.setActivity("Update original batch: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
+                        ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
                         ba.setBatchUploadId(batchId);
                         transactionInDAO.submitBatchActivityLog(ba);
-                        transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
+                        transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                     }
                     
 		    //need to insert error on why we are rejecting
@@ -3108,10 +3108,10 @@ public class transactionInManagerImpl implements transactionInManager {
                 //Update original RR submission to show rejected status
                 if(!"".equals(HELRRSchemaName)) {
                     batchuploadactivity ba = new batchuploadactivity();
-                    ba.setActivity("Update original batch: " + batch.getId() + " to status 39 in database - " + HELRRSchemaName);
+                    ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 39 in database - " + HELRRSchemaName);
                     ba.setBatchUploadId(batchId);
                     transactionInDAO.submitBatchActivityLog(ba);
-                    transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName);
+                    transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                 }
 		
 		//log batch activity
