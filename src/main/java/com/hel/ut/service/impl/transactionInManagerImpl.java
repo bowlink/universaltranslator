@@ -2580,7 +2580,7 @@ public class transactionInManagerImpl implements transactionInManager {
                             
 			    //log batch activity
 			    ba = new batchuploadactivity();
-			    ba.setActivity(configDetails.getconfigName() + " - Formula error found in excel file. First instance at -  "  + newfilename);
+			    ba.setActivity(configDetails.getconfigName() + " - Formula error found in excel file file. First instance at -  "  + newfilename);
 			    ba.setBatchUploadId(batchId);
 			    transactionInDAO.submitBatchActivityLog(ba);
 			    
@@ -2595,7 +2595,7 @@ public class transactionInManagerImpl implements transactionInManager {
                                 transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName);
                             }
                             
-			    sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Formula found, first instance at " + newfilename + ".  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Formula Error");
+			    sendEmailToAdmin((new Date() + "<br/>Please please login and review " + configDetails.getconfigName() + " file. Formula found, first instance at " + newfilename + ".  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Formula Error");
 			    
                             //clean
                             cleanAuditErrorTable(batch.getId());
