@@ -1883,7 +1883,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		dateinTZ = requiredFormat.format(note.getDateCreated());
 		createDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateinTZ);
 		
-		reportBody.append("<tr><td valign='top' style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(note.getUpdateMade()).append("</td>");
+		reportBody.append("<tr><td valign='top' style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(note.getUpdateMade().replace("<>","BLANK")).append("</td>");
 		reportBody.append("<td valign='top' style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(note.getUsersName()).append("</td>");
 		reportBody.append("<td valign='top' style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(new SimpleDateFormat("M/dd/yyyy h:mm a").format(createDate)).append("</td>");
 		reportBody.append("</tr>");

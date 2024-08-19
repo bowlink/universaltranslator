@@ -151,7 +151,7 @@ function populateMessages(fromDate,toDate) {
 	    {
 		"mData": "configName", 
 		"defaultContent": "",
-		"bSortable":true,
+		"bSortable":false,
 		"sWidth": "20%",
 		"render": function ( data, type, row, meta ) {
 		    var returnData = '';
@@ -195,7 +195,7 @@ function populateMessages(fromDate,toDate) {
 	    {
 		"mData": "transportMethod", 
 		"defaultContent": "",
-		"bSortable":true,
+		"bSortable":false,
 		"sWidth": "18%",
 		"className": "center-text",
 		"render": function ( data, type, row, meta ) {
@@ -251,7 +251,7 @@ function populateMessages(fromDate,toDate) {
 		    minutes = minutes < 10 ? '0'+minutes : minutes;
 		    var myDateFormatted = ((dateC.getMonth()*1)+1)+'/'+dateC.getDate()+'/'+dateC.getFullYear() + ' ' + hours+':'+minutes+ ' ' + ampm;
                    
-                    
+                  
                     if(row.startDateTime != null) {
                         
                         var dateS = new Date(row.startDateTime);
@@ -313,11 +313,11 @@ function populateMessages(fromDate,toDate) {
 	    {
 		"mData": "transportMethodId", 
 		"defaultContent": "",
-		"bSortable":true,
+		"bSortable":false,
 		"sWidth": "5%",
-		"className": "center-text actions-col",
+		"className": "",
 		"render": function ( data, type, row, meta ) {
-		   var returnData = '<div class="dropdown pull-left"><button class="btn btn-sm btn-default dropdown-toggle" type="button" data-toggle="dropdown"><i class="fa fa-cog"></i></button><ul class="dropdown-menu pull-right">';
+		   var returnData = '<div class="dropdown"><button class="btn btn-sm btn-default dropdown-toggle" type="button" data-toggle="dropdown"><i class="fa fa-cog"></i></button><ul class="dropdown-menu pull-right">';
 		   
 		    if(row.statusValue === 'MAN') {
                        returnData += '<li><a href="#!" id="release" class="releaseBatch" rel="releaseBatch" rel2="'+row.id+'" title="Process Inbound Batch"><span class="glyphicon glyphicon-ok-sign"></span></span> Process Inbound Batch</a></li>';
@@ -331,6 +331,8 @@ function populateMessages(fromDate,toDate) {
 		   }
 		   
 		   if(userRole == 1) {
+                       returnData += '<li class="divider"></li>';
+                       returnData += '<li><a href="/administrator/configurations/details?i='+row.configId+'" title="View Source Configuration"><span class="glyphicon glyphicon-edit"></span> View Source Configuration</a></li>';
 		       returnData += '<li class="divider"></li>';
 		       returnData += '<li><a href="javascript:void(0);" rel="'+row.utBatchName+'" class="deleteTransactions" title="Delete Batch Transactions"><span class="glyphicon glyphicon-remove"></span> Delete Batch</a></li>';
 		   }
@@ -340,7 +342,6 @@ function populateMessages(fromDate,toDate) {
 	    }
 	 ]
     });   
-    
 }
 
 function commaSeparateNumber(val){
@@ -348,8 +349,7 @@ function commaSeparateNumber(val){
       val = val.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
     }
     return val;
-  }
-
+}
 
 function searchByDateRange() {
     var fromDate = $('.daterange span').attr('rel');
@@ -359,5 +359,4 @@ function searchByDateRange() {
     $('#toDate').val(toDate);
 
     populateMessages(fromDate,toDate);
-
 }

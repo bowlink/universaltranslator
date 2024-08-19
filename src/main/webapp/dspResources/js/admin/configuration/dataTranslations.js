@@ -252,14 +252,40 @@ require(['./main'], function () {
             });
        }
     });
+    
+    //If a crosswalk is selected the system will auto select the CLEAR ERROR OPTION for pass/clear
+    $('#crosswalk').change(function() {
+        $('#fieldA').val("");
+        $('#fieldB').val("");
+        $('#constant1').val("");
+        $('#constant2').val("");
+        $('#macro').val("");
+        $("input[name=passClear][value='1']").prop("checked",true);
+        
+        if($(this).val() != '') {
+            $("input[name=passClear][value='2']").prop("checked",true);
+        }  
+    });
 
     //Function that will check the selected macro and determine if a module
     //should be launched to ask questions.
     $('#macro').change(function () {
         var selMacro = $(this).val();
         var list = $('#macroLookUpList').val();
+        
+        $('#fieldA').val("");
+        $('#fieldB').val("");
+        $('#constant1').val("");
+        $('#constant2').val("");
+        $('#crosswalk').val("");
+        $("input[name=passClear][value='1']").prop("checked",true);
 
         if (selMacro > 0) {
+            
+            if((selMacro == 129 || selMacro == 160  || selMacro == 177 || selMacro == 195 || selMacro == 201)) {
+                 $("input[name=passClear][value='2']").prop("checked",true);
+            }
+            
             if (list.indexOf(selMacro) !== -1) {
                 $.ajax({
                     url: 'getMacroDetails.do',
@@ -599,6 +625,14 @@ require(['./main'], function () {
         $('span').html("");
 
         var errorFound = 0;
+        
+        //Check to see if the macro "APPLY CW TO LIST" is selected and a crosswalk is selected
+        //If so remove the selected crosswalk because it is selected with the macro
+        if((selectedMacro == 129 || selectedMacro == 160  || selectedMacro == 177 || selectedMacro == 195 || selectedMacro == 201) && selectedCW > 0) {
+           $('#crosswalk').val("");
+           selectedCW = "";
+           CWText = "";
+        }
 
         if (selectedField == "") {
             $('#fieldDiv').addClass("has-error");
