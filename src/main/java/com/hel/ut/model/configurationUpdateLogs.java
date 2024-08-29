@@ -13,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
@@ -27,7 +28,8 @@ public class configurationUpdateLogs {
     private String usersName;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
+    @GenericGenerator(name = "native",strategy = "native")
     @Column(name = "id;", nullable = false)
     private int id;
 
@@ -37,7 +39,7 @@ public class configurationUpdateLogs {
     @Column(name = "userId", nullable = false)
     private int userId;
     
-    @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "dateCreated", nullable = true)
     private Date dateCreated = new Date();
     
@@ -91,5 +93,4 @@ public class configurationUpdateLogs {
     public void setUsersName(String usersName) {
 	this.usersName = usersName;
     }
-
 }

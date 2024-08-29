@@ -13,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
@@ -36,14 +37,15 @@ public class referralActivityExports {
     private String encryptedSecret = null;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
+    @GenericGenerator(name = "native",strategy = "native")
     @Column(name = "ID", nullable = false)
     private int id;
 
     @Column(name = "SELDATERANGE", nullable = true)
     private String selDateRange = "";
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "DATESUBMITTED", nullable = false)
     private Date dateSubmitted = new Date();
 
@@ -59,19 +61,19 @@ public class referralActivityExports {
     @Column(name = "statusId", nullable = false)
     private Integer statusId = 1;
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "fromDate", nullable = true)
     private Date fromDate;
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "toDate", nullable = true)
     private Date toDate;
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "runStart", nullable = true)
     private Date runStart = new Date();
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "runEnd", nullable = true)
     private Date runEnd = new Date();
 

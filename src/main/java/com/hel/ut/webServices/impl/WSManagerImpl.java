@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-
 import javax.annotation.Resource;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPBody;
@@ -15,10 +14,8 @@ import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPEnvelope;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.hel.ut.dao.WebServicesDAO;
 import com.hel.ut.dao.transactionOutDAO;
 import com.hel.ut.model.WSMessagesIn;

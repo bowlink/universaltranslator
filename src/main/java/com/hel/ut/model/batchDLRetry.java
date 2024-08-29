@@ -13,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.hibernate.annotations.GenericGenerator;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -25,7 +26,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class batchDLRetry {
 	
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
+    @GenericGenerator(name = "native",strategy = "native")
     @Column(name = "ID", nullable = false)
     private int id;
 
@@ -35,7 +37,7 @@ public class batchDLRetry {
     @Column(name = "fromStatusId", nullable = false)
     private int fromStatusId;
     
-    @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "DATECREATED", nullable = false)
     private Date dateCreated = new Date();
 

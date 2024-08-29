@@ -12,8 +12,8 @@
            
             <form:form id="configurationNoteForm" commandName="configurationNote" modelAttribute="configurationNote" method="post" role="form">
                 <form:hidden path="id" id="id" />
-                <form:hidden path="dateCreated" />
                 <form:hidden path="configId" />
+                <form:hidden path="dateCreated" />
                 <form:hidden path="userId" />
                 <div class="form-container">
                     <spring:bind path="updateMade">

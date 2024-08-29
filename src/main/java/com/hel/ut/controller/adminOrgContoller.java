@@ -3,7 +3,6 @@ package com.hel.ut.controller;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -15,9 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
 import java.util.List;
-
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.batchDownloads;
 import com.hel.ut.model.batchUploads;
@@ -49,8 +46,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
-
-
 
 /**
  * The adminOrgController class will handle all URL requests that fall inside of the '/administrator/organizations' url path.
@@ -131,7 +126,6 @@ public class adminOrgContoller {
         String sEcho = request.getParameter("sEcho");
         String sortDirection = request.getParameter("sSortDir_0");
         Integer totalRecords = 0;
-	
 	
 	List<Organization> organizations = organizationManager.getOrganizationsPaged(iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
 	List<Organization> totalOrgs = organizationManager.getOrganizations();

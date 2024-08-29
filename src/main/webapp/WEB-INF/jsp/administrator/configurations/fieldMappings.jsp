@@ -8,7 +8,7 @@
         <div class="col-md-12">
             <div class="alert alert-success fieldsUpdated" style="display:none;">
                 <strong>Success!</strong> 
-                The field mappings have been successfully updated!
+                The field settings have been successfully updated!
             </div>
             <div id="saveMsgDiv" class="alert alert-danger" style="display:none;">
                 <strong>You must click SAVE above to submit the mapping changes!</strong>

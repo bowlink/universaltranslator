@@ -14,6 +14,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.hel.ut.validator.Phone;
 import javax.persistence.Transient;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
@@ -28,7 +29,8 @@ public class Organization {
     private String organizationType = "", helRegistry = "";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
+    @GenericGenerator(name = "native",strategy = "native")
     @Column(name = "ID", nullable = false)
     private int id;
 
@@ -65,7 +67,7 @@ public class Organization {
     @Column(name = "FAX", nullable = true)
     private String fax;
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "DATECREATED", nullable = true)
     private Date dateCreated = new Date();
 

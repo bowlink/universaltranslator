@@ -23,7 +23,7 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import org.hibernate.Criteria;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
@@ -1207,10 +1207,9 @@ public class transactionInDAOImpl implements transactionInDAO {
 
 	try {
 
-	    String sql1 = ("SET @a" + batchId + "/*'*/:=/*'*/0;");
-
-	    Query query1 = sessionFactory.getCurrentSession().createSQLQuery(sql1);
-	    query1.executeUpdate();
+	    //String sql1 = ("SET @a" + batchId + "/*'*/:=/*'*/0;");
+	    //Query query1 = sessionFactory.getCurrentSession().createSQLQuery(sql1);
+	    //query1.executeUpdate();
 
 	    String ignoreSyntax = "";
 
@@ -1295,7 +1294,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    ua.setUserId(0);
 	    ua.setFeatureId(0);
 	    ua.setAccessMethod("System");
-	    ua.setActivity("Error inserting data from inbound batch file. Error: " + ex.getMessage());
+	    ua.setActivity("Error inserting data from inbound batch file. Error: ");
 	    ua.setBatchUploadId(batchId);
 	    usermanager.insertUserLog(ua);
 	    

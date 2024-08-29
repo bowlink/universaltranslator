@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "ref_transportmethods")
@@ -18,7 +19,8 @@ public class TransportMethod {
     private int id;
 
     @NoHtml
-    @Column(name = "TRANSPORTMETHOD", nullable = false)
+    @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
+    @GenericGenerator(name = "native",strategy = "native")
     private String transportMethod;
 
     @Column(name = "active", nullable = true)

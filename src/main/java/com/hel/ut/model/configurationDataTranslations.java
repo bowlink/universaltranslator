@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
@@ -28,7 +29,8 @@ public class configurationDataTranslations {
     Map<String, String> defaultValues;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
+    @GenericGenerator(name = "native",strategy = "native")
     @Column(name = "ID", nullable = false)
     private int id;
 
@@ -68,7 +70,7 @@ public class configurationDataTranslations {
     @Column(name = "DEFAULTVALUE", nullable = true)
     private String defaultValue;
     
-    @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "dateAdded", nullable = true)
     private Date dateAdded = new Date();
     

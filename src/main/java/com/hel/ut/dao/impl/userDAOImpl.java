@@ -1,7 +1,7 @@
 package com.hel.ut.dao.impl;
 
 import java.util.List;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
@@ -20,7 +20,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.TimeZone;
 import org.hibernate.type.StandardBasicTypes;
 
 /**
@@ -152,7 +151,7 @@ public class userDAOImpl implements userDAO {
     @Override
     @Transactional(readOnly = false)
     public void setLastLogin(String username) {
-        Query q1 = sessionFactory.getCurrentSession().createQuery("insert into utUserLogin (userId)" + " select id from utUser where username = :username");
+        Query q1 = sessionFactory.getCurrentSession().createSQLQuery("insert into REL_USERLOGINS (userId)" + " select id from users where username = :username");
         q1.setParameter("username", username);
         q1.executeUpdate();
     }

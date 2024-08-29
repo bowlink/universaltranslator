@@ -12,13 +12,15 @@ import javax.persistence.Table;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.hel.ut.validator.NoHtml;
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "moveFilesLog")
 public class MoveFilesLog {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
+    @GenericGenerator(name = "native",strategy = "native")
     @Column(name = "ID", nullable = false)
     private int id;
 
@@ -38,11 +40,11 @@ public class MoveFilesLog {
     @Column(name = "folderPath", nullable = true)
     private String folderPath;
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "startDateTime", nullable = true)
     private Date startDateTime = new Date();
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "endDateTime", nullable = true)
     private Date endDateTime = new Date();
 

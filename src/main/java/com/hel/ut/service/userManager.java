@@ -3,7 +3,6 @@ package com.hel.ut.service;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
-
 import com.hel.ut.model.utUser;
 import com.hel.ut.model.utUserActivity;
 import com.hel.ut.model.configurationConnectionSenders;

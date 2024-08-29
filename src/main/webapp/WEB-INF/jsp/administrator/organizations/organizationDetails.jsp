@@ -17,7 +17,7 @@
             </div>
         </c:if>
 
-        <form:form commandName="organization"  method="post" role="form" enctype="multipart/form-data">
+        <form:form commandName="organization" modelAttribute="organization"  method="post" role="form" enctype="multipart/form-data">
             <input type="hidden" id="action" name="action" value="save" />
             <form:hidden path="id" id="orgId" />
             <form:hidden path="cleanURL" id="cleanURL" />

@@ -2,7 +2,7 @@ package com.hel.ut.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.SessionFactory;

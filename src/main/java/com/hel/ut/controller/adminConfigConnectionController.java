@@ -14,10 +14,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import com.hel.ut.model.utConfiguration;
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.utUser;
@@ -33,14 +31,10 @@ import com.hel.ut.model.mailMessage;
 import com.hel.ut.service.emailMessageManager;
 import com.hel.ut.service.sysAdminManager;
 import com.hel.ut.service.userManager;
-
-
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
-
 import com.hel.ut.service.hispManager;
 import com.hel.ut.service.impl.transactionInManagerImpl;
-
 import javax.servlet.http.HttpSession;
 import com.hel.ut.service.utConfigurationManager;
 import com.hel.ut.service.utConfigurationTransportManager;

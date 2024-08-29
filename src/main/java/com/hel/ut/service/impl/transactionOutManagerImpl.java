@@ -41,9 +41,7 @@ import org.docx4j.model.fields.merge.MailMerger.OutputField;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.Resource;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -60,6 +58,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.net.ftp.FTPClient;
@@ -578,7 +577,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 					    fileSystem attachDir = new fileSystem();
 					    File f = new File(directory + "hl7pdf.pdf");
 					    byte[] bytes = attachDir.loadFile(f);
-					    byte[] encoded = Base64.encode(bytes);
+					    byte[] encoded = Base64.getEncoder().encode(bytes);
 					    String encodedString = new String(encoded);
 
 					    hl7recordRow.append(encodedString);
@@ -640,7 +639,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 						fileSystem attachDir = new fileSystem();
 						File f = new File(directory + "hl7pdf.pdf");
 						byte[] bytes = attachDir.loadFile(f);
-						byte[] encoded = Base64.encode(bytes);
+						byte[] encoded = Base64.getEncoder().encode(bytes);
 						String encodedString = new String(encoded);
 
 						hl7recordRow.append(encodedString);
@@ -786,7 +785,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			if (!"".equals(hl7recordRow.toString())) {
 			    try {
 				if (encrypt == true) {
-				    byte[] encoded = Base64.encode(hl7recordRow.toString().getBytes());
+				    byte[] encoded = Base64.getEncoder().encode(hl7recordRow.toString().getBytes());
 				    fw.write(new String(encoded));
 				} else {
 				    fw.write(hl7recordRow.toString());
@@ -855,7 +854,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		if (!"".equals(recordRow)) {
 		    try {
 			if (encrypt == true) {
-			    byte[] encoded = Base64.encode(recordRow.getBytes());
+			    byte[] encoded = Base64.getEncoder().encode(recordRow.getBytes());
 			    fw.write(new String(encoded));
 			} else {
 			    fw.write(recordRow);
@@ -938,7 +937,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		if (!"".equals(recordRow)) {
 		    try {
 			if (encrypt == true) {
-			    byte[] encoded = Base64.encode(recordRow.getBytes());
+			    byte[] encoded = Base64.getEncoder().encode(recordRow.getBytes());
 			    fw.write(new String(encoded));
 			} else {
 			    fw.write(recordRow);

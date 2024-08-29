@@ -53,7 +53,7 @@
 						<br />
 						Transport Method: <strong>${connection.targetTransportMethod}</strong>
                                             </td>
-                                            <td class="center-text"><fmt:formatDate value="${connection.dateCreated}" type="date" pattern="M/dd/yyyy" /></td>
+                                            <td class="center-text"><fmt:formatDate value="${connection.dateCreated}" type="date" pattern="M/dd/yyyy hh:mm a" /></td>
                                             <td class="center-text actions-col">
                                                 <c:choose>
                                                     <c:when test="${connection.status == true}">

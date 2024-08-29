@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Properties;
 import javax.annotation.Resource;
 import org.hibernate.Criteria;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;

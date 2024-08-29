@@ -9,11 +9,9 @@ import com.hel.ut.model.Organization;
 import com.hel.ut.model.batchUploads;
 import com.hel.ut.model.configurationFormFields;
 import com.hel.ut.model.utConfiguration;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintStream;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -22,7 +20,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.monitorjbl.xlsx.StreamingReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -107,46 +104,46 @@ public class excelToTxt {
 	    Sheet datatypeSheet = workbook.getSheetAt(0);
 	      
 	    DataFormatter formatter = new DataFormatter();
+            
 	    int  writeRow = 0;
 	    boolean hasFormulaCell = false;
 	    boolean hasErrorCell = false;
 	    String cellErrorLocation = "";
 	    String formulaErrorLocation = "";
             
-	  
-		    //check field numbers, we email admin if field do not match
-	    	List<configurationFormFields> configFormFields = configurationtransportmanager.getConfigurationFields(batch.getConfigId(), 0);
+            //check field numbers, we email admin if field do not match
+            List<configurationFormFields> configFormFields = configurationtransportmanager.getConfigurationFields(batch.getConfigId(), 0);
 
-	    	Integer totalFields = configFormFields.size();
-	    
-	    
-	   
+            Integer totalFields = configFormFields.size();
+            
 	    boolean testColSize = false;
+            
+            Cell cell = null;
 	    
 	    for(Row row : datatypeSheet) {
 	    	String string = "";
 	    	if (!testColSize) {
-	    		int totalNoColsInSheet = row.getLastCellNum();
-	    		if (totalNoColsInSheet != totalFields) {
-		    		try {
-		        		 utConfiguration configDetails = configurationManager.getConfigurationById(batch.getConfigId());
-		        		 transactioninmanager.sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Column Size Mismatch " + totalNoColsInSheet + " found. Expecting  "+totalFields+" columns. <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), ("Columns size mismatch " + configDetails.getconfigName()), false, true);			   
-		        	 } catch (Exception e) {
-		        		    e.printStackTrace();
-		        	 }}  
-	    
-	    		testColSize = true;
+                    int totalNoColsInSheet = row.getLastCellNum();
+                    if (totalNoColsInSheet != totalFields) {
+                        try {
+                            utConfiguration configDetails = configurationManager.getConfigurationById(batch.getConfigId());
+                            transactioninmanager.sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Column Size Mismatch " + totalNoColsInSheet + " found. Expecting  "+totalFields+" columns. <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), ("Columns size mismatch " + configDetails.getconfigName()), false, true);			   
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } 
+                    testColSize = true;
 	    	}
 	    	for(int cn=0; cn<row.getLastCellNum(); cn++) {
                     // If the cell is missing from the file, generate a blank one
                     // (Works by specifying a MissingCellPolicy)
-                    Cell cell = row.getCell(cn, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                    cell = row.getCell(cn, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                     String text = "";
                     
                     //need to review cells for formula and reject entire file
-                    if (cell != null && cell.getCellTypeEnum() != CellType.BLANK) {
+                    if (cell != null && cell.getCellType() != CellType.BLANK) {
                         //formula 
-                        if (cell.getCellTypeEnum() == CellType.FORMULA) {			
+                        if (cell.getCellType() == CellType.FORMULA) {			
                             hasFormulaCell = true;
                             //text = "FORMULA";
                             text = "FORMULA FOUND HERE " + formatter.formatCellValue(cell);
@@ -154,7 +151,7 @@ public class excelToTxt {
                             int errorCell = cn + 1;
                             formulaErrorLocation = "row " + errorRow + ", cell " + errorCell;
                         } 
-                        else if (cell.getCellTypeEnum() == CellType.ERROR) {
+                        else if (cell.getCellType() == CellType.ERROR) {
                             hasErrorCell = true;
                             //text = "CELL ERROR";
                             text = "CELL ERROR FOUND HERE ";
@@ -168,7 +165,7 @@ public class excelToTxt {
                             cellErrorLocation = "row " + errorRow + ", cell " + errorCell;
 			 } 
                         else {
-                            text = formatter.formatCellValue(cell);
+                            text = cell.getStringCellValue();//formatter.formatCellValue(cell);
                         }
                     } 
                     

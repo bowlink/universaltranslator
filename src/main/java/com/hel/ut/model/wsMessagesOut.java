@@ -18,6 +18,7 @@ import javax.persistence.Transient;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.hel.ut.validator.NoHtml;
+import org.hibernate.annotations.GenericGenerator;
 
 /**
  *
@@ -37,7 +38,8 @@ public class wsMessagesOut {
     private String mimeType = "";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
+    @GenericGenerator(name = "native",strategy = "native")
     @Column(name = "ID", nullable = false)
     private int id;
 
@@ -68,7 +70,7 @@ public class wsMessagesOut {
     @Column(name = "messageResult", nullable = false)
     private String messageResult = ""; //set to failed
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "DATECREATED", nullable = false)
     private Date dateCreated = new Date();
 

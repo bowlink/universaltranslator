@@ -16,13 +16,11 @@ import com.hel.ut.model.configurationFTPFields;
 import com.hel.ut.model.configurationTransportMessageTypes;
 import com.hel.ut.reference.fileSystem;
 import com.hel.ut.service.organizationManager;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.hel.ut.service.utConfigurationManager;
@@ -33,7 +31,6 @@ import com.hel.ut.model.configurationconnectionfieldmappings;
 import com.hel.ut.model.logftpconnectionerrors;
 import com.hel.ut.model.organizationDirectDetails;
 import com.hel.ut.model.utConfiguration;
-import com.hel.ut.security.decryptObject;
 import com.hel.ut.security.encryptObject;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -44,7 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.annotation.Resource;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 
 @Service
 public class utConfigurationTransportManagerImpl implements utConfigurationTransportManager {

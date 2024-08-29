@@ -54,7 +54,6 @@ import com.hel.ut.service.transactionInManager;
 import com.hel.ut.service.transactionOutManager;
 import com.hel.ut.service.userManager;
 import com.hel.ut.webServices.WSManager;
-
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
@@ -71,11 +70,9 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;

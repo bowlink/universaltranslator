@@ -33,7 +33,7 @@ public class historyResults {
     private String patientId = null;
     private int batchId = 0;
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "DATECREATED", nullable = false)
     private Date dateCreated = new Date();
 

@@ -3,7 +3,7 @@ package com.hel.ut.dao.impl;
 import java.util.List;
 import java.util.Properties;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;

@@ -6,16 +6,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMethod;
-
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.custom.searchParameters;
 import com.hel.ut.model.utUser;
@@ -24,16 +21,13 @@ import com.hel.ut.service.fileManager;
 import com.hel.ut.service.organizationManager;
 import com.hel.ut.service.userManager;
 import com.hel.ut.service.utConfigurationManager;
-
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import javax.annotation.Resource;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.servlet.ModelAndView;

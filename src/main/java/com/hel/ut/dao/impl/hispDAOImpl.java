@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import com.hel.ut.model.hisps;
 import java.util.List;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 
 /**
  * The userDAOImpl class will implement the DAO access layer to handle updates for organization system users

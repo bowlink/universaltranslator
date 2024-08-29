@@ -14,7 +14,7 @@ import com.hel.ut.service.transactionInManager;
 import com.hel.ut.service.userManager;
 import com.hel.ut.service.utConfigurationTransportManager;
 import org.hibernate.Criteria;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;

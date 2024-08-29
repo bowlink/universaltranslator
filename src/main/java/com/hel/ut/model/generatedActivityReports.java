@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.hibernate.annotations.GenericGenerator;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -16,7 +17,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class generatedActivityReports {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
+    @GenericGenerator(name = "native",strategy = "native")
     @Column(name = "id", nullable = false)
     private int id;
     
@@ -32,7 +34,7 @@ public class generatedActivityReports {
     @Column(name = "dateRange", nullable = false)
     private String dateRange;
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm:ss")
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "DATECREATED", nullable = true)
     private Date dateCreated = new Date();
     

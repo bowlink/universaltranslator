@@ -17,7 +17,7 @@ import com.hel.ut.model.RestAPIMessagesOut;
 import com.hel.ut.model.batchDownloads;
 import com.hel.ut.model.batchUploads;
 import java.text.SimpleDateFormat;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 

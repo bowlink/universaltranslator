@@ -5,6 +5,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.persistence.*;
 import java.util.List;
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "CONFIGURATIONTRANSPORTDETAILS")
@@ -44,7 +45,8 @@ public class configurationTransport {
     private CommonsMultipartFile ccdTemplatefile = null, hl7PDFTemplatefile = null;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
+    @GenericGenerator(name = "native",strategy = "native")
     @Column(name = "ID", nullable = false)
     private int id;
 
