@@ -119,6 +119,7 @@ public class excelToTxt {
 	    boolean testColSize = false;
             
             Cell cell = null;
+            String text = "";
 	    
 	    for(Row row : datatypeSheet) {
 	    	String string = "";
@@ -138,7 +139,7 @@ public class excelToTxt {
                     // If the cell is missing from the file, generate a blank one
                     // (Works by specifying a MissingCellPolicy)
                     cell = row.getCell(cn, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-                    String text = "";
+                    text = "";
                     
                     //need to review cells for formula and reject entire file
                     if (cell != null && cell.getCellType() != CellType.BLANK) {
@@ -163,9 +164,14 @@ public class excelToTxt {
                             int errorRow  = row.getRowNum()+1;
                             int errorCell = cn + 1;
                             cellErrorLocation = "row " + errorRow + ", cell " + errorCell;
-			 } 
+			} 
                         else {
-                            text = cell.getStringCellValue();//formatter.formatCellValue(cell);
+                            try {
+                                text = formatter.formatCellValue(cell);
+                            }
+                            catch (Exception e) {
+                                text = String.valueOf(cell.getStringCellValue());
+                            }
                         }
                     } 
                     
