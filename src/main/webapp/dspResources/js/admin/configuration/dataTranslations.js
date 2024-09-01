@@ -651,6 +651,15 @@ require(['./main'], function () {
         }
         
         if (errorFound == 0) {
+            
+            if(selectedCW === '') {
+                selectedCW = 0;
+            }
+            
+            if(selectedMacro === '') {
+                selectedMacro = 0;
+            }
+            
             $.ajax({
                 url: "setTranslations",
                 type: "GET",
