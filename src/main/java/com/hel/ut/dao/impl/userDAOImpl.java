@@ -2,8 +2,6 @@ package com.hel.ut.dao.impl;
 
 import java.util.List;
 import org.hibernate.query.Query;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +18,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.hibernate.type.StandardBasicTypes;
 
 /**
@@ -93,17 +95,22 @@ public class userDAOImpl implements userDAO {
     @Transactional(readOnly = true)
     public List<utUser> getUsersByOrganization(int orgId) {
 
-        List<Integer> OrgIds = new ArrayList<Integer>();
+        List<Integer> OrgIds = new ArrayList<>();
         OrgIds.add(orgId);
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<utUser> criteria = builder.createQuery(utUser.class);
+        Root<utUser> root = criteria.from(utUser.class);
 
-        Criteria users = sessionFactory.getCurrentSession().createCriteria(utUser.class);
-        users.add(Restrictions.eq("status", true));
-        users.add(Restrictions.in("orgId", OrgIds));
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("status"), true);
+        predicates[1] = root.get("orgId").in(OrgIds);
 
-        List<utUser> userList = users.list();
+        Predicate whereClause = builder.and(predicates);
 
-        return userList;
-
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -116,10 +123,16 @@ public class userDAOImpl implements userDAO {
     @Override
     @Transactional(readOnly = true)
     public utUser getUserByUserName(String username) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(utUser.class);
-        criteria.add(Restrictions.eq("username", username));
-	
-        return (utUser) criteria.uniqueResult();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<utUser> criteria = builder.createQuery(utUser.class);
+        Root<utUser> root = criteria.from(utUser.class);
+
+        Predicate whereClause = builder.equal(root.get("userName"), username);
+
+        criteria.where(whereClause);
+        
+        return (utUser) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
     }
 
     /**
@@ -455,25 +468,40 @@ public class userDAOImpl implements userDAO {
 
         if (connections == null || connections.isEmpty()) {
             orgList.add(0);
-        } else {
+        } 
+        else {
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<configurationConnection> criteria = builder.createQuery(configurationConnection.class);
+            Root<configurationConnection> root = criteria.from(configurationConnection.class);
+            
+            CriteriaQuery<utConfiguration> targetconfigurationQuery = builder.createQuery(utConfiguration.class);
+            Root<utConfiguration> targetRoot = targetconfigurationQuery.from(utConfiguration.class);
+            
+            Predicate whereClause = null;
+            
             for (configurationConnectionSenders userConnection : connections) {
-                Criteria connection = sessionFactory.getCurrentSession().createCriteria(configurationConnection.class);
-                connection.add(Restrictions.eq("id", userConnection.getConnectionId()));
+                
+                whereClause = builder.equal(root.get("id"), userConnection.getConnectionId());
+                criteria.where(whereClause);
 
-                configurationConnection connectionInfo = (configurationConnection) connection.uniqueResult();
-
-                /* Get the list of target orgs */
-                Criteria targetconfigurationQuery = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-                targetconfigurationQuery.add(Restrictions.eq("id", connectionInfo.gettargetConfigId()));
-                utConfiguration targetconfigDetails = (utConfiguration) targetconfigurationQuery.uniqueResult();
-
-                /* Add the target org to the target organization list */
-                orgList.add(targetconfigDetails.getorgId());
+                configurationConnection connectionInfo = (configurationConnection) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
+                
+                if(connectionInfo != null) {
+                    whereClause = builder.equal(targetRoot.get("id"), connectionInfo.gettargetConfigId());
+                    targetconfigurationQuery.where(whereClause);
+                    
+                    utConfiguration targetconfigDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(targetconfigurationQuery).uniqueResult();
+                    
+                    if(targetconfigDetails != null) {
+                         /* Add the target org to the target organization list */
+                        orgList.add(targetconfigDetails.getorgId());
+                    }
+                }
             }
         }
 
         return orgList;
-
     }
 
     @Override
@@ -483,21 +511,36 @@ public class userDAOImpl implements userDAO {
 
         if (connections == null || connections.isEmpty()) {
             messageTypeList.add(0);
-        } else {
+        } 
+        else {
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<configurationConnection> criteria = builder.createQuery(configurationConnection.class);
+            Root<configurationConnection> root = criteria.from(configurationConnection.class);
+            
+            CriteriaQuery<utConfiguration> sourceconfigurationQuery = builder.createQuery(utConfiguration.class);
+            Root<utConfiguration> sourceRoot = sourceconfigurationQuery.from(utConfiguration.class);
+            
+            Predicate whereClause = null;
+            
             for (configurationConnectionSenders userConnection : connections) {
-                Criteria connection = sessionFactory.getCurrentSession().createCriteria(configurationConnection.class);
-                connection.add(Restrictions.eq("id", userConnection.getConnectionId()));
-
-                configurationConnection connectionInfo = (configurationConnection) connection.uniqueResult();
-
-                /* Get the message type for the utConfiguration */
-                Criteria sourceconfigurationQuery = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-                sourceconfigurationQuery.add(Restrictions.eq("id", connectionInfo.getsourceConfigId()));
-                utConfiguration configDetails = (utConfiguration) sourceconfigurationQuery.uniqueResult();
-
-                /* Add the message type to the message type list */
-                messageTypeList.add(configDetails.getMessageTypeId());
-
+                
+                whereClause = builder.equal(root.get("id"), userConnection.getConnectionId());
+                criteria.where(whereClause);
+                
+                configurationConnection connectionInfo = (configurationConnection) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
+                
+                if(connectionInfo != null) {
+                    whereClause = builder.equal(sourceRoot.get("id"), connectionInfo.getsourceConfigId());
+                    sourceconfigurationQuery.where(whereClause);
+                    
+                    utConfiguration configDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(sourceconfigurationQuery).uniqueResult();
+                    
+                    if(configDetails != null) {
+                        /* Add the message type to the message type list */
+                        messageTypeList.add(configDetails.getMessageTypeId());
+                    }
+                }
             }
         }
 
@@ -507,12 +550,16 @@ public class userDAOImpl implements userDAO {
     @Override
     @Transactional(readOnly = true)
     public List<configurationConnectionSenders> configurationConnectionSendersByUserId(int userId) {
-        /* Get a list of connections the user has access to */
-        Criteria connections = sessionFactory.getCurrentSession().createCriteria(configurationConnectionSenders.class);
-        connections.add(Restrictions.eq("userId", userId));
-        List<configurationConnectionSenders> userConnections = connections.list();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationConnectionSenders> criteria = builder.createQuery(configurationConnectionSenders.class);
+        Root<configurationConnectionSenders> root = criteria.from(configurationConnectionSenders.class);
 
-        return userConnections;
+        Predicate whereClause = builder.equal(root.get("userId"), userId);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
     
     @Override
@@ -613,17 +660,18 @@ public class userDAOImpl implements userDAO {
     @Transactional(readOnly = true)
     public List<utUser> getAllUsersByOrganization(int orgId) {
 
-        List<Integer> OrgIds = new ArrayList<Integer>();
+        List<Integer> OrgIds = new ArrayList<>();
         OrgIds.add(orgId);
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<utUser> criteria = builder.createQuery(utUser.class);
+        Root<utUser> root = criteria.from(utUser.class);
 
+        Predicate whereClause = root.get("orgId").in(OrgIds);
 
-        Criteria users = sessionFactory.getCurrentSession().createCriteria(utUser.class);
-        users.add(Restrictions.in("orgId", OrgIds));
-
-        List<utUser> userList = users.list();
-
-        return userList;
-
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
     
     /**
@@ -683,5 +731,4 @@ public class userDAOImpl implements userDAO {
             return null;
         }
     }
-    
 }

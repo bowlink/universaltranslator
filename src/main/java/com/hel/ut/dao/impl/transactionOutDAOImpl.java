@@ -13,24 +13,23 @@ import com.hel.ut.service.sysAdminManager;
 import com.hel.ut.service.transactionInManager;
 import com.hel.ut.service.userManager;
 import com.hel.ut.service.utConfigurationTransportManager;
-import org.hibernate.Criteria;
 import org.hibernate.query.Query;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -142,10 +141,16 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     public List<batchDownloads> findInboxBatches(int userId, int orgId, int fromOrgId, int messageTypeId, Date fromDate, Date toDate) throws Exception {
 	int firstResult = 0;
 
-	/* Get a list of connections the user has access to */
-	Criteria connections = sessionFactory.getCurrentSession().createCriteria(configurationConnectionReceivers.class);
-	connections.add(Restrictions.eq("userId", userId));
-	List<configurationConnectionReceivers> userConnections = connections.list();
+	// Get a list of connections the user has access to
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationConnectionReceivers> criteria = builder.createQuery(configurationConnectionReceivers.class);
+        Root<configurationConnectionReceivers> root = criteria.from(configurationConnectionReceivers.class);
+
+        Predicate whereClause = builder.equal(root.get("userId"), userId);
+
+        criteria.where(whereClause);
+        
+        List<configurationConnectionReceivers> userConnections = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
 
 	List<Integer> messageTypeList = new ArrayList<>();
 	List<Integer> sourceOrgList = new ArrayList<>();
@@ -155,67 +160,96 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    sourceOrgList.add(0);
 	} 
 	else {
+            
+            CriteriaQuery<configurationConnection> connectionCriteria = builder.createQuery(configurationConnection.class);
+            Root<configurationConnection> connectionRoot = connectionCriteria.from(configurationConnection.class);
+            
+            CriteriaQuery<utConfiguration> configCriteria = builder.createQuery(utConfiguration.class);
+            Root<utConfiguration> configRoot = configCriteria.from(utConfiguration.class);
+            
 	    for (configurationConnectionReceivers userConnection : userConnections) {
-		Criteria connection = sessionFactory.getCurrentSession().createCriteria(configurationConnection.class);
-		connection.add(Restrictions.eq("id", userConnection.getConnectionId()));
-
-		configurationConnection connectionInfo = (configurationConnection) connection.uniqueResult();
-
-		/* Get the message type for the utConfiguration */
-		Criteria targetconfigurationQuery = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-		targetconfigurationQuery.add(Restrictions.eq("id", connectionInfo.gettargetConfigId()));
-
-		utConfiguration configDetails = (utConfiguration) targetconfigurationQuery.uniqueResult();
-
-		/* Add the message type to the message type list */
-		if (messageTypeId == 0) {
-		    messageTypeList.add(configDetails.getMessageTypeId());
-		} else {
-		    if (messageTypeId == configDetails.getMessageTypeId()) {
-			messageTypeList.add(configDetails.getMessageTypeId());
-		    }
-		}
-
-		/* Get the list of source orgs */
-		Criteria sourceconfigurationQuery = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-		sourceconfigurationQuery.add(Restrictions.eq("id", connectionInfo.getsourceConfigId()));
-		utConfiguration sourceconfigDetails = (utConfiguration) sourceconfigurationQuery.uniqueResult();
-
-		/* Add the target org to the target organization list */
-		if (fromOrgId == 0) {
-		    sourceOrgList.add(sourceconfigDetails.getorgId());
-		} else {
-		    if (fromOrgId == sourceconfigDetails.getorgId()) {
-			sourceOrgList.add(sourceconfigDetails.getorgId());
-		    }
-		}
+                
+                whereClause = builder.equal(connectionRoot.get("id"), userConnection.getConnectionId());
+                connectionCriteria.where(whereClause);
+                
+                configurationConnection connectionInfo = (configurationConnection) sessionFactory.getCurrentSession().createQuery(connectionCriteria).uniqueResult();
+                
+                if(connectionInfo != null) {
+                    // Get the message type for the utConfiguration 
+                    whereClause = builder.equal(configRoot.get("id"), connectionInfo.gettargetConfigId());
+                    configCriteria.where(whereClause);
+                    
+                    utConfiguration configDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
+                    
+                    if(configDetails != null) {
+                        if (messageTypeId == 0) {
+                             messageTypeList.add(configDetails.getMessageTypeId());
+                        }
+                        else {
+                             if (messageTypeId == configDetails.getMessageTypeId()) {
+                                 messageTypeList.add(configDetails.getMessageTypeId());
+                             }
+                        }
+                    }
+                    
+                    whereClause = builder.equal(configRoot.get("id"), connectionInfo.getsourceConfigId());
+                    configCriteria.where(whereClause);
+                    
+                    utConfiguration sourceconfigDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
+                    
+                    if(sourceconfigDetails != null) {
+                        if (fromOrgId == 0) {
+                            sourceOrgList.add(sourceconfigDetails.getorgId());
+                        }
+                        else {
+                            if (fromOrgId == sourceconfigDetails.getorgId()) {
+                                sourceOrgList.add(sourceconfigDetails.getorgId());
+                            }
+                        }
+                    }
+                }
 	    }
 	}
 
 	if (messageTypeList.isEmpty()) {
 	    messageTypeList.add(0);
 	}
+        
+        CriteriaQuery<batchDownloads> batchDownloadsCriteria = builder.createQuery(batchDownloads.class);
+        Root<batchDownloads> batchDownloadsRoot = batchDownloadsCriteria.from(batchDownloads.class);
+        
+        
+        Predicate transportMethodId = builder.equal(batchDownloadsRoot.get("transportMethodId"), 2);
+        Predicate statusId1 = builder.notEqual(batchDownloadsRoot.get("statusId"), 29); // Submission Processed Errored
+        Predicate statusId2 = builder.notEqual(batchDownloadsRoot.get("statusId"), 30); // Submission Processed Errored
+        Predicate statusId3 = builder.notEqual(batchDownloadsRoot.get("statusId"), 32); // Submission Processed Errored
+        
+        Predicate fromDateSearch = null;
+        if (!"".equals(fromDate) && fromDate != null) {
+            fromDateSearch = builder.greaterThanOrEqualTo(batchDownloadsRoot.get("dateCreated"), fromDate);
+        }
+        
+        Predicate toDateSearch = null;
+        if (!"".equals(toDate) && toDate != null) {
+            toDateSearch = builder.lessThan(batchDownloadsRoot.get("dateCreated"), toDate);
+        }
+        
+        if(fromDateSearch != null && toDateSearch != null) {
+            whereClause = builder.and(transportMethodId,statusId1,statusId2,statusId3,fromDateSearch,toDateSearch);
+        }
+        else if(fromDateSearch != null && toDateSearch == null) {
+            whereClause = builder.and(transportMethodId,statusId1,statusId2,statusId3,fromDateSearch);
+        }
+        else if(fromDateSearch == null && toDateSearch != null) {
+            whereClause = builder.and(transportMethodId,statusId1,statusId2,statusId3,toDateSearch);
+        }
+        else {
+            whereClause = builder.and(transportMethodId,statusId1,statusId2,statusId3);
+        }
 
-	Criteria findBatches = sessionFactory.getCurrentSession().createCriteria(batchDownloads.class);
-	findBatches.add(Restrictions.eq("transportMethodId", 2));
-	findBatches.add(Restrictions.and(
-	    Restrictions.ne("statusId", 29), /* Submission Processed Errored */
-	    Restrictions.ne("statusId", 30), /* Target Creation Errored */
-	    Restrictions.ne("statusId", 32) /* Submission Cancelled */
-	));
-
-	if (!"".equals(fromDate) && fromDate != null) {
-	    findBatches.add(Restrictions.ge("dateCreated", fromDate));
-	}
-
-	if (!"".equals(toDate) && toDate != null) {
-	    findBatches.add(Restrictions.lt("dateCreated", toDate));
-	}
-
-	findBatches.addOrder(Order.desc("dateCreated"));
-
-	return findBatches.list();
-
+        batchDownloadsCriteria.orderBy(builder.desc(batchDownloadsRoot.get("dateCreated"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(batchDownloadsCriteria).getResultList();
     }
 
     /**
@@ -232,49 +266,58 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     public List<batchDownloads> getAllBatches(Date fromDate, Date toDate, String batchName) throws Exception {
 
 	int firstResult = 0;
-
-	Criteria findBatches = sessionFactory.getCurrentSession().createCriteria(batchDownloads.class);
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<batchDownloads> criteria = builder.createQuery(batchDownloads.class);
+        Root<batchDownloads> root = criteria.from(batchDownloads.class);
 	
 	if (!"".equals(batchName)) {
-	    findBatches.add(Restrictions.eq("utBatchName", batchName));
+            Predicate whereClause = builder.equal(root.get("utBatchName"), batchName);
+
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+
+            return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
 	}
 	else {
-	    Criterion rest1 = null;
-	    Criterion rest2 = null;
+            Predicate rest1 = null;
+	    Predicate rest2 = null;
 
 	    if (fromDate != null) {
 		if (!"".equals(fromDate)) {
 
 		    if (toDate != null) {
 			if (!"".equals(toDate)) {
-			    rest1 = Restrictions.and(Restrictions.ge("dateCreated", fromDate),Restrictions.lt("dateCreated", toDate));
-			    rest2 = Restrictions.and(Restrictions.ge("startDateTime", fromDate),Restrictions.lt("startDateTime", toDate));
+                            rest1 = builder.and(builder.greaterThanOrEqualTo(root.get("dateCreated"), fromDate),builder.lessThan(root.get("dateCreated"), toDate));
+                            rest2 = builder.and(builder.greaterThanOrEqualTo(root.get("startDateTime"), fromDate),builder.lessThan(root.get("startDateTime"), toDate));
 			}
 			else {
-			    rest1 = Restrictions.ge("dateCreated", fromDate);
-			    rest2 = Restrictions.ge("startDateTime", fromDate);
+			    rest1 = builder.greaterThanOrEqualTo(root.get("dateCreated"), fromDate);
+			    rest2 = builder.greaterThanOrEqualTo(root.get("startDateTime"), fromDate);
 			}
 		    }
 		    else {
-			rest1 = Restrictions.ge("dateCreated", fromDate);
-			rest2 = Restrictions.ge("startDateTime", fromDate);
+			rest1 = builder.greaterThanOrEqualTo(root.get("dateCreated"), fromDate);
+                        rest2 = builder.greaterThanOrEqualTo(root.get("startDateTime"), fromDate);
 		    }
 		}
 	    }
 	    else {
 		if (toDate != null) {
 		    if (!"".equals(toDate)) {
-			rest1 = Restrictions.lt("dateCreated", toDate);
-			rest2 = Restrictions.lt("startDateTime", toDate);
+			rest1 = builder.lessThan(root.get("dateCreated"), toDate);
+			rest2 = builder.lessThan(root.get("startDateTime"), toDate);
 		    }
 		}
 	    }
-	    findBatches.add(Restrictions.and(Restrictions.ge("totalRecordCount", 0),Restrictions.or(rest1,rest2)));
+            
+            Predicate dateSearch = builder.or(rest1,rest2);
+            
+            Predicate whereClause = builder.and(builder.ge(root.get("totalRecordCount"), 0),dateSearch);
+            
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+
+            return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
 	}
-
-	findBatches.addOrder(Order.desc("dateCreated"));
-
-	return findBatches.list();
     }
 
     /**
@@ -447,9 +490,15 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	int firstResult = 0;
 
 	/* Get a list of connections the user has access to */
-	Criteria connections = sessionFactory.getCurrentSession().createCriteria(configurationConnectionReceivers.class);
-	connections.add(Restrictions.eq("userId", userId));
-	List<configurationConnectionReceivers> userConnections = connections.list();
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationConnectionReceivers> criteria = builder.createQuery(configurationConnectionReceivers.class);
+        Root<configurationConnectionReceivers> root = criteria.from(configurationConnectionReceivers.class);
+
+        Predicate whereClause = builder.equal(root.get("userId"), userId);
+
+        criteria.where(whereClause);
+        
+        List<configurationConnectionReceivers> userConnections = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
 
 	List<Integer> messageTypeList = new ArrayList<>();
 	List<Integer> sourceOrgList = new ArrayList<>();
@@ -457,74 +506,111 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	if (userConnections.isEmpty()) {
 	    messageTypeList.add(0);
 	    sourceOrgList.add(0);
-	} else {
-
+	} 
+        else {
+            CriteriaQuery<configurationConnection> connectionCriteria = builder.createQuery(configurationConnection.class);
+            Root<configurationConnection> connectionRoot = connectionCriteria.from(configurationConnection.class);
+            
+            CriteriaQuery<utConfiguration> configCriteria = builder.createQuery(utConfiguration.class);
+            Root<utConfiguration> configRoot = configCriteria.from(utConfiguration.class);
+            
+            CriteriaQuery<configurationTransport> transportCriteria = builder.createQuery(configurationTransport.class);
+            Root<configurationTransport> transportRoot = transportCriteria.from(configurationTransport.class);
+            
 	    for (configurationConnectionReceivers userConnection : userConnections) {
-		Criteria connection = sessionFactory.getCurrentSession().createCriteria(configurationConnection.class);
-		connection.add(Restrictions.eq("id", userConnection.getConnectionId()));
+                
+                whereClause = builder.equal(connectionRoot.get("id"), userConnection.getConnectionId());
+                connectionCriteria.where(whereClause);
+                
+                configurationConnection connectionInfo = (configurationConnection) sessionFactory.getCurrentSession().createQuery(connectionCriteria).uniqueResult();
+                
+                if(connectionInfo != null) {
+                    
+                    whereClause = builder.equal(configRoot.get("id"), connectionInfo.gettargetConfigId());
+                    configCriteria.where(whereClause);
+                    
+                    utConfiguration configDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
+                    
+                    if(configDetails != null) {
+                        
+                        whereClause = builder.equal(transportRoot.get("configId"), configDetails.getId());
+                        transportCriteria.where(whereClause);
+                        
+                        configurationTransport transportDetails = (configurationTransport) sessionFactory.getCurrentSession().createQuery(transportCriteria).uniqueResult();
+                        
+                        if(transportDetails != null) {
+                            if (transportDetails.gettransportMethodId() == 1
+                                || transportDetails.gettransportMethodId() == 3
+                                || transportDetails.gettransportMethodId() == 5
+                                || transportDetails.gettransportMethodId() == 6
+                                || transportDetails.gettransportMethodId() == 9) {
 
-		configurationConnection connectionInfo = (configurationConnection) connection.uniqueResult();
-
-		/* Get the message type for the utConfiguration */
-		Criteria targetconfigurationQuery = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-		targetconfigurationQuery.add(Restrictions.eq("id", connectionInfo.gettargetConfigId()));
-
-		utConfiguration configDetails = (utConfiguration) targetconfigurationQuery.uniqueResult();
-
-		/* Need to make sure only file download configurations are displayed */
-		Criteria transportDetailsQuery = sessionFactory.getCurrentSession().createCriteria(configurationTransport.class);
-		transportDetailsQuery.add(Restrictions.eq("configId", configDetails.getId()));
-
-		configurationTransport transportDetails = (configurationTransport) transportDetailsQuery.uniqueResult();
-
-		if (transportDetails.gettransportMethodId() == 1
-		    || transportDetails.gettransportMethodId() == 3
-		    || transportDetails.gettransportMethodId() == 5
-		    || transportDetails.gettransportMethodId() == 6
-		    || transportDetails.gettransportMethodId() == 9) {
-		    
-		    messageTypeList.add(configDetails.getMessageTypeId());
-		}
-
-		/* Get the list of source orgs */
-		Criteria sourceconfigurationQuery = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-		sourceconfigurationQuery.add(Restrictions.eq("id", connectionInfo.getsourceConfigId()));
-		utConfiguration sourceconfigDetails = (utConfiguration) sourceconfigurationQuery.uniqueResult();
-
-		/* Add the target org to the target organization list */
-		sourceOrgList.add(sourceconfigDetails.getorgId());
+                                messageTypeList.add(configDetails.getMessageTypeId());
+                            }
+                        }
+                    }
+                    
+                    whereClause = builder.equal(configRoot.get("id"), connectionInfo.getsourceConfigId());
+                    configCriteria.where(whereClause);
+                    
+                    utConfiguration sourceconfigDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
+                    
+                    if(sourceconfigDetails != null) {
+                        sourceOrgList.add(sourceconfigDetails.getorgId());
+                    }
+                }
 	    }
 	}
 
 	if (messageTypeList.isEmpty()) {
 	    messageTypeList.add(0);
 	}
-
-	Criteria findBatches = sessionFactory.getCurrentSession().createCriteria(batchDownloads.class);
-	findBatches.add(Restrictions.or(
-	    Restrictions.eq("transportMethodId", 1),
-	    Restrictions.eq("transportMethodId", 3),
-	    Restrictions.eq("transportMethodId", 5),
-	    Restrictions.eq("transportMethodId", 6),
-	    Restrictions.eq("transportMethodId", 9)
-	));
-	findBatches.add(Restrictions.or(
-	    Restrictions.eq("statusId", 22),
-	    Restrictions.eq("statusId", 23),
-	    Restrictions.eq("statusId", 28)
-	));
-
+        
+        CriteriaQuery<batchDownloads> batchDownloadsCriteria = builder.createQuery(batchDownloads.class);
+        Root<batchDownloads> batchDownloadsRoot = batchDownloadsCriteria.from(batchDownloads.class);
+        
+        Predicate[] transportPredicates = new Predicate[5];
+        transportPredicates[0] = builder.equal(batchDownloadsRoot.get("transportMethodId"), 1);
+        transportPredicates[1] = builder.equal(batchDownloadsRoot.get("transportMethodId"), 3);
+        transportPredicates[2] = builder.equal(batchDownloadsRoot.get("transportMethodId"), 5);
+        transportPredicates[3] = builder.equal(batchDownloadsRoot.get("transportMethodId"), 6);
+        transportPredicates[4] = builder.equal(batchDownloadsRoot.get("transportMethodId"), 9);
+        
+        Predicate query1 = builder.or(transportPredicates);
+        
+        Predicate[] statusPredicates = new Predicate[3];
+        statusPredicates[0] = builder.equal(batchDownloadsRoot.get("statusId"), 22);
+        statusPredicates[1] = builder.equal(batchDownloadsRoot.get("statusId"), 23);
+        statusPredicates[2] = builder.equal(batchDownloadsRoot.get("statusId"), 28);
+        
+        Predicate query2 = builder.or(statusPredicates);
+        
+        Predicate fromSearch = null;
 	if (!"".equals(fromDate)) {
-	    findBatches.add(Restrictions.ge("dateCreated", fromDate));
+            fromSearch = builder.greaterThanOrEqualTo(batchDownloadsRoot.get("dateCreated"), fromDate);
 	}
 
+        Predicate toSearch = null;
 	if (!"".equals(toDate)) {
-	    findBatches.add(Restrictions.lt("dateCreated", toDate));
+            toSearch = builder.lessThan(batchDownloadsRoot.get("dateCreated"), toDate);
 	}
-
-	findBatches.addOrder(Order.desc("dateCreated"));
-
-	return findBatches.list();
+        
+        if(fromSearch != null && toSearch != null) {
+            whereClause = builder.and(query1,query2,fromSearch,toSearch);
+        }
+        else if(fromSearch != null && toSearch == null) {
+            whereClause = builder.and(query1,query2,fromSearch);
+        }
+        else if(fromSearch == null && toSearch != null) {
+            whereClause = builder.and(query1,query2,toSearch);
+        }
+        else {
+            whereClause = builder.and(query1,query2);
+        }
+        
+         batchDownloadsCriteria.orderBy(builder.desc(batchDownloadsRoot.get("dateCreated"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(batchDownloadsCriteria).getResultList();
     }
 
     /**
@@ -608,12 +694,16 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = true)
     public List<targetOutputRunLogs> getLatestRunLog(int configId) throws Exception {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<targetOutputRunLogs> criteria = builder.createQuery(targetOutputRunLogs.class);
+        Root<targetOutputRunLogs> root = criteria.from(targetOutputRunLogs.class);
 
-	Criteria latestLogQuery = sessionFactory.getCurrentSession().createCriteria(targetOutputRunLogs.class);
-	latestLogQuery.add(Restrictions.eq("configId", configId));
-	latestLogQuery.addOrder(Order.desc("lastRunTime"));
+        Predicate whereClause = builder.equal(root.get("configId"), configId);
 
-	return latestLogQuery.list();
+        criteria.orderBy(builder.desc(root.get("lastRunTime"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     @Override
@@ -775,29 +865,50 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = true)
     public List<batchDownloads> getBatchesByStatusIdsAndDate(Date fromDate,Date toDate, Integer fetchSize, List<Integer> statusIds) throws Exception {
-	
-	Criteria findBatches = sessionFactory.getCurrentSession().createCriteria(batchDownloads.class);
-	findBatches.add(Restrictions.in("statusId",statusIds));
-
-	if (fromDate != null) {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<batchDownloads> criteria = builder.createQuery(batchDownloads.class);
+        Root<batchDownloads> root = criteria.from(batchDownloads.class);
+        
+        Predicate statusSearch = root.get("statusId").in(statusIds);
+        
+        Predicate fromDateSearch = null;
+        if (fromDate != null) {
 	    if (!"".equals(fromDate)) {
-		findBatches.add(Restrictions.ge("dateCreated", fromDate));
+                fromDateSearch = builder.greaterThanOrEqualTo(root.get("dateCreated"), fromDate);
 	    }
 	}
-
-	if (toDate != null) {
+        
+        Predicate toDateSearch = null;
+        if (toDate != null) {
 	    if (!"".equals(toDate)) {
-		findBatches.add(Restrictions.lt("dateCreated", toDate));
+                toDateSearch = builder.lessThan(root.get("dateCreated"), toDate);
 	    }
 	}
+        
+        Predicate whereClause = null;
+        
+        if(fromDateSearch != null && toDateSearch != null) {
+            whereClause = builder.and(statusSearch,fromDateSearch,toDateSearch);
+        }
+        else if(fromDateSearch != null && toDateSearch == null) {
+            whereClause = builder.and(statusSearch,fromDateSearch);
+        }
+        else if(fromDateSearch == null && toDateSearch != null) {
+            whereClause = builder.and(statusSearch,toDateSearch);
+        }
+        else {
+            whereClause = statusSearch;
+        }
 
-	findBatches.addOrder(Order.desc("dateCreated"));
-
-	if (fetchSize > 0) {
-	    findBatches.setMaxResults(fetchSize);
-	}
-
-	return findBatches.list();
+        criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        
+        if (fetchSize > 0) {
+            return sessionFactory.getCurrentSession().createQuery(criteria).setMaxResults(fetchSize).getResultList();
+        }
+        else {
+            return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        }
     }
 
     @Override
@@ -814,22 +925,42 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = true)
     public List<batchDownloads> getDLBatchesByStatusIds(List<Integer> statusIds) throws Exception {
-	Criteria dlBatches = sessionFactory.getCurrentSession().createCriteria(batchDownloads.class);
-	dlBatches.add(Restrictions.in("statusId", statusIds));
-	List<batchDownloads> dlBatchesList = dlBatches.list();
-	return dlBatchesList;
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<batchDownloads> criteria = builder.createQuery(batchDownloads.class);
+        Root<batchDownloads> root = criteria.from(batchDownloads.class);
+
+        Predicate whereClause = root.get("statusId").in(statusIds);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public batchDLRetry getBatchDLRetryByDownloadId(Integer batchDownloadId,Integer statusId) throws Exception {
-	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(batchDLRetry.class);
-	criteria.add(Restrictions.eq("batchDownloadId", batchDownloadId));
-	if (statusId > 0) {
-	    criteria.add(Restrictions.eq("fromStatusId", statusId));
-	}
-	criteria.addOrder(Order.desc("dateCreated"));
-	List<batchDLRetry> brList = criteria.list();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<batchDLRetry> criteria = builder.createQuery(batchDLRetry.class);
+        Root<batchDLRetry> root = criteria.from(batchDLRetry.class);
+        
+        Predicate whereClause = null;
+        
+        if (statusId > 0) {
+            Predicate[] predicates = new Predicate[2];
+            predicates[0] = builder.equal(root.get("batchDownloadId"), batchDownloadId);
+            predicates[1] = builder.equal(root.get("fromStatusId"), statusId);
+
+            whereClause = builder.and(predicates);
+        }
+        else {
+            whereClause = builder.equal(root.get("batchDownloadId"), batchDownloadId);
+        }
+
+        criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        
+        List<batchDLRetry> brList = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
 
 	if (brList.size() > 0) {
 	    return brList.get(0);
@@ -1234,26 +1365,35 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = true)
     public List<batchDownloads> getDLBatchesByBatchUploadId(Integer batchUploadId) throws Exception {
-	
-	Criteria dlBatches = sessionFactory.getCurrentSession().createCriteria(batchDownloads.class);
-	
-	dlBatches.add(Restrictions.eq("batchUploadId", batchUploadId));
-	
-	List<batchDownloads> dlBatchesList = dlBatches.list();
-	return dlBatchesList;
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<batchDownloads> criteria = builder.createQuery(batchDownloads.class);
+        Root<batchDownloads> root = criteria.from(batchDownloads.class);
+
+        Predicate whereClause = builder.equal(root.get("batchUploadId"), batchUploadId);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
     
     @Override
     @Transactional(readOnly = true)
     public List<batchDownloads> getPendingResetBatches(Integer batchUploadId) throws Exception {
-	
-	Criteria dlBatches = sessionFactory.getCurrentSession().createCriteria(batchDownloads.class);
-	
-	dlBatches.add(Restrictions.eq("batchUploadId", batchUploadId));
-	dlBatches.add(Restrictions.eq("statusId",66));
-	
-	List<batchDownloads> dlBatchesList = dlBatches.list();
-	return dlBatchesList;
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<batchDownloads> criteria = builder.createQuery(batchDownloads.class);
+        Root<batchDownloads> root = criteria.from(batchDownloads.class);
+
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("batchUploadId"), batchUploadId);
+        predicates[1] = builder.equal(root.get("statusId"), 66);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
     
     /**
@@ -1643,10 +1783,17 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     public directmessagesout getDirectAPIMessagesById(Integer directMessageId) {
 	//1 if list of statusId is null, we get all
 	try {
-	    Criteria findDirectAPIMessage = sessionFactory.getCurrentSession().createCriteria(directmessagesout.class);
-	    findDirectAPIMessage.add(Restrictions.eq("id", directMessageId));
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<directmessagesout> criteria = builder.createQuery(directmessagesout.class);
+            Root<directmessagesout> root = criteria.from(directmessagesout.class);
 
-	    List<directmessagesout> directAPIMessages = findDirectAPIMessage.list();
+            Predicate whereClause = builder.equal(root.get("id"), directMessageId);
+
+            criteria.where(whereClause);
+
+            List<directmessagesout> directAPIMessages = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+            
 	    if (!directAPIMessages.isEmpty()) {
 		return directAPIMessages.get(0);
 	    }
@@ -1778,12 +1925,20 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = true)
     public List<batchDownloads> getBatchesByOrgId(Integer orgId) {
-	try {
-	    /* Get a list of uploaded batches for these statuses */
-	    Criteria findBatches = sessionFactory.getCurrentSession().createCriteria(batchDownloads.class);
-	    findBatches.add(Restrictions.eq("orgId", orgId));
-	    return findBatches.list();
-	} catch (Exception ex) {
+	
+        try {
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<batchDownloads> criteria = builder.createQuery(batchDownloads.class);
+            Root<batchDownloads> root = criteria.from(batchDownloads.class);
+
+            Predicate whereClause = builder.equal(root.get("orgId"), orgId);
+
+            criteria.where(whereClause);
+
+            return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+            
+	} 
+        catch (Exception ex) {
 	    System.err.println("/*** getBatchesByOrgId " + ex.getCause().getMessage());
 	    return null;
 	}

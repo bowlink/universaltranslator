@@ -2,18 +2,17 @@ package com.hel.ut.dao.impl;
 
 import java.util.Date;
 import java.util.List;
-
-import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.hel.ut.dao.WebServicesDAO;
 import com.hel.ut.model.WSMessagesIn;
 import com.hel.ut.model.wsMessagesOut;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 /**
  * The WebServicesDAOImpl class will implement the DAO access layer to handle updates for web services messages
@@ -31,35 +30,60 @@ public class WebServicesDAOImpl implements WebServicesDAO {
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
-    public List<WSMessagesIn> getWSMessagesInList(Date fromDate, Date toDate,
-            Integer fetchSize) throws Exception {
-
-        Criteria findWSIn = sessionFactory.getCurrentSession().createCriteria(WSMessagesIn.class);
-
+    public List<WSMessagesIn> getWSMessagesInList(Date fromDate, Date toDate, Integer fetchSize) throws Exception {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<WSMessagesIn> criteria = builder.createQuery(WSMessagesIn.class);
+        Root<WSMessagesIn> root = criteria.from(WSMessagesIn.class);
+        
+        Predicate fromDateSearch = null;
+        Predicate toDateSearch = null;
+        Predicate whereClause = null;
+        
         if (!"".equals(fromDate)) {
-            findWSIn.add(Restrictions.ge("dateCreated", fromDate));
+            fromDateSearch = builder.greaterThanOrEqualTo(root.get("dateCreated"), fromDate);
         }
-
+        
         if (!"".equals(toDate)) {
-            findWSIn.add(Restrictions.lt("dateCreated", toDate));
+            toDateSearch = builder.lessThan(root.get("dateCreated"), toDate);
         }
-
-        findWSIn.addOrder(Order.desc("dateCreated"));
-
+        
+        if(fromDateSearch != null && toDateSearch != null) {
+            whereClause = builder.and(fromDateSearch,toDateSearch);
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        }
+        else if(fromDateSearch != null && toDateSearch == null) {
+            whereClause = fromDateSearch;
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        }
+        else if(fromDateSearch == null && toDateSearch != null) {
+            whereClause = toDateSearch;
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        }
+        
         if (fetchSize > 0) {
-            findWSIn.setMaxResults(fetchSize);
+            return sessionFactory.getCurrentSession().createQuery(criteria).setMaxResults(fetchSize).getResultList();
         }
-        return findWSIn.list();
-
+        else {
+            return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
     public WSMessagesIn getWSMessagesIn(Integer wsId) throws Exception {
-        Criteria findWSIn = sessionFactory.getCurrentSession().createCriteria(WSMessagesIn.class);
-        findWSIn.add(Restrictions.eq("id", wsId));
-        List<WSMessagesIn> wsList = findWSIn.list();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<WSMessagesIn> criteria = builder.createQuery(WSMessagesIn.class);
+        Root<WSMessagesIn> root = criteria.from(WSMessagesIn.class);
+
+        Predicate whereClause = builder.equal(root.get("id"), wsId);
+
+        criteria.where(whereClause);
+        
+        List<WSMessagesIn> wsList = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        
         if (wsList.size() == 1) {
             return wsList.get(0);
         } else {
@@ -79,34 +103,60 @@ public class WebServicesDAOImpl implements WebServicesDAO {
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
-    public List<wsMessagesOut> getWSMessagesOutList(Date fromDate, Date toDate,
-            Integer fetchSize) throws Exception {
-
-        Criteria findWSOut = sessionFactory.getCurrentSession().createCriteria(wsMessagesOut.class);
-
+    public List<wsMessagesOut> getWSMessagesOutList(Date fromDate, Date toDate,Integer fetchSize) throws Exception {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<wsMessagesOut> criteria = builder.createQuery(wsMessagesOut.class);
+        Root<wsMessagesOut> root = criteria.from(wsMessagesOut.class);
+        
+        Predicate fromDateSearch = null;
+        Predicate toDateSearch = null;
+        Predicate whereClause = null;
+        
         if (!"".equals(fromDate)) {
-            findWSOut.add(Restrictions.ge("dateCreated", fromDate));
+            fromDateSearch = builder.greaterThanOrEqualTo(root.get("dateCreated"), fromDate);
         }
-
+        
         if (!"".equals(toDate)) {
-            findWSOut.add(Restrictions.lt("dateCreated", toDate));
+            toDateSearch = builder.lessThan(root.get("dateCreated"), toDate);
         }
-
-        findWSOut.addOrder(Order.desc("dateCreated"));
-
+        
+        if(fromDateSearch != null && toDateSearch != null) {
+            whereClause = builder.and(fromDateSearch,toDateSearch);
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        }
+        else if(fromDateSearch != null && toDateSearch == null) {
+            whereClause = fromDateSearch;
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        }
+        else if(fromDateSearch == null && toDateSearch != null) {
+            whereClause = toDateSearch;
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        }
+        
         if (fetchSize > 0) {
-            findWSOut.setMaxResults(fetchSize);
+            return sessionFactory.getCurrentSession().createQuery(criteria).setMaxResults(fetchSize).getResultList();
         }
-        return findWSOut.list();
+        else {
+            return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        }
     }
 
     @Override
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public wsMessagesOut getWSMessagesOut(Integer wsId) throws Exception {
-        Criteria findWSOut = sessionFactory.getCurrentSession().createCriteria(wsMessagesOut.class);
-        findWSOut.add(Restrictions.eq("id", wsId));
-        List<wsMessagesOut> wsList = findWSOut.list();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<wsMessagesOut> criteria = builder.createQuery(wsMessagesOut.class);
+        Root<wsMessagesOut> root = criteria.from(wsMessagesOut.class);
+
+        Predicate whereClause = builder.equal(root.get("id"), wsId);
+
+        criteria.where(whereClause);
+        
+        List<wsMessagesOut> wsList = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        
         if (wsList.size() == 1) {
             return wsList.get(0);
         } else {
@@ -117,23 +167,33 @@ public class WebServicesDAOImpl implements WebServicesDAO {
     @Override
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
-    public List<wsMessagesOut> getWSMessagesOutByBatchId(Integer batchId)
-            throws Exception {
-        Criteria findWSOut = sessionFactory.getCurrentSession().createCriteria(wsMessagesOut.class);
-        findWSOut.add(Restrictions.eq("batchDownloadId", batchId));
-        List<wsMessagesOut> wsList = findWSOut.list();
-        return wsList;
+    public List<wsMessagesOut> getWSMessagesOutByBatchId(Integer batchId) throws Exception {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<wsMessagesOut> criteria = builder.createQuery(wsMessagesOut.class);
+        Root<wsMessagesOut> root = criteria.from(wsMessagesOut.class);
+
+        Predicate whereClause = builder.equal(root.get("batchDownloadId"), batchId);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     @Override
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
-    public List<WSMessagesIn> getWSMessagesInByBatchId(Integer batchId)
-            throws Exception {
-        Criteria findWS = sessionFactory.getCurrentSession().createCriteria(WSMessagesIn.class);
-        findWS.add(Restrictions.eq("batchUploadId", batchId));
-        List<WSMessagesIn> wsList = findWS.list();
-        return wsList;
+    public List<WSMessagesIn> getWSMessagesInByBatchId(Integer batchId) throws Exception {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<WSMessagesIn> criteria = builder.createQuery(WSMessagesIn.class);
+        Root<WSMessagesIn> root = criteria.from(WSMessagesIn.class);
+
+        Predicate whereClause = builder.equal(root.get("batchUploadId"), batchId);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     @Override
@@ -141,5 +201,4 @@ public class WebServicesDAOImpl implements WebServicesDAO {
     public void saveWSMessagesIn(WSMessagesIn wsIn) throws Exception {
         sessionFactory.getCurrentSession().saveOrUpdate(wsIn);
     }
-
 }

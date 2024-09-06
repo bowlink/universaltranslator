@@ -3,20 +3,19 @@ package com.hel.ut.dao.impl;
 import com.hel.ut.dao.RestAPIDAO;
 import java.util.Date;
 import java.util.List;
-
-import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.hel.ut.model.RestAPIMessagesIn;
 import com.hel.ut.model.RestAPIMessagesOut;
 import com.hel.ut.model.batchDownloads;
 import com.hel.ut.model.batchUploads;
 import java.text.SimpleDateFormat;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.hibernate.query.Query;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
@@ -44,12 +43,19 @@ public class RestAPIDAOImpl implements RestAPIDAO {
         Integer batchUploadId = 0;
 	
 	if(!"".equals(batchName)) {
-	    Criteria findBatchUpload = sessionFactory.getCurrentSession().createCriteria(batchUploads.class);
-	    findBatchUpload.add(Restrictions.eq("utBatchName",batchName));
-	    findBatchUpload.setMaxResults(1);
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<batchUploads> criteria = builder.createQuery(batchUploads.class);
+            Root<batchUploads> root = criteria.from(batchUploads.class);
+
+            Predicate whereClause = builder.equal(root.get("utBatchName"), batchName);
+
+            criteria.where(whereClause);
+
+            List<batchUploads> uploads = sessionFactory.getCurrentSession().createQuery(criteria).setMaxResults(1).getResultList();
 	    
-	    if(!findBatchUpload.list().isEmpty()) {
-		batchUploads batchUploadDetails = (batchUploads) findBatchUpload.list().get(0);
+	    if(!uploads.isEmpty()) {
+		batchUploads batchUploadDetails = (batchUploads) uploads.get(0);
 		batchUploadId = batchUploadDetails.getId();
 	    }
 	}
@@ -96,9 +102,17 @@ public class RestAPIDAOImpl implements RestAPIDAO {
     @Override
     @Transactional(readOnly = true)
     public RestAPIMessagesIn getRestAPIMessagesIn(Integer messageId) throws Exception {
-        Criteria findApiMessageIn = sessionFactory.getCurrentSession().createCriteria(RestAPIMessagesIn.class);
-        findApiMessageIn.add(Restrictions.eq("id", messageId));
-        List<RestAPIMessagesIn> apiMessageList = findApiMessageIn.list();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<RestAPIMessagesIn> criteria = builder.createQuery(RestAPIMessagesIn.class);
+        Root<RestAPIMessagesIn> root = criteria.from(RestAPIMessagesIn.class);
+
+        Predicate whereClause = builder.equal(root.get("id"), messageId);
+
+        criteria.where(whereClause);
+        
+        List<RestAPIMessagesIn> apiMessageList = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        
         if (apiMessageList.size() == 1) {
             return apiMessageList.get(0);
         } else {
@@ -114,37 +128,83 @@ public class RestAPIDAOImpl implements RestAPIDAO {
         Integer batchDownloadId = 0;
 	
 	if(!"".equals(batchName)) {
-	    Criteria findBatchDownload = sessionFactory.getCurrentSession().createCriteria(batchDownloads.class);
-	    findBatchDownload.add(Restrictions.eq("utBatchName",batchName));
-	    findBatchDownload.setMaxResults(1);
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<batchDownloads> criteria = builder.createQuery(batchDownloads.class);
+            Root<batchDownloads> root = criteria.from(batchDownloads.class);
+
+            Predicate whereClause = builder.equal(root.get("utBatchName"), batchName);
+
+            criteria.where(whereClause);
+
+            List<batchDownloads> downloads = sessionFactory.getCurrentSession().createQuery(criteria).setMaxResults(1).getResultList();
 	    
-	    if(!findBatchDownload.list().isEmpty()) {
-		batchDownloads batchDownloadDetails = (batchDownloads) findBatchDownload.list().get(0);
+	    if(!downloads.isEmpty()) {
+		batchDownloads batchDownloadDetails = (batchDownloads) downloads.get(0);
 		batchDownloadId = batchDownloadDetails.getId();
 	    }
 	}
-	
-	Criteria findRestOut = sessionFactory.getCurrentSession().createCriteria(RestAPIMessagesOut.class);
-
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<RestAPIMessagesOut> criteria = builder.createQuery(RestAPIMessagesOut.class);
+        Root<RestAPIMessagesOut> root = criteria.from(RestAPIMessagesOut.class);
+        
+        Predicate fromDateSearch = null;
+        Predicate toDateSearch = null;
+        Predicate batchDownloadIdSearch = null;
+        Predicate whereClause = null;
+        
         if (!"".equals(fromDate)) {
-            findRestOut.add(Restrictions.ge("dateCreated", fromDate));
+            fromDateSearch = builder.greaterThanOrEqualTo(root.get("dateCreated"), fromDate);
         }
-
+        
         if (!"".equals(toDate)) {
-            findRestOut.add(Restrictions.lt("dateCreated", toDate));
+            toDateSearch = builder.lessThan(root.get("dateCreated"), toDate);
         }
-	
-	if(batchDownloadId > 0) {
-	    findRestOut.add(Restrictions.eq("batchDownloadId",batchDownloadId));
-	}
-
-        findRestOut.addOrder(Order.desc("dateCreated"));
-
+        
+        if(batchDownloadId > 0) {
+            batchDownloadIdSearch = builder.equal(root.get("batchDownloadId"), batchDownloadId);
+        }
+        
+        if(fromDateSearch != null && toDateSearch != null && batchDownloadIdSearch != null) {
+            whereClause = builder.and(fromDateSearch,toDateSearch,batchDownloadIdSearch);
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        }
+        else if(fromDateSearch != null && toDateSearch != null && batchDownloadIdSearch == null) {
+            whereClause = builder.and(fromDateSearch,toDateSearch);
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        }
+        else if(fromDateSearch != null && toDateSearch == null && batchDownloadIdSearch != null) {
+            whereClause = builder.and(fromDateSearch,batchDownloadIdSearch);
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        }
+        else if(fromDateSearch == null && toDateSearch != null && batchDownloadIdSearch != null) {
+            whereClause = builder.and(toDateSearch,batchDownloadIdSearch);
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        }
+        else if(fromDateSearch != null && toDateSearch == null && batchDownloadIdSearch == null) {
+            whereClause = builder.and(fromDateSearch);
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        }
+        else if(fromDateSearch == null && toDateSearch != null && batchDownloadIdSearch == null) {
+            whereClause = builder.and(toDateSearch);
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        }
+        else if(fromDateSearch == null && toDateSearch == null && batchDownloadIdSearch != null) {
+            whereClause = builder.and(batchDownloadIdSearch);
+            criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        }
+        
+        List<RestAPIMessagesOut> apiOutMessages = null;
+                
         if (fetchSize > 0) {
-            findRestOut.setMaxResults(fetchSize);
+            apiOutMessages = sessionFactory.getCurrentSession().createQuery(criteria).setMaxResults(fetchSize).getResultList();
         }
-        return findRestOut.list();
-
+        else {
+            apiOutMessages = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        }
+        
+        return apiOutMessages;
     }
     
     @SuppressWarnings("unchecked")
@@ -315,9 +375,17 @@ public class RestAPIDAOImpl implements RestAPIDAO {
     @Override
     @Transactional(readOnly = true)
     public RestAPIMessagesOut getRestAPIMessagesOut(Integer messageId) throws Exception {
-        Criteria findApiMessageOut = sessionFactory.getCurrentSession().createCriteria(RestAPIMessagesOut.class);
-        findApiMessageOut.add(Restrictions.eq("id", messageId));
-        List<RestAPIMessagesOut> apiMessageList = findApiMessageOut.list();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<RestAPIMessagesOut> criteria = builder.createQuery(RestAPIMessagesOut.class);
+        Root<RestAPIMessagesOut> root = criteria.from(RestAPIMessagesOut.class);
+
+        Predicate whereClause = builder.equal(root.get("id"), messageId);
+
+        criteria.where(whereClause);
+        
+        List<RestAPIMessagesOut> apiMessageList = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        
         if (apiMessageList.size() == 1) {
             return apiMessageList.get(0);
         } else {
@@ -329,14 +397,21 @@ public class RestAPIDAOImpl implements RestAPIDAO {
     @Override
     @Transactional(readOnly = true)
     public RestAPIMessagesIn getRestAPIMessagesInByBatchId(Integer batchId) throws Exception {
-        Criteria findApiMessageIn = sessionFactory.getCurrentSession().createCriteria(RestAPIMessagesIn.class);
-        findApiMessageIn.add(Restrictions.eq("batchUploadId", batchId));
-        List<RestAPIMessagesIn> apiMessageList = findApiMessageIn.list();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<RestAPIMessagesIn> criteria = builder.createQuery(RestAPIMessagesIn.class);
+        Root<RestAPIMessagesIn> root = criteria.from(RestAPIMessagesIn.class);
+
+        Predicate whereClause = builder.equal(root.get("batchUploadId"), batchId);
+
+        criteria.where(whereClause);
+        
+        List<RestAPIMessagesIn> apiMessageList = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        
         if (apiMessageList.size() == 1) {
             return apiMessageList.get(0);
         } else {
             return null;
         }
     }
-
 }

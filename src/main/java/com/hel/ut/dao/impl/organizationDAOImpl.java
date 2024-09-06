@@ -1,14 +1,10 @@
 package com.hel.ut.dao.impl;
 
 import java.util.List;
-
 import org.hibernate.query.Query;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
 import com.hel.ut.dao.organizationDAO;
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.utUser;
@@ -18,7 +14,10 @@ import com.hel.ut.reference.fileSystem;
 import java.util.ArrayList;
 import java.util.Properties;
 import javax.annotation.Resource;
-import org.hibernate.criterion.Order;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.hibernate.exception.SQLGrammarException;
 import org.hibernate.transform.Transformers;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,9 +96,16 @@ public class organizationDAOImpl implements organizationDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<Organization> getOrganizationByName(String cleanURL) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Organization.class);
-        criteria.add(Restrictions.eq("cleanURL", cleanURL));
-        return criteria.list();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<Organization> criteria = builder.createQuery(Organization.class);
+        Root<Organization> root = criteria.from(Organization.class);
+
+        Predicate whereClause = builder.equal(root.get("cleanURL"), cleanURL);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -325,10 +331,16 @@ public class organizationDAOImpl implements organizationDAO {
 
         // Get a list of configurations for the passed in org
         List<Integer> configs = new ArrayList<>();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<utConfiguration> criteria = builder.createQuery(utConfiguration.class);
+        Root<utConfiguration> root = criteria.from(utConfiguration.class);
 
-        Criteria configurations = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-        configurations.add(Restrictions.eq("orgId", orgId));
-        List<utConfiguration> orgConfigs = configurations.list();
+        Predicate whereClause = builder.equal(root.get("orgId"), orgId);
+
+        criteria.where(whereClause);
+        
+        List<utConfiguration> orgConfigs = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
 
         if (orgConfigs.isEmpty()) {
             configs.add(0);
@@ -340,48 +352,71 @@ public class organizationDAOImpl implements organizationDAO {
 
         // Find all connections set up for the returned configurations
         List<Integer> targetOrgIds = new ArrayList<>();
+        
+        CriteriaQuery<configurationConnection> confiConnectionCriteria = builder.createQuery(configurationConnection.class);
+        Root<configurationConnection> confiConnectionRoot = confiConnectionCriteria.from(configurationConnection.class);
+        
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = confiConnectionRoot.get("sourceConfigId").in(configs);
+        predicates[1] = confiConnectionRoot.get("targetConfigId").in(configs);
 
-        Criteria connections = sessionFactory.getCurrentSession().createCriteria(configurationConnection.class);
-        connections.add(Restrictions.or(
-	    Restrictions.in("sourceConfigId", configs),
-	    Restrictions.in("targetConfigId", configs)
-        ));
-        List<configurationConnection> orgConnections = connections.list();
+        whereClause = builder.or(predicates);
+        
+        confiConnectionCriteria.where(whereClause);
+        
+        List<configurationConnection> orgConnections = sessionFactory.getCurrentSession().createQuery(confiConnectionCriteria).getResultList();
 
         // Find all organiations associated to the returend connections
         if (orgConnections.isEmpty()) {
             targetOrgIds.add(0);
         } 
 	else {
+            
+            CriteriaQuery<utConfiguration> configDetailsCriteria = builder.createQuery(utConfiguration.class);
+            Root<utConfiguration> utConfigurationRoot = configDetailsCriteria.from(utConfiguration.class);
+            
             for (configurationConnection connection : orgConnections) {
-
-                Criteria getSrcConfigDetails = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-                getSrcConfigDetails.add(Restrictions.eq("id", connection.getsourceConfigId()));
-
-                utConfiguration srcconfigDetails = (utConfiguration) getSrcConfigDetails.uniqueResult();
-
-                if (srcconfigDetails.getorgId() != orgId && !targetOrgIds.contains(srcconfigDetails.getorgId())) {
-                    targetOrgIds.add(srcconfigDetails.getorgId());
+                
+                whereClause = builder.equal(utConfigurationRoot.get("id"), connection.getsourceConfigId());
+                
+                configDetailsCriteria.where(whereClause);
+                
+                utConfiguration srcconfigDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configDetailsCriteria).uniqueResult();
+                
+                if(srcconfigDetails != null) {
+                    if (srcconfigDetails.getorgId() != orgId && !targetOrgIds.contains(srcconfigDetails.getorgId())) {
+                        targetOrgIds.add(srcconfigDetails.getorgId());
+                    }
                 }
 
-                Criteria getTgtConfigDetails = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-                getTgtConfigDetails.add(Restrictions.eq("id", connection.gettargetConfigId()));
-
-                utConfiguration TgtconfigDetails = (utConfiguration) getTgtConfigDetails.uniqueResult();
-
-                if (TgtconfigDetails.getorgId() != orgId && !targetOrgIds.contains(TgtconfigDetails.getorgId())) {
-                    targetOrgIds.add(TgtconfigDetails.getorgId());
+                whereClause = builder.equal(utConfigurationRoot.get("id"), connection.gettargetConfigId());
+                
+                configDetailsCriteria.where(whereClause);
+                
+                utConfiguration TgtconfigDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configDetailsCriteria).uniqueResult();
+                
+                if(TgtconfigDetails != null) {
+                    if (TgtconfigDetails.getorgId() != orgId && !targetOrgIds.contains(TgtconfigDetails.getorgId())) {
+                        targetOrgIds.add(TgtconfigDetails.getorgId());
+                    }
                 }
             }
         }
+        
+        builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<Organization> OrganizationCriteria = builder.createQuery(Organization.class);
+        Root<Organization> OrganizationRoot = OrganizationCriteria.from(Organization.class);
 
-        Criteria orgs = sessionFactory.getCurrentSession().createCriteria(Organization.class);
-        orgs.add(Restrictions.eq("status", true));
-        orgs.add(Restrictions.eq("publicOrg", true));
-        orgs.add(Restrictions.in("id", targetOrgIds));
-        orgs.addOrder(Order.asc("orgName"));
+        predicates = new Predicate[3];
+        predicates[0] = builder.equal(OrganizationRoot.get("status"), true);
+        predicates[1] = builder.equal(OrganizationRoot.get("publicOrg"), true);
+        predicates[2] = OrganizationRoot.get("id").in(targetOrgIds);
 
-        return orgs.list();
+        whereClause = builder.and(predicates);
+
+        OrganizationCriteria.orderBy(builder.asc(OrganizationRoot.get("orgName"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(OrganizationCriteria).getResultList();
     }
     
     /**

@@ -2,7 +2,6 @@ package com.hel.ut.dao.impl;
 
 import java.util.List;
 import java.util.Properties;
-
 import org.hibernate.query.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.transform.Transformers;
@@ -10,7 +9,6 @@ import org.hibernate.type.StandardBasicTypes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.hel.ut.dao.sysAdminDAO;
 import com.hel.ut.dao.UtilitiesDAO;
 import com.hel.ut.model.Crosswalks;
@@ -22,12 +20,11 @@ import com.hel.ut.model.MoveFilesLog;
 import com.hel.ut.model.mainHL7Details;
 import com.hel.ut.model.mainHL7Elements;
 import com.hel.ut.model.mainHL7Segments;
-
 import javax.annotation.Resource;
-
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 /**
  * @see com.hel.ut.dao.sysAdminDAO
@@ -349,15 +346,22 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public mainHL7Details getHL7Details(int hl7Id) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(mainHL7Details.class);
-        criteria.add(Restrictions.eq("id", hl7Id));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<mainHL7Details> criteria = builder.createQuery(mainHL7Details.class);
+        Root<mainHL7Details> root = criteria.from(mainHL7Details.class);
 
-        if (criteria.uniqueResult() == null) {
+        Predicate whereClause = builder.equal(root.get("id"), hl7Id);
+
+        criteria.where(whereClause);
+        
+        mainHL7Details HL7Details = (mainHL7Details) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
+
+        if (HL7Details == null) {
             return null;
         } else {
-            return (mainHL7Details) criteria.uniqueResult();
+            return HL7Details;
         }
-
     }
 
     /**
@@ -370,11 +374,16 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = true)
     public List<mainHL7Segments> getHL7Segments(int hl7Id) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(mainHL7Segments.class);
-        criteria.add(Restrictions.eq("hl7Id", hl7Id));
-        criteria.addOrder(Order.asc("displayPos"));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<mainHL7Segments> criteria = builder.createQuery(mainHL7Segments.class);
+        Root<mainHL7Segments> root = criteria.from(mainHL7Segments.class);
 
-        return criteria.list();
+        Predicate whereClause = builder.equal(root.get("hl7Id"), hl7Id);
+
+        criteria.orderBy(builder.asc(root.get("displayPos"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -387,12 +396,20 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = true)
     public List<mainHL7Elements> getHL7Elements(int hl7Id, int segmentId) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(mainHL7Elements.class);
-        criteria.add(Restrictions.eq("hl7Id", hl7Id));
-        criteria.add(Restrictions.eq("segmentId", segmentId));
-        criteria.addOrder(Order.asc("displayPos"));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<mainHL7Elements> criteria = builder.createQuery(mainHL7Elements.class);
+        Root<mainHL7Elements> root = criteria.from(mainHL7Elements.class);
 
-        return criteria.list();
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("hl7Id"), hl7Id);
+        predicates[1] = builder.equal(root.get("segmentId"), segmentId);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.orderBy(builder.asc(root.get("displayPos"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -476,28 +493,35 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = true)
     public List<lu_ProcessStatus> getAllProcessStatus() throws Exception {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<lu_ProcessStatus> criteria = builder.createQuery(lu_ProcessStatus.class);
+        Root<lu_ProcessStatus> root = criteria.from(lu_ProcessStatus.class);
 
-        Criteria statusList = sessionFactory.getCurrentSession().createCriteria(lu_ProcessStatus.class);
-        statusList.add(Restrictions.eq("status", true));
-        statusList.addOrder(Order.asc("category"));
-        statusList.addOrder(Order.asc("displayText"));
+        Predicate whereClause = builder.equal(root.get("status"), true);
 
-        return statusList.list();
-
+        criteria.orderBy(builder.asc(root.get("category")),builder.asc(root.get("displayText"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<lu_ProcessStatus> getAllHistoryFormProcessStatus() throws Exception {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<lu_ProcessStatus> criteria = builder.createQuery(lu_ProcessStatus.class);
+        Root<lu_ProcessStatus> root = criteria.from(lu_ProcessStatus.class);
 
-        Criteria statusList = sessionFactory.getCurrentSession().createCriteria(lu_ProcessStatus.class);
-        statusList.add(Restrictions.eq("status", true));
-        statusList.add(Restrictions.in("id", new Integer[]{17, 31, 21, 14, 11, 9, 16, 20, 15, 25, 29, 8, 3, 23, 37, 33, 19, 12, 10}));
-        statusList.addOrder(Order.asc("category"));
-        statusList.addOrder(Order.asc("displayText"));
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("status"), true);
+        predicates[1] = root.get("id").in(new Integer[]{17, 31, 21, 14, 11, 9, 16, 20, 15, 25, 29, 8, 3, 23, 37, 33, 19, 12, 10});
 
-        return statusList.list();
+        Predicate whereClause = builder.and(predicates);
 
+        criteria.orderBy(builder.asc(root.get("category")),builder.asc(root.get("displayText"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     @Override
@@ -511,15 +535,19 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     
     @Override
     @Transactional(readOnly = true)
-	public List<MoveFilesLog> getMoveFilesLog(Integer statusId) throws Exception {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(MoveFilesLog.class);
-		if (statusId != null) {
-			criteria.add(Restrictions.eq("statusId",statusId));
-		}
-       
-		List<MoveFilesLog> moveLogList = criteria.list();
-        return moveLogList;
-	}
+    public List<MoveFilesLog> getMoveFilesLog(Integer statusId) throws Exception {
+            
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<MoveFilesLog> criteria = builder.createQuery(MoveFilesLog.class);
+        Root<MoveFilesLog> root = criteria.from(MoveFilesLog.class);
+        
+        if (statusId != null) {
+            Predicate whereClause = builder.equal(root.get("statusId"), statusId);
+            criteria.where(whereClause);
+        }
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+    }
 
     @Override
     @Transactional(readOnly = false)
@@ -527,7 +555,6 @@ public class sysAdminDAOImpl implements sysAdminDAO {
         Query deleteFields = sessionFactory.getCurrentSession().createQuery("delete from MoveFilesLog where id = :moveFilePathId");
         deleteFields.setParameter("moveFilePathId", moveFileLog.getId());
         deleteFields.executeUpdate();
-	
     }
     
     @Override

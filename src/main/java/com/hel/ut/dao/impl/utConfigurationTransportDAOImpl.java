@@ -1,16 +1,11 @@
 package com.hel.ut.dao.impl;
 
 import java.util.List;
-
-import org.hibernate.Criteria;
 import org.hibernate.query.Query;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
-
 import com.hel.ut.model.TransportMethod;
 import com.hel.ut.model.configurationFTPFields;
 import com.hel.ut.model.configurationFormFields;
@@ -20,15 +15,17 @@ import com.hel.ut.model.configurationTransport;
 import com.hel.ut.model.configurationTransportMessageTypes;
 import com.hel.ut.model.configurationWebServiceFields;
 import com.hel.ut.model.configurationWebServiceSenders;
-
 import java.util.Iterator;
-
 import org.springframework.stereotype.Repository;
 import com.hel.ut.dao.utConfigurationTransportDAO;
 import com.hel.ut.model.configurationconnectionfieldmappings;
 import com.hel.ut.model.logftpconnectionerrors;
 import com.hel.ut.model.organizationDirectDetails;
 import com.hel.ut.model.utConfiguration;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 @Repository
 public class utConfigurationTransportDAOImpl implements utConfigurationTransportDAO {
@@ -214,15 +211,27 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public List<configurationFormFields> getConfigurationFields(int configId, int transportDetailId) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFormFields.class)
-            .add(Restrictions.eq("configId", configId));
-		
-	    if(transportDetailId > 0) {
-	       criteria .add(Restrictions.eq("transportDetailId", transportDetailId));
-	    }
-	    criteria.addOrder(Order.asc("fieldNo"));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationFormFields> criteria = builder.createQuery(configurationFormFields.class);
+        Root<configurationFormFields> root = criteria.from(configurationFormFields.class);
+        
+        Predicate whereClause = null;
+        
+        if(transportDetailId > 0) {
+            Predicate[] predicates = new Predicate[2];
+            predicates[0] = builder.equal(root.get("configId"), configId);
+            predicates[1] = builder.equal(root.get("transportDetailId"), transportDetailId);
 
-        return criteria.list();
+            whereClause = builder.and(predicates);
+        }
+        else {
+             whereClause = builder.equal(root.get("configId"), configId);
+        }
+        
+        criteria.orderBy(builder.asc(root.get("fieldNo"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -238,14 +247,22 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public List<configurationFormFields> getConfigurationFieldsByBucket(int configId, int transportDetailId, int bucket) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFormFields.class)
-	.add(Restrictions.eq("configId", configId))
-	.add(Restrictions.eq("transportDetailId", transportDetailId))
-	.add(Restrictions.eq("bucketNo", bucket))
-	.add(Restrictions.eq("useField", true))
-	.addOrder(Order.asc("bucketDspPos"));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationFormFields> criteria = builder.createQuery(configurationFormFields.class);
+        Root<configurationFormFields> root = criteria.from(configurationFormFields.class);
 
-        return criteria.list();
+        Predicate[] predicates = new Predicate[4];
+        predicates[0] = builder.equal(root.get("configId"), configId);
+        predicates[1] = builder.equal(root.get("transportDetailId"), transportDetailId);
+        predicates[2] = builder.equal(root.get("bucketNo"), bucket);
+        predicates[3] = builder.equal(root.get("useField"), true);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.orderBy(builder.asc(root.get("bucketDspPos"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -261,12 +278,21 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public configurationFormFields getConfigurationFieldsByFieldNo(int configId, int transportDetailId, int fieldNo) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFormFields.class)
-	.add(Restrictions.eq("configId", configId))
-	.add(Restrictions.eq("transportDetailId", transportDetailId))
-	.add(Restrictions.eq("fieldNo", fieldNo));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationFormFields> criteria = builder.createQuery(configurationFormFields.class);
+        Root<configurationFormFields> root = criteria.from(configurationFormFields.class);
 
-        return (configurationFormFields) criteria.uniqueResult();
+        Predicate[] predicates = new Predicate[3];
+        predicates[0] = builder.equal(root.get("configId"), configId);
+        predicates[1] = builder.equal(root.get("transportDetailId"), transportDetailId);
+        predicates[2] = builder.equal(root.get("fieldNo"), fieldNo);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.where(whereClause);
+        
+        return (configurationFormFields) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
     }
 
     /**
@@ -291,10 +317,16 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public List<configurationFTPFields> getTransportFTPDetails(int transportDetailId) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFTPFields.class)
-	.add(Restrictions.eq("transportId", transportDetailId));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationFTPFields> criteria = builder.createQuery(configurationFTPFields.class);
+        Root<configurationFTPFields> root = criteria.from(configurationFTPFields.class);
 
-        return criteria.list();
+        Predicate whereClause = builder.equal(root.get("transportId"), transportDetailId);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -308,11 +340,20 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public configurationFTPFields getTransportFTPDetailsPush(int transportDetailId) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFTPFields.class)
-	.add(Restrictions.eq("transportId", transportDetailId))
-	.add(Restrictions.eq("method", 2));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationFTPFields> criteria = builder.createQuery(configurationFTPFields.class);
+        Root<configurationFTPFields> root = criteria.from(configurationFTPFields.class);
 
-        return (configurationFTPFields) criteria.uniqueResult();
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("transportId"), transportDetailId);
+        predicates[1] = builder.equal(root.get("method"), 2);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.where(whereClause);
+        
+        return (configurationFTPFields) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
     }
 
     /**
@@ -326,11 +367,20 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public configurationFTPFields getTransportFTPDetailsPull(int transportDetailId) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFTPFields.class)
-	.add(Restrictions.eq("transportId", transportDetailId))
-	.add(Restrictions.eq("method", 1));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationFTPFields> criteria = builder.createQuery(configurationFTPFields.class);
+        Root<configurationFTPFields> root = criteria.from(configurationFTPFields.class);
 
-        return (configurationFTPFields) criteria.uniqueResult();
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("transportId"), transportDetailId);
+        predicates[1] = builder.equal(root.get("method"), 1);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.where(whereClause);
+        
+        return (configurationFTPFields) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
     }
 
     /**
@@ -413,12 +463,20 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public List<configurationFormFields> getRequiredFieldsForConfig(Integer configId) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFormFields.class)
-	.add(Restrictions.eq("configId", configId))
-	.add(Restrictions.eq("required", true))
-	.addOrder(Order.asc("fieldNo"));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationFormFields> criteria = builder.createQuery(configurationFormFields.class);
+        Root<configurationFormFields> root = criteria.from(configurationFormFields.class);
 
-        return criteria.list();
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("configId"), configId);
+        predicates[1] = builder.equal(root.get("required"), true);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.orderBy(builder.asc(root.get("fieldNo"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -431,15 +489,27 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public List<configurationFormFields> getCffByValidationType(Integer configId, Integer validationTypeId) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFormFields.class)
-	.add(Restrictions.eq("configId", configId));
-	
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationFormFields> criteria = builder.createQuery(configurationFormFields.class);
+        Root<configurationFormFields> root = criteria.from(configurationFormFields.class);
+        
+        Predicate whereClause = null;
+        
         if (validationTypeId != 0) {
-            criteria.add(Restrictions.eq("validationTypeId", validationTypeId));
-        }
-        criteria.addOrder(Order.asc("fieldNo"));
+            Predicate[] predicates = new Predicate[2];
+            predicates[0] = builder.equal(root.get("configId"), configId);
+            predicates[1] = builder.equal(root.get("validationTypeId"), validationTypeId);
 
-        return criteria.list();
+            whereClause = builder.and(predicates);
+        }
+        else {
+            whereClause = builder.equal(root.get("configId"), configId);
+        }
+
+        criteria.orderBy(builder.asc(root.get("fieldNo"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     @Override
@@ -511,11 +581,20 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public configurationFormFields getCFFByFieldNo(int configId, int fieldNo) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFormFields.class)
-	.add(Restrictions.eq("configId", configId))
-	.add(Restrictions.eq("fieldNo", fieldNo));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationFormFields> criteria = builder.createQuery(configurationFormFields.class);
+        Root<configurationFormFields> root = criteria.from(configurationFormFields.class);
 
-        return (configurationFormFields) criteria.uniqueResult();
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("configId"), configId);
+        predicates[1] = builder.equal(root.get("fieldNo"), fieldNo);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.where(whereClause);
+        
+        return (configurationFormFields) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
     }
 
     @Override
@@ -763,31 +842,50 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
      * The 'getTransFileDropDetails' function will return the file drop information for the passed in transportDetailId.
      *
      *
+     * @param transportDetailId
      * @return This function will return a list of Rhapsody details
+     * @throws java.lang.Exception
      */
     @Override
     @Transactional(readOnly = true)
     public List<configurationFileDropFields> getTransFileDropDetails(int transportDetailId) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFileDropFields.class)
-	.add(Restrictions.eq("transportId", transportDetailId));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationFileDropFields> criteria = builder.createQuery(configurationFileDropFields.class);
+        Root<configurationFileDropFields> root = criteria.from(configurationFileDropFields.class);
 
-        return criteria.list();
+        Predicate whereClause = builder.equal(root.get("transportId"), transportDetailId);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
      * The 'getTransFileDropDetailsPush' function will return the PUSH file drop details for the passed in transportDetailsId.
      *
      *
+     * @param transportDetailId
      * @return This function will return the PUSH file drop details
+     * @throws java.lang.Exception
      */
     @Override
     @Transactional(readOnly = true)
     public configurationFileDropFields getTransFileDropDetailsPush(int transportDetailId) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFileDropFields.class)
-	.add(Restrictions.eq("transportId", transportDetailId))
-	.add(Restrictions.eq("method", 2));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationFileDropFields> criteria = builder.createQuery(configurationFileDropFields.class);
+        Root<configurationFileDropFields> root = criteria.from(configurationFileDropFields.class);
 
-        return (configurationFileDropFields) criteria.uniqueResult();
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("transportId"), transportDetailId);
+        predicates[1] = builder.equal(root.get("method"), 2);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.where(whereClause);
+        
+        return (configurationFileDropFields) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
     }
 
     /**
@@ -801,11 +899,20 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public configurationFileDropFields getTransFileDropDetailsPull(int transportDetailId) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFileDropFields.class)
-	.add(Restrictions.eq("transportId", transportDetailId))
-	.add(Restrictions.eq("method", 1));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationFileDropFields> criteria = builder.createQuery(configurationFileDropFields.class);
+        Root<configurationFileDropFields> root = criteria.from(configurationFileDropFields.class);
 
-        return (configurationFileDropFields) criteria.uniqueResult();
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("transportId"), transportDetailId);
+        predicates[1] = builder.equal(root.get("method"), 1);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.where(whereClause);
+        
+        return (configurationFileDropFields) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
     }
 
     @Override
@@ -926,10 +1033,16 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public List<configurationWebServiceFields> getTransWSDetails(int transportDetailId) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationWebServiceFields.class)
-	.add(Restrictions.eq("transportId", transportDetailId));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationWebServiceFields> criteria = builder.createQuery(configurationWebServiceFields.class);
+        Root<configurationWebServiceFields> root = criteria.from(configurationWebServiceFields.class);
 
-        return criteria.list();
+        Predicate whereClause = builder.equal(root.get("transportId"), transportDetailId);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     @Override
@@ -1022,11 +1135,20 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public configurationWebServiceFields getTransWSDetailsPush(int transportDetailId) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationWebServiceFields.class)
-	.add(Restrictions.eq("transportId", transportDetailId))
-	.add(Restrictions.eq("method", 2));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationWebServiceFields> criteria = builder.createQuery(configurationWebServiceFields.class);
+        Root<configurationWebServiceFields> root = criteria.from(configurationWebServiceFields.class);
 
-        return (configurationWebServiceFields) criteria.uniqueResult();
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("transportId"), transportDetailId);
+        predicates[1] = builder.equal(root.get("method"), 2);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.where(whereClause);
+        
+        return (configurationWebServiceFields) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
     }
 
     /**
@@ -1040,21 +1162,36 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public configurationWebServiceFields getTransWSDetailsPull(int transportDetailId) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationWebServiceFields.class)
-	.add(Restrictions.eq("transportId", transportDetailId))
-	.add(Restrictions.eq("method", 1));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationWebServiceFields> criteria = builder.createQuery(configurationWebServiceFields.class);
+        Root<configurationWebServiceFields> root = criteria.from(configurationWebServiceFields.class);
 
-        return (configurationWebServiceFields) criteria.uniqueResult();
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("transportId"), transportDetailId);
+        predicates[1] = builder.equal(root.get("method"), 1);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.where(whereClause);
+        
+        return (configurationWebServiceFields) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
     public List<configurationWebServiceSenders> getWSSenderList(int transportId) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationWebServiceSenders.class)
-	.add(Restrictions.eq("transportId", transportId));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationWebServiceSenders> criteria = builder.createQuery(configurationWebServiceSenders.class);
+        Root<configurationWebServiceSenders> root = criteria.from(configurationWebServiceSenders.class);
 
-        return criteria.list();
+        Predicate whereClause = builder.equal(root.get("transportId"), transportId);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     @Override
@@ -1407,10 +1544,16 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public configurationFormFields getConfigurationFieldById(int fieldId) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationFormFields.class)
-                .add(Restrictions.eq("id", fieldId));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationFormFields> criteria = builder.createQuery(configurationFormFields.class);
+        Root<configurationFormFields> root = criteria.from(configurationFormFields.class);
 
-        return (configurationFormFields) criteria.uniqueResult();
+        Predicate whereClause = builder.equal(root.get("id"), fieldId);
+
+        criteria.where(whereClause);
+        
+        return (configurationFormFields) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
     }
     
     /**
@@ -1446,11 +1589,16 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public List<configurationconnectionfieldmappings> getConnectionFieldMappingsByConnectionId(Integer connectionId) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationconnectionfieldmappings.class)
-	.add(Restrictions.eq("connectionId", connectionId));
-	    criteria.addOrder(Order.asc("fieldNo"));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationconnectionfieldmappings> criteria = builder.createQuery(configurationconnectionfieldmappings.class);
+        Root<configurationconnectionfieldmappings> root = criteria.from(configurationconnectionfieldmappings.class);
 
-        return criteria.list();
+        Predicate whereClause = builder.equal(root.get("connectionId"), connectionId);
+
+        criteria.orderBy(builder.asc(root.get("fieldNo"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
     
     /**

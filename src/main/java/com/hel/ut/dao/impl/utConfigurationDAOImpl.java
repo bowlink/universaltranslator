@@ -3,17 +3,12 @@ package com.hel.ut.dao.impl;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.hibernate.Criteria;
 import org.hibernate.query.Query;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.hel.ut.model.CrosswalkData;
 import com.hel.ut.model.HL7Details;
 import com.hel.ut.model.HL7ElementComponents;
@@ -43,12 +38,15 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import org.springframework.stereotype.Repository;
 import com.hel.ut.dao.utConfigurationDAO;
 import com.hel.ut.dao.utConfigurationTransportDAO;
 import com.hel.ut.model.configurationFormFields;
 import com.hel.ut.model.configurationUpdateLogs;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DateUtil;
 
@@ -112,6 +110,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     /**
      * The 'getConfigurationsByOrgId' function will return a list of configurations for the organization id passed in
      *
+     * @param searchTerm
      * @Table configurations
      *
      * @param	orgId	This will hold the organization id to find
@@ -122,19 +121,27 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<utConfiguration> getConfigurationsByOrgId(int orgId, String searchTerm) {
-
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<utConfiguration> criteria = builder.createQuery(utConfiguration.class);
+        Root<utConfiguration> root = criteria.from(utConfiguration.class);
+        
+        Predicate whereClause = null;
+        
         if (!"".equals(searchTerm)) {
-            Criteria criteria = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-            criteria.add(Restrictions.eq("orgId", orgId)).addOrder(Order.desc("dateCreated"));
-            return criteria.list();
-        } 
-	else {
-            Criteria criteria = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-            criteria.add(Restrictions.eq("orgId", orgId));
-	    criteria.add(Restrictions.eq("deleted", false));
-            criteria.addOrder(Order.desc("dateCreated"));
-            return criteria.list();
+             whereClause = builder.equal(root.get("orgId"), orgId);
         }
+        else {
+            Predicate[] predicates = new Predicate[2];
+            predicates[0] = builder.equal(root.get("orgId"), orgId);
+            predicates[1] = builder.equal(root.get("deleted"), false);
+
+            whereClause = builder.and(predicates);
+        }
+
+        criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -150,12 +157,21 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<utConfiguration> getActiveConfigurationsByOrgId(int orgId) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-        criteria.add(Restrictions.eq("orgId", orgId));
-        criteria.add(Restrictions.eq("status", true));
-	criteria.add(Restrictions.eq("deleted", false));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<utConfiguration> criteria = builder.createQuery(utConfiguration.class);
+        Root<utConfiguration> root = criteria.from(utConfiguration.class);
 
-        return criteria.list();
+        Predicate[] predicates = new Predicate[3];
+        predicates[0] = builder.equal(root.get("orgId"), orgId);
+        predicates[1] = builder.equal(root.get("status"), true);
+        predicates[2] = builder.equal(root.get("deleted"), false);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -171,14 +187,32 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public utConfiguration getConfigurationByName(String configName, int orgId) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-        criteria.add(Restrictions.like("configName", configName));
-	if(orgId > 0) {
-	    criteria.add(Restrictions.eq("orgId", orgId));
-	}
-	criteria.add(Restrictions.eq("deleted", false));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<utConfiguration> criteria = builder.createQuery(utConfiguration.class);
+        Root<utConfiguration> root = criteria.from(utConfiguration.class);
+        
+        Predicate whereClause = null;
+        
+        if(orgId > 0) {
+            Predicate[] predicates = new Predicate[3];
+            predicates[0] = builder.like(root.get("configName"), configName);
+            predicates[1] = builder.equal(root.get("orgId"), orgId);
+            predicates[2] = builder.equal(root.get("deleted"), false);
 
-        return (utConfiguration) criteria.uniqueResult();
+            whereClause = builder.and(predicates);
+        }
+        else {
+            Predicate[] predicates = new Predicate[2];
+            predicates[0] = builder.like(root.get("configName"), configName);
+            predicates[1] = builder.equal(root.get("deleted"), false);
+
+            whereClause = builder.and(predicates);
+        }
+
+        criteria.where(whereClause);
+        
+        return (utConfiguration) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
     }
 
     /**
@@ -563,10 +597,16 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List<configurationConnectionSenders> getConnectionSenders(int connectionId) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationConnectionSenders.class);
-        criteria.add(Restrictions.eq("connectionId", connectionId));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationConnectionSenders> criteria = builder.createQuery(configurationConnectionSenders.class);
+        Root<configurationConnectionSenders> root = criteria.from(configurationConnectionSenders.class);
 
-        return criteria.list();
+        Predicate whereClause = builder.equal(root.get("connectionId"), connectionId);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -579,10 +619,16 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List<configurationConnectionReceivers> getConnectionReceivers(int connectionId) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationConnectionReceivers.class);
-        criteria.add(Restrictions.eq("connectionId", connectionId));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationConnectionReceivers> criteria = builder.createQuery(configurationConnectionReceivers.class);
+        Root<configurationConnectionReceivers> root = criteria.from(configurationConnectionReceivers.class);
 
-        return criteria.list();
+        Predicate whereClause = builder.equal(root.get("connectionId"), connectionId);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -740,32 +786,45 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List<utConfiguration> getActiveConfigurationsByUserId(int userId, int transportMethod) throws Exception {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationConnectionSenders> criteria = builder.createQuery(configurationConnectionSenders.class);
+        Root<configurationConnectionSenders> root = criteria.from(configurationConnectionSenders.class);
 
-        /* Find all SENDER connections for the passed in user */
-        Criteria findAuthConnections = sessionFactory.getCurrentSession().createCriteria(configurationConnectionSenders.class);
-        findAuthConnections.add(Restrictions.eq("userId", userId));
+        Predicate whereClause = builder.equal(root.get("userId"), userId);
 
-        /* This variables (senderConnections) will hold the list of authorized connections */
-        List<configurationConnectionSenders> senderConnections = findAuthConnections.list();
+        criteria.where(whereClause);
+        
+        List<configurationConnectionSenders> senderConnections = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
 
         /* 
          Create an emtpy array that will hold the list of configurations associated to the
          found connections.
          */
-        List<Integer> senderConfigList = new ArrayList<Integer>();
+        List<Integer> senderConfigList = new ArrayList<>();
 
         if (senderConnections.isEmpty()) {
             senderConfigList.add(0);
-        } else {
-            /* Search the connections by connectionId to pull the sourceConfigId */
+        } 
+        else {
+            CriteriaQuery<configurationConnection> connectionCriteria = builder.createQuery(configurationConnection.class);
+            Root<configurationConnection> connectionRoot = connectionCriteria.from(configurationConnection.class);
+            
+            configurationConnection connectionDetails = null;
+                    
+            // Search the connections by connectionId to pull the sourceConfigId
             for (configurationConnectionSenders connection : senderConnections) {
-                Criteria findConnectionDetails = sessionFactory.getCurrentSession().createCriteria(configurationConnection.class);
-                findConnectionDetails.add(Restrictions.eq("id", connection.getConnectionId()));
-                configurationConnection connectionDetails = (configurationConnection) findConnectionDetails.uniqueResult();
-
-                /* Add the sourceConfigId to the array */
-                senderConfigList.add(connectionDetails.getsourceConfigId());
-                findConnectionDetails = null;
+                
+                whereClause = builder.equal(root.get("id"), connection.getConnectionId());
+                connectionCriteria.where(whereClause);
+                
+                connectionDetails = (configurationConnection) sessionFactory.getCurrentSession().createQuery(connectionCriteria).uniqueResult();
+                
+                if(connectionDetails != null) {
+                    senderConfigList.add(connectionDetails.getsourceConfigId());
+                }
+                
+                connectionDetails = null;
             }
         }
 
@@ -773,12 +832,20 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
          Query to get a list of all ERG configurations that the logged in
          user is authorized to create
          */
-        List<Integer> ergConfigList = new ArrayList<Integer>();
-        Criteria findERGConfigs = sessionFactory.getCurrentSession().createCriteria(configurationTransport.class);
-        findERGConfigs.add(Restrictions.eq("transportMethodId", transportMethod)
-        ).add(Restrictions.and(Restrictions.in("configId", senderConfigList)));
+        List<Integer> ergConfigList = new ArrayList<>();
+        
+        CriteriaQuery<configurationTransport> transportCriteria = builder.createQuery(configurationTransport.class);
+        Root<configurationTransport> transportnRoot = transportCriteria.from(configurationTransport.class);
+        
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("transportMethodId"), transportMethod);
+        predicates[1] = root.get("configId").in(senderConfigList);
 
-        List<configurationTransport> ergConfigs = findERGConfigs.list();
+        whereClause = builder.and(predicates);
+        
+        transportCriteria.where(whereClause);
+        
+        List<configurationTransport> ergConfigs = sessionFactory.getCurrentSession().createQuery(transportCriteria).getResultList();
 
         for (configurationTransport config : ergConfigs) {
             ergConfigList.add(config.getconfigId());
@@ -792,16 +859,20 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
          Finally query the utConfiguration table to get all configurations in the authorized list
          of utConfiguration Ids.
          */
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-        criteria.add(Restrictions.eq("status", true));
-	criteria.add(Restrictions.eq("deleted", false));
-        criteria.add(Restrictions.eq("sourceType", 1));
-        criteria.add(Restrictions.and(
-                Restrictions.in("id", ergConfigList)
-        ));
+        CriteriaQuery<utConfiguration> configCriteria = builder.createQuery(utConfiguration.class);
+        Root<utConfiguration> configRoot = configCriteria.from(utConfiguration.class);
 
-        return criteria.list();
+        predicates = new Predicate[4];
+        predicates[0] = builder.equal(root.get("status"), true);
+        predicates[1] = builder.equal(root.get("deleted"), false);
+        predicates[2] = builder.equal(root.get("sourceType"), 1);
+        predicates[3] = root.get("id").in(ergConfigList);
 
+        whereClause = builder.and(predicates);
+
+        configCriteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(configCriteria).getResultList();
     }
 
     @Override
@@ -831,12 +902,20 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<CrosswalkData> getCrosswalkData(int cwId) {
+        
         try {
-            Criteria criteria = sessionFactory.getCurrentSession().createCriteria(CrosswalkData.class);
-            criteria.add(Restrictions.eq("crosswalkId", cwId));
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<CrosswalkData> criteria = builder.createQuery(CrosswalkData.class);
+            Root<CrosswalkData> root = criteria.from(CrosswalkData.class);
 
-            return criteria.list();
-        } catch (Exception e) {
+            Predicate whereClause = builder.equal(root.get("crosswalkId"), cwId);
+
+            criteria.where(whereClause);
+
+            return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        } 
+        catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -855,20 +934,29 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public HL7Details getHL7Details(int configId) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(HL7Details.class);
-        criteria.add(Restrictions.eq("configId", configId));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<HL7Details> criteria = builder.createQuery(HL7Details.class);
+        Root<HL7Details> root = criteria.from(HL7Details.class);
 
-        if (criteria.uniqueResult() == null) {
+        Predicate whereClause = builder.equal(root.get("configId"), configId);
+
+        criteria.where(whereClause);
+
+        HL7Details details = (HL7Details) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
+
+        if (details == null) {
             return null;
-        } else {
-            return (HL7Details) criteria.uniqueResult();
+        } 
+        else {
+            return details;
         }
-
     }
 
     /**
      * The 'getHL7Segments' function will return the list of segments for a specific HL7 Message.
      *
+     * @param hl7Id
      * @Table configurationHL7Segments
      *
      * @return This function will return a list of HL7Segment objects
@@ -876,11 +964,16 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List<HL7Segments> getHL7Segments(int hl7Id) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(HL7Segments.class);
-        criteria.add(Restrictions.eq("hl7Id", hl7Id));
-        criteria.addOrder(Order.asc("displayPos"));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<HL7Segments> criteria = builder.createQuery(HL7Segments.class);
+        Root<HL7Segments> root = criteria.from(HL7Segments.class);
 
-        return criteria.list();
+        Predicate whereClause = builder.equal(root.get("hl7Id"), hl7Id);
+
+        criteria.orderBy(builder.asc(root.get("displayPos"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -893,12 +986,20 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List<HL7Elements> getHL7Elements(int hl7Id, int segmentId) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(HL7Elements.class);
-        criteria.add(Restrictions.eq("hl7Id", hl7Id));
-        criteria.add(Restrictions.eq("segmentId", segmentId));
-        criteria.addOrder(Order.asc("displayPos"));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<HL7Elements> criteria = builder.createQuery(HL7Elements.class);
+        Root<HL7Elements> root = criteria.from(HL7Elements.class);
 
-        return criteria.list();
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("hl7Id"), hl7Id);
+        predicates[1] = builder.equal(root.get("segmentId"), segmentId);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.orderBy(builder.asc(root.get("displayPos"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -911,11 +1012,16 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List<HL7ElementComponents> getHL7ElementComponents(int elementId) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(HL7ElementComponents.class);
-        criteria.add(Restrictions.eq("elementId", elementId));
-        criteria.addOrder(Order.asc("displayPos"));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<HL7ElementComponents> criteria = builder.createQuery(HL7ElementComponents.class);
+        Root<HL7ElementComponents> root = criteria.from(HL7ElementComponents.class);
 
-        return criteria.list();
+        Predicate whereClause = builder.equal(root.get("elementId"), elementId);
+
+        criteria.orderBy(builder.asc(root.get("displayPos"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**
@@ -1154,12 +1260,23 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public configurationExcelDetails getExcelDetails(Integer configId, Integer orgId) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationExcelDetails.class);
-        criteria.add(Restrictions.eq("configId", configId));
-        criteria.add(Restrictions.eq("orgId", orgId));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationExcelDetails> criteria = builder.createQuery(configurationExcelDetails.class);
+        Root<configurationExcelDetails> root = criteria.from(configurationExcelDetails.class);
 
-        if (criteria.list().size() > 0) {
-            return (configurationExcelDetails) criteria.list().get(0);
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("configId"), configId);
+        predicates[1] = builder.equal(root.get("orgId"), orgId);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.where(whereClause);
+        
+        List<configurationExcelDetails> excelDetails = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+
+        if (excelDetails.size() > 0) {
+            return (configurationExcelDetails) excelDetails.get(0);
         } else {
             return null;
         }
@@ -1917,32 +2034,49 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List<utConfiguration> getActiveConfigurationsByTransportType(int userId, List<Integer> transportMethods) throws Exception {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationConnectionSenders> criteria = builder.createQuery(configurationConnectionSenders.class);
+        Root<configurationConnectionSenders> root = criteria.from(configurationConnectionSenders.class);
 
+        Predicate whereClause = builder.equal(root.get("userId"), userId);
+
+        criteria.where(whereClause);
+        
         /* Find all SENDER connections for the passed in user */
-        Criteria findAuthConnections = sessionFactory.getCurrentSession().createCriteria(configurationConnectionSenders.class);
-        findAuthConnections.add(Restrictions.eq("userId", userId));
-
-        /* This variables (senderConnections) will hold the list of authorized connections */
-        List<configurationConnectionSenders> senderConnections = findAuthConnections.list();
+        List<configurationConnectionSenders> senderConnections = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
 
         /* 
          Create an emtpy array that will hold the list of configurations associated to the
          found connections.
          */
-        List<Integer> senderConfigList = new ArrayList<Integer>();
+        List<Integer> senderConfigList = new ArrayList<>();
 
         if (senderConnections.isEmpty()) {
             senderConfigList.add(0);
-        } else {
-            /* Search the connections by connectionId to pull the sourceConfigId */
+        } 
+        else {
+            
+            CriteriaQuery<configurationConnection> connectionCriteria = builder.createQuery(configurationConnection.class);
+            Root<configurationConnection> connectionRoot = connectionCriteria.from(configurationConnection.class);
+            
+            configurationConnection connectionDetails = null;
+            
+            // Search the connections by connectionId to pull the sourceConfigId
             for (configurationConnectionSenders connection : senderConnections) {
-                Criteria findConnectionDetails = sessionFactory.getCurrentSession().createCriteria(configurationConnection.class);
-                findConnectionDetails.add(Restrictions.eq("id", connection.getConnectionId()));
-                configurationConnection connectionDetails = (configurationConnection) findConnectionDetails.uniqueResult();
-
-                /* Add the sourceConfigId to the array */
-                senderConfigList.add(connectionDetails.getsourceConfigId());
-                findConnectionDetails = null;
+                
+                whereClause = builder.equal(connectionRoot.get("id"), connection.getConnectionId());
+                
+                connectionCriteria.where(whereClause);
+                
+                connectionDetails = (configurationConnection) sessionFactory.getCurrentSession().createQuery(connectionCriteria).uniqueResult();
+                
+                if(connectionDetails != null) {
+                    // Add the sourceConfigId to the array
+                    senderConfigList.add(connectionDetails.getsourceConfigId());
+                }
+                
+                connectionDetails = null;
             }
         }
 
@@ -1950,15 +2084,25 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
          Query to get a list of all ERG configurations that the logged in
          user is authorized to create
          */
-        List<Integer> ergConfigList = new ArrayList<Integer>();
-        Criteria findERGConfigs = sessionFactory.getCurrentSession().createCriteria(configurationTransport.class);
-        findERGConfigs.add(Restrictions.in("transportMethodId", transportMethods)
-        ).add(Restrictions.and(Restrictions.in("configId", senderConfigList)));
+        List<Integer> ergConfigList = new ArrayList<>();
+        
+        CriteriaQuery<configurationTransport> transportCriteria = builder.createQuery(configurationTransport.class);
+        Root<configurationTransport> transportRoot = transportCriteria.from(configurationTransport.class);
+        
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = transportRoot.get("transportMethodId").in(transportMethods);
+        predicates[1] = transportRoot.get("configId").in(senderConfigList);
 
-        List<configurationTransport> ergConfigs = findERGConfigs.list();
-
-        for (configurationTransport config : ergConfigs) {
-            ergConfigList.add(config.getconfigId());
+        whereClause = builder.and(predicates);
+        
+        transportCriteria.where(whereClause);
+        
+        List<configurationTransport> ergConfigs = sessionFactory.getCurrentSession().createQuery(transportCriteria).getResultList();
+        
+        if(!ergConfigs.isEmpty()) {
+            for (configurationTransport config : ergConfigs) {
+                ergConfigList.add(config.getconfigId());
+            }
         }
 
         if (ergConfigList.isEmpty()) {
@@ -1969,16 +2113,20 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
          Finally query the utConfiguration table to get all configurations in the authorized list
          of utConfiguration Ids.
          */
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-        criteria.add(Restrictions.eq("status", true));
-	criteria.add(Restrictions.eq("deleted", false));
-        criteria.add(Restrictions.eq("sourceType", 1));
-        criteria.add(Restrictions.and(
-                Restrictions.in("id", ergConfigList)
-        ));
+        CriteriaQuery<utConfiguration> configCriteria = builder.createQuery(utConfiguration.class);
+        Root<utConfiguration> configRoot = configCriteria.from(utConfiguration.class);
+        
+        predicates = new Predicate[4];
+        predicates[0] = builder.equal(root.get("status"), true);
+        predicates[1] = builder.equal(root.get("deleted"), false);
+        predicates[2] = builder.equal(root.get("sourceType"), 1);
+        predicates[3] = root.get("id").in(ergConfigList);
 
-        return criteria.list();
-
+        whereClause = builder.and(predicates);
+        
+        configCriteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(configCriteria).getResultList();
     }
     
     /**
@@ -2059,10 +2207,16 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public watchlist getDashboardWatchListById(int watchId) throws Exception {
-	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(watchlist.class);
-        criteria.add(Restrictions.eq("id", watchId));
-	
-	return (watchlist) criteria.uniqueResult();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<watchlist> criteria = builder.createQuery(watchlist.class);
+        Root<watchlist> root = criteria.from(watchlist.class);
+        
+        Predicate whereClause = builder.equal(root.get("id"), watchId);
+
+        criteria.where(whereClause);
+        
+        return (watchlist) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
     }
     
     /**
@@ -2198,10 +2352,16 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public watchlistEntry getWatchListEntry(Integer entryId) throws Exception {
-	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(watchlistEntry.class);
-        criteria.add(Restrictions.eq("id", entryId));
-	
-	return (watchlistEntry) criteria.uniqueResult();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<watchlistEntry> criteria = builder.createQuery(watchlistEntry.class);
+        Root<watchlistEntry> root = criteria.from(watchlistEntry.class);
+
+        Predicate whereClause = builder.equal(root.get("id"), entryId);
+
+        criteria.where(whereClause);
+        
+        return (watchlistEntry) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
     }
     
     @Override
@@ -2436,7 +2596,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     /**
      * The 'deleteConfigurationFTPInformation' function will remove the authorized receivers for the passed in connectionId.
      *
-     * @param connectionId The connection Id to remove receivers for
+     * @param transportId
      */
     @Override
     @Transactional(readOnly = false)
@@ -2450,11 +2610,19 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public configurationDataTranslations getDataTranslationById(Integer translationId) throws Exception {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(configurationDataTranslations.class);
-        criteria.add(Restrictions.eq("id", translationId));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationDataTranslations> criteria = builder.createQuery(configurationDataTranslations.class);
+        Root<configurationDataTranslations> root = criteria.from(configurationDataTranslations.class);
 
-        if (criteria.list().size() > 0) {
-            return (configurationDataTranslations) criteria.uniqueResult();
+        Predicate whereClause = builder.equal(root.get("id"), translationId);
+
+        criteria.where(whereClause);
+        
+        List<configurationDataTranslations> dataTranslations = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+
+        if (!dataTranslations.isEmpty()) {
+            return (configurationDataTranslations) dataTranslations.get(0);
         } else {
             return null;
         }

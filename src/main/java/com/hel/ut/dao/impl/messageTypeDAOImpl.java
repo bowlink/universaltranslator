@@ -3,9 +3,7 @@ package com.hel.ut.dao.impl;
 import java.util.List;
 import java.util.Properties;
 import javax.annotation.Resource;
-import org.hibernate.Criteria;
 import org.hibernate.query.Query;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -14,7 +12,10 @@ import com.hel.ut.dao.messageTypeDAO;
 import com.hel.ut.model.CrosswalkData;
 import com.hel.ut.model.Crosswalks;
 import com.hel.ut.model.validationType;
-import org.hibernate.criterion.Disjunction;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 
@@ -49,20 +50,29 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Override
     @Transactional(readOnly = true)
     public double findTotalCrosswalks(int orgId) {
-
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Crosswalks.class);
-
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<Crosswalks> criteria = builder.createQuery(Crosswalks.class);
+        Root<Crosswalks> root = criteria.from(Crosswalks.class);
+        
+        Predicate whereClause = null;
+        
         if (orgId == 0) {
-            criteria.add(Restrictions.eq("orgId", 0));
-        } else {
-            Disjunction or = Restrictions.disjunction();
-            or.add(Restrictions.eq("orgId", 0));
-            or.add(Restrictions.eq("orgId", orgId));
-            criteria.add(or);
-
+             whereClause = builder.equal(root.get("orgId"), 0);
+        }
+        else {
+            Predicate[] predicates = new Predicate[2];
+            predicates[0] = builder.equal(root.get("orgId"), 0);
+            predicates[1] = builder.equal(root.get("orgId"), orgId);
+            
+            whereClause = builder.or(predicates);
         }
 
-        double totalCrosswalks = (double) criteria.list().size();
+        criteria.where(whereClause);
+        
+        List<Crosswalks> croswalks = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+
+        double totalCrosswalks = (double) croswalks.size();
 
         return totalCrosswalks;
     }
@@ -342,10 +352,16 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Override
     @Transactional(readOnly = true)
     public String getCrosswalkName(int cwId) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Crosswalks.class);
-        criteria.add(Restrictions.eq("id", cwId));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<Crosswalks> criteria = builder.createQuery(Crosswalks.class);
+        Root<Crosswalks> root = criteria.from(Crosswalks.class);
 
-        Crosswalks cwDetails = (Crosswalks) criteria.uniqueResult();
+        Predicate whereClause = builder.equal(root.get("id"), cwId);
+
+        criteria.where(whereClause);
+        
+        Crosswalks cwDetails = (Crosswalks) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
 
         String cwName = "";
 	
@@ -504,19 +520,33 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Override
     @Transactional(readOnly = true)
     public Crosswalks getCrosswalkByNameAndOrg(String cwName, Integer orgId, String fileName) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Crosswalks.class);
-        criteria.add(Restrictions.eq("orgId", orgId));
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<Crosswalks> criteria = builder.createQuery(Crosswalks.class);
+        Root<Crosswalks> root = criteria.from(Crosswalks.class);
+
+        Predicate[] predicates = null;
+        
+        if(orgId == 0) {
+            predicates = new Predicate[2];
+            predicates[0] = builder.equal(root.get("orgId"), orgId);
+            predicates[1] = builder.equal(root.get("name"), cwName);
+        }
+        else {
+            predicates = new Predicate[3];
+            predicates[0] = builder.equal(root.get("orgId"), orgId);
+            predicates[1] = builder.like(root.get("name"), "%"+cwName);
+            predicates[2] = builder.equal(root.get("fileName"), fileName);
+        }
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.where(whereClause);
+        
+        List<Crosswalks> crosswalks = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
 	
-	if(orgId == 0) {
-	    criteria.add(Restrictions.eq("name", cwName));
-	}
-	else {
-	    criteria.add(Restrictions.like("name", "%"+cwName));
-	    criteria.add(Restrictions.eq("fileName", fileName));
-	}
-	
-	if(criteria.list().size() > 0) {
-	    Crosswalks cwDetails = (Crosswalks) criteria.list().get(0);
+	if(crosswalks.size() > 0) {
+	    Crosswalks cwDetails = (Crosswalks) crosswalks.get(0);
 	    return cwDetails;
 	}
 	else {

@@ -41,6 +41,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -216,9 +220,15 @@ public class transactionInDAOImpl implements transactionInDAO {
     /**
      * The 'getsentBatchesHistory' function will return a list of sent batches for the organization passed in.
      *
+     * @param userId
      * @param orgId The organization Id to find pending transactions for.
+     * @param toOrgId
+     * @param fromDate
+     * @param messageTypeId
+     * @param toDate
      *
      * @return The function will return a list of sent transactions
+     * @throws java.lang.Exception
      */
     @Override
     @Transactional(readOnly = true)
@@ -236,79 +246,115 @@ public class transactionInDAOImpl implements transactionInDAO {
      */
     @Transactional(readOnly = true)
     public List<batchUploads> findsentBatches(int userId, int orgId, int toOrgId, int messageTypeId, Date fromDate, Date toDate) throws Exception {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationConnectionSenders> criteria = builder.createQuery(configurationConnectionSenders.class);
+        Root<configurationConnectionSenders> root = criteria.from(configurationConnectionSenders.class);
 
-	/* Get a list of connections the user has access to */
-	Criteria connections = sessionFactory.getCurrentSession().createCriteria(configurationConnectionSenders.class);
-	connections.add(Restrictions.eq("userId", userId));
-	List<configurationConnectionSenders> userConnections = connections.list();
+        Predicate whereClause = builder.equal(root.get("userId"), userId);
 
-	List<Integer> messageTypeList = new ArrayList<Integer>();
-	List<Integer> targetOrgList = new ArrayList<Integer>();
+        criteria.where(whereClause);
+        
+        List<configurationConnectionSenders> userConnections = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+
+	List<Integer> messageTypeList = new ArrayList<>();
+	List<Integer> targetOrgList = new ArrayList<>();
 
 	if (userConnections.isEmpty()) {
 	    messageTypeList.add(0);
 	    targetOrgList.add(0);
-	} else {
+	} 
+        else {
+            
+            CriteriaQuery<configurationConnection> connectionCriteria = builder.createQuery(configurationConnection.class);
+            Root<configurationConnection> connectionRoot = connectionCriteria.from(configurationConnection.class);
+            
+            CriteriaQuery<utConfiguration> configCriteria = builder.createQuery(utConfiguration.class);
+            Root<utConfiguration> configRoot = configCriteria.from(utConfiguration.class);
+            
+            whereClause = null;
 
 	    for (configurationConnectionSenders userConnection : userConnections) {
-		Criteria connection = sessionFactory.getCurrentSession().createCriteria(configurationConnection.class);
-		connection.add(Restrictions.eq("id", userConnection.getConnectionId()));
+                
+                whereClause = builder.equal(connectionRoot.get("id"), userConnection.getConnectionId());
+                connectionCriteria.where(whereClause);
 
-		configurationConnection connectionInfo = (configurationConnection) connection.uniqueResult();
+		configurationConnection connectionInfo = (configurationConnection) sessionFactory.getCurrentSession().createQuery(connectionCriteria).uniqueResult();
 
 		/* Get the message type for the utConfiguration */
-		Criteria sourceconfigurationQuery = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-		sourceconfigurationQuery.add(Restrictions.eq("id", connectionInfo.getsourceConfigId()));
+		whereClause = builder.equal(configRoot.get("id"), connectionInfo.getsourceConfigId());
+		configCriteria.where(whereClause);
 
-		utConfiguration configDetails = (utConfiguration) sourceconfigurationQuery.uniqueResult();
+		utConfiguration configDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
+                
+                if(configDetails != null) {
+                    if (messageTypeId == 0) {
+                        messageTypeList.add(configDetails.getMessageTypeId());
+                    } 
+                    else if (messageTypeId == configDetails.getMessageTypeId()) {
+                        messageTypeList.add(configDetails.getMessageTypeId());
+                    }
+                }
 
-		/* Add the message type to the message type list */
-		if (messageTypeId == 0) {
-		    messageTypeList.add(configDetails.getMessageTypeId());
-		} else if (messageTypeId == configDetails.getMessageTypeId()) {
-		    messageTypeList.add(configDetails.getMessageTypeId());
-		}
-
-		/* Get the list of target orgs */
-		Criteria targetconfigurationQuery = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-		targetconfigurationQuery.add(Restrictions.eq("id", connectionInfo.gettargetConfigId()));
-		utConfiguration targetconfigDetails = (utConfiguration) targetconfigurationQuery.uniqueResult();
-
-		/* Add the target org to the target organization list */
-		if (toOrgId == 0) {
-		    targetOrgList.add(targetconfigDetails.getorgId());
-		} else if (toOrgId == targetconfigDetails.getorgId()) {
-		    targetOrgList.add(targetconfigDetails.getorgId());
-		}
+		whereClause = builder.equal(configRoot.get("id"), connectionInfo.gettargetConfigId());
+                configCriteria.where(whereClause);
+                
+                utConfiguration targetconfigDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
+                
+                if(targetconfigDetails != null) {
+                    /* Add the target org to the target organization list */
+                    if (toOrgId == 0) {
+                        targetOrgList.add(targetconfigDetails.getorgId());
+                    } 
+                    else if (toOrgId == targetconfigDetails.getorgId()) {
+                        targetOrgList.add(targetconfigDetails.getorgId());
+                    }
+                }
 	    }
 	}
 
-
-	Criteria findBatches = sessionFactory.getCurrentSession().createCriteria(batchUploads.class);
-	findBatches.add(Restrictions.or(
-		Restrictions.eq("statusId", 4), /* Submission Being Processed */
-		Restrictions.eq("statusId", 22), /* Submission Delivery Locked */
-		Restrictions.eq("statusId", 23), /* Submission Delivery Completed */
-		Restrictions.eq("statusId", 24), /* Submission Processing Completed */
-		Restrictions.eq("statusId", 25), /* Target Batch Creation in process */
-		Restrictions.eq("statusId", 28), /* Target Batch Creation in process */
-		Restrictions.eq("statusId", 29), /* Submission Processed Errored */
-		Restrictions.eq("statusId", 30), /* Target Creation Errored */
-		Restrictions.eq("statusId", 32) /* Submission Cancelled */
-	)
-	);
-
-	if (!"".equals(fromDate)) {
-	    findBatches.add(Restrictions.ge("dateSubmitted", fromDate));
+        CriteriaQuery<batchUploads> batchUploadCriteria = builder.createQuery(batchUploads.class);
+        Root<batchUploads> batchUploadRoot = batchUploadCriteria.from(batchUploads.class);
+        
+        Predicate[] predicates = new Predicate[9];
+        predicates[0] = builder.equal(batchUploadRoot.get("statusId"), 4);
+        predicates[1] = builder.equal(batchUploadRoot.get("statusId"), 22);
+        predicates[2] = builder.equal(batchUploadRoot.get("statusId"), 23);
+        predicates[3] = builder.equal(batchUploadRoot.get("statusId"), 24);
+        predicates[4] = builder.equal(batchUploadRoot.get("statusId"), 25);
+        predicates[5] = builder.equal(batchUploadRoot.get("statusId"), 28);
+        predicates[6] = builder.equal(batchUploadRoot.get("statusId"), 29);
+        predicates[7] = builder.equal(batchUploadRoot.get("statusId"), 30);
+        predicates[8] = builder.equal(batchUploadRoot.get("statusId"), 32);
+        
+        Predicate statusQuery = builder.or(predicates);
+        
+        Predicate fromDateQuery = null;
+        if (!"".equals(fromDate)) {
+            fromDateQuery = builder.greaterThanOrEqualTo(batchUploadRoot.get("dateSubmitted"), fromDate);
 	}
 
+        Predicate toDateQuery = null;
 	if (!"".equals(toDate)) {
-	    findBatches.add(Restrictions.lt("dateSubmitted", toDate));
+            toDateQuery = builder.lessThan(batchUploadRoot.get("dateSubmitted"), toDate);
 	}
+        
+        if(fromDateQuery != null && toDateQuery != null) {
+            whereClause = builder.and(statusQuery,fromDateQuery,toDateQuery);
+        }
+        else if (fromDateQuery != null && toDateQuery == null) {
+            whereClause = builder.and(statusQuery,fromDateQuery);
+        }
+        else if (fromDateQuery == null && toDateQuery != null) {
+            whereClause = builder.and(statusQuery,toDateQuery);
+        }
+        else {
+            whereClause = statusQuery;
+        }
 
-	findBatches.addOrder(Order.desc("dateSubmitted"));
-
-	return findBatches.list();
+        batchUploadCriteria.orderBy(builder.desc(batchUploadRoot.get("dateSubmitted"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(batchUploadCriteria).getResultList();
     }
 
     /**
@@ -386,45 +432,57 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Override
     @Transactional(readOnly = true)
     public List<batchUploads> getuploadedBatches(int userId, int orgId, Date fromDate, Date toDate, List<Integer> excludedStatusIds) throws Exception {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationConnectionSenders> criteria = builder.createQuery(configurationConnectionSenders.class);
+        Root<configurationConnectionSenders> root = criteria.from(configurationConnectionSenders.class);
 
-	/* Get a list of connections the user has access to */
-	Criteria connections = sessionFactory.getCurrentSession().createCriteria(configurationConnectionSenders.class);
-	connections.add(Restrictions.eq("userId", userId));
-	List<configurationConnectionSenders> userConnections = connections.list();
+        Predicate whereClause = builder.equal(root.get("userId"), userId);
 
-	List<Integer> configIdList = new ArrayList<Integer>();
+        criteria.where(whereClause);
+        
+        List<configurationConnectionSenders> userConnections = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+
+	List<Integer> configIdList = new ArrayList<>();
 
 	if (userConnections.isEmpty()) {
 	    configIdList.add(0);
-	} else {
+	} 
+        else {
+            
+            CriteriaQuery<configurationConnection> connectionCriteria = builder.createQuery(configurationConnection.class);
+            Root<configurationConnection> connectionRoot = connectionCriteria.from(configurationConnection.class);
 
 	    for (configurationConnectionSenders userConnection : userConnections) {
-
-		Criteria connection = sessionFactory.getCurrentSession().createCriteria(configurationConnection.class);
-		connection.add(Restrictions.eq("id", userConnection.getConnectionId()));
-
-		configurationConnection connectionInfo = (configurationConnection) connection.uniqueResult();
-
-		if (!configIdList.contains(connectionInfo.getsourceConfigId())) {
-		    configIdList.add(connectionInfo.getsourceConfigId());
-		}
+                
+                whereClause = builder.equal(connectionRoot.get("id"), userConnection.getConnectionId());
+                connectionCriteria.where(whereClause);
+                
+                configurationConnection connectionInfo = (configurationConnection) sessionFactory.getCurrentSession().createQuery(connectionCriteria).uniqueResult();
+                
+                if(connectionInfo != null) {
+                    if (!configIdList.contains(connectionInfo.getsourceConfigId())) {
+                        configIdList.add(connectionInfo.getsourceConfigId());
+                    }
+                }
 	    }
 	}
+        
 	// multiconfig is 0 so we need to add
 	configIdList.add(0);
 
-	List<Integer> batchIdList = new ArrayList<Integer>();
+	List<Integer> batchIdList = new ArrayList<>();
 
 	SimpleDateFormat dateFormat = new SimpleDateFormat("E MMM dd HH:mm:ss Z yyyy");
 
 	String batchsql = "select bu.*, concat(u.firstName,' ',u.lastName) as usersName, ps.displayCode as statusValue "
-		+ "from batchUploads bu "
-		+ "inner join lu_processstatus ps on ps.id = bu.statusId "
-		+ "inner join users u on u.id = bu.userId "
-		+ "where bu.orgId = " + orgId + " "
-		+ "and configId in (" + configIdList.toString().replace("[", "").replace("]", "") + ") "
-		+ "and transportMethodId != 2 "
-		+ "and statusId not in (" + excludedStatusIds.toString().replace("[", "").replace("]", "") + ") ";
+        + "from batchUploads bu "
+        + "inner join lu_processstatus ps on ps.id = bu.statusId "
+        + "inner join users u on u.id = bu.userId "
+        + "where bu.orgId = " + orgId + " "
+        + "and configId in (" + configIdList.toString().replace("[", "").replace("]", "") + ") "
+        + "and transportMethodId != 2 "
+        + "and statusId not in (" + excludedStatusIds.toString().replace("[", "").replace("]", "") + ") ";
 
 	if (!"".equals(fromDate)) {
 	    Date date = (Date) dateFormat.parse(fromDate.toString());
@@ -443,10 +501,9 @@ public class transactionInDAOImpl implements transactionInDAO {
 	batchsql += "order by dateSubmitted desc";
 
 	Query batchquery = sessionFactory.getCurrentSession().createSQLQuery(batchsql)
-		.setResultTransformer(Transformers.aliasToBean(batchUploads.class));
+        .setResultTransformer(Transformers.aliasToBean(batchUploads.class));
 
 	return batchquery.list();
-
     }
 
     @Override
@@ -576,56 +633,74 @@ public class transactionInDAOImpl implements transactionInDAO {
     public List<batchUploads> getAllUploadedBatches(Date fromDate, Date toDate, Integer fetchSize, String batchName) throws Exception {
 
 	int firstResult = 0;
-
-	Criteria findBatches = sessionFactory.getCurrentSession().createCriteria(batchUploads.class);
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<batchUploads> criteria = builder.createQuery(batchUploads.class);
+        Root<batchUploads> root = criteria.from(batchUploads.class);
 	
 	if (!"".equals(batchName)) {
-	    findBatches.add(Restrictions.and(Restrictions.ge("totalRecordCount", 0),Restrictions.eq("utBatchName", batchName)));
+            
+            Predicate[] predicates = new Predicate[2];
+            predicates[0] = builder.equal(root.get("utBatchName"), batchName);
+            predicates[1] = builder.ge(root.get("totalRecordCount"), 0);
+
+            Predicate whereClause = builder.and(predicates);
+
+            criteria.orderBy(builder.desc(root.get("dateSubmitted"))).where(whereClause);
+
+            if (fetchSize > 0) {
+                return sessionFactory.getCurrentSession().createQuery(criteria).setMaxResults(fetchSize).getResultList();
+            }
+            else {
+                return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+            }
 	}
 	else {
-	    Criterion rest1 = null;
-	    Criterion rest2 = null;
+	    Predicate rest1 = null;
+	    Predicate rest2 = null;
 
 	    if (fromDate != null) {
 		if (!"".equals(fromDate)) {
 
 		    if (toDate != null) {
 			if (!"".equals(toDate)) {
-			    rest1 = Restrictions.and(Restrictions.ge("dateSubmitted", fromDate),Restrictions.lt("dateSubmitted", toDate));
-			    rest2 = Restrictions.and(Restrictions.ge("startDateTime", fromDate),Restrictions.lt("startDateTime", toDate));
+                            rest1 = builder.and(builder.greaterThanOrEqualTo(root.get("dateSubmitted"), fromDate),builder.lessThan(root.get("dateSubmitted"), toDate));
+                            rest2 = builder.and(builder.greaterThanOrEqualTo(root.get("startDateTime"), fromDate),builder.lessThan(root.get("startDateTime"), toDate));
 			}
 			else {
-			    rest1 = Restrictions.ge("dateSubmitted", fromDate);
-			    rest2 = Restrictions.ge("startDateTime", fromDate);
+                            rest1 = builder.greaterThanOrEqualTo(root.get("dateSubmitted"), fromDate);
+			    rest2 = builder.greaterThanOrEqualTo(root.get("startDateTime"), fromDate);
 			}
 		    }
 		    else {
-			rest1 = Restrictions.ge("dateSubmitted", fromDate);
-			rest2 = Restrictions.ge("startDateTime", fromDate);
+                        rest1 = builder.greaterThanOrEqualTo(root.get("dateSubmitted"), fromDate);
+                        rest2 = builder.greaterThanOrEqualTo(root.get("startDateTime"), fromDate);
 		    }
 		}
 	    }
 	    else {
 		if (toDate != null) {
 		    if (!"".equals(toDate)) {
-			rest1 = Restrictions.lt("dateSubmitted", toDate);
-			rest2 = Restrictions.lt("startDateTime", toDate);
+                        rest1 = builder.lessThan(root.get("dateSubmitted"), toDate);
+			rest2 = builder.lessThan(root.get("startDateTime"), toDate);
 		    }
 		}
 	    }
-	    findBatches.add(Restrictions.and(Restrictions.ge("totalRecordCount", 0),Restrictions.or(rest1,rest2)));
+            
+            Predicate dateSearch = builder.or(rest1,rest2);
+            
+            Predicate whereClause = builder.and(builder.ge(root.get("totalRecordCount"), 0),dateSearch);
+            
+            criteria.orderBy(builder.desc(root.get("dateSubmitted"))).where(whereClause);
+            
+            if (fetchSize > 0) {
+                return sessionFactory.getCurrentSession().createQuery(criteria).setMaxResults(fetchSize).getResultList();
+            }
+            else {
+                return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+            }
 	}
-	
-
-	findBatches.addOrder(Order.desc("dateSubmitted"));
-
-	if (fetchSize > 0) {
-	    findBatches.setMaxResults(fetchSize);
-	}
-	return findBatches.list();
     }
-
-    
 
     @Override
     @Transactional(readOnly = false)
@@ -791,26 +866,35 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Override
     @Transactional(readOnly = true)
     public List<Integer> getFeedbackReportConnection(int configId, int targetorgId) {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationConnection> criteria = builder.createQuery(configurationConnection.class);
+        Root<configurationConnection> root = criteria.from(configurationConnection.class);
 
-	Criteria configurationConnections = sessionFactory.getCurrentSession().createCriteria(configurationConnection.class);
-	configurationConnections.add(Restrictions.eq("sourceConfigId", configId));
-	configurationConnections.addOrder(Order.asc("dateCreated"));
+        Predicate whereClause = builder.equal(root.get("sourceConfigId"), configId);
 
-	List<configurationConnection> connections = configurationConnections.list();
+        criteria.orderBy(builder.asc(root.get("dateCreated"))).where(whereClause);
+        
+        List<configurationConnection> connections = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
 
 	List<Integer> connectionId = new ArrayList<>();
 
 	if (!connections.isEmpty()) {
+            
+            CriteriaQuery<utConfiguration> configCriteria = builder.createQuery(utConfiguration.class);
+            Root<utConfiguration> configRoot = configCriteria.from(utConfiguration.class);
 
 	    for (configurationConnection connection : connections) {
-		Criteria configurations = sessionFactory.getCurrentSession().createCriteria(utConfiguration.class);
-		configurations.add(Restrictions.eq("id", connection.gettargetConfigId()));
+		whereClause = builder.equal(configRoot.get("id"), connection.gettargetConfigId());
+                configCriteria.where(whereClause);
 
-		utConfiguration configDetails = (utConfiguration) configurations.uniqueResult();
-
-		if (configDetails.getorgId() == targetorgId) {
-		    connectionId.add(connection.getId());
-		}
+		utConfiguration configDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
+                
+                if(configDetails != null) {
+                    if (configDetails.getorgId() == targetorgId) {
+                        connectionId.add(connection.getId());
+                    }
+                }
 	    }
 	}
 
@@ -1392,12 +1476,18 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Transactional(readOnly = true)
     public List<batchUploads> getBatchesByStatusIds(List<Integer> statusIds) {
 	try {
-	    /* Get a list of uploaded batches for these statuses */
-	    Criteria findBatches = sessionFactory.getCurrentSession().createCriteria(batchUploads.class);
-	    findBatches.add(Restrictions.in("statusId", statusIds));
-	    findBatches.addOrder(Order.asc("dateSubmitted"));
-	    return findBatches.list();
-	} catch (Exception ex) {
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<batchUploads> criteria = builder.createQuery(batchUploads.class);
+            Root<batchUploads> root = criteria.from(batchUploads.class);
+
+            Predicate whereClause = root.get("statusId").in(statusIds);
+
+            criteria.orderBy(builder.asc(root.get("dateSubmitted"))).where(whereClause);
+
+            return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+	} 
+        catch (Exception ex) {
 	    System.err.println("getBatchesByStatusIds " + ex.getCause().getMessage());
 	    return null;
 	}
@@ -1869,19 +1959,23 @@ public class transactionInDAOImpl implements transactionInDAO {
     public List<WSMessagesIn> getWSMessagesByStatusId(List<Integer> statusIds) {
 	//1 if list of statusId is null, we get all
 	try {
-	    Criteria findWSMessages = sessionFactory.getCurrentSession().createCriteria(WSMessagesIn.class);
-	    if (statusIds.size() != 0) {
-		findWSMessages.add(Restrictions.in("statusId", statusIds));
-	    }
-
-	    List<WSMessagesIn> wsMessages = findWSMessages.list();
-	    return wsMessages;
-	} catch (Exception ex) {
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<WSMessagesIn> criteria = builder.createQuery(WSMessagesIn.class);
+            Root<WSMessagesIn> root = criteria.from(WSMessagesIn.class);
+            
+            if (statusIds.size() != 0) {
+                Predicate statusQuery = root.get("statusId").in(statusIds);
+                criteria.where(statusQuery);
+            }
+            
+            return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+	} 
+        catch (Exception ex) {
 	    System.err.println("getWSMessagesByStatusId " + ex.getCause());
 	    ex.printStackTrace();
 	    return null;
 	}
-
     }
 
     @Override
@@ -1890,14 +1984,22 @@ public class transactionInDAOImpl implements transactionInDAO {
     public WSMessagesIn getWSMessagesById(Integer wsMessageId) {
 	//1 if list of statusId is null, we get all
 	try {
-	    Criteria findWSMessage = sessionFactory.getCurrentSession().createCriteria(WSMessagesIn.class);
-	    findWSMessage.add(Restrictions.eq("id", wsMessageId));
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<WSMessagesIn> criteria = builder.createQuery(WSMessagesIn.class);
+            Root<WSMessagesIn> root = criteria.from(WSMessagesIn.class);
 
-	    List<WSMessagesIn> wsMessages = findWSMessage.list();
+            Predicate whereClause = builder.equal(root.get("id"), wsMessageId);
+
+            criteria.where(whereClause);
+
+            List<WSMessagesIn> wsMessages = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+            
 	    if (wsMessages.size() > 0) {
 		return wsMessages.get(0);
 	    }
-	} catch (Exception ex) {
+	} 
+        catch (Exception ex) {
 	    System.err.println("getWSMessagesById " + ex.getCause());
 	    ex.printStackTrace();
 	    return null;
@@ -2219,16 +2321,23 @@ public class transactionInDAOImpl implements transactionInDAO {
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
-    public List<referralActivityExports> getReferralActivityExportsByStatus(
-	    List<Integer> statusIds, Integer howMany) throws Exception {
-	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(referralActivityExports.class);
-	if (statusIds.size() > 0) {
-	    criteria.add(Restrictions.in("statusId", statusIds));
-	}
-	if (howMany > 0) {
-	    criteria.setMaxResults(howMany);
-	}
-	return criteria.list();
+    public List<referralActivityExports> getReferralActivityExportsByStatus(List<Integer> statusIds, Integer howMany) throws Exception {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<referralActivityExports> criteria = builder.createQuery(referralActivityExports.class);
+        Root<referralActivityExports> root = criteria.from(referralActivityExports.class);
+        
+        if (statusIds.size() > 0) {
+            Predicate whereClause = root.get("userName").in(statusIds);
+            criteria.where(whereClause);
+        }
+        
+        if (howMany > 0) {
+            return sessionFactory.getCurrentSession().createQuery(criteria).setMaxResults(howMany).getResultList();
+        }
+        else {
+            return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        }
     }
 
     /**
@@ -2269,12 +2378,21 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Override
     @Transactional(readOnly = true)
     public referralActivityExports getReferralActivityExportById(Integer exportId) throws Exception {
-	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(referralActivityExports.class);
-	criteria.add(Restrictions.eq("id", exportId));
-	List<referralActivityExports> exports = criteria.list();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<referralActivityExports> criteria = builder.createQuery(referralActivityExports.class);
+        Root<referralActivityExports> root = criteria.from(referralActivityExports.class);
+
+        Predicate whereClause = builder.equal(root.get("id"), exportId);
+
+        criteria.where(whereClause);
+        
+        List<referralActivityExports> exports = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        
 	if (exports.size() > 0) {
 	    return exports.get(0);
-	} else {
+	} 
+        else {
 	    return null;
 	}
     }
@@ -2536,12 +2654,12 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Transactional(readOnly = true)
     public List<batchUploads> getBatchesByStatusIdsAndDate(Date fromDate, Date toDate, Integer fetchSize, List<Integer> statusIds) throws Exception {
 	
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<batchUploads> criteria = builder.createQuery(batchUploads.class);
+        Root<batchUploads> root = criteria.from(batchUploads.class);
 	
-	Criteria findBatches = sessionFactory.getCurrentSession().createCriteria(batchUploads.class);
-	//findBatches.add(Restrictions.in("statusId",statusIds));
-	
-	Criterion rest1 = null;
-	Criterion rest2 = null;
+	Predicate rest1 = null;
+        Predicate rest2 = null;
 
 	if (fromDate != null) {
 	    if (!"".equals(fromDate)) {
@@ -2551,18 +2669,18 @@ public class transactionInDAOImpl implements transactionInDAO {
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(toDate);
 			cal.add(Calendar.DATE, 1);
-			
-			rest1 = Restrictions.and(Restrictions.ge("dateSubmitted", fromDate),Restrictions.lt("dateSubmitted", cal.getTime()));
-			rest2 = Restrictions.and(Restrictions.ge("startDateTime", fromDate),Restrictions.lt("startDateTime", cal.getTime()));
+                        
+                        rest1 = builder.and(builder.greaterThanOrEqualTo(root.get("dateSubmitted"), fromDate),builder.lessThan(root.get("dateSubmitted"), cal.getTime()));
+                        rest2 = builder.and(builder.greaterThanOrEqualTo(root.get("startDateTime"), fromDate),builder.lessThan(root.get("startDateTime"), cal.getTime()));
 		    }
 		    else {
-			rest1 = Restrictions.ge("dateSubmitted", fromDate);
-			rest2 = Restrictions.ge("startDateTime", fromDate);
+                        rest1 = builder.greaterThanOrEqualTo(root.get("dateSubmitted"), fromDate);
+                        rest2 = builder.greaterThanOrEqualTo(root.get("startDateTime"), fromDate);
 		    }
 		}
 		else {
-		    rest1 = Restrictions.ge("dateSubmitted", fromDate);
-		    rest2 = Restrictions.ge("startDateTime", fromDate);
+                    rest1 = builder.greaterThanOrEqualTo(root.get("dateSubmitted"), fromDate);
+                    rest2 = builder.greaterThanOrEqualTo(root.get("startDateTime"), fromDate);
 		}
 	    }
 	}
@@ -2572,43 +2690,58 @@ public class transactionInDAOImpl implements transactionInDAO {
 		    Calendar cal = Calendar.getInstance();
 		    cal.setTime(toDate);
 		    cal.add(Calendar.DATE, 1);
-		    rest1 = Restrictions.lt("dateSubmitted", cal.getTime());
-		    rest2 = Restrictions.lt("startDateTime", cal.getTime());
+                    
+                    rest1 = builder.lessThan(root.get("dateSubmitted"), cal.getTime());
+                    rest2 = builder.lessThan(root.get("startDateTime"), cal.getTime());
 		}
 	    }
 	}
-	
-	findBatches.add(Restrictions.and(Restrictions.in("statusId",statusIds),Restrictions.or(rest1,rest2)));
+        
+        Predicate dateSearch = builder.or(rest1,rest2);
+            
+        Predicate whereClause = builder.and(root.get("statusId").in(statusIds),dateSearch);
 
-	findBatches.addOrder(Order.desc("dateSubmitted"));
-
-	if (fetchSize > 0) {
-	    findBatches.setMaxResults(fetchSize);
-	}
-
-	return findBatches.list();
-	
+        criteria.orderBy(builder.desc(root.get("dateSubmitted"))).where(whereClause);
+        
+        if (fetchSize > 0) {
+            return sessionFactory.getCurrentSession().createQuery(criteria).setMaxResults(fetchSize).getResultList();
+        }
+        else {
+            return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
-    public batchRetry getBatchRetryByUploadId(Integer batchUploadId, Integer statusId)
-	    throws Exception {
-	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(batchRetry.class);
-	criteria.add(Restrictions.eq("batchUploadId", batchUploadId));
-	if (statusId > 0) {
-	    criteria.add(Restrictions.eq("fromStatusId", statusId));
-	}
-	criteria.addOrder(Order.desc("dateCreated"));
-	List<batchRetry> brList = criteria.list();
+    public batchRetry getBatchRetryByUploadId(Integer batchUploadId, Integer statusId) throws Exception {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<batchRetry> criteria = builder.createQuery(batchRetry.class);
+        Root<batchRetry> root = criteria.from(batchRetry.class);
+
+        Predicate batchUploadIdQuery = builder.equal(root.get("batchUploadId"), batchUploadId);
+        
+        Predicate whereClause = null;
+         
+        if (statusId > 0) {
+            Predicate statusIdQuery = builder.equal(root.get("fromStatusId"), statusId);
+            whereClause = builder.and(batchUploadIdQuery,statusIdQuery);
+        }
+        else {
+            whereClause = batchUploadIdQuery;
+        }
+
+        criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        
+        List<batchRetry> brList = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
 
 	if (brList.size() > 0) {
 	    return brList.get(0);
-	} else {
+	} 
+        else {
 	    return null;
 	}
-
     }
 
     @Override
@@ -2642,20 +2775,24 @@ public class transactionInDAOImpl implements transactionInDAO {
     public List<RestAPIMessagesIn> getRestAPIMessagesByStatusId(List<Integer> statusIds) {
 	//1 if list of statusId is null, we get all
 	try {
-	    Criteria findRestAPIMessages = sessionFactory.getCurrentSession().createCriteria(RestAPIMessagesIn.class);
-	    if (!statusIds.isEmpty()) {
-		findRestAPIMessages.add(Restrictions.in("statusId", statusIds));
-	    }
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<RestAPIMessagesIn> criteria = builder.createQuery(RestAPIMessagesIn.class);
+            Root<RestAPIMessagesIn> root = criteria.from(RestAPIMessagesIn.class);
+            
+            if (!statusIds.isEmpty()) {
+                Predicate statusIdQuery = root.get("statusId").in(statusIds);
+                criteria.where(statusIdQuery);
+            }
 
-	    List<RestAPIMessagesIn> restAPIMessages = findRestAPIMessages.list();
-	    return restAPIMessages;
+            return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
 
-	} catch (Exception ex) {
+	} 
+        catch (Exception ex) {
 	    System.err.println("getRestAPIMessagesByStatusId " + ex.getCause());
 	    ex.printStackTrace();
 	    return null;
 	}
-
     }
 
     @Override
@@ -2664,14 +2801,22 @@ public class transactionInDAOImpl implements transactionInDAO {
     public RestAPIMessagesIn getRestAPIMessagesById(Integer restAPIMessageId) {
 	//1 if list of statusId is null, we get all
 	try {
-	    Criteria findRestAPIMessage = sessionFactory.getCurrentSession().createCriteria(RestAPIMessagesIn.class);
-	    findRestAPIMessage.add(Restrictions.eq("id", restAPIMessageId));
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<RestAPIMessagesIn> criteria = builder.createQuery(RestAPIMessagesIn.class);
+            Root<RestAPIMessagesIn> root = criteria.from(RestAPIMessagesIn.class);
 
-	    List<RestAPIMessagesIn> restAPIMessages = findRestAPIMessage.list();
+            Predicate whereClause = builder.equal(root.get("id"), restAPIMessageId);
+
+            criteria.where(whereClause);
+
+            List<RestAPIMessagesIn> restAPIMessages = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+            
 	    if (!restAPIMessages.isEmpty()) {
 		return restAPIMessages.get(0);
 	    }
-	} catch (Exception ex) {
+	} 
+        catch (Exception ex) {
 	    System.err.println("getRestAPIMessagesById " + ex.getCause());
 	    ex.printStackTrace();
 	    return null;
@@ -3248,11 +3393,20 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Override
     @Transactional(readOnly = true)
     public List<MoveFilesLog> existingMoveFileLogs(Integer statusId, Integer methodId) throws Exception {
-	
-	Criteria criteria = sessionFactory.getCurrentSession().createCriteria(MoveFilesLog.class);
-	criteria.add(Restrictions.eq("statusId", statusId));
-	criteria.add(Restrictions.eq("transportMethodId", methodId));
-	return criteria.list();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<MoveFilesLog> criteria = builder.createQuery(MoveFilesLog.class);
+        Root<MoveFilesLog> root = criteria.from(MoveFilesLog.class);
+
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.equal(root.get("statusId"), statusId);
+        predicates[1] = builder.equal(root.get("transportMethodId"), methodId);
+
+        Predicate whereClause = builder.and(predicates);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
     
     /**
@@ -3292,20 +3446,24 @@ public class transactionInDAOImpl implements transactionInDAO {
     public List<directmessagesin> getDirectAPIMessagesByStatusId(List<Integer> statusIds) {
 	//1 if list of statusId is null, we get all
 	try {
-	    Criteria findDirectAPIMessages = sessionFactory.getCurrentSession().createCriteria(directmessagesin.class);
-	    if (!statusIds.isEmpty()) {
-		findDirectAPIMessages.add(Restrictions.in("statusId", statusIds));
-	    }
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<directmessagesin> criteria = builder.createQuery(directmessagesin.class);
+            Root<directmessagesin> root = criteria.from(directmessagesin.class);
+            
+            if (!statusIds.isEmpty()) {
+                Predicate statusIdQuery = root.get("statusId").in(statusIds);
+                criteria.where(statusIdQuery);
+            }
 
-	    List<directmessagesin> directAPIMessages = findDirectAPIMessages.list();
-	    return directAPIMessages;
+            return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
 
-	} catch (Exception ex) {
+	} 
+        catch (Exception ex) {
 	    System.err.println("getDirectAPIMessagesByStatusId " + ex.getCause());
 	    ex.printStackTrace();
 	    return null;
 	}
-
     }
 
     @Override
@@ -3314,14 +3472,22 @@ public class transactionInDAOImpl implements transactionInDAO {
     public directmessagesin getDirectAPIMessagesById(Integer directMessageId) {
 	//1 if list of statusId is null, we get all
 	try {
-	    Criteria findDirectAPIMessage = sessionFactory.getCurrentSession().createCriteria(directmessagesin.class);
-	    findDirectAPIMessage.add(Restrictions.eq("id", directMessageId));
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<directmessagesin> criteria = builder.createQuery(directmessagesin.class);
+            Root<directmessagesin> root = criteria.from(directmessagesin.class);
 
-	    List<directmessagesin> directAPIMessages = findDirectAPIMessage.list();
+            Predicate whereClause = builder.equal(root.get("id"), directMessageId);
+
+            criteria.where(whereClause);
+
+            List<directmessagesin> directAPIMessages = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+            
 	    if (!directAPIMessages.isEmpty()) {
 		return directAPIMessages.get(0);
 	    }
-	} catch (Exception ex) {
+	} 
+        catch (Exception ex) {
 	    System.err.println("getDirectAPIMessagesById " + ex.getCause());
 	    ex.printStackTrace();
 	    return null;
@@ -3335,14 +3501,22 @@ public class transactionInDAOImpl implements transactionInDAO {
     public directmessagesin getDirectAPIMessagesByBatchUploadId(Integer BatchUploadId) {
 	//1 if list of statusId is null, we get all
 	try {
-	    Criteria findDirectAPIMessage = sessionFactory.getCurrentSession().createCriteria(directmessagesin.class);
-	    findDirectAPIMessage.add(Restrictions.eq("batchUploadId", BatchUploadId));
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<directmessagesin> criteria = builder.createQuery(directmessagesin.class);
+            Root<directmessagesin> root = criteria.from(directmessagesin.class);
 
-	    List<directmessagesin> directAPIMessages = findDirectAPIMessage.list();
+            Predicate whereClause = builder.equal(root.get("batchUploadId"), BatchUploadId);
+
+            criteria.where(whereClause);
+
+            List<directmessagesin> directAPIMessages = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+            
 	    if (!directAPIMessages.isEmpty()) {
 		return directAPIMessages.get(0);
 	    }
-	} catch (Exception ex) {
+	} 
+        catch (Exception ex) {
 	    System.err.println("getDirectAPIMessagesByBatchUploadId " + ex.getCause());
 	    ex.printStackTrace();
 	    return null;
@@ -3714,13 +3888,16 @@ public class transactionInDAOImpl implements transactionInDAO {
     
     @Transactional(readOnly = true)
     public List<batchDownloads> getDLBatchesByBatchUploadId(Integer batchUploadId) throws Exception {
-	
-	Criteria dlBatches = sessionFactory.getCurrentSession().createCriteria(batchDownloads.class);
-	
-	dlBatches.add(Restrictions.eq("batchUploadId", batchUploadId));
-	
-	List<batchDownloads> dlBatchesList = dlBatches.list();
-	return dlBatchesList;
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<batchDownloads> criteria = builder.createQuery(batchDownloads.class);
+        Root<batchDownloads> root = criteria.from(batchDownloads.class);
+
+        Predicate whereClause = builder.equal(root.get("batchUploadId"), batchUploadId);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
     
     @Override
@@ -4119,11 +4296,18 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Transactional(readOnly = true)
     public List<batchUploads> getBatchesByOrgId(Integer orgId) {
 	try {
-	    /* Get a list of uploaded batches for these statuses */
-	    Criteria findBatches = sessionFactory.getCurrentSession().createCriteria(batchUploads.class);
-	    findBatches.add(Restrictions.eq("orgId", orgId));
-	    return findBatches.list();
-	} catch (Exception ex) {
+            
+            CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+            CriteriaQuery<batchUploads> criteria = builder.createQuery(batchUploads.class);
+            Root<batchUploads> root = criteria.from(batchUploads.class);
+
+            Predicate whereClause = builder.equal(root.get("orgId"), orgId);
+
+            criteria.where(whereClause);
+
+            return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+	} 
+        catch (Exception ex) {
 	    System.err.println("/*** getBatchesByOrgId " + ex.getCause().getMessage());
 	    return null;
 	}
