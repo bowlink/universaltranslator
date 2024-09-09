@@ -2,8 +2,6 @@ package com.hel.ut.model;
 
 import com.hel.ut.validator.NoHtml;
 import java.util.Date;
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,7 +11,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.Size;
 import org.hibernate.annotations.GenericGenerator;
-
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,7 +18,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Entity
 @Table(name = "USERS")
 public class utUser {
-
 
     @Transient
     private String orgName, password, roleType, lastLogInDate = "";

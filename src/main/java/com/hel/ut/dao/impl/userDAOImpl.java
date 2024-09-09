@@ -128,7 +128,7 @@ public class userDAOImpl implements userDAO {
         CriteriaQuery<utUser> criteria = builder.createQuery(utUser.class);
         Root<utUser> root = criteria.from(utUser.class);
 
-        Predicate whereClause = builder.equal(root.get("userName"), username);
+        Predicate whereClause = builder.equal(root.get("username"), username);
 
         criteria.where(whereClause);
         
