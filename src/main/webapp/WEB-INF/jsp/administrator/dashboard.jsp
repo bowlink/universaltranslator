@@ -94,7 +94,6 @@
 						    <th scope="col" class="center-text">Interface</th>
 						    <th scope="col" class="center-text">Transactions (Rows)</th>
 						    <th scope="col" class="center-text">Errors</th>
-						    <th scope="col" class="center-text">Error Threshold</th>
 						</tr>
 					    </thead>
 				       </table>
@@ -123,7 +122,6 @@
 						    <th scope="col" class="center-text">Interface</th>
 						    <th scope="col" class="center-text">Transactions (Rows)</th>
 						    <th scope="col" class="center-text">Errors</th>
-                                                    <th scope="col" class="center-text">Error Threshold</th>
 						</tr>
 					    </thead>
 					 </table>

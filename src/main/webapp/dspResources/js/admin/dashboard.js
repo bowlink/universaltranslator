@@ -412,29 +412,6 @@ function getInboundMessages() {
 		    }
 		    return returnData;
 		}
-	    },
-	    {
-		"mData": "threshold", 
-		"defaultContent": "",
-		"bSortable":true,
-		"sWidth": "5%",
-		"className": "center-text",
-		"render": function ( data, type, row, meta ) {
-                    var returnData = ''
-                    if(row.uploadType === 'Watch List Entry') {
-                        returnData = 'N/A';
-                    }
-                    else {
-                       /* var percent = (row.errorRecordCount * 100 / row.totalRecordCount);
-                        if(percent > 100) {
-                            percent = 100;
-                        }
-                        returnData = '<figure class="highcharts-figure"><div id="threshold-chart-'+row.id+'" rel1="'+row.id+'" rel2="'+percent+'" rel3="'+row.threshold+'" class="inrecords chart-container"></div></figure>'; */
-                        returnData = data + '%';
-                    }
-		    
-		    return returnData;
-		}
 	    }
 	 ]
     }); 
@@ -733,29 +710,6 @@ function getOutboundMessages() {
 		"className": "center-text",
 		"render": function ( data, type, row, meta ) {
 		     return commaSeparateNumber(data);
-		}
-	    },
-	    {
-		"mData": "threshold", 
-		"defaultContent": "",
-		"bSortable":true,
-		"sWidth": "5%",
-		"className": "center-text",
-		"render": function ( data, type, row, meta ) {
-                    var returnData = ''
-                    if(row.uploadType === 'Watch List Entry') {
-                        returnData = 'N/A';
-                    }
-                    else {
-                        var percent = (row.errorRecordCount * 100 / row.totalRecordCount);
-                        if(percent > 100) {
-                            percent = 100;
-                        }
-                        //returnData = '<figure class="highcharts-figure"><div id="out-threshold-chart-'+row.id+'" rel1="'+row.id+'" rel2="'+percent+'" rel3="'+row.threshold+'" class="outrecords chart-container"></div></figure>'; 
-                        returnData = Math.round(percent) + '% of ' + data + '%';
-                    }
-		    
-		    return returnData;
 		}
 	    }
 	 ]
