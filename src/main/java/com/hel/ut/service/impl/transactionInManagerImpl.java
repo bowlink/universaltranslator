@@ -2827,27 +2827,92 @@ public class transactionInManagerImpl implements transactionInManager {
 			int numLoadTransactions = getLoadTransactionCount("transactionInRecords_" + batch.getId());
 			
 			if (numLoadTransactions < 1) {
-			   
-			    //log batch activity
-			    ba = new batchuploadactivity();
-			    ba.setActivity("No records were found in table transactionInRecords_" + batchId);
-			    ba.setBatchUploadId(batchId);
-			    transactionInDAO.submitBatchActivityLog(ba);
-			    
-			    //entire batch failed, we reject entire batch
-			    updateBatchStatus(batchId, 39, "endDateTime");
+                            boolean loadError = true;
                             
-                            //Update original RR submission to show rejected status
-                            if(!"".equals(HELRRSchemaName)) {
+                            //log batch activity
+                            ba = new batchuploadactivity();
+                            ba.setActivity("No records were found in table transactionInRecords_" + batchId + " using line terminator "+ lineTerminator + ".");
+                            ba.setBatchUploadId(batchId);
+                            transactionInDAO.submitBatchActivityLog(ba);
+                            
+                            //Try another line terminator
+                            if("\\r\\n".equals(lineTerminator) || "\\r".equals(lineTerminator) ) {
+                                
+                                if("\\r\\n".equals(lineTerminator)) {
+                                    lineTerminator = "\\r";
+                                }
+                                else {
+                                    lineTerminator = "\\r\\n";
+                                }
+                                
+                                //log batch activity
                                 ba = new batchuploadactivity();
-                                ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 39 in database - " + HELRRSchemaName);
+                                ba.setActivity("Trying to load the records using a new line terminator "+ lineTerminator + ".");
                                 ba.setBatchUploadId(batchId);
                                 transactionInDAO.submitBatchActivityLog(ba);
-                                transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
+                                
+                                errorHere = insertLoadData(batch.getId(), batch.getConfigId(), delimChar, actualFileName, "transactionInRecords_" + batch.getId(), batch.isContainsHeaderRow(), totalHeaderRows, lineTerminator);
+                                
+                                if (errorHere > 0) {
+                            
+                                    //Update original RR submission to show rejected status
+                                    if(!"".equals(HELRRSchemaName)) {
+                                        ba = new batchuploadactivity();
+                                        ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 7 in database - " + HELRRSchemaName);
+                                        ba.setBatchUploadId(batchId);
+                                        transactionInDAO.submitBatchActivityLog(ba);
+                                        transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
+                                    }
+
+                                    insertProcessingError(7, null, batchId, null, null, null, null, false, false, "insertLoadData, please login and check logs.");
+                                    try {
+                                        sendEmailToAdmin(("load error for batch - " + batch.getOriginalFileName() + " - " + batch.getUtBatchName()), "insertLoadData Error");
+                                    } catch (Exception ex) {
+                                        ex.printStackTrace();
+                                    }
+                                    sysErrors++;
+                                }
+                                
+                                numLoadTransactions = getLoadTransactionCount("transactionInRecords_" + batch.getId());
+                                
+                                if (numLoadTransactions > 0) {
+                                    loadError = false;
+                                }
+                                else {
+                                    //log batch activity
+                                    ba = new batchuploadactivity();
+                                    ba.setActivity("Still failed to load records using new line terminator "+ lineTerminator + ".");
+                                    ba.setBatchUploadId(batchId);
+                                    transactionInDAO.submitBatchActivityLog(ba);
+                                }
                             }
                             
-			    //need to insert error on why we are rejecting
-			    insertProcessingError(14, null, batchId, null, null, null, null, false, false, "No transactions were loaded into batch. Please check file and line terminator.");
+                            if(loadError) {
+			   
+                                //entire batch failed, we reject entire batch
+                                updateBatchStatus(batchId, 39, "endDateTime");
+
+                                //Update original RR submission to show rejected status
+                                if(!"".equals(HELRRSchemaName)) {
+                                    ba = new batchuploadactivity();
+                                    ba.setActivity("Updated RR Import with batchId: " + batch.getId() + " to status 39 in database - " + HELRRSchemaName);
+                                    ba.setBatchUploadId(batchId);
+                                    transactionInDAO.submitBatchActivityLog(ba);
+                                    transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
+                                }
+
+                                //need to insert error on why we are rejecting
+                                insertProcessingError(14, null, batchId, null, null, null, null, false, false, "No transactions were loaded into batch. Please check file and line terminator.");
+
+                                batchStatusId = 39;
+                            }
+                            else {
+                                //log batch activity
+                                ba = new batchuploadactivity();
+                                ba.setActivity("Loaded " + numLoadTransactions + " records from file: " + batch.getOriginalFileName());
+                                ba.setBatchUploadId(batchId);
+                                transactionInDAO.submitBatchActivityLog(ba);
+                            }
 			}
 			else {
 			    //log batch activity
@@ -2918,6 +2983,8 @@ public class transactionInManagerImpl implements transactionInManager {
 				
 				insertProcessingError(6, null, batchId, null, null, null, null, false, false, "No valid configurations were found for loading batch.");
 				updateBatchStatus(batchId, 7, "endDateTime");
+                                
+                                batchStatusId = 7;
 			    }
 			}
 			else {
@@ -2938,6 +3005,8 @@ public class transactionInManagerImpl implements transactionInManager {
 
                             insertProcessingError(6, null, batchId, null, null, null, null, false, false, "No valid configurations were found for loading batch."); 
                             updateBatchStatus(batchId, 7, "endDateTime");
+                            
+                            batchStatusId = 7;
 			}
 			
 			if(foundConfigId == 0) {
@@ -2958,6 +3027,8 @@ public class transactionInManagerImpl implements transactionInManager {
 			   
                             insertProcessingError(6, null, batchId, null, null, null, null, false, false, "No valid configurations were found for loading batch."); 
                             updateBatchStatus(batchId, 7, "endDateTime");
+                            
+                            batchStatusId = 7;
 			}
 			else {
 			    batch.setConfigId(foundConfigId);
@@ -3069,6 +3140,8 @@ public class transactionInManagerImpl implements transactionInManager {
 		    ba.setActivity("No valid configurations were found for batch.");
 		    ba.setBatchUploadId(batchId);
 		    transactionInDAO.submitBatchActivityLog(ba);
+                    
+                    batchStatusId = 7;
 		} 
 		else if (batchHandling.size() != 1) {
 		    //TODO email admin to fix problem
@@ -3083,6 +3156,8 @@ public class transactionInManagerImpl implements transactionInManager {
 		    ba.setActivity("Multiple or no file handling found, please check auto-release and error handling configurations");
 		    ba.setBatchUploadId(batchId);
 		    transactionInDAO.submitBatchActivityLog(ba);
+                    
+                    batchStatusId = 39;
 		}
 		
 		if (batchHandling.size() == 1) {
@@ -3098,8 +3173,11 @@ public class transactionInManagerImpl implements transactionInManager {
 
 		updateRecordCounts(batchId, errorStatusIds, false, "errorRecordCount");
 		updateRecordCounts(batchId, new ArrayList<>(), false, "totalRecordCount");
-		batchStatusId = 43; //loaded without targets 
-		
+                
+                if(batchStatusId != 7 && batchStatusId != 39) {
+                    batchStatusId = 43; //loaded without targets 
+                }
+                
 	    } catch (Exception ex) {
 		insertProcessingError(processingSysErrorId, null, batchId, null, null, null, null, false, false, ("loadBatch method error " + ex.getMessage()));
 		batchStatusId = 39;
