@@ -8,6 +8,7 @@ package com.hel.ut.service;
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.batchUploads;
 import com.hel.ut.model.configurationFormFields;
+import com.hel.ut.model.configurationMessageSpecs;
 import com.hel.ut.model.utConfiguration;
 import java.io.File;
 import java.io.FileWriter;
@@ -120,9 +121,17 @@ public class excelToTxt {
             
             Cell cell = null;
             String text = "";
-	    
+	    String string = "";
+            
+            boolean useField = false;
+            
+            //Get the message specs to see if header row is being used
+            configurationMessageSpecs messageSpecs = configurationManager.getMessageSpecs(batch.getConfigId());
+            
 	    for(Row row : datatypeSheet) {
-	    	String string = "";
+                
+	    	string = "";
+               
 	    	if (!testColSize) {
                     int totalNoColsInSheet = row.getLastCellNum();
                     if (totalNoColsInSheet != totalFields) {
@@ -135,45 +144,53 @@ public class excelToTxt {
                     } 
                     testColSize = true;
 	    	}
+                
 	    	for(int cn=0; cn<row.getLastCellNum(); cn++) {
+                     
                     // If the cell is missing from the file, generate a blank one
                     // (Works by specifying a MissingCellPolicy)
                     cell = row.getCell(cn, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                     text = "";
                     
-                    //need to review cells for formula and reject entire file
-                    if (cell != null && cell.getCellType() != CellType.BLANK) {
-                        //formula 
-                        if (cell.getCellType() == CellType.FORMULA) {			
-                            hasFormulaCell = true;
-                            //text = "FORMULA";
-                            text = "FORMULA FOUND HERE " + formatter.formatCellValue(cell);
-                            int errorRow  = row.getRowNum()+1;
-                            int errorCell = cn + 1;
-                            formulaErrorLocation = "row " + errorRow + ", cell " + errorCell;
+                    useField = configFormFields.get(cn).getUseField();
+                    
+                    if(row.getRowNum() == 0 && messageSpecs.getcontainsHeaderRow()) {
+                        useField = true;
+                    }
+                    
+                    if(useField) {
+                        //need to review cells for formula and reject entire file
+                        if (cell != null && cell.getCellType() != CellType.BLANK) {
+                            //formula 
+                            if (cell.getCellType() == CellType.FORMULA) {			
+                                hasFormulaCell = true;
+                                text = "FORMULA FOUND HERE " + formatter.formatCellValue(cell);
+                                int errorRow  = row.getRowNum()+1;
+                                int errorCell = cn + 1;
+                                formulaErrorLocation = "row " + errorRow + ", cell " + errorCell;
+                            } 
+                            else if (cell.getCellType() == CellType.ERROR) {
+                                hasErrorCell = true;
+                                text = "CELL ERROR FOUND HERE ";
+                                try {
+                                    text = text + formatter.formatCellValue(cell);
+                                } catch (Exception ex) {
+                                    System.out.println("Cell error cannot get value. Batch Id - " + batch.getId());
+                                }
+                                int errorRow  = row.getRowNum()+1;
+                                int errorCell = cn + 1;
+                                cellErrorLocation = "row " + errorRow + ", cell " + errorCell;
+                            } 
+                            else {
+                                try {
+                                    text = formatter.formatCellValue(cell);
+                                }
+                                catch (Exception e) {
+                                    text = String.valueOf(cell.getStringCellValue());
+                                }
+                            }
                         } 
-                        else if (cell.getCellType() == CellType.ERROR) {
-                            hasErrorCell = true;
-                            //text = "CELL ERROR";
-                            text = "CELL ERROR FOUND HERE ";
-                            try {
-                            	text = text + formatter.formatCellValue(cell);
-                            } catch (Exception ex) {
-                            	System.out.println("Cell error cannot get value. Batch Id - " + batch.getId());
-                            }
-                            int errorRow  = row.getRowNum()+1;
-                            int errorCell = cn + 1;
-                            cellErrorLocation = "row " + errorRow + ", cell " + errorCell;
-			} 
-                        else {
-                            try {
-                                text = formatter.formatCellValue(cell);
-                            }
-                            catch (Exception e) {
-                                text = String.valueOf(cell.getStringCellValue());
-                            }
-                        }
-                    } 
+                    }
                     
                     //handle error cells
                     string = string + text.trim() + batch.getDelimChar();

@@ -8,6 +8,7 @@ package com.hel.ut.service;
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.batchUploads;
 import com.hel.ut.model.configurationFormFields;
+import com.hel.ut.model.configurationMessageSpecs;
 import com.hel.ut.model.utConfiguration;
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,6 +22,8 @@ import javax.annotation.Resource;
 import org.apache.poi.hssf.extractor.ExcelExtractor;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -88,7 +91,6 @@ public class xlsToTxt {
     	}
 
     	try {
-            String text = "";
             FileWriter fw = new FileWriter(newFile);
 	        
             InputStream inp = new FileInputStream(inputFile);
@@ -103,29 +105,45 @@ public class xlsToTxt {
                 }
             }
             
-            //check field numbers
-	    	List<configurationFormFields> configFormFields = configurationtransportmanager.getConfigurationFields(batch.getConfigId(), 0);
-	    	HSSFSheet datatypeSheet = wb.getSheetAt(0);
-	    	
-	    	Integer totalFields = configFormFields.size();
-	    	int totalNoColsInSheet = datatypeSheet.getRow(0).getLastCellNum();
-	    	
-	        if (totalNoColsInSheet != totalFields) {
-	        	 try {
-	        		 utConfiguration configDetails = configurationManager.getConfigurationById(batch.getConfigId());
-	        		 transactioninmanager.sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Column Size Mismatch " + totalNoColsInSheet + " found. Expecting  "+totalFields+" columns. <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), ("Columns size mismatch " + configDetails.getconfigName()), false, true);			   
-	        	 } catch (Exception e) {
-	                 e.printStackTrace();
-	        	 }
-	        	 
-	       }  
+            //Get the message specs to see if header row is being used
+            configurationMessageSpecs messageSpecs = configurationManager.getMessageSpecs(batch.getConfigId());
             
+            //check field numbers
+            List<configurationFormFields> configFormFields = configurationtransportmanager.getConfigurationFields(batch.getConfigId(), 0);
+            HSSFSheet datatypeSheet = wb.getSheetAt(0);
+
+            Integer totalFields = configFormFields.size();
+            int totalNoColsInSheet = datatypeSheet.getRow(0).getLastCellNum();
+
+            if (totalNoColsInSheet != totalFields) {
+                try {
+                    utConfiguration configDetails = configurationManager.getConfigurationById(batch.getConfigId());
+                    transactioninmanager.sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Column Size Mismatch " + totalNoColsInSheet + " found. Expecting  "+totalFields+" columns. <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), ("Columns size mismatch " + configDetails.getconfigName()), false, true);			   
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } 
+            }  
+            
+            boolean useField = false;
+            for(Row row : datatypeSheet) {
+                for(int cn=0; cn<row.getLastCellNum(); cn++) {
+                    useField = configFormFields.get(cn).getUseField();
+                    
+                    if(row.getRowNum() == 0 && messageSpecs.getcontainsHeaderRow()) {
+                        useField = true;
+                    }
+                    
+                    if(!useField) {
+                        row.getCell(cn).setCellValue("");
+                    }
+                }
+            }
             
             ExcelExtractor extractor = new ExcelExtractor(wb);
             extractor.setIncludeBlankCells(true);
             extractor.setFormulasNotResults(true);
             extractor.setIncludeSheetNames(false);
-            text = extractor.getText();
+            String text = extractor.getText();
             fw.write(text.replaceAll("(?m)^[ \t]*\r?\n", ""));
             extractor.close();
             wb.close();
@@ -133,7 +151,6 @@ public class xlsToTxt {
             fw.close();
         } 
         catch (Exception ex) {
-            ex.printStackTrace();
             newfileName = "ERRORERRORERROR";
             PrintStream ps = new PrintStream(newFile);
             ex.printStackTrace(ps);
