@@ -152,7 +152,12 @@ public class excelToTxt {
                     cell = row.getCell(cn, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                     text = "";
                     
-                    useField = configFormFields.get(cn).getUseField();
+                    try {
+                        useField = configFormFields.get(cn).getUseField();
+                    }
+                    catch (Exception ex) {
+                        useField = false;
+                    }
                     
                     if(row.getRowNum() == 0 && messageSpecs.getcontainsHeaderRow()) {
                         useField = true;
