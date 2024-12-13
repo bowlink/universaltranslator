@@ -124,7 +124,7 @@ public class xlsToTxt {
                 } 
             }  
             
-            boolean useField = false;
+           /* boolean useField = false;
             for(Row row : datatypeSheet) {
                 for(int cn=0; cn<row.getLastCellNum(); cn++) {
                     useField = configFormFields.get(cn).getUseField();
@@ -137,7 +137,7 @@ public class xlsToTxt {
                         row.getCell(cn).setCellValue("");
                     }
                 }
-            }
+            }*/
             
             ExcelExtractor extractor = new ExcelExtractor(wb);
             extractor.setIncludeBlankCells(true);
