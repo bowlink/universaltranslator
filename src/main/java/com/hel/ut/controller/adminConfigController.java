@@ -1,6 +1,5 @@
 package com.hel.ut.controller;
 
-
 import com.hel.ut.model.CrosswalkData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -929,7 +928,46 @@ public class adminConfigController {
 	    configurationDetails.setstepsCompleted(2);
 	    utconfigurationmanager.updateConfiguration(configurationDetails);
 	}
-	
+        
+        //Get the current transport details
+        configurationTransport currTransportDetails = utconfigurationTransportManager.getTransportDetails(configId);
+        
+        //Check to see if the configuration is for family planning and the file type changed
+        //If so need to modify the associated FP system import type file type setting
+        if(configurationDetails.getMessageTypeId() == 2 && configurationDetails.getType() == 1 && 
+            (
+                (transportDetails.getfileType() != currTransportDetails.getfileType())
+                ||
+                (transportDetails.getmaxFileSize() != currTransportDetails.getmaxFileSize())
+                ||
+                (transportDetails.getfileDelimiter() != currTransportDetails.getfileDelimiter())
+            )) {
+            //Need to get the FP system database 
+            String fpSchemaName = "";
+            fpSchemaName = organizationmanager.getOrganizationById(configurationDetails.getorgId()).getHelRegistrySchemaName();
+            if(!"".equals(fpSchemaName)) {
+                try {
+                    utconfigurationTransportManager.updateFamilyPlanningAssociatedImport(fpSchemaName,configId,transportDetails.getfileType(),transportDetails.getfileDelimiter(),transportDetails.getmaxFileSize());
+                }
+                catch (Exception ex) {
+                    mailMessage mail = new mailMessage();
+                    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+                    mail.setfromEmailAddress("support@health-e-link.net");
+                    mail.setmessageSubject("Error trying to update a family planning import type - " + " " + myProps.getProperty("server.identity"));
+                    StringBuilder emailBody = new StringBuilder();
+                    emailBody.append("There was an error trying to update a family planning import type.");
+                    emailBody.append("<br/>FP Database Name: ").append(fpSchemaName);
+                    emailBody.append("<br/>Configuration Id: ").append(configId);
+                    emailBody.append("<br/>Updated File Type: ").append(transportDetails.getfileType());
+                    emailBody.append("<br/>Updated File Delimiter: ").append(transportDetails.getfileDelimiter());
+                    emailBody.append("<br/>Updated Max File Size: ").append(transportDetails.getmaxFileSize());
+                    emailBody.append("<br/><br/>").append(ex.getMessage());
+                    mail.setmessageBody(emailBody.toString());
+                    emailMessageManager.sendEmail(mail);
+                }
+            }
+        }
+        
         // submit the updates
         Integer transportId = utconfigurationTransportManager.updateTransportDetails(configurationDetails,transportDetails);
 	
@@ -1250,6 +1288,36 @@ public class adminConfigController {
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(messageSpecs.getconfigId());
 	
 	utConfiguration configDetails = utconfigurationmanager.getConfigurationById(messageSpecs.getconfigId());
+        
+        //Get the current transport details
+        configurationMessageSpecs currMessageSpecs = utconfigurationmanager.getMessageSpecs(messageSpecs.getconfigId());
+        
+        //Check to see if the configuration is for family planning and the file type changed
+        //If so need to modify the associated FP system import type file type setting
+        if(configDetails.getMessageTypeId() == 2 && configDetails.getType() == 1 && messageSpecs.getcontainsHeaderRow() != currMessageSpecs.getcontainsHeaderRow()) {
+            //Need to get the FP system database 
+            String fpSchemaName = "";
+            fpSchemaName = organizationmanager.getOrganizationById(configDetails.getorgId()).getHelRegistrySchemaName();
+            if(!"".equals(fpSchemaName)) {
+                try {
+                    utconfigurationTransportManager.updateFamilyPlanningAssociatedImportHeaderRow(fpSchemaName,messageSpecs.getconfigId(),messageSpecs.getcontainsHeaderRow());
+                }
+                catch (Exception ex) {
+                    mailMessage mail = new mailMessage();
+                    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+                    mail.setfromEmailAddress("support@health-e-link.net");
+                    mail.setmessageSubject("Error trying to update a family planning import type header row setting - " + " " + myProps.getProperty("server.identity"));
+                    StringBuilder emailBody = new StringBuilder();
+                    emailBody.append("There was an error trying to update a family planning import type header row setting.");
+                    emailBody.append("<br/>FP Database Name: ").append(fpSchemaName);
+                    emailBody.append("<br/>Configuration Id: ").append(messageSpecs.getconfigId());
+                    emailBody.append("<br/>Updated Header Row: ").append(currMessageSpecs.getcontainsHeaderRow());
+                    emailBody.append("<br/><br/>").append(ex.getMessage());
+                    mail.setmessageBody(emailBody.toString());
+                    emailMessageManager.sendEmail(mail);
+                }
+            }
+        }
 
         //Save/Update the configuration message specs
 	try {

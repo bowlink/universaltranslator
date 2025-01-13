@@ -154,4 +154,8 @@ public interface utConfigurationTransportManager {
     void saveFTPConnectionError(logftpconnectionerrors ftpCconnectionError) throws Exception;
     
     List<logftpconnectionerrors> findFTPConnectionErrors(Integer ftpConnectionId, String connectionError) throws Exception;
+    
+    void updateFamilyPlanningAssociatedImport(String fpSchemaName,Integer configId,Integer fileType,Integer delimiter, Integer maxFileSize) throws Exception;
+    
+    void updateFamilyPlanningAssociatedImportHeaderRow(String fpSchemaName, Integer configId, boolean hasHeaderRow) throws Exception;
 }

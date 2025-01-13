@@ -1633,5 +1633,29 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
            
         return query.list();
     }
+    
+    @Override
+    @Transactional(readOnly = false)
+    public void updateFamilyPlanningAssociatedImport(String fpSchemaName, Integer configId, Integer fileType, Integer delimiter, Integer maxFileSize) throws Exception {
+        
+        Query query = sessionFactory.getCurrentSession().createSQLQuery("update "+ fpSchemaName + ".programuploadtypes set fileDelimId = :fileDelimiter, inFileTypeId = :fileType, maxFileSize = :maxFileSize where helConfigId = :configId")
+        .setParameter("fileDelimiter", delimiter)
+        .setParameter("fileType", fileType)        
+        .setParameter("maxFileSize", maxFileSize) 
+        .setParameter("configId", configId);
+        
+        query.executeUpdate();
+    }
+    
+    @Override
+    @Transactional(readOnly = false)
+    public void updateFamilyPlanningAssociatedImportHeaderRow(String fpSchemaName,Integer configId, boolean hasHeaderRow) throws Exception {
+        
+        Query query = sessionFactory.getCurrentSession().createSQLQuery("update "+ fpSchemaName + ".programuploadtypes set containsHeaderRow = :hasHeaderRow where helConfigId = :configId")
+        .setParameter("hasHeaderRow", hasHeaderRow)
+        .setParameter("configId", configId);
+        
+        query.executeUpdate();
+    }
 }
 

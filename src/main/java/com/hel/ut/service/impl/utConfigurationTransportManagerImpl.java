@@ -786,4 +786,25 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
     public List<logftpconnectionerrors> findFTPConnectionErrors(Integer ftpConnectionId, String connectionError) throws Exception {
 	return configurationTransportDAO.findFTPConnectionErrors(ftpConnectionId,connectionError);
     }
+    
+    @Override
+    public void updateFamilyPlanningAssociatedImport(String fpSchemaName, Integer configId, Integer fileType, Integer delimiter, Integer maxFileSize) throws Exception {
+        
+        if(delimiter == 13) {
+            delimiter = 14;
+        }
+        else if(delimiter == 12) {
+            delimiter = 13;
+        }
+        
+        if(fileType == 8 || fileType == 11) {
+            delimiter = 2;
+        }
+        configurationTransportDAO.updateFamilyPlanningAssociatedImport(fpSchemaName,configId,fileType,delimiter,maxFileSize);
+    }
+    
+    @Override
+    public void updateFamilyPlanningAssociatedImportHeaderRow(String fpSchemaName,Integer configId, boolean hasHeaderRow) throws Exception {
+        configurationTransportDAO.updateFamilyPlanningAssociatedImportHeaderRow(fpSchemaName,configId,hasHeaderRow);
+    }
 }
