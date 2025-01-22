@@ -22,18 +22,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import org.hibernate.Criteria;
 import org.hibernate.query.Query;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.text.ParseException;
@@ -1322,7 +1317,7 @@ public class transactionInDAOImpl implements transactionInDAO {
             if (fileWithPath.endsWith(".txt") || fileWithPath.endsWith(".csv")) {
                 
                 byte[] fileAsBytes = filemanager.loadFileAsBytesArray(fileWithPath);
-
+                
                 if(fileAsBytes[0] == -1 || fileAsBytes[0] == -2) {
                     
                     String newFileNameWithPath = "";
@@ -1361,7 +1356,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    String fieldSql = "";
 	    for (int i = 1; i <= totalFields; i++) {
 	    	fieldSql += "F" + i + " ,";
-		    }
+            }
 	    fieldSql = fieldSql.substring(0, fieldSql.length() - 1);
 	    
 	    sql = sql + fieldSql;
@@ -1840,11 +1835,12 @@ public class transactionInDAOImpl implements transactionInDAO {
 	
 	configFormFields.forEach(field -> {
 	    if(field.getUseField()) {
-			tableFields.append(" F").append(field.getFieldNo())
-				.append(" = case ")
-				.append("when lcase(F").append(field.getFieldNo()).append(") = 'null' then '' ")
-				.append("when F").append(field.getFieldNo()).append(" is null then '' ")
-				.append("else TRIM(replace(F").append(field.getFieldNo()).append(", char(13), '')) end,");
+                tableFields.append(" F").append(field.getFieldNo())
+                .append(" = case ")
+                .append("when lcase(F").append(field.getFieldNo()).append(") = 'null' then '' ")
+                .append("when lcase(F").append(field.getFieldNo()).append(") = '\u0000' then '' ")
+                .append("when F").append(field.getFieldNo()).append(" is null then '' ")
+                .append("else TRIM(replace(F").append(field.getFieldNo()).append(", char(13), '')) end,");
 	    }
 	});
 	
