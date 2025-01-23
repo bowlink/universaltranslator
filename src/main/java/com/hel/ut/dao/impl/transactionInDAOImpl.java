@@ -2909,9 +2909,9 @@ public class transactionInDAOImpl implements transactionInDAO {
 	
 	String sql = "delete from " + loadTableName + " where "
         + "("
-        + "(F1 IS NULL AND F2 IS NULL AND F3 IS NULL AND F4 IS NULL AND F5 IS NULL) "
+        + "(F1 IS NULL AND F2 IS NULL AND F3 IS NULL AND F4 IS NULL AND F5 IS NULL AND F6 IS NULL AND F7 IS NULL AND F8 IS NULL AND F9 IS NULL AND F10 IS NULL) "
         + "OR "
-        + "(length(trim(F1)) = 0 AND length(trim(F2)) = 0 AND length(trim(F3)) = 0 AND length(trim(F4)) = 0 AND length(trim(F5)) = 0)"
+        + "(length(trim(F1)) = 0 AND length(trim(F2)) = 0 AND length(trim(F3)) = 0 AND length(trim(F4)) = 0 AND length(trim(F5)) = 0 AND length(trim(F6)) = 0 AND length(trim(F7)) = 0 AND length(trim(F8)) = 0 AND length(trim(F9)) = 0 AND length(trim(F10)) = 0)"
         + ")";
         
 	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
