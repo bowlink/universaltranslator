@@ -2942,6 +2942,12 @@ public class transactionInManagerImpl implements transactionInManager {
 		    //sysError = sysError + updateLoadTable(loadTableName, batch.getId());
 		    //3.5 we delete blank rows
 		    sysErrors = sysErrors + removeLoadTableBlankRows(batch.getId(), "transactionInRecords_" + batch.getId());
+                    
+                    //log batch activity
+                    ba = new batchuploadactivity();
+                    ba.setActivity("Removed all rows from the load table where the first 10 fields are empty or null for batch: " + batchId);
+                    ba.setBatchUploadId(batchId);
+                    transactionInDAO.submitBatchActivityLog(ba);
 		    
 		    //4. Check to see if we have a config, if not find it in the records
 		    if (batch.getConfigId() == null || batch.getConfigId() == 0) {
