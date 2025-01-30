@@ -1634,7 +1634,34 @@ public class adminConfigController {
 
         //Return a list of available crosswalks
         List<Crosswalks> crosswalks = messagetypemanager.getCrosswalksForConfig(1, 0, configurationDetails.getorgId(),configurationDetails.getId(), false);
-        mav.addObject("crosswalks", crosswalks);
+        List<Crosswalks> crosswalksToUse = new ArrayList<>();
+        if(!crosswalks.isEmpty()) {
+            Integer cId = 0;
+            for(Crosswalks crosswalk : crosswalks) {
+                String cName = crosswalk.getName().trim();
+                if(cName.contains("_")) {
+                    try {
+                        cId = Integer.parseInt(cName.substring(0, cName.indexOf("_")));
+                        if(cId > 0) {
+                            utConfiguration cDetails = utconfigurationmanager.getConfigurationById(cId);
+                            if(cDetails != null) {
+                               if(cDetails.getStatus()) {
+                                    crosswalksToUse.add(crosswalk);
+                                } 
+                            }
+                        }
+                    }
+                    catch (Exception ex) {
+                         crosswalksToUse.add(crosswalk);
+                    }
+                }
+                else {
+                    crosswalksToUse.add(crosswalk);
+                }
+            }
+        }
+        
+        mav.addObject("crosswalks", crosswalksToUse);
         mav.addObject("orgId", configurationDetails.getorgId());
 
         //Return a list of available macros

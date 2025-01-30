@@ -346,10 +346,10 @@ function populateConfigurations(orgId, selectBoxId) {
             for (var i = 0; i < len; i++) {
                 if (data[i].id == currConfigId) {
 		    found = 1;
-                    html += '<option value="' + data[i].id + '" selected>' + data[i].configName + '&nbsp;&#149;&nbsp;' + data[i].transportMethod + '</option>';
+                    html += '<option value="' + data[i].id + '" selected>' + data[i].configName + '&nbsp;(ID: '+ data[i].id + ')&nbsp;&#149;&nbsp;' + data[i].transportMethod + '</option>';
 		    
                 } else {
-                    html += '<option value="' + data[i].id + '">' + data[i].configName + '&nbsp;&#149;&nbsp;' + data[i].transportMethod + '</option>';
+                    html += '<option value="' + data[i].id + '">' + data[i].configName + '&nbsp;(ID: '+ data[i].id +')&nbsp;&#149;&nbsp;' + data[i].transportMethod + '</option>';
                 }
             }
 	    
