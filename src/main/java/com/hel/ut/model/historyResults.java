@@ -6,7 +6,7 @@
 package com.hel.ut.model;
 
 import java.util.Date;
-import javax.persistence.Column;
+import jakarta.persistence.Column;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**

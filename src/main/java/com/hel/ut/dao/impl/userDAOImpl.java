@@ -18,10 +18,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.type.StandardBasicTypes;
 
 /**
@@ -164,7 +164,7 @@ public class userDAOImpl implements userDAO {
     @Override
     @Transactional(readOnly = false)
     public void setLastLogin(String username) {
-        Query q1 = sessionFactory.getCurrentSession().createSQLQuery("insert into REL_USERLOGINS (userId)" + " select id from users where username = :username");
+        Query q1 = sessionFactory.getCurrentSession().createNativeQuery("insert into REL_USERLOGINS (userId)" + " select id from users where username = :username", String.class);
         q1.setParameter("username", username);
         q1.executeUpdate();
     }
@@ -202,7 +202,7 @@ public class userDAOImpl implements userDAO {
 
         String sql = ("select id from users where lower(email) = '" + identifier + "' or lower(username) = '" + identifier + "' or lower(concat(concat(firstName,' '),lastName)) = '" + identifier + "'");
 
-        Query findUser = sessionFactory.getCurrentSession().createSQLQuery(sql);
+        Query findUser = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 
         if (findUser.list().size() > 1) {
             return null;
@@ -262,8 +262,8 @@ public class userDAOImpl implements userDAO {
     @SuppressWarnings("unchecked")
     public utUserActivity getUAById(Integer uaId) {
         try {
-            Query query = sessionFactory.getCurrentSession().createSQLQuery("select * from userActivity where id = :uaId").setResultTransformer(Transformers.aliasToBean(utUserActivity.class));
-            query.setParameter("uaId", uaId);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery("select * from userActivity where id = :uaId",utUserActivity.class)
+            .setParameter("uaId", uaId);
             List<utUserActivity> uaList = query.list();
             if (uaList.size() > 0) {
                 return uaList.get(0);
@@ -300,8 +300,8 @@ public class userDAOImpl implements userDAO {
                     + " (select id from configurationconnections "
                     + " where sourceConfigId in ( :configId))) order by userType;");
 
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(utUser.class));
-            query.setParameterList("configId", configIds);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
+            .setParameterList("configId", configIds);
 
             List<utUser> users = query.list();
 
@@ -320,11 +320,11 @@ public class userDAOImpl implements userDAO {
     public List<utUser> getOrgUsersForConfig(List<Integer> configIds) {
         try {
             String sql = ("select * from users where status = 1 and orgId in (select orgId from configurations where id "
-                    + " in ( :configId ) "
-                    + " and status = 1) order by userType;");
+            + " in ( :configId ) "
+            + " and status = 1) order by userType;");
 
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(utUser.class));
-            query.setParameterList("configId", configIds);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
+            .setParameterList("configId", configIds);
 
             List<utUser> users = query.list();
 
@@ -345,8 +345,8 @@ public class userDAOImpl implements userDAO {
             String sql = ("select * from users where status = 1 and Id in (select userId from configurationconnectionsenders where sendEmailAlert = 1 and connectionId "
                     + " in (select id from configurationconnections where sourceConfigId = :configId))");
 
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(utUser.class));
-            query.setParameter("configId", configId);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
+            .setParameter("configId", configId);
 
             List<utUser> users = query.list();
 
@@ -367,8 +367,8 @@ public class userDAOImpl implements userDAO {
             String sql = ("select * from users where status = 1 and Id in (select userId from configurationconnectionreceivers where sendEmailAlert = 1 and connectionId "
                     + " in (select id from configurationconnections where targetConfigId = :configId))");
 
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(utUser.class));
-            query.setParameter("configId", configId);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
+            .setParameter("configId", configId);
 
             List<utUser> users = query.list();
 
@@ -410,7 +410,7 @@ public class userDAOImpl implements userDAO {
         try {
             String sql = ("select r.role from users u inner join userRoles r on u.roleId = r.id where u.status = 1 and u.username = :userName");
 
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
             query.setParameter("userName", user.getUsername());
             List<String> roles = query.list();
 
@@ -447,8 +447,9 @@ public class userDAOImpl implements userDAO {
             sql = sql + " in (:orgs)";
         }
         sql = sql + " order by orgName, username";
-        Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(utUser.class));
-        query.setParameter("status", status);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
+        .setParameter("status", status);
+        
         if (!rolesToExclude.isEmpty()) {
             query.setParameterList("rolesToExclude", rolesToExclude);
         }
@@ -578,7 +579,7 @@ public class userDAOImpl implements userDAO {
 
                 utUserLogin lastLogin = (utUserLogin) logins.get(0);
 
-                Query q1 = sessionFactory.getCurrentSession().createSQLQuery("update rel_userlogins set dateLoggedOut = '" +formatter.format(logoutDate)+ "' where id = " + lastLogin.getId());
+                Query q1 = sessionFactory.getCurrentSession().createNativeQuery("update rel_userlogins set dateLoggedOut = '" +formatter.format(logoutDate)+ "' where id = " + lastLogin.getId(), String.class);
                 q1.executeUpdate();
             }
 	}
@@ -599,27 +600,25 @@ public class userDAOImpl implements userDAO {
         OrgIds.add(orgId);
 	
 	String sql = "select a.id, a.firstName, a.lastName, a.status, b.role as roleType," 
-		+ "(select dateCreated from rel_userlogins where userId = a.id order by dateCreated desc limit 1) as dateLastLoggedIn,"
-		+ "(select TIMESTAMPDIFF(MINUTE,dateCreated,dateLoggedOut) as totalTimeLoggedIn from rel_userlogins where userId = a.id order by dateCreated desc limit 1) as totalTimeLoggedIn," 
-		+ "(select count(id) from rel_userlogins where userId = a.id) as totalLogins " 
-		+ "from users a inner join userroles b on a.roleId = b.id " 
-		+ "where a.orgId in ("+OrgIds.toString().replace("[", "").replace("]", "")+")";
+        + "(select dateCreated from rel_userlogins where userId = a.id order by dateCreated desc limit 1) as dateLastLoggedIn,"
+        + "(select TIMESTAMPDIFF(MINUTE,dateCreated,dateLoggedOut) as totalTimeLoggedIn from rel_userlogins where userId = a.id order by dateCreated desc limit 1) as totalTimeLoggedIn," 
+        + "(select count(id) from rel_userlogins where userId = a.id) as totalLogins " 
+        + "from users a inner join userroles b on a.roleId = b.id " 
+        + "where a.orgId in ("+OrgIds.toString().replace("[", "").replace("]", "")+")";
 	
-	 Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
-		.addScalar("id", StandardBasicTypes.INTEGER)
-                .addScalar("firstName", StandardBasicTypes.STRING)
-		.addScalar("lastName", StandardBasicTypes.STRING)
-                .addScalar("status", StandardBasicTypes.BOOLEAN)
-		.addScalar("dateLastLoggedIn", StandardBasicTypes.TIMESTAMP)
-                .addScalar("totalTimeLoggedIn", StandardBasicTypes.INTEGER)
-                .addScalar("totalLogins", StandardBasicTypes.INTEGER)
-		.addScalar("roleType", StandardBasicTypes.STRING)
-		.setResultTransformer(Transformers.aliasToBean(utUser.class));
+	 Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("firstName", StandardBasicTypes.STRING)
+        .addScalar("lastName", StandardBasicTypes.STRING)
+        .addScalar("status", StandardBasicTypes.BOOLEAN)
+        .addScalar("dateLastLoggedIn", StandardBasicTypes.TIMESTAMP)
+        .addScalar("totalTimeLoggedIn", StandardBasicTypes.INTEGER)
+        .addScalar("totalLogins", StandardBasicTypes.INTEGER)
+        .addScalar("roleType", StandardBasicTypes.STRING);
 
         List<utUser> userList = query.list();
 
         return userList;
-
     }
     
     /**
@@ -634,19 +633,15 @@ public class userDAOImpl implements userDAO {
     public List<utUserLogin> getUserLogins(int userId) {
 
 	String sql = "select dateCreated,IFNULL(TIMESTAMPDIFF(MINUTE,dateCreated,dateLoggedOut),0) as totalTimeLoggedIn " 
-		+ "from rel_userlogins " 
-		+ "where userId = " + userId 
-		+ " order by dateCreated desc";
+        + "from rel_userlogins where userId = " + userId + " order by dateCreated desc";
 	
-	 Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
-		.addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
-                .addScalar("totalTimeLoggedIn", StandardBasicTypes.INTEGER)
-		.setResultTransformer(Transformers.aliasToBean(utUserLogin.class));
+	 Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUserLogin.class)
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
+        .addScalar("totalTimeLoggedIn", StandardBasicTypes.INTEGER);
 
         List<utUserLogin> userLogins = query.list();
 
         return userLogins;
-
     }
     
     /**
@@ -686,11 +681,11 @@ public class userDAOImpl implements userDAO {
     public List<utUser> getSuccessEmailSendersForConfig(Integer targetConfigId) {
         try {
             String sql = ("select * from users where status = 1 and id in (select userId from configurationconnectionreceivers where sendEmailAlert = 1 and connectionId in "
-                    + " (select id from configurationconnections "
-                    + " where targetConfigId = :targetConfigId)) order by userType;");
+            + " (select id from configurationconnections "
+            + " where targetConfigId = :targetConfigId)) order by userType;");
 
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(utUser.class));
-           query.setParameter("targetConfigId", targetConfigId);
+           Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
+           .setParameter("targetConfigId", targetConfigId);
                    
            List<utUser> users = query.list();
 
@@ -715,11 +710,11 @@ public class userDAOImpl implements userDAO {
     public List<utUser> getSuccessEmailReceiversForConfig(Integer targetConfigId) {
         try {
             String sql = ("select * from users where status = 1 and id in (select userId from configurationconnectionsenders where sendEmailAlert = 1 and connectionId in "
-                    + " (select id from configurationconnections "
-                    + " where targetConfigId = :targetConfigId)) order by userType;");
+            + " (select id from configurationconnections "
+            + " where targetConfigId = :targetConfigId)) order by userType;");
 
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(utUser.class));
-           query.setParameter("targetConfigId", targetConfigId);
+           Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
+           .setParameter("targetConfigId", targetConfigId);
                    
            List<utUser> users = query.list();
 

@@ -3,25 +3,24 @@ package com.hel.ut.model;
 import com.hel.ut.validator.NoHtml;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.hibernate.annotations.GenericGenerator;
-
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 @Table(name = "CROSSWALKS")
 public class Crosswalks {
 
     @Transient
-    private CommonsMultipartFile file;
+    private MultipartFile file;
     
     @Transient
     private int dtsId = 0;
@@ -104,11 +103,11 @@ public class Crosswalks {
         this.orgId = orgId;
     }
 
-    public CommonsMultipartFile getFile() {
+    public MultipartFile getFile() {
         return file;
     }
 
-    public void setFile(CommonsMultipartFile file) {
+    public void setFile(MultipartFile file) {
         this.file = file;
     }
 

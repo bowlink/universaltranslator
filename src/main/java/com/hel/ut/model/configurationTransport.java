@@ -1,11 +1,10 @@
 package com.hel.ut.model;
 
 import com.hel.ut.validator.NoHtml;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
-
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 @Table(name = "CONFIGURATIONTRANSPORTDETAILS")
@@ -42,7 +41,7 @@ public class configurationTransport {
     private int threshold = 100;
 
     @Transient
-    private CommonsMultipartFile ccdTemplatefile = null, hl7PDFTemplatefile = null;
+    private MultipartFile ccdTemplatefile = null, hl7PDFTemplatefile = null;
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
@@ -364,11 +363,11 @@ public class configurationTransport {
         this.ccdSampleTemplate = ccdSampleTemplate;
     }
 
-    public CommonsMultipartFile getCcdTemplatefile() {
+    public MultipartFile getCcdTemplatefile() {
         return ccdTemplatefile;
     }
 
-    public void setCcdTemplatefile(CommonsMultipartFile ccdTemplatefile) {
+    public void setCcdTemplatefile(MultipartFile ccdTemplatefile) {
         this.ccdTemplatefile = ccdTemplatefile;
     }
 
@@ -380,11 +379,11 @@ public class configurationTransport {
         this.HL7PDFSampleTemplate = HL7PDFSampleTemplate;
     }
 
-    public CommonsMultipartFile getHl7PDFTemplatefile() {
+    public MultipartFile getHl7PDFTemplatefile() {
         return hl7PDFTemplatefile;
     }
 
-    public void setHl7PDFTemplatefile(CommonsMultipartFile hl7PDFTemplatefile) {
+    public void setHl7PDFTemplatefile(MultipartFile hl7PDFTemplatefile) {
         this.hl7PDFTemplatefile = hl7PDFTemplatefile;
     }
 

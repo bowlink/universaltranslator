@@ -26,10 +26,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 /**
  *
@@ -377,8 +377,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	}	
 	sql += "id FROM transactiontranslatedout_" + batchId + " order by id asc";
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
-	Transformers.aliasToBean(transactionOutRecords.class));
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, transactionOutRecords.class);
 
 	List<transactionOutRecords> records = query.list();
 	
@@ -393,7 +392,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = true)
     public List getInternalStatusCodes() {
-	Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT id, displaytext FROM lu_internalMessageStatus order by displayText asc");
+	Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, displaytext FROM lu_internalMessageStatus order by displayText asc", String.class);
 	return query.list();
     }
 
@@ -418,7 +417,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	}
 	sql = sql + " where id = :id ";
 	
-	Query updateData = sessionFactory.getCurrentSession().createSQLQuery(sql)
+	Query updateData = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
 	.setParameter("statusId", statusId)
 	.setParameter("id", batchDLId);
 	
@@ -441,7 +440,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	
 	String sql = "update BatchDownloads set outputFileName = :fileName where id = :batchId";
 
-	Query updateData = sessionFactory.getCurrentSession().createSQLQuery(sql)
+	Query updateData = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
 	.setParameter("batchId", batchId)
 	.setParameter("fileName", fileName);
 
@@ -466,8 +465,9 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 
 	String sql = "select max(fieldNo) as maxFieldNo from configurationFormFields where configId = :configId and useField = 1";
 
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).addScalar("maxFieldNo", StandardBasicTypes.INTEGER);
-	query.setParameter("configId", configId);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
+        .addScalar("maxFieldNo", StandardBasicTypes.INTEGER)
+	.setParameter("configId", configId);
 
 	return (Integer) query.list().get(0);
     }
@@ -626,7 +626,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 
 	String sql = "update BatchDownloads set lastDownloaded = CURRENT_TIMESTAMP where id = :batchId";
 
-	Query updateData = sessionFactory.getCurrentSession().createSQLQuery(sql)
+	Query updateData = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
 	.setParameter("batchId", batchId);
 
 	try {
@@ -662,7 +662,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 
 	String sql = "update batchDownloads set statusId = :statusId where id = :batchId";
 
-	Query updateData = sessionFactory.getCurrentSession().createSQLQuery(sql)
+	Query updateData = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
 	.setParameter("statusId", statusId)
 	.setParameter("batchId", batchId);
 	
@@ -741,7 +741,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	}
 
 	if (!"".equals(sql)) {
-	    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 
 	    if (transportDetails.getfileType() == 12) {
 		query.setParameter("batchConfigId", transportDetails.getconfigId());
@@ -764,7 +764,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     public List<ConfigOutboundForInsert> setConfigOutboundForInsert(int configId, int batchDownloadId) throws Exception {
 	
 	String sql = ("call setSqlForOutboundConfig(:configId, :batchDownloadId);");
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,ConfigOutboundForInsert.class)
 	.addScalar("batchDownloadId", StandardBasicTypes.INTEGER)
 	.addScalar("fieldNos", StandardBasicTypes.STRING)
 	.addScalar("saveToCols", StandardBasicTypes.STRING)
@@ -772,7 +772,6 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	.addScalar("selectFields", StandardBasicTypes.STRING)
 	.addScalar("updateFields", StandardBasicTypes.STRING)
 	.addScalar("configId", StandardBasicTypes.INTEGER)
-	.setResultTransformer(Transformers.aliasToBean(ConfigOutboundForInsert.class))
 	.setParameter("configId", configId)
 	.setParameter("batchDownloadId", batchDownloadId);
 
@@ -789,7 +788,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	+ "select group_concat('REPLACE(REPLACE(ifnull(F', fieldNo, ',\"\") , ''\\n'', ''''), ''\\r'', '''')' order by fieldNo asc) as fieldNos "
 	+ " from configurationFormFields where configId = :configId";
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	query.setParameter("configId", configId);
 	List<String> fieldNos = query.list();
 	if (query.list().size() == 1) {
@@ -802,7 +801,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = false)
     public void setSessionLength() throws Exception {
-	Query query1 = sessionFactory.getCurrentSession().createSQLQuery("SET SESSION group_concat_max_len = 9999999;");
+	Query query1 = sessionFactory.getCurrentSession().createNativeQuery("SET SESSION group_concat_max_len = 9999999;", String.class);
 	query1.executeUpdate();
     }
 
@@ -815,7 +814,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	+ "where (dateCreated >= '" + fromDate + "' and dateCreated < '" + toDate + "')  "
 	+ "and statusId = 41";
 
-	Query getRejectedCount = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	Query getRejectedCount = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 
 	return (BigInteger) getRejectedCount.uniqueResult();
     }
@@ -827,7 +826,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	String sql = "select group_concat('REPLACE(REPLACE(ifnull(F', fieldValue, ',\"\") , ''\\n'', ''''), ''\\r'', '''')' order by id asc) as fieldNos "
 	+ " from configurationccdelements where configId = :configId  and fieldValue != ''";
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	query.setParameter("configId", configId);
 	List<String> fieldNos = query.list();
 	if (query.list().size() == 1) {
@@ -852,7 +851,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    sql += "statusId = 9";
 	}
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	query.setParameter("configId", transportDetails.getconfigId());
 	try {
 	    return query.list();
@@ -1023,7 +1022,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    + "KEY `torFK_idx` (`batchDownloadId`)"
 	    + ") ENGINE=InnoDB DEFAULT CHARSET=latin1;";
 
-	    Query query = sessionFactory.getCurrentSession().createSQLQuery(transactionOutRecordsTable);
+	    Query query = sessionFactory.getCurrentSession().createNativeQuery(transactionOutRecordsTable, String.class);
 	    query.executeUpdate();
 
 	    //Create the transactiontranslatedout_batchDownloadId table
@@ -1046,7 +1045,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    + "KEY `ttobatchId` (`batchDownloadId`)"
 	    + ") ENGINE=InnoDB DEFAULT CHARSET=latin1;";
 
-	    query = sessionFactory.getCurrentSession().createSQLQuery(transactionTranslatedOutTable);
+	    query = sessionFactory.getCurrentSession().createNativeQuery(transactionTranslatedOutTable, String.class);
 	    query.executeUpdate();
 
 	    //Create the transactionouterrors_batchDownloadId table
@@ -1079,7 +1078,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    + "CONSTRAINT `toeVT_"+batchDownloadId+"_FK` FOREIGN KEY (`validationTypeId`) REFERENCES `ref_validationtypes` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION"
 	    + ") ENGINE=InnoDB DEFAULT CHARSET=latin1;";
 
-	    query = sessionFactory.getCurrentSession().createSQLQuery(transactionOutErrorsTable);
+	    query = sessionFactory.getCurrentSession().createNativeQuery(transactionOutErrorsTable, String.class);
 	    query.executeUpdate();
 
 	    //Create the transactiontranslatedlistout_batchDownloadId table
@@ -1099,7 +1098,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    + "KEY `outConcatKey` (`concatKey`)"
 	    + ") ENGINE=InnoDB DEFAULT CHARSET=latin1;";
 
-	    query = sessionFactory.getCurrentSession().createSQLQuery(transactionTranslatedListOutTable);
+	    query = sessionFactory.getCurrentSession().createNativeQuery(transactionTranslatedListOutTable, String.class);
 	    query.executeUpdate();
 	    
 	    //Create the transactionoutjsontable_batchDownloadId table
@@ -1115,7 +1114,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    + " KEY `ttoJsonConfigId` (`configId`)"
 	    + ") ENGINE=InnoDB DEFAULT CHARSET=latin1;";
 
-	    query = sessionFactory.getCurrentSession().createSQLQuery(transactionOutJSONTable);
+	    query = sessionFactory.getCurrentSession().createNativeQuery(transactionOutJSONTable, String.class);
 	    query.executeUpdate();
 	    
 	    //Create the transactionoutdetailauditerrors_batchUploadId table
@@ -1140,7 +1139,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    + " CONSTRAINT `ttoauditErrorKey_"+batchDownloadId+"_FK` FOREIGN KEY (`batchDownloadId`) REFERENCES `batchDownloads` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION" 
 	    +") ENGINE=InnoDB DEFAULT CHARSET=latin1;";
 
-	    query = sessionFactory.getCurrentSession().createSQLQuery(transactionoutdetailauditerrorsTable);
+	    query = sessionFactory.getCurrentSession().createNativeQuery(transactionoutdetailauditerrorsTable, String.class);
 	    query.executeUpdate();
 	    
 	    // create tables to track dropped values from macros
@@ -1148,14 +1147,14 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    + "drop table if exists transactionoutmacrodroppedvalues_" + batchDownloadId + ";"
 	    + "CREATE TABLE transactionoutmacrodroppedvalues_" + batchDownloadId + " ( id int(11) NOT NULL AUTO_INCREMENT, batchDownloadId int(11) not null, transactionOutRecordsId int(11) NOT NULL, configId int(11) not null, fieldNo int(11) NOT NULL, fieldValue text, matchId varchar(255) NULL, crosswalkId int(11) not null default 0, PRIMARY KEY (id), KEY outDrop (matchId));";
 	    
-	    query = sessionFactory.getCurrentSession().createSQLQuery(transactionoutmacrodroppedvalues);
+	    query = sessionFactory.getCurrentSession().createNativeQuery(transactionoutmacrodroppedvalues, String.class);
 	    query.executeUpdate();
 	    
 	    String transactionoutmacrokeptvalues = ""
 	    + "drop table if exists transactionoutmacrokeptvalues_" + batchDownloadId + ";"
 	    + "CREATE TABLE transactionoutmacrokeptvalues_" + batchDownloadId + " ( id int(11) NOT NULL AUTO_INCREMENT, batchDownloadId int(11) not null, transactionOutRecordsId int(11) NOT NULL, configId int(11) not null, fieldNo int(11) NOT NULL, fieldValue text, matchId varchar(255) NULL, PRIMARY KEY (id), KEY inkept (matchId));";
 	    
-	    query = sessionFactory.getCurrentSession().createSQLQuery(transactionoutmacrokeptvalues);
+	    query = sessionFactory.getCurrentSession().createNativeQuery(transactionoutmacrokeptvalues, String.class);
 	    query.executeUpdate();
 	} 
 	catch (Exception ex) {
@@ -1194,7 +1193,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	+ "UNIQUE KEY `temp_transactionInRecordsId_UNIQUE` (`transactionInRecordsId`)"
 	+ ") ENGINE=InnoDB DEFAULT CHARSET=latin1;";
 
-        Query query = sessionFactory.getCurrentSession().createSQLQuery(temptransactionTranslatedInTable);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(temptransactionTranslatedInTable, String.class);
         query.executeUpdate();
 	
 	StringBuilder selectFields = new StringBuilder();
@@ -1230,7 +1229,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	sqlinsert += "batchUploadId) SELECT id,transactionInRecordsId,configId,statusId,"+selectFields;
 	sqlinsert+= "batchUploadId from transactiontranslatedin_"+batchUploadId;
 	
-	query = sessionFactory.getCurrentSession().createSQLQuery(sqlinsert);
+	query = sessionFactory.getCurrentSession().createNativeQuery(sqlinsert, String.class);
 	query.executeUpdate();
 	
 	try {
@@ -1251,7 +1250,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 		sql+= batchDownloadId + ","+configId +",transactionInRecordsId from temp_transactiontranslatedin_"+batchUploadId+"_"+batchDownloadId+" where statusId = 9;";
 	    }
 	    
-	    query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	    query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	    query.executeUpdate();
 	    
 	    sql = "insert into transactiontranslatedout_"+batchDownloadId+" "
@@ -1261,12 +1260,12 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    sql+= "select 9, configId, id, " + insertFields;
 	    sql+= "batchDownloadId from transactionoutrecords_"+batchDownloadId+";";
 	    
-	    query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	    query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	    query.executeUpdate();
             
             //Delete the temp table
             sql = "DROP TABLE IF EXISTS `temp_transactiontranslatedin_" + batchUploadId + "_" + batchDownloadId + "`;";
-            query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+            query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
             query.executeUpdate();
 	    
 	} catch (Exception ex) {
@@ -1288,7 +1287,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	deleteSQL += "DROP TABLE IF EXISTS `transactioninmacrodroppedvalues_" + batchId + "`;";
 	deleteSQL += "DROP TABLE IF EXISTS `transactioninmacrokeptvalues_" + batchId + "`;";
 	
-	deleteQuery = sessionFactory.getCurrentSession().createSQLQuery(deleteSQL);
+	deleteQuery = sessionFactory.getCurrentSession().createNativeQuery(deleteSQL, String.class);
 	deleteQuery.executeUpdate();
     }
     
@@ -1303,7 +1302,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	clearSQL += "truncate TABLE `transactiontranslatedout_" + batchDownloadId + "`;";
 	clearSQL += "truncate TABLE `transactionoutrecords_" + batchDownloadId + "`;";
 	
-	Query clearData = sessionFactory.getCurrentSession().createSQLQuery(clearSQL);
+	Query clearData = sessionFactory.getCurrentSession().createNativeQuery(clearSQL, String.class);
 
 	try {
 	    clearData.executeUpdate();
@@ -1329,7 +1328,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	deleteSQL += "DROP TABLE IF EXISTS `transactionoutmacrodroppedvalues_" + batchId + "`;";
 	deleteSQL += "DROP TABLE IF EXISTS `transactionoutmacrokeptvalues_" + batchId + "`;";
 	
-	deleteQuery = sessionFactory.getCurrentSession().createSQLQuery(deleteSQL);
+	deleteQuery = sessionFactory.getCurrentSession().createNativeQuery(deleteSQL, String.class);
 	deleteQuery.executeUpdate();
     }
     
@@ -1355,7 +1354,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 		}
 		
 		if(!"".equals(deleteSQL)) {
-		    deleteQuery = sessionFactory.getCurrentSession().createSQLQuery(deleteSQL);
+		    deleteQuery = sessionFactory.getCurrentSession().createNativeQuery(deleteSQL, String.class);
 		    deleteQuery.executeUpdate();
 		}
 	    }
@@ -1420,7 +1419,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	
 	String SQL_MASTER_TABLES = "SHOW TABLES IN universaltranslator";
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(SQL_MASTER_TABLES);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(SQL_MASTER_TABLES, String.class);
 	List<String> tableNames = query.list();
 	
 	if(!query.list().isEmpty()) {
@@ -1518,7 +1517,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    sqlQuery += " limit " + displayStart+ ", 1000000";
 	}
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery)
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,batchDownloads.class)
 	.addScalar("id", StandardBasicTypes.INTEGER)
 	.addScalar("orgId", StandardBasicTypes.INTEGER)
 	.addScalar("utBatchName", StandardBasicTypes.STRING)
@@ -1537,8 +1536,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	.addScalar("fromBatchName", StandardBasicTypes.STRING)
 	.addScalar("fromBatchFile", StandardBasicTypes.STRING)
 	.addScalar("totalMessages", StandardBasicTypes.INTEGER)
-	.addScalar("srcOrgName", StandardBasicTypes.STRING)
-	.setResultTransformer(Transformers.aliasToBean(batchDownloads.class));
+	.addScalar("srcOrgName", StandardBasicTypes.STRING);
 	
 	List<batchDownloads> batchSentMessages = query.list();
 	
@@ -1556,7 +1554,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     public void populateOutboundAuditReport(Integer configId, Integer batchDownloadId, Integer batchUploadId, Integer batchUploadConfigId) throws Exception {
 	try {
 	    String sql = "call populateOutboundAuditReport(:configId, :batchDownloadId, :batchUploadId, :batchUploadConfigId);";
-	    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	    query.setParameter("configId", configId);
 	    query.setParameter("batchDownloadId", batchDownloadId);
 	    query.setParameter("batchUploadId", batchUploadId);
@@ -1577,11 +1575,10 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    + "inner join lu_errorcodes c on c.id = e.errorId "
 	    + "where e.batchDownloadId = :batchId group by e.errorId");
 
-	    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
+	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,batchErrorSummary.class)
 	    .addScalar("errorDisplayText", StandardBasicTypes.STRING)
 	    .addScalar("errorId", StandardBasicTypes.INTEGER)
-	    .addScalar("totalErrors", StandardBasicTypes.INTEGER)
-	    .setResultTransformer(Transformers.aliasToBean(batchErrorSummary.class));
+	    .addScalar("totalErrors", StandardBasicTypes.INTEGER);
 	    query.setParameter("batchId", batchId);
 
 	    List<batchErrorSummary> batchErrorSummaries = query.list();
@@ -1603,8 +1600,9 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	String sql = " select * from batchdownloadactivity where batchDownloadId = :batchId order by id asc";
 
 	try {
-	    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(batchdownloadactivity.class));
-	    query.setParameter("batchId", batchInfo.getId());
+	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,batchdownloadactivity.class)
+	    .setParameter("batchId", batchInfo.getId());
+            
 	    List<batchdownloadactivity> batchActivities = query.list();
 
 	    return batchActivities;
@@ -1646,14 +1644,14 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    + "or length(REPLACE(REPLACE(F" + cff.getFieldNo() + ", '\n', ''), '\r', '')) = 0) "
 	    + "and configId = :configId and (statusId is null or statusId not in (:transRELId));";
 	    
-	    Query insertData = sessionFactory.getCurrentSession().createSQLQuery(sql)
+	    Query insertData = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
 	    .setParameter("configId", cff.getconfigId())
 	    .setParameterList("transRELId", transRELId);
 	    
 	    insertData.executeUpdate();
 	    
 	    sql = "select count(id) as total from transactionouterrors_" + batchDownloadId + " where errorId = 1 and fieldNo = " + cff.getFieldNo();
-	    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).addScalar("total", StandardBasicTypes.INTEGER);
+	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class).addScalar("total", StandardBasicTypes.INTEGER);
 	    
 	    return (Integer) query.list().get(0);
 	    
@@ -1676,7 +1674,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Transactional(readOnly = true)
     public List getMissingRequiredField(Integer batchDownloadId,Integer configId,Integer fieldNo) {
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT id FROM transactionouterrors_"+batchDownloadId+" where errorId = 1 and batchDownloadId = :batchDownloadId and configId = :configId and fieldNo = :fieldNo");
+	Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id FROM transactionouterrors_"+batchDownloadId+" where errorId = 1 and batchDownloadId = :batchDownloadId and configId = :configId and fieldNo = :fieldNo", String.class);
 	query.setParameter("configId", configId);
 	query.setParameter("batchDownloadId", batchDownloadId);
 	query.setParameter("fieldNo", fieldNo);
@@ -1690,7 +1688,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 
 	String sql = "select * from transactionouterrors_"+batchId + " where required = 1";
 
-	Query getTotalErrors = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	Query getTotalErrors = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	
 	if(getTotalErrors.list() == null) {
 	    return 0;
@@ -1761,7 +1759,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    sqlQuery += " limit " + displayStart+ ", 1000000";
 	}
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery)
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,directmessagesout.class)
 	    .addScalar("id", StandardBasicTypes.INTEGER)
 	    .addScalar("statusName", StandardBasicTypes.STRING)
 	    .addScalar("orgName", StandardBasicTypes.STRING)
@@ -1769,8 +1767,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    .addScalar("batchDownloadId", StandardBasicTypes.INTEGER)
 	    .addScalar("configId", StandardBasicTypes.INTEGER)
 	    .addScalar("batchName", StandardBasicTypes.STRING)
-	    .addScalar("totalMessages", StandardBasicTypes.INTEGER)
-	    .setResultTransformer(Transformers.aliasToBean(directmessagesout.class));
+	    .addScalar("totalMessages", StandardBasicTypes.INTEGER);
 	
 	List<directmessagesout> directmessagesout = query.list();
 	
@@ -1831,7 +1828,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	+ ") rptField4 on rptField4.fieldNo = cs.rptField4 and rptField4.configId = e.configId "
 	+ "where e.batchDownloadId = :batchDownloadId limit 1";
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	query.setParameter("batchDownloadId", batchDownloadId);
 
 	return query.list();
@@ -1853,7 +1850,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 			+ "in (select transactionOutRecordsId "
 		+ " from transactionouterrors_"+batchDownloadId + " where errorId = 1)";
 	
-	Query updateData = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	Query updateData = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	try {
 	    updateData.executeUpdate();
 	} catch (Exception ex) {
@@ -1867,7 +1864,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 
 	String sql = "call insertValidationErrorsOutbound(:vtType, :fieldNo, :batchDownloadId, :configId, :transactionId, :isFieldRequired)";
 
-	Query insertError = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	Query insertError = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	insertError.setParameter("vtType", cff.getValidationType());
 	insertError.setParameter("fieldNo", cff.getFieldNo());
 	insertError.setParameter("batchDownloadId", batchDownloadId);
@@ -1879,7 +1876,8 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    insertError.executeUpdate();
 	    
 	    sql = "select count(id) as total from transactionouterrors_" + batchDownloadId + " where errorId = 2 and fieldNo = " + cff.getFieldNo();
-	    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).addScalar("total", StandardBasicTypes.INTEGER);
+	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
+            .addScalar("total", StandardBasicTypes.INTEGER);
 	    
 	    return (Integer) query.list().get(0);
 	    
@@ -1906,7 +1904,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	String sql = "select group_concat(CONCAT(\"'\", fieldDesc, \"'\") order by fieldNo asc) as fieldHeadings "
 	+ "from configurationFormFields where configId = " + configId;
 
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	List<String> fieldHeadings = query.list();
 	if (!fieldHeadings.isEmpty()) {
 		return fieldHeadings.get(0);
@@ -1969,8 +1967,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	+ "transactionoutrecords_" + batchId + " b on b.id = a.transactionOutRecordsId "
 	+ "order by a.id asc";
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
-	Transformers.aliasToBean(transactionOutRecords.class));
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,transactionOutRecords.class);
 
 	List<transactionOutRecords> records = query.list();
 	
@@ -2008,7 +2005,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	
 	if (!"".equals(sql)) {
 	    
-	    Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 
 	    if (transportDetails.getfileType() == 12) {
 		query.setParameter("batchConfigId", transportDetails.getconfigId());

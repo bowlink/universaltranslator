@@ -12,15 +12,13 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpSession;
-
+import jakarta.servlet.http.HttpSession;
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 
 @Service

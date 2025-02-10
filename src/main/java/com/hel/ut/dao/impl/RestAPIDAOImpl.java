@@ -12,12 +12,11 @@ import com.hel.ut.model.RestAPIMessagesOut;
 import com.hel.ut.model.batchDownloads;
 import com.hel.ut.model.batchUploads;
 import java.text.SimpleDateFormat;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.query.Query;
-import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 
 /**
@@ -82,15 +81,14 @@ public class RestAPIDAOImpl implements RestAPIDAO {
 	    sqlQuery += " limit " + fetchSize;
 	}
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery)
-		.addScalar("id", StandardBasicTypes.INTEGER)
-                .addScalar("orgId", StandardBasicTypes.INTEGER)
-                .addScalar("statusId", StandardBasicTypes.INTEGER)
-                .addScalar("errorId", StandardBasicTypes.INTEGER)
-                .addScalar("dateCreated", StandardBasicTypes.DATE)
-                .addScalar("batchUploadId", StandardBasicTypes.INTEGER)
-		.addScalar("configId", StandardBasicTypes.INTEGER)
-		.setResultTransformer(Transformers.aliasToBean(RestAPIMessagesIn.class));
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,RestAPIMessagesIn.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("orgId", StandardBasicTypes.INTEGER)
+        .addScalar("statusId", StandardBasicTypes.INTEGER)
+        .addScalar("errorId", StandardBasicTypes.INTEGER)
+        .addScalar("dateCreated", StandardBasicTypes.DATE)
+        .addScalar("batchUploadId", StandardBasicTypes.INTEGER)
+        .addScalar("configId", StandardBasicTypes.INTEGER);
 
 	List<RestAPIMessagesIn> apimessagesin = query.list();
 	
@@ -271,17 +269,16 @@ public class RestAPIDAOImpl implements RestAPIDAO {
 	    sqlQuery += " limit " + displayStart+ ", 1000000";
 	}
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery)
-	    .addScalar("id", StandardBasicTypes.INTEGER)
-	    .addScalar("statusName", StandardBasicTypes.STRING)
-	    .addScalar("errorDisplayText", StandardBasicTypes.STRING)
-	    .addScalar("orgName", StandardBasicTypes.STRING)
-	    .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
-	    .addScalar("batchUploadId", StandardBasicTypes.INTEGER)
-	    .addScalar("configId", StandardBasicTypes.INTEGER)
-	    .addScalar("batchName", StandardBasicTypes.STRING)
-	    .addScalar("totalMessages", StandardBasicTypes.INTEGER)
-	    .setResultTransformer(Transformers.aliasToBean(RestAPIMessagesIn.class));
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,RestAPIMessagesIn.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("statusName", StandardBasicTypes.STRING)
+        .addScalar("errorDisplayText", StandardBasicTypes.STRING)
+        .addScalar("orgName", StandardBasicTypes.STRING)
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
+        .addScalar("batchUploadId", StandardBasicTypes.INTEGER)
+        .addScalar("configId", StandardBasicTypes.INTEGER)
+        .addScalar("batchName", StandardBasicTypes.STRING)
+        .addScalar("totalMessages", StandardBasicTypes.INTEGER);
 	
 	List<RestAPIMessagesIn> apimessagesin = query.list();
 	
@@ -353,17 +350,16 @@ public class RestAPIDAOImpl implements RestAPIDAO {
 	    sqlQuery += " limit " + displayStart+ ", 1000000";
 	}
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery)
-	    .addScalar("id", StandardBasicTypes.INTEGER)
-	    .addScalar("statusName", StandardBasicTypes.STRING)
-	    .addScalar("errorDisplayText", StandardBasicTypes.STRING)
-	    .addScalar("orgName", StandardBasicTypes.STRING)
-	    .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
-	    .addScalar("batchDownloadId", StandardBasicTypes.INTEGER)
-	    .addScalar("configId", StandardBasicTypes.INTEGER)
-	    .addScalar("batchName", StandardBasicTypes.STRING)
-	    .addScalar("totalMessages", StandardBasicTypes.INTEGER)
-	    .setResultTransformer(Transformers.aliasToBean(RestAPIMessagesOut.class));
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,RestAPIMessagesOut.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("statusName", StandardBasicTypes.STRING)
+        .addScalar("errorDisplayText", StandardBasicTypes.STRING)
+        .addScalar("orgName", StandardBasicTypes.STRING)
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
+        .addScalar("batchDownloadId", StandardBasicTypes.INTEGER)
+        .addScalar("configId", StandardBasicTypes.INTEGER)
+        .addScalar("batchName", StandardBasicTypes.STRING)
+        .addScalar("totalMessages", StandardBasicTypes.INTEGER);
 	
 	List<RestAPIMessagesOut> apimessagesout = query.list();
 	

@@ -2,7 +2,6 @@ package com.hel.ut.dao.impl;
 
 import java.util.List;
 import java.util.Properties;
-import javax.annotation.Resource;
 import org.hibernate.query.Query;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +11,11 @@ import com.hel.ut.dao.messageTypeDAO;
 import com.hel.ut.model.CrosswalkData;
 import com.hel.ut.model.Crosswalks;
 import com.hel.ut.model.validationType;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.annotation.Resource;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 
@@ -85,8 +85,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @SuppressWarnings("rawtypes")
     @Transactional(readOnly = true)
     public List getInformationTables() {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT distinct table_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" + myProps.getProperty("schemaNameIL") + "' and TABLE_NAME LIKE 'message\\_%'");
-
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT distinct table_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" + myProps.getProperty("schemaNameIL") + "' and TABLE_NAME LIKE 'message\\_%'", String.class);
         return query.list();
     }
 
@@ -98,8 +97,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @SuppressWarnings("rawtypes")
     @Transactional(readOnly = true)
     public List getAllTables() {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT distinct table_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" + myProps.getProperty("schemaNameIL") + "'");
-
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT distinct table_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" + myProps.getProperty("schemaNameIL") + "'", String.class);
         return query.list();
     }
 
@@ -113,8 +111,8 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @SuppressWarnings("rawtypes")
     @Transactional(readOnly = true)
     public List getTableColumns(String tableName) {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" + myProps.getProperty("schemaNameIL") + "' AND TABLE_NAME = :tableName and COLUMN_NAME not in ('id', 'dateCreated', 'transactionInId') order by COLUMN_NAME")
-                .setParameter("tableName", tableName);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" + myProps.getProperty("schemaNameIL") + "' AND TABLE_NAME = :tableName and COLUMN_NAME not in ('id', 'dateCreated', 'transactionInId') order by COLUMN_NAME", String.class)
+        .setParameter("tableName", tableName);
 
         return query.list();
     }
@@ -128,8 +126,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @SuppressWarnings("rawtypes")
     @Transactional(readOnly = true)
     public List getValidationTypes() {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT id, validationType FROM ref_validationTypes order by id asc");
-
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, validationType FROM ref_validationTypes order by id asc", String.class);
         return query.list();
     }
 
@@ -143,7 +140,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @SuppressWarnings("rawtypes")
     @Transactional(readOnly = true)
     public String getValidationById(int id) {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT validationType FROM ref_validationTypes where id = :id");
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT validationType FROM ref_validationTypes where id = :id", String.class);
         query.setParameter("id", id);
 
         String validationType = (String) query.uniqueResult();
@@ -160,7 +157,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @SuppressWarnings("rawtypes")
     @Transactional(readOnly = true)
     public List getDelimiters() {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT id, delimiter FROM ref_delimiters order by delimiter asc");
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, delimiter FROM ref_delimiters order by delimiter asc", String.class);
 
         return query.list();
     }
@@ -176,7 +173,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Transactional(readOnly = true)
     @Override
     public String getDelimiterChar(int id) {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT delimChar FROM ref_delimiters where id = :id");
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT delimChar FROM ref_delimiters where id = :id", String.class);
         query.setParameter("id", id);
 
         String delimChar = (String) query.uniqueResult();
@@ -316,7 +313,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @SuppressWarnings("rawtypes")
     @Transactional(readOnly = true)
     public List getCrosswalkData(int cwId) {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT sourceValue, targetValue, descValue FROM rel_crosswalkData where crosswalkId = :crosswalkid order by id asc");
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT sourceValue, targetValue, descValue FROM rel_crosswalkData where crosswalkId = :crosswalkid order by id asc", String.class);
         query.setParameter("crosswalkid", cwId);
 
         return query.list();
@@ -333,7 +330,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Override
     @Transactional(readOnly = true)
     public String getFieldName(int fieldId) {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT fieldDesc FROM messageTypeFormFields where id = :fieldId")
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT fieldDesc FROM messageTypeFormFields where id = :fieldId", String.class)
 	.setParameter("fieldId", fieldId);
 
         String fieldName = (String) query.uniqueResult();
@@ -389,9 +386,8 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     public void executeSQLStatement(String sqlStmt) {
 	if(sqlStmt != null) {
 	    if(!"".equals(sqlStmt)) {
-		
 		//Need to insert all the fields into the crosswalk data Fields table
-		Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlStmt);
+		Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlStmt, String.class);
 		query.executeUpdate();
 	    }
 	}
@@ -414,7 +410,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Override
     @Transactional(readOnly = true)
     public List getCrosswalksWithData(Integer orgId) {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("select a.name,  b.sourceValue, b.targetValue, b.descValue, a.id, a.fileDelimiter from crosswalks a inner join rel_crosswalkdata b on b.crosswalkId = a.id where a.orgId = :orgId order by a.name asc");
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("select a.name,  b.sourceValue, b.targetValue, b.descValue, a.id, a.fileDelimiter from crosswalks a inner join rel_crosswalkdata b on b.crosswalkId = a.id where a.orgId = :orgId order by a.name asc", String.class);
         query.setParameter("orgId", orgId);
 
         return query.list();
@@ -438,14 +434,13 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	    sql += "where a.orgId = 0 order by a.name asc";
 	}
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,Crosswalks.class)
 	.addScalar("id", StandardBasicTypes.INTEGER)
 	.addScalar("orgId", StandardBasicTypes.INTEGER)
 	.addScalar("dtsId", StandardBasicTypes.INTEGER)
 	.addScalar("name", StandardBasicTypes.STRING)
 	.addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
 	.addScalar("lastUpdated", StandardBasicTypes.TIMESTAMP)	
-	.setResultTransformer( Transformers.aliasToBean(Crosswalks.class))
 	.setParameter("orgId", orgId)
 	.setParameter("configId", configId);
 	
@@ -457,7 +452,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Override
     @Transactional(readOnly = true)
     public List getCrosswalksWithDataByFileName(Integer orgId, String fileName) {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("select b.sourceValue, b.targetValue, b.descValue, c.delimiter, c.delimChar from crosswalks a inner join rel_crosswalkdata b on b.crosswalkId = a.id inner join ref_delimiters c on c.id = a.fileDelimiter where a.orgId = :orgId and a.fileName = :fileName order by b.id asc");
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("select b.sourceValue, b.targetValue, b.descValue, c.delimiter, c.delimChar from crosswalks a inner join rel_crosswalkdata b on b.crosswalkId = a.id inner join ref_delimiters c on c.id = a.fileDelimiter where a.orgId = :orgId and a.fileName = :fileName order by b.id asc", String.class);
         query.setParameter("orgId", orgId);
 	query.setParameter("fileName", fileName);
 
@@ -475,7 +470,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	+ "and ((a.id in (select crosswalkId from configurationdatatranslations where configId = :configId)) OR (a.id in (select constant1 from configurationdatatranslations where configId = :configId))) "
 	+ "order by a.name asc";
 	
-        Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
         query.setParameter("orgId", orgId);
 	query.setParameter("configId", configId);
 
@@ -493,7 +488,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Transactional(readOnly = true)
     @Override
     public String getDelimiterById(int id) {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT delimiter FROM ref_delimiters where id = :id");
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT delimiter FROM ref_delimiters where id = :id", String.class);
         query.setParameter("id", id);
 
         String delimChar = (String) query.uniqueResult();
@@ -560,8 +555,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	
 	String sql = "select distinct * from crosswalks a where orgId = :orgId and id in (select crosswalkid from configurationdatatranslations where configId = :configId);";
 
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
-	.setResultTransformer( Transformers.aliasToBean(Crosswalks.class))
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,Crosswalks.class)
 	.setParameter("orgId", orgId)
 	.setParameter("configId", configId);
 	
@@ -579,7 +573,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	+ "inner join configurationdatatranslations b on (b.crosswalkid = a.id or (b.macroId in (129,160,177,195,199,201) and (b.constant1 = a.id or b.constant2 = a.id))) and b.configId = :configId "
 	+ "where a.orgId > 0 and a.orgId != :newOrgId order by a.name asc";
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,Crosswalks.class)
 	.addScalar("id", StandardBasicTypes.INTEGER)
 	.addScalar("orgId", StandardBasicTypes.INTEGER)
 	.addScalar("fileDelimiter", StandardBasicTypes.INTEGER)	
@@ -587,7 +581,6 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	.addScalar("fileName", StandardBasicTypes.STRING)	
 	.addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
 	.addScalar("lastUpdated", StandardBasicTypes.TIMESTAMP)	
-	.setResultTransformer( Transformers.aliasToBean(Crosswalks.class))
 	.setParameter("configId", configId)
 	.setParameter("newOrgId", newOrgId);
 	
@@ -605,7 +598,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	+ "configurationdatatranslations c on (c.crosswalkid = a.id or (c.macroId in (129,160,177,195,199,201) and (c.constant1 = a.id or c.constant2 = a.id))) and c.configId = :configId "
 	+ "order by a.name asc";
 	
-        Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	query.setParameter("configId", configId);
 
         return query.list();
@@ -621,7 +614,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	+ "ref_delimiters c on c.id = a.fileDelimiter "
 	+ "where a.id = :crosswalkId";
 	
-        Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
         query.setParameter("crosswalkId", crosswalkId);
 	
         return query.list();
@@ -635,7 +628,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
         
 	String sql = "select group_concat(configId) from configurationdatatranslations where crosswalkId = :crosswalkId or (macroId in (129,160,177,195,199,201) and (constant1 = :crosswalkId or constant2 = :crosswalkId))";
 	
-        Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
         query.setParameter("crosswalkId", crosswalkId);
         
         if(!query.list().isEmpty()) {

@@ -9,7 +9,7 @@
     <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
         <property name="hibernateProperties">
             <props>
-                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</prop>
 		<prop key="hibernate.multiTenancy">DATABASE</prop>
                 <prop key="hibernate.show_sql">${jdbc.hibernate.show_sql}</prop>
 		<prop key="hibernate.tenant_identifier_resolver">com.hel.ut.util.CurrentTenantIdentifierResolverImpl</prop>

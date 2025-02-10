@@ -2,9 +2,7 @@ package com.hel.ut.webServices;
 
 import java.util.Date;
 import java.util.List;
-
-import javax.xml.soap.SOAPMessage;
-
+import jakarta.xml.soap.SOAPMessage;
 import com.hel.ut.model.WSMessagesIn;
 import com.hel.ut.model.wsMessagesOut;
 import com.hel.ut.model.custom.ToWSSOAP;
@@ -32,5 +30,4 @@ public interface WSManager {
     List<WSMessagesIn> getWSMessagesInByBatchId(Integer batchId) throws Exception;
 
     void saveWSMessagesIn(WSMessagesIn wsIn) throws Exception;
-
 }

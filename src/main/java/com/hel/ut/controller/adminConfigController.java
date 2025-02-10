@@ -3,7 +3,7 @@ package com.hel.ut.controller;
 import com.hel.ut.model.CrosswalkData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -61,7 +61,7 @@ import com.hel.ut.service.impl.transactionInManagerImpl;
 import com.hel.ut.service.transactionInManager;
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import com.hel.ut.service.utConfigurationManager;
 import com.hel.ut.service.utConfigurationTransportManager;
 import com.itextpdf.text.Document;
@@ -72,6 +72,7 @@ import com.registryKit.registry.configurations.configuration;
 import com.registryKit.registry.configurations.configurationManager;
 import com.registryKit.registry.helRegistry;
 import com.registryKit.registry.helRegistryManager;
+import jakarta.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -96,9 +97,8 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -122,7 +122,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 @Controller
 @RequestMapping("/administrator/configurations")
@@ -5892,7 +5891,7 @@ public class adminConfigController {
     
     @RequestMapping(value = "/submitMultiCrosswalks", method = RequestMethod.POST)
     public @ResponseBody String submitMultiCrosswalks(Authentication authentication, @RequestParam(value = "orgId", required = false) Integer orgId,
-        @RequestParam(value = "cwId", required = true) Integer cwId, @RequestParam(value = "fileDelimiter", required = true) Integer fileDelimiter, @RequestParam("crosswalkFile") CommonsMultipartFile[] crosswalkFiles) throws Exception {
+        @RequestParam(value = "cwId", required = true) Integer cwId, @RequestParam(value = "fileDelimiter", required = true) Integer fileDelimiter, @RequestParam("crosswalkFile") MultipartFile[] crosswalkFiles) throws Exception {
 
         if(crosswalkFiles != null) {
             String cwName = "";
@@ -5905,7 +5904,7 @@ public class adminConfigController {
             List<String> multipleSrcValues = new ArrayList<>();
              boolean multipleSrcValuesExists = false;
 
-            for(CommonsMultipartFile cwfile : crosswalkFiles) {
+            for(MultipartFile cwfile : crosswalkFiles) {
                 originalFileName = cwfile.getOriginalFilename();
                 
                 multipleSrcValuesExists = false;

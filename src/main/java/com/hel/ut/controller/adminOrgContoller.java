@@ -37,14 +37,14 @@ import com.hel.ut.service.utConfigurationManager;
 import com.hel.ut.service.utConfigurationTransportManager;
 import com.registryKit.registry.tiers.programOrgHierarchy;
 import com.registryKit.registry.tiers.programOrgHierarchyDetails;
+import jakarta.annotation.Resource;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 
 /**

@@ -12,9 +12,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
 
 /**
  * The mainController class will handle all URL requests that fall outside of specific user or admin controllers
@@ -59,22 +58,22 @@ public class mainController {
     @Autowired
     private emailManager emailmanager;
     
+   
     /**
      * The '/', '/login' request will serve up the login page.
      *
-     * @param request
-     * @param response
      * @return	the login page view
      * @throws Exception
      */
     @RequestMapping(value = {"/", "/login"}, method = RequestMethod.GET)
-	public ModelAndView login() throws Exception {
+    public ModelAndView login() throws Exception {
         
 	ModelAndView mav = new ModelAndView();
-	mav.setViewName("/login");
+	mav.setViewName("templates/login");
+        
+        mav.addObject("pageTitle", "Health-e-Link Account Login");
 
 	return mav;
-
     }
 
     /**
@@ -86,7 +85,7 @@ public class mainController {
      * @throws Exception
      */
     @RequestMapping(value = "/loginfailed", method = RequestMethod.GET)
-	public ModelAndView loginerror(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public ModelAndView loginerror(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 	ModelAndView mav = new ModelAndView();
 	mav.setViewName("/login");

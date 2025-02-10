@@ -6,15 +6,15 @@
 package com.hel.ut.model;
 
 import com.hel.ut.validator.NoHtml;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.hibernate.annotations.GenericGenerator;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -25,7 +25,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 public class configurationMessageSpecs {
 
     @Transient
-    private CommonsMultipartFile file = null, parsingScriptFile = null;
+    private MultipartFile file = null, parsingScriptFile = null;
     
     @Transient
     private boolean hasHeader = false;
@@ -178,11 +178,11 @@ public class configurationMessageSpecs {
         this.rptField4 = rptField4;
     }
 
-    public CommonsMultipartFile getFile() {
+    public MultipartFile getFile() {
         return file;
     }
 
-    public void setFile(CommonsMultipartFile file) {
+    public void setFile(MultipartFile file) {
         this.file = file;
     }
 
@@ -218,11 +218,11 @@ public class configurationMessageSpecs {
 	this.parsingTemplate = parsingTemplate;
     }
 
-    public CommonsMultipartFile getParsingScriptFile() {
+    public MultipartFile getParsingScriptFile() {
 	return parsingScriptFile;
     }
 
-    public void setParsingScriptFile(CommonsMultipartFile parsingScriptFile) {
+    public void setParsingScriptFile(MultipartFile parsingScriptFile) {
 	this.parsingScriptFile = parsingScriptFile;
     }
 

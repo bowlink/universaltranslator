@@ -11,15 +11,14 @@ import com.hel.ut.model.utUser;
 import com.hel.ut.model.utConfiguration;
 import com.hel.ut.model.configurationConnection;
 import com.hel.ut.reference.fileSystem;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Properties;
-import javax.annotation.Resource;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.exception.SQLGrammarException;
-import org.hibernate.transform.Transformers;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -468,12 +467,9 @@ public class organizationDAOImpl implements organizationDAO {
         query += "order by "+sortColumnName+" "+sortDirection;
         query += " limit :displayStart , :displayRecords";
 	
-        Query q1 = sessionFactory.getCurrentSession().createSQLQuery(query);
-        
-        q1.setParameter("displayStart", displayStart);
-        q1.setParameter("displayRecords", displayRecords);
-	
-        q1.setResultTransformer(Transformers.aliasToBean(Organization.class));
+        Query q1 = sessionFactory.getCurrentSession().createNativeQuery(query,Organization.class)
+        .setParameter("displayStart", displayStart)
+        .setParameter("displayRecords", displayRecords);
 
         return q1.list();
     }
@@ -485,10 +481,8 @@ public class organizationDAOImpl implements organizationDAO {
 	String sqlQuery = "select distinct a.id, a.orgName from organizations a inner join configurations b on b.orgId = a.id ";
 	sqlQuery += "where b.messageTypeId = :registryType and b.status = 1 order by a.orgName asc";
 	
-	Query q1 = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery);
-        q1.setParameter("registryType", registryType);
-	
-        q1.setResultTransformer(Transformers.aliasToBean(Organization.class));
+	Query q1 = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,Organization.class)
+        .setParameter("registryType", registryType);
 
 	return q1.list();
     }
@@ -502,8 +496,7 @@ public class organizationDAOImpl implements organizationDAO {
         + "registries.registries r on r.id = a.helRegistryId "
         + "order by helRegistry asc, a.orgName asc";
         
-        Query q1 = sessionFactory.getCurrentSession().createSQLQuery(sqlQuery);
-        q1.setResultTransformer(Transformers.aliasToBean(Organization.class));
+        Query q1 = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,Organization.class);
         
         return q1.list();
     }

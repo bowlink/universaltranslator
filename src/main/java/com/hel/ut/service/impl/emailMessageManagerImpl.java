@@ -7,7 +7,7 @@ package com.hel.ut.service.impl;
 
 import com.hel.ut.model.mailMessage;
 import com.hel.ut.service.emailMessageManager;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;

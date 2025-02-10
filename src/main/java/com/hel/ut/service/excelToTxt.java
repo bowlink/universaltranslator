@@ -27,7 +27,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  *

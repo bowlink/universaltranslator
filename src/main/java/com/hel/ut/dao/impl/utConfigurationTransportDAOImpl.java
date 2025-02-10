@@ -22,10 +22,10 @@ import com.hel.ut.model.configurationconnectionfieldmappings;
 import com.hel.ut.model.logftpconnectionerrors;
 import com.hel.ut.model.organizationDirectDetails;
 import com.hel.ut.model.utConfiguration;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 @Repository
 public class utConfigurationTransportDAOImpl implements utConfigurationTransportDAO {
@@ -103,7 +103,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public List getTransportMethods() {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT id, transportMethod FROM ref_transportMethods where active = 1 order by transportMethod asc");
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, transportMethod FROM ref_transportMethods where active = 1 order by transportMethod asc", String.class);
 
         return query.list();
     }
@@ -124,16 +124,16 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	if(configurationDetails.getType() == 1) {
 	    //eReferral configuration (allow online form and file drop)
 	    if(configurationDetails.getMessageTypeId() == 1) {
-		query = sessionFactory.getCurrentSession().createSQLQuery("SELECT id, transportMethod FROM ref_transportMethods where active = 1 and id in (10,13) order by transportMethod asc");
+		query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, transportMethod FROM ref_transportMethods where active = 1 and id in (10,13) order by transportMethod asc", String.class);
 	    }
 	    else {
-		query = sessionFactory.getCurrentSession().createSQLQuery("SELECT id, transportMethod FROM ref_transportMethods where active = 1 and id = 13 order by transportMethod asc");
+		query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, transportMethod FROM ref_transportMethods where active = 1 and id = 13 order by transportMethod asc", String.class);
 	    }
 	}
 	
 	//Target configuration
 	else {
-	    query = sessionFactory.getCurrentSession().createSQLQuery("SELECT id, transportMethod FROM ref_transportMethods where active = 1 and id in (3,9,12,13) order by transportMethod asc");
+	    query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, transportMethod FROM ref_transportMethods where active = 1 and id in (3,9,12,13) order by transportMethod asc", String.class);
 	}
 	
         return query.list();
@@ -151,12 +151,12 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     public void copyMessageTypeFields(int transportId, int configId, int messageTypeId) {
 
         // Check to see if there are any data translations for the passed in message type
-        Query translationQuery = sessionFactory.getCurrentSession().createSQLQuery("SELECT id FROM rel_messageTypeDataTranslations where messageTypeId = :messageTypeId");
+        Query translationQuery = sessionFactory.getCurrentSession().createNativeQuery("SELECT id FROM rel_messageTypeDataTranslations where messageTypeId = :messageTypeId", String.class);
         translationQuery.setParameter("messageTypeId", messageTypeId);
 
         if (translationQuery.list().size() > 0) {
             // Get all the message type fields
-            Query messageTypeFields = sessionFactory.getCurrentSession().createSQLQuery("SELECT id, messageTypeId FROM messageTypeFormFields where messageTypeId = :messageTypeId");
+            Query messageTypeFields = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, messageTypeId FROM messageTypeFormFields where messageTypeId = :messageTypeId", String.class);
             messageTypeFields.setParameter("messageTypeId", messageTypeId);
             List fieldList = messageTypeFields.list();
 
@@ -166,7 +166,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
             while (it.hasNext()) {
                 Object row[] = (Object[]) it.next();
                 id = (Integer) row[0];
-                Query query = sessionFactory.getCurrentSession().createSQLQuery("INSERT INTO configurationFormFields (messageTypeFieldId, configId, transportDetailId, fieldNo, fieldDesc, validationType, required, useField) SELECT id, :configId, :transportDetailId, fieldNo,  fieldDesc, validationType, required, 1 FROM messageTypeFormFields where messageTypeId = :messageTypeId and id = :id");
+                Query query = sessionFactory.getCurrentSession().createNativeQuery("INSERT INTO configurationFormFields (messageTypeFieldId, configId, transportDetailId, fieldNo, fieldDesc, validationType, required, useField) SELECT id, :configId, :transportDetailId, fieldNo,  fieldDesc, validationType, required, 1 FROM messageTypeFormFields where messageTypeId = :messageTypeId and id = :id", String.class);
                 query.setParameter("configId", configId);
                 query.setParameter("messageTypeId", messageTypeId);
                 query.setParameter("transportDetailId", transportId);
@@ -174,14 +174,14 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
                 query.executeUpdate();
 
                 //Get the max id
-                Query maxId = sessionFactory.getCurrentSession().createSQLQuery("SELECT max(id), configId FROM configurationFormFields");
+                Query maxId = sessionFactory.getCurrentSession().createNativeQuery("SELECT max(id), configId FROM configurationFormFields", String.class);
                 List queryList = maxId.list();
                 Iterator maxIt = queryList.iterator();
                 while (maxIt.hasNext()) {
                     Object maxrow[] = (Object[]) maxIt.next();
                     max = (Integer) maxrow[0];
                     /* Check to see if there is a data translation for the current row */
-                    Query copyTranslations = sessionFactory.getCurrentSession().createSQLQuery("INSERT INTO configurationDataTranslations (configId, fieldId, crosswalkId, macroId, processOrder) SELECT :configId, :fieldId, crosswalkId, 0, processOrder FROM rel_messageTypeDataTranslations where fieldId = :fieldId2");
+                    Query copyTranslations = sessionFactory.getCurrentSession().createNativeQuery("INSERT INTO configurationDataTranslations (configId, fieldId, crosswalkId, macroId, processOrder) SELECT :configId, :fieldId, crosswalkId, 0, processOrder FROM rel_messageTypeDataTranslations where fieldId = :fieldId2", String.class);
                     copyTranslations.setParameter("configId", configId);
                     copyTranslations.setParameter("fieldId", max);
                     copyTranslations.setParameter("fieldId2", id);
@@ -190,7 +190,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
             }
         } else {
 	    
-            Query query = sessionFactory.getCurrentSession().createSQLQuery("INSERT INTO configurationFormFields (messageTypeFieldId, configId, transportDetailId, fieldNo, fieldDesc, validationType, required, useField) SELECT id, :configId, :transportDetailId, fieldNo,  fieldDesc, validationType, required, 1 FROM messageTypeFormFields where messageTypeId = :messageTypeId");
+            Query query = sessionFactory.getCurrentSession().createNativeQuery("INSERT INTO configurationFormFields (messageTypeFieldId, configId, transportDetailId, fieldNo, fieldDesc, validationType, required, useField) SELECT id, :configId, :transportDetailId, fieldNo,  fieldDesc, validationType, required, 1 FROM messageTypeFormFields where messageTypeId = :messageTypeId", String.class);
             query.setParameter("configId", configId);
             query.setParameter("messageTypeId", messageTypeId);
             query.setParameter("transportDetailId", transportId);
@@ -405,7 +405,9 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public String getTransportMethodById(int Id) {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT transportMethod FROM ref_transportMethods where id = :Id").setParameter("Id", Id);
+        
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT transportMethod FROM ref_transportMethods where id = :Id", String.class)
+        .setParameter("Id", Id);
 
         String transportMethod = (String) query.uniqueResult();
 
@@ -524,10 +526,9 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	    + " and transportMethodId = :transportMethodId and configurationTransportDetails.configId in "
 	    + "(select id from configurations where orgId = :orgId and type = 1);");
 	    
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
-                    Transformers.aliasToBean(configurationTransport.class));
-            query.setParameter("orgId", orgId);
-            query.setParameter("transportMethodId", transportMethodId);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
+            .setParameter("orgId", orgId)
+            .setParameter("transportMethodId", transportMethodId);
 
             List<configurationTransport> configurationTransports = query.list();
 
@@ -553,10 +554,9 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
             if (!getZeroMessageTypeCol) {
                 sql = sql + " and messageTypeCol != 0";
             }
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
-                    Transformers.aliasToBean(configurationMessageSpecs.class));
-            query.setParameter("userId", userId);
-            query.setParameter("transportMethodId", transportMethodId);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationMessageSpecs.class)
+            .setParameter("userId", userId)
+            .setParameter("transportMethodId", transportMethodId);
 
             List<configurationMessageSpecs> configurationMessageSpecs = query.list();
 
@@ -618,10 +618,9 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
             if (!getZeroMessageTypeCol) {
                 sql = sql + " and messageTypeCol != 0";
             }
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
-                    Transformers.aliasToBean(configurationMessageSpecs.class));
-            query.setParameter("orgId", orgId);
-            query.setParameter("transportMethodId", transportMethodId);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationMessageSpecs.class)
+            .setParameter("orgId", orgId)
+            .setParameter("transportMethodId", transportMethodId);
 
             List<configurationMessageSpecs> configurationMessageSpecs = query.list();
 
@@ -647,11 +646,11 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 		    + "where a.id = :transportDetailId and a.fileExt = :fileExt and a.transportMethodId = :transportMethodId "
 		    + "and d.type = 1 and d.status = :status";
 	  
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(configurationTransport.class));
-            query.setParameter("fileExt", fileExt);
-            query.setParameter("transportMethodId", transportMethodId);
-            query.setParameter("status", status);
-            query.setParameter("transportDetailId", transportDetailsId);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
+            .setParameter("fileExt", fileExt)
+            .setParameter("transportMethodId", transportMethodId)
+            .setParameter("status", status)
+            .setParameter("transportDetailId", transportDetailsId);
 
             List<configurationTransport> configurationTransports = query.list();
 
@@ -675,11 +674,11 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	    + "configurations b on b.id = a.configId "
 	    + "where a.id = :transportDetailsId and a.fileExt = :fileExt and a.transportMethodId = :transportMethodId and a.status = :status and b.type = 1";
 	    
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(configurationTransport.class));
-            query.setParameter("fileExt", fileExt);
-            query.setParameter("transportMethodId", transportMethodId);
-            query.setParameter("status", status);
-            query.setParameter("transportDetailsId", transportDetailsId);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
+            .setParameter("fileExt", fileExt)
+            .setParameter("transportMethodId", transportMethodId)
+            .setParameter("status", status)
+            .setParameter("transportDetailsId", transportDetailsId);
 
             List<configurationTransport> transportList = query.list();
 
@@ -714,7 +713,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 		    + "configurations b on b.id = a.configId "
 		    + "where a.id = :transportId");
 	    
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
             query.setParameter("transportId", ftpInfo.gettransportId());
 
             Integer orgId = (Integer) query.list().get(0);
@@ -733,7 +732,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
         try {
             String sql = ("select min(maxFileSize) as filesize from configurationTransportDetails "
                     + " where transportmethodid = :transportMethodId and fileext = :fileExt");
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
             query.setParameter("fileExt", fileExt);
             query.setParameter("transportMethodId", transportMethodId);
 
@@ -753,14 +752,14 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     public List<configurationTransport> getCountContainsHeaderRow(String fileExt, Integer transportMethodId) {
         try {
             String sql = ("select distinct containsHeaderRow from configurationTransportDetails, ref_delimiters , configurationMessageSpecs "
-                    + " where ref_delimiters.id = configurationTransportDetails.fileDelimiter "
-                    + " and configurationMessageSpecs.configId = configurationTransportDetails.configId"
-                    + " and fileext = :fileExt and transportmethodId = :transportMethodId"
-                    + " and configurationTransportDetails.configId in (select id from configurations where type = 1)");
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
-                    Transformers.aliasToBean(configurationTransport.class));
-            query.setParameter("fileExt", fileExt);
-            query.setParameter("transportMethodId", transportMethodId);
+            + " where ref_delimiters.id = configurationTransportDetails.fileDelimiter "
+            + " and configurationMessageSpecs.configId = configurationTransportDetails.configId"
+            + " and fileext = :fileExt and transportmethodId = :transportMethodId"
+            + " and configurationTransportDetails.configId in (select id from configurations where type = 1)");
+            
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
+            .setParameter("fileExt", fileExt)
+            .setParameter("transportMethodId", transportMethodId);
 
             List<configurationTransport> headerRows = query.list();
 
@@ -780,10 +779,10 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
             String sql = (" select configId from configurationTransportDetails "
                     + " where transportmethodid = :transportMethodId and fileext = :fileExt "
                     + " and filedelimiter = :fileDelimiter");
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
-            query.setParameter("fileExt", fileExt);
-            query.setParameter("transportMethodId", transportMethodId);
-            query.setParameter("fileDelimiter", fileDelimiter);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
+            .setParameter("fileExt", fileExt)
+            .setParameter("transportMethodId", transportMethodId)
+            .setParameter("fileDelimiter", fileDelimiter);
 
             List<Integer> configs = query.list();
 
@@ -802,15 +801,15 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
         try {
 
             String sql = ("select distinct delimChar, fileDelimiter "
-                    + " from configurationTransportDetails, ref_delimiters  "
-                    + " where ref_delimiters.id = configurationTransportDetails.fileDelimiter "
-                    + " and transportMethodId = :transportMethodId "
-                    + " and configurationTransportDetails.fileExt = :fileExt"
-                    + " and configurationTransportDetails.configId in (select id from configurations where type = 1)");
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
-                    Transformers.aliasToBean(configurationTransport.class));
-            query.setParameter("transportMethodId", transportMethodId);
-            query.setParameter("fileExt", fileExt);
+            + " from configurationTransportDetails, ref_delimiters  "
+            + " where ref_delimiters.id = configurationTransportDetails.fileDelimiter "
+            + " and transportMethodId = :transportMethodId "
+            + " and configurationTransportDetails.fileExt = :fileExt"
+            + " and configurationTransportDetails.configId in (select id from configurations where type = 1)");
+            
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
+            .setParameter("transportMethodId", transportMethodId)
+            .setParameter("fileExt", fileExt);
 
             List<configurationTransport> configurationTransports = query.list();
 
@@ -924,9 +923,9 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	    + " where fileext = :fileExt and transportmethodId = :transportMethodId"
 	    + " and configurationTransportDetails.configId in (select id from configurations where type = 1)");
 	    
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(configurationTransport.class));
-            query.setParameter("fileExt", fileExt);
-            query.setParameter("transportMethodId", transportMethodId);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
+            .setParameter("fileExt", fileExt)
+            .setParameter("transportMethodId", transportMethodId);
 
             List<configurationTransport> encodingIds = query.list();
 
@@ -955,7 +954,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	    + "configurations b on b.id = a.configId "
 	    + "where a.id = :transportId");
 	    
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
             query.setParameter("transportId", fileDropInfo.getTransportId());
 	    
             Integer orgId = (Integer) query.list().get(0);
@@ -980,8 +979,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     public List<TransportMethod> getTransportMethods(List<Integer> statusIds) {
         try {
             Query query = sessionFactory.getCurrentSession()
-	    .createSQLQuery("SELECT id, transportMethod FROM ref_transportMethods where active in (:statusIds) order by transportMethod asc")
-	    .setResultTransformer(Transformers.aliasToBean(TransportMethod.class));
+	    .createNativeQuery("SELECT id, transportMethod FROM ref_transportMethods where active in (:statusIds) order by transportMethod asc",TransportMethod.class);
 	    
             query.setParameterList("statusIds", statusIds);
             return query.list();
@@ -1010,11 +1008,10 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
                 sql = sql + " fileType in (:fileTypeIds) and ";
             }
             sql = sql + " status in (:statusIds) and  transportmethodid = :transportMethodId and configId "
-                    + " in (select id from configurations where type = :configType and orgId = :orgId);";
-            Query query = sessionFactory.getCurrentSession()
-                    .createSQLQuery(sql)
-                    .setResultTransformer(
-                            Transformers.aliasToBean(configurationTransport.class));
+            + " in (select id from configurations where type = :configType and orgId = :orgId);";
+            
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class);
+            
             if (fileTypeIds != null) {
                 query.setParameterList("fileTypeIds", fileTypeIds);
             }
@@ -1072,11 +1069,10 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
                 sql = sql + " and configurationTransportDetails.id in (select transportId from rel_transportWebServiceDetails where method = 1) ";
             }
 	  
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
-                    Transformers.aliasToBean(configurationTransport.class));
-            query.setParameter("orgId", orgId);
-            query.setParameter("transportMethodId", transportMethodId);
-            query.setParameter("status", status);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
+            .setParameter("orgId", orgId)
+            .setParameter("transportMethodId", transportMethodId)
+            .setParameter("status", status);
 
             List<configurationTransport> configurationTransports = query.list();
 
@@ -1108,11 +1104,10 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
                 sql = sql + " and configurationTransportDetails.id in (select transportId from rel_transportWebServiceDetails where method = 1) ";
             }
 
-            Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
-                    Transformers.aliasToBean(configurationTransport.class));
-            query.setParameter("orgId", orgId);
-            query.setParameter("transportMethodId", transportMethodId);
-            query.setParameter("status", status);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
+            .setParameter("orgId", orgId)
+            .setParameter("transportMethodId", transportMethodId)
+            .setParameter("status", status);
 
             List<configurationTransport> configurationTransports = query.list();
 
@@ -1215,7 +1210,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	+ " and configurationTransportDetails.configId in "
 	+ "(select id from configurations where orgId = :orgId and type = 1);");
 	
-        Query query = sessionFactory.getCurrentSession().createSQLQuery(sql);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
         query.setParameter("orgId", orgId);
         query.setParameter("transportMethodId", transportMethodId);
 
@@ -1235,10 +1230,9 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
                 + "where restAPIURL = :restAPIURL "
 		+ "and configId in (select id from configurations where status = 1 and type = 1)");
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
-                    Transformers.aliasToBean(configurationTransport.class));
-	query.setParameter("restAPIURL", apiCustomCall);
-	
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
+	.setParameter("restAPIURL", apiCustomCall);
+
         if(query.list().isEmpty()) {
 	    return null;
 	}
@@ -1262,11 +1256,10 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 		+ "and configId in (select id from configurations where status = 1 and type = 1)");
 	
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(
-                    Transformers.aliasToBean(configurationTransport.class));
-	query.setParameter("restAPIURL", apiCustomCall);
-	query.setParameter("restAPIUsername", credValue[0]);
-	query.setParameter("restAPIPassword", credValue[1]);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
+	.setParameter("restAPIURL", apiCustomCall)
+	.setParameter("restAPIUsername", credValue[0])
+	.setParameter("restAPIPassword", credValue[1]);
 	
 	if(query.list().isEmpty()) {
 	    return null;
@@ -1290,8 +1283,9 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public String getRestAPIMethodName(Integer methodId) {
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("SELECT functionName FROM lu_availablerestapifunctions where id = :Id")
-                .setParameter("Id", methodId);
+        
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT functionName FROM lu_availablerestapifunctions where id = :Id", String.class)
+        .setParameter("Id", methodId);
 
         String transportMethod = (String) query.uniqueResult();
 
@@ -1329,7 +1323,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	    + "where configId = " + configId + " "
 	    + "order by fieldNo asc";
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(configurationFormFields.class));
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationFormFields.class);
            
         return query.list();
     }
@@ -1344,7 +1338,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = true)
     public List<String> getHELConfigurationDetailsBySQL(String sqlStatement) throws Exception {
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlStatement);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlStatement, String.class);
 	
 	if(query != null) {
 	    if(!query.list().isEmpty()) {
@@ -1448,10 +1442,9 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	+ "WHERE INSTR(:directMessageToAddress,dmConfigKeyword) > 0 "
 	+ "and configId in (select id from configurations where orgId = :organizationId)";
         
-        Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
 	.setParameter("organizationId", orgId)
-	.setParameter("directMessageToAddress", directMessageToAddress)
-	.setResultTransformer(Transformers.aliasToBean(configurationTransport.class));
+	.setParameter("directMessageToAddress", directMessageToAddress);
 	
 	if(!query.list().isEmpty()) {
 	    return (configurationTransport) query.list().get(0);
@@ -1470,7 +1463,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = false)
     public void executeConfigTransportSQL(String sqlStatement) throws Exception {
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sqlStatement);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlStatement, String.class);
 	query.executeUpdate();
     }
     
@@ -1493,7 +1486,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	    + "targetConfigId = " + targetConfigId + " "
 	    + "order by fieldNo asc";
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(configurationconnectionfieldmappings.class));
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationconnectionfieldmappings.class);
            
         return query.list();
     }
@@ -1528,7 +1521,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	    + "inner join configurations c on c.id = b.configId "
 	    + "where c.deleted = 0 and c.status = 1 and c.type = 1 order by a.id asc;";
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(configurationFTPFields.class));
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationFTPFields.class);
            
         return query.list();
     }
@@ -1573,7 +1566,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	    + "where targetConfigId = " + targetConfigId + " "
 	    + "order by fieldNo asc";
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(configurationconnectionfieldmappings.class));
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationconnectionfieldmappings.class);
            
         return query.list();
     }
@@ -1629,7 +1622,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 	+ " and connectionError = '" + connectionError + "'"
 	+ " and DATE(dateCreated) =  DATE(CURRENT_TIMESTAMP)";
 	
-	Query query = sessionFactory.getCurrentSession().createSQLQuery(sql).setResultTransformer(Transformers.aliasToBean(logftpconnectionerrors.class));
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,logftpconnectionerrors.class);
            
         return query.list();
     }
@@ -1638,7 +1631,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = false)
     public void updateFamilyPlanningAssociatedImport(String fpSchemaName, Integer configId, Integer fileType, Integer delimiter, Integer maxFileSize) throws Exception {
         
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("update "+ fpSchemaName + ".programuploadtypes set fileDelimId = :fileDelimiter, inFileTypeId = :fileType, maxFileSize = :maxFileSize where helConfigId = :configId")
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("update "+ fpSchemaName + ".programuploadtypes set fileDelimId = :fileDelimiter, inFileTypeId = :fileType, maxFileSize = :maxFileSize where helConfigId = :configId", String.class)
         .setParameter("fileDelimiter", delimiter)
         .setParameter("fileType", fileType)        
         .setParameter("maxFileSize", maxFileSize) 
@@ -1651,7 +1644,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = false)
     public void updateFamilyPlanningAssociatedImportHeaderRow(String fpSchemaName,Integer configId, boolean hasHeaderRow) throws Exception {
         
-        Query query = sessionFactory.getCurrentSession().createSQLQuery("update "+ fpSchemaName + ".programuploadtypes set containsHeaderRow = :hasHeaderRow where helConfigId = :configId")
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("update "+ fpSchemaName + ".programuploadtypes set containsHeaderRow = :hasHeaderRow where helConfigId = :configId", String.class)
         .setParameter("hasHeaderRow", hasHeaderRow)
         .setParameter("configId", configId);
         

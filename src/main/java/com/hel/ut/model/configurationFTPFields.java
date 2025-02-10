@@ -1,22 +1,22 @@
 package com.hel.ut.model;
 
 import com.hel.ut.validator.NoHtml;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.hibernate.annotations.GenericGenerator;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 @Table(name = "REL_TRANSPORTFTPDETAILS")
 public class configurationFTPFields {
 
     @Transient
-    private CommonsMultipartFile file;
+    private MultipartFile file;
     
     @Transient
     private String FTPPassword = "";
@@ -136,11 +136,11 @@ public class configurationFTPFields {
         this.certification = certification;
     }
 
-    public CommonsMultipartFile getfile() {
+    public MultipartFile getfile() {
         return file;
     }
 
-    public void setfile(CommonsMultipartFile file) {
+    public void setfile(MultipartFile file) {
         this.file = file;
     }
 

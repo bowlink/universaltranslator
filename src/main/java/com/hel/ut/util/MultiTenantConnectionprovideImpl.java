@@ -10,8 +10,6 @@ package com.hel.ut.util;
  * @author chadmccue
  */
 
-import com.mchange.v2.c3p0.C3P0Registry;
-import com.mchange.v2.c3p0.PooledDataSource;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;

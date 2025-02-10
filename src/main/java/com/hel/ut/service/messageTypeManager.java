@@ -2,11 +2,10 @@ package com.hel.ut.service;
 
 import com.hel.ut.model.CrosswalkData;
 import java.util.List;
-
 import com.hel.ut.model.Crosswalks;
 import com.hel.ut.model.validationType;
 import java.io.File;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface messageTypeManager {
 
@@ -69,5 +68,5 @@ public interface messageTypeManager {
     
     String checkIfCWIsInUse(Integer crosswalkId);
     
-    boolean checkForMultipleSrcValues(CommonsMultipartFile cwfile,File uploadedFile,Integer fileDelimiter) throws Exception;
+    boolean checkForMultipleSrcValues(MultipartFile cwfile,File uploadedFile,Integer fileDelimiter) throws Exception;
 }

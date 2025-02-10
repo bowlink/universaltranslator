@@ -10,7 +10,7 @@ package com.hel.ut.util;
  * @author chadmccue
  */
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;

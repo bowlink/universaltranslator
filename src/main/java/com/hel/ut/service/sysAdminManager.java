@@ -3,9 +3,7 @@ package com.hel.ut.service;
 import com.hel.ut.model.Crosswalks;
 import java.io.InputStream;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import com.hel.ut.model.custom.LookUpTable;
 import com.hel.ut.model.custom.TableData;
 import com.hel.ut.model.lutables.lu_ProcessStatus;

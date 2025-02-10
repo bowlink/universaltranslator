@@ -14,7 +14,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
 import com.hel.ut.security.CustomWebAuthenticationDetails.MyAuthenticationDetails;
 import com.hel.ut.service.userManager;
 

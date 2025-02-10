@@ -20,11 +20,11 @@ import com.hel.ut.model.MoveFilesLog;
 import com.hel.ut.model.mainHL7Details;
 import com.hel.ut.model.mainHL7Elements;
 import com.hel.ut.model.mainHL7Segments;
-import javax.annotation.Resource;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.annotation.Resource;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 /**
  * @see com.hel.ut.dao.sysAdminDAO
@@ -53,35 +53,28 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     public List<TableData> getDataList(String utTableName, String searchTerm) {
 
         String sql = "select id, displayText, description, "
-                + " isCustom as custom, status as status, dateCreated as dateCreated from "
-                + utTableName + " where (displayText like :searchTerm or description like :searchTerm) order by id";
-        Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
-                .addScalar("id", StandardBasicTypes.INTEGER)
-                .addScalar("displayText", StandardBasicTypes.STRING)
-                .addScalar("description", StandardBasicTypes.STRING)
-                .addScalar("custom", StandardBasicTypes.BOOLEAN)
-                .addScalar("status", StandardBasicTypes.BOOLEAN)
-                .addScalar("dateCreated", StandardBasicTypes.DATE)
-                .setResultTransformer(Transformers.aliasToBean(TableData.class))
-                .setParameter("searchTerm", searchTerm);
+        + " isCustom as custom, status as status, dateCreated as dateCreated from "
+        + utTableName + " where (displayText like :searchTerm or description like :searchTerm) order by id";
+        
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,TableData.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("displayText", StandardBasicTypes.STRING)
+        .addScalar("description", StandardBasicTypes.STRING)
+        .addScalar("custom", StandardBasicTypes.BOOLEAN)
+        .addScalar("status", StandardBasicTypes.BOOLEAN)
+        .addScalar("dateCreated", StandardBasicTypes.DATE)
+        .setParameter("searchTerm", searchTerm);
 
         List<TableData> dataList = query.list();
-        // TODO
-        /**
-         * add codes for paging *
-         */
-
+        
         return dataList;
-
     }
 
     @Override
     @Transactional(readOnly = true)
     public Integer findTotalDataRows(String utTableName) {
         String sql = "select count(id) as rowCount from " + utTableName;
-        Query query = sessionFactory
-                .getCurrentSession()
-                .createSQLQuery(sql).addScalar("rowCount", StandardBasicTypes.INTEGER);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class).addScalar("rowCount", StandardBasicTypes.INTEGER);
         Integer rowCount = (Integer) query.list().get(0);
 
         return rowCount;
@@ -92,24 +85,22 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     public LookUpTable getTableInfo(String urlId) {
 
         LookUpTable lookUpTable = new LookUpTable();
-        Query query = sessionFactory.getCurrentSession().createSQLQuery(""
-                + "select utTableName, "
-                + "displayText as displayName, "
-                + "urlId, description, "
-                + "dateCreated from lookUpTables where urlId = :urlId")
-                .addScalar("utTableName", StandardBasicTypes.STRING)
-                .addScalar("displayName", StandardBasicTypes.STRING)
-                .addScalar("urlId", StandardBasicTypes.STRING)
-                .addScalar("description", StandardBasicTypes.STRING)
-                .addScalar("dateCreated", StandardBasicTypes.DATE).setResultTransformer(
-                Transformers.aliasToBean(LookUpTable.class)).setParameter("urlId", urlId);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(""
+        + "select utTableName, "
+        + "displayText as displayName, "
+        + "urlId, description, "
+        + "dateCreated from lookUpTables where urlId = :urlId",LookUpTable.class)
+        .addScalar("utTableName", StandardBasicTypes.STRING)
+        .addScalar("displayName", StandardBasicTypes.STRING)
+        .addScalar("urlId", StandardBasicTypes.STRING)
+        .addScalar("description", StandardBasicTypes.STRING)
+        .setParameter("urlId", urlId);
 
         if (query.list().size() == 1) {
             lookUpTable = (LookUpTable) query.list().get(0);
         }
 
         return lookUpTable;
-
     }
 
     /**
@@ -119,15 +110,17 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Transactional(readOnly = false)
     public boolean deleteDataItem(String utTableName, int id) {
         String sql = "delete from " + utTableName + " where id = :id";
-        Query deleteTable = sessionFactory.getCurrentSession().createSQLQuery(sql)
-                .addScalar("id", StandardBasicTypes.INTEGER).setParameter("id", id);
+        
+        Query deleteTable = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .setParameter("id", id);
+        
         try {
             deleteTable.executeUpdate();
             return true;
         } catch (Throwable ex) {
             System.err.println("deleteDataItem failed." + ex);
             return false;
-
         }
     }
 
@@ -136,70 +129,68 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     public TableData getTableData(Integer id, String utTableName) {
         //we create sql, we transform
         TableData tableData = new TableData();
-        String sql = ("select id, displayText, description, isCustom as custom, "
-                + "status "
-                + " from " + utTableName + " where id = :id");
-        Query query = sessionFactory.getCurrentSession().createSQLQuery(sql)
-                .addScalar("id", StandardBasicTypes.INTEGER)
-                .addScalar("displayText", StandardBasicTypes.STRING)
-                .addScalar("description", StandardBasicTypes.STRING)
-                .addScalar("custom", StandardBasicTypes.BOOLEAN)
-                .addScalar("status", StandardBasicTypes.BOOLEAN).setResultTransformer(
-                Transformers.aliasToBean(TableData.class)).setParameter("id", id);
+        
+        String sql = "select id, displayText, description, isCustom as custom, status from " + utTableName + " where id = :id";
+        
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,TableData.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("displayText", StandardBasicTypes.STRING)
+        .addScalar("description", StandardBasicTypes.STRING)
+        .addScalar("custom", StandardBasicTypes.BOOLEAN)
+        .addScalar("status", StandardBasicTypes.BOOLEAN)
+        .setParameter("id", id);
 
         if (query.list().size() == 1) {
             tableData = (TableData) query.list().get(0);
         }
+        
         return tableData;
-
     }
 
     @Override
     @Transactional(readOnly = false)
     public boolean updateTableData(TableData tableData, String utTableName) {
         boolean updated = false;
-        String sql = "update " + utTableName
-                + " set displayText = :displayText, "
-                + "description = :description, "
-                + "status = :status, "
-                + "isCustom = :isCustom "
-                + "where id = :id ";
-        Query updateData = sessionFactory.getCurrentSession().createSQLQuery(sql)
-                .addScalar("displayText", StandardBasicTypes.STRING)
-                .addScalar("description", StandardBasicTypes.STRING)
-                .addScalar("isCustom", StandardBasicTypes.BOOLEAN)
-                .addScalar("status", StandardBasicTypes.BOOLEAN)
-                .addScalar("id", StandardBasicTypes.INTEGER)
-                .setParameter("displayText", tableData.getDisplayText())
-                .setParameter("description", tableData.getDescription())
-                .setParameter("isCustom", tableData.isCustom())
-                .setParameter("status", tableData.isStatus())
-                .setParameter("id", tableData.getId());
+        String sql = "update " + utTableName+ " set displayText = :displayText, description = :description, status = :status, isCustom = :isCustom where id = :id";
+        
+        Query updateData = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
+        .addScalar("displayText", StandardBasicTypes.STRING)
+        .addScalar("description", StandardBasicTypes.STRING)
+        .addScalar("isCustom", StandardBasicTypes.BOOLEAN)
+        .addScalar("status", StandardBasicTypes.BOOLEAN)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .setParameter("displayText", tableData.getDisplayText())
+        .setParameter("description", tableData.getDescription())
+        .setParameter("isCustom", tableData.isCustom())
+        .setParameter("status", tableData.isStatus())
+        .setParameter("id", tableData.getId());
+        
         try {
             updateData.executeUpdate();
             updated = true;
         } catch (Throwable ex) {
             System.err.println("update table data failed." + ex);
         }
+        
         return updated;
-
     }
 
     @Override
     @Transactional(readOnly = false)
     public void createTableDataHibernate(TableData tableData, String utTableName) {
 
-        String sql = "insert into " + utTableName + " (displayText, description, isCustom, status) "
-                + "values (:displayText, :description, :isCustom, :status)";
-        Query insertData = sessionFactory.getCurrentSession().createSQLQuery(sql)
-                .addScalar("displayText", StandardBasicTypes.STRING)
-                .addScalar("description", StandardBasicTypes.STRING)
-                .addScalar("isCustom", StandardBasicTypes.BOOLEAN)
-                .addScalar("status", StandardBasicTypes.BOOLEAN)
-                .setParameter("displayText", tableData.getDisplayText())
-                .setParameter("description", tableData.getDescription())
-                .setParameter("isCustom", tableData.isCustom())
-                .setParameter("status", tableData.isStatus());
+        String sql = "insert into " + utTableName + " (displayText, description, isCustom, status) values (:displayText, :description, :isCustom, :status)";
+        
+        Query insertData = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
+        .addScalar("displayText", StandardBasicTypes.STRING)
+        .addScalar("description", StandardBasicTypes.STRING)
+        .addScalar("isCustom", StandardBasicTypes.BOOLEAN)
+        .addScalar("status", StandardBasicTypes.BOOLEAN)
+        .setParameter("displayText", tableData.getDisplayText())
+        .setParameter("description", tableData.getDescription())
+        .setParameter("isCustom", tableData.isCustom())
+        .setParameter("status", tableData.isStatus());
+        
         try {
             insertData.executeUpdate();
         } catch (Throwable ex) {

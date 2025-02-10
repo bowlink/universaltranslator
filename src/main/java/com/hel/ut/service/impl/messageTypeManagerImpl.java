@@ -18,14 +18,13 @@ import com.hel.ut.model.Crosswalks;
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.validationType;
 import com.hel.ut.reference.fileSystem;
+import jakarta.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Properties;
-import javax.annotation.Resource;
 import org.apache.commons.io.FileUtils;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 @Service
 public class messageTypeManagerImpl implements messageTypeManager {
@@ -474,7 +473,7 @@ public class messageTypeManagerImpl implements messageTypeManager {
     }
     
     @Override
-    public boolean checkForMultipleSrcValues(CommonsMultipartFile cwfile, File uploadedFile, Integer fileDelimiter) throws Exception {       
+    public boolean checkForMultipleSrcValues(MultipartFile cwfile, File uploadedFile, Integer fileDelimiter) throws Exception {       
         
         boolean multipleValuesFound = false;
         

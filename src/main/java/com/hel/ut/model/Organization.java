@@ -2,28 +2,25 @@ package com.hel.ut.model;
 
 import com.hel.ut.validator.NoHtml;
 import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import org.hibernate.validator.constraints.NotEmpty;
-
 import com.hel.ut.validator.Phone;
-import javax.persistence.Transient;
+import jakarta.persistence.Transient;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 @Table(name = "ORGANIZATIONS")
 public class Organization {
 
     @Transient
-    private CommonsMultipartFile file = null;
+    private MultipartFile file = null;
     
     @Transient
     private String organizationType = "", helRegistry = "";
@@ -219,11 +216,11 @@ public class Organization {
         this.parsingTemplate = parsingTemplate;
     }
 
-    public CommonsMultipartFile getFile() {
+    public MultipartFile getFile() {
         return file;
     }
 
-    public void setFile(CommonsMultipartFile file) {
+    public void setFile(MultipartFile file) {
         this.file = file;
     }
 

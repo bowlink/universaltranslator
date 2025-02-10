@@ -9,6 +9,7 @@
     <http pattern="/css/**" security="none"/>
     <http pattern="/javascript/**" security="none" />
     <http pattern="/rest.api/**" security="none"/>
+     <http pattern="/login" security="none"/>
 
     <http auto-config="true" use-expressions="true" disable-url-rewriting="true" >
         <intercept-url access="hasAnyRole('ROLE_VALIDATE')" pattern="/authenticate/**"></intercept-url>

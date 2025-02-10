@@ -24,7 +24,7 @@ import com.hel.ut.model.watchlist;
 import com.hel.ut.model.watchlistEntry;
 import java.io.File;
 import java.util.Date;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 public interface utConfigurationManager {
 

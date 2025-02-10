@@ -16,8 +16,8 @@ import com.hel.ut.service.organizationManager;
 import com.hel.ut.service.transactionInManager;
 import com.hel.ut.service.utConfigurationManager;
 import java.nio.charset.Charset;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -41,7 +41,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import org.apache.commons.io.FilenameUtils;
 
 /**
