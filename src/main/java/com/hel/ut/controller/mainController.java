@@ -69,7 +69,8 @@ public class mainController {
     public ModelAndView login() throws Exception {
         
 	ModelAndView mav = new ModelAndView();
-	mav.setViewName("templates/login");
+	mav.setViewName("common/layout");
+        mav.addObject("contentPage","loginPage.jsp");
         
         mav.addObject("pageTitle", "Health-e-Link Account Login");
 
