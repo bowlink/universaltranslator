@@ -4,42 +4,47 @@
  * and open the template in the editor.
  */
 
+jQuery(function ($) {
+    
+    $(document).ready(function () {
+        
+        $("input:text,form").attr("autocomplete", "off");
 
-require(['./main'], function () {
+        $('#retrievePasswordForm').submit(function(event) {
+            $('#passwordFound').hide();
+            $('#passwordNotFound').hide();
 
-    $("input:text,form").attr("autocomplete", "off");
+            $.ajax({
+                url: '/forgotPassword.do',
+                type: "Post",
+                data: {
+                    'identifier': $('#identifier').val()
+                },
+                success: function (data) {
+                    if (data > 0) {
+                        sendEmail(data);
+                    } else {
+                        $('#noResults').show();
+                        $('.alert').delay(2000).fadeOut(1000);
+                    }
+                }
+            });
 
-    $('#retrievePasswordForm').submit(function(event) {
-        $('#passwordFound').hide();
-        $('#passwordNotFound').hide();
-       
+           event.preventDefault(); 
+        });
+    });
+    
+    function sendEmail(userId) {
         $.ajax({
-            url: '/forgotPassword.do',
+            url: '/sendPassword.do',
             type: "Post",
             data: {
-                'identifier': $('#identifier').val()
+                'userId': userId
             },
-            success: function (data) {
-                if (data > 0) {
-                    sendEmail(data);
-                } else {
-                    $('#noResults').show();
-                    $('.alert').delay(2000).fadeOut(1000);
-                }
+            success: function(response) {
+                $('#noResults').hide();
+                $('#emailSent').show();
             }
         });
-       
-       event.preventDefault(); 
-    });
+    }
 });
-
-function sendEmail(userId) {
-    $('#noResults').hide();
-    $('#emailSent').show();
-    $('.alert').delay(2000).fadeOut(1000);
-    $.ajax({
-        url: '/sendPassword.do',
-        type: "Post",
-        data: {'userId': userId}
-    });
-}

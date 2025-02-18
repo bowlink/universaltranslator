@@ -1,17 +1,14 @@
 package com.hel.ut.model.lutables;
 
 import java.util.Date;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
-import org.hibernate.validator.constraints.NotEmpty;
-
 import com.hel.ut.validator.NoHtml;
+import jakarta.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "lu_ProcessStatus")

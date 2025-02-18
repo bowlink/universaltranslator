@@ -1,4 +1,4 @@
-define(['jquery', 'sprintf'], function ($) {
+jQuery(function ($) {
 
     // create a new constructor
     var Overlay = function (element, options) {

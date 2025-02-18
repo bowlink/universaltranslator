@@ -18,12 +18,28 @@
 
     <context:component-scan base-package="com.hel.ut, com.registryKit"/>
     
-    <mvc:annotation-driven />
+    <bean id="templateEngine" class="org.thymeleaf.spring6.SpringTemplateEngine">
+        <property name="templateResolvers">
+            <set>
+                <bean class="org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver">
+                    <property name="prefix" value="/WEB-INF/templates/" />
+                    <property name="suffix" value=".html" />
+                    <property name="templateMode" value="HTML" />
+                    <property name="cacheable" value="false" />
+                </bean>
+            </set>
+        </property>
+        <property name="additionalDialects">
+          <set>
+            <bean class="org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect"/>
+            <bean class="nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect"/>
+          </set>
+        </property>
+    </bean>
     
-     <!-- Configure View Resolver -->
-    <bean id = "viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/WEB-INF/jsp/"/>
-        <property name="suffix" value=".jsp"/>
+    <bean class="org.thymeleaf.spring6.view.ThymeleafViewResolver">
+        <property name="templateEngine" ref="templateEngine" />
+        <property name="characterEncoding" value="UTF-8" />
     </bean>
     
     <!-- bind your messages.properties -->
@@ -45,10 +61,6 @@
                 <prop key="mail.smtp.ssl.protocols">${mailserver.protocols}</prop>
             </props>
         </property>
-    </bean>
-    
-    <bean id="emailMessageManagerImpl" class="com.hel.ut.service.impl.emailMessageManagerImpl">
-        <property name="mailSender" ref="mailSender" />
     </bean>
     
      <context:property-placeholder location="file:${catalina.home}/properties/HELRegistryManagement.properties"/>
@@ -84,6 +96,5 @@
     <mvc:annotation-driven />
     
     <mvc:resources mapping="/dspResources/**" location="/dspResources/" /> 
-    
     
 </beans>

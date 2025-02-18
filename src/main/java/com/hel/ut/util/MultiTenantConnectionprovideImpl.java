@@ -32,17 +32,7 @@ public class MultiTenantConnectionprovideImpl extends AbstractDataSourceBasedMul
 
     @Override
     protected DataSource selectDataSource(String tenantIdentifier) {
-	/*PooledDataSource pds = C3P0Registry.pooledDataSourceByName(tenantIdentifier);
 	
-	if(pds == null) {
-	    try {
-		return MasterService.getComboPooledDataSource(tenantIdentifier);
-	    }
-	    catch (IOException ex) {
-		Logger.getLogger(MultiTenantConnectionprovideImpl.class.getName()).log(Level.SEVERE, null, ex);
-	    }
-	}
-	return pds;*/
 	try {
 	    return MasterService.getDataSource(tenantIdentifier);
 	} catch (IOException ex) {
@@ -50,7 +40,5 @@ public class MultiTenantConnectionprovideImpl extends AbstractDataSourceBasedMul
 	    //Logger.getLogger(MultiTenantConnectionprovideImpl.class.getName()).log(Level.SEVERE, null, ex);
 	}
 	return null;
-	
     }
-
 }

@@ -26,5 +26,4 @@ public class CustomWebAuthenticationDetails extends
             return loginAsUser;
         }
     }
-
 }

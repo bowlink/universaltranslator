@@ -112,14 +112,6 @@ public class Transaction {
         this.batchName = batchName;
     }
 
-    public int gettransportMethodId() {
-        return transportMethodId;
-    }
-
-    public void settransportMethodId(int transportMethodId) {
-        this.transportMethodId = transportMethodId;
-    }
-
     public String getoriginalFileName() {
         return originalFileName;
     }

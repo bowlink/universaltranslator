@@ -13,6 +13,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.util.Objects;
 
 /**
  * The WebServicesDAOImpl class will implement the DAO access layer to handle updates for web services messages
@@ -99,6 +100,11 @@ public class WebServicesDAOImpl implements WebServicesDAO {
 
     /**
      * this method get a list of outbound web messages restricted by Date range
+     * @param fromDate
+     * @param toDate
+     * @param fetchSize
+     * @return 
+     * @throws java.lang.Exception
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -199,6 +205,11 @@ public class WebServicesDAOImpl implements WebServicesDAO {
     @Override
     @Transactional(readOnly = false)
     public void saveWSMessagesIn(WSMessagesIn wsIn) throws Exception {
-        sessionFactory.getCurrentSession().saveOrUpdate(wsIn);
+        
+        if (Objects.isNull(sessionFactory.getCurrentSession().find(WSMessagesIn.class, wsIn.getId()))) {
+            sessionFactory.getCurrentSession().persist(wsIn);
+        } else {
+            sessionFactory.getCurrentSession().merge(wsIn);
+        }
     }
 }

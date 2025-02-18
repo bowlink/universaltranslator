@@ -180,5 +180,4 @@ public class hl7toTxt {
         
         return newfileName;
     }
-
 }

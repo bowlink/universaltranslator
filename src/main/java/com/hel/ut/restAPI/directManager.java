@@ -247,7 +247,7 @@ public class directManager {
 	    Integer batchStatusId = 0;
 
 	    if (transportDetails != null) {
-		clearRecords = transportDetails.getclearRecords();
+		clearRecords = transportDetails.isClearRecords();
 	    }
 	    
 	    // get the batch download details
@@ -299,7 +299,7 @@ public class directManager {
                 if (findExt >= 0) {
                     fileName = batchDownloadDetails.getOutputFileName();
                 } else {
-                    fileName = new StringBuilder().append(batchDownloadDetails.getOutputFileName()).append(".").append(transportDetails.getfileExt()).toString();
+                    fileName = new StringBuilder().append(batchDownloadDetails.getOutputFileName()).append(".").append(transportDetails.getFileExt()).toString();
                 }
                 
                 ba = new batchdownloadactivity();
@@ -309,7 +309,7 @@ public class directManager {
 	    
                 //Submit the restAPImessageOut
                 directmessagesout directMessageOut = new directmessagesout();
-                directMessageOut.setConfigId(transportDetails.getconfigId());
+                directMessageOut.setConfigId(transportDetails.getConfigId());
                 directMessageOut.setBatchDownloadId(batchDownloadId);
                 directMessageOut.setBatchUploadId(batchDownloadDetails.getBatchUploadId());
                 directMessageOut.setOrgId(batchDownloadDetails.getOrgId());
@@ -318,9 +318,9 @@ public class directManager {
                 directMessageOut.setToDirectAddress(batchUploadDetails.getSenderEmail());
                 directMessageOut.setHispId(hispDetails.getId());
 
-                String filelocation = transportDetails.getfileLocation().trim();
+                String filelocation = transportDetails.getFileLocation().trim();
 
-                File file = new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getfileLocation().trim() + fileName);
+                File file = new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getFileLocation().trim() + fileName);
 
                 String responseMessage = "";
 	    
@@ -613,13 +613,13 @@ public class directManager {
                             List<String> bccAddresses = new ArrayList<>();
                             bccAddresses.add("cmccue@health-e-link.net");
 
-                            utConfiguration configDetails = configurationmanager.getConfigurationById(transportDetails.getconfigId());
+                            utConfiguration configDetails = configurationmanager.getConfigurationById(transportDetails.getConfigId());
 
                             DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
                             Date date = new Date();
 
                             //build message
-                            String message = "A Community eConnect feedback report was sent to your organization on " + dateFormat.format(date) + " via direct messaging for feedback report configuration " + configDetails.getconfigName().trim() + ".";
+                            String message = "A Community eConnect feedback report was sent to your organization on " + dateFormat.format(date) + " via direct messaging for feedback report configuration " + configDetails.getConfigname().trim() + ".";
                             mail.setmessageBody(message);
                             mail.setmessageSubject("New Community eConnect feedback report");
 

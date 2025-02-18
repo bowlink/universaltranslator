@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+     <head>
+        <title>Health-e-Link UT Configuration Details</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/configurations/actionBar :: actionBar}"></div>
+            <div th:insert="~{administrator/configurations/menuBar :: menuBar}"></div>
+            <div class="main clearfix" role="main">
+
+                <div class="col-md-12">
+                    <div class="alert alert-success" role="alert"  th:if="${savedStatus != null}">
+                        <strong>Success!</strong> 
+                        <p th:if="${savedStatus == 'updated'}">The configuration has been successfully updated!</p>
+                        <p th:if="${savedStatus != 'created'}">The configuration has been successfully added!</p>
+                    </div>
+                    
+                    <form id="configuration" th:action="${'/administrator/configurations/details'}" th:object="${configurationDetails}" method="post" role="form" enctype="multipart/form-data">
+                        <input type="hidden" id="action" name="action" value="save" />
+                        <input type="hidden" th:field="*{id}"/>
+                        <input type="hidden" th:field="*{dateCreated}"/>
+                        <input type="hidden" th:field="*{stepsCompleted}"/>
+
+                        <section class="panel panel-default">
+
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Details</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-container">
+                                    <div class="form-group">
+                                        <label for="status">Status * </label>
+                                        <div>
+                                            <label class="radio-inline">
+                                                <input type="radio" th:field="*{status}" value="true" /> Active
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" th:field="*{status}" value="false" />Inactive
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="type">Configuration Type * <span class="badge badge-help" data-placement="top" title="" data-original-title="Select &quot;For Source&quot; if this is for sending a message and &quot;For Target&quot; if this is for receiving a message">?</span></label>
+                                        <div>
+                                            <label class="radio-inline">
+                                                <input type="radio" th:field="*{type}" value="1" th:disabled="${id > 0}" /> For Source Organization 
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" th:field="*{type}" value="2"  th:disabled="${id > 0}" /> For Target Organization 
+                                            </label>
+                                            <div th:if="${id > 0}">
+                                                <input type="hidden" th:field="*{type}"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="messageTypeId">Message Type *</label>
+                                        <div>
+                                            <label class="radio-inline">
+                                                <input type="radio" th:field="*{messageTypeId}" value="1" th:disabled="${id > 0}" /> eReferral Configuration
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" th:field="*{messageTypeId}" value="2"  th:disabled="${id > 0}" /> Family Planning Configuration
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" th:field="*{messageTypeId}" value="3"  th:disabled="${id > 0}" /> Other Configuration
+                                            </label>
+                                            <div th:if="${id > 0}">
+                                                <input type="hidden" th:field="*{messageTypeId}"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="configurationTypeDiv" class="form-group" th:style="${type == 1 ? 'block' : 'none'}">
+                                        <label for="configurationType">Processing Type * </label>
+                                        <div>
+                                            <label class="radio-inline">
+                                                <input type="radio" th:field="*{configurationType}" value="1" th:disabled="${id > 0}" /> Translate Incoming Message 
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" th:field="*{configurationType}" value="2"  th:disabled="${id > 0}" /> Passthru
+                                            </label>
+                                            <div th:if="${id > 0}">
+                                                <input type="hidden" th:field="*{configurationType}"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="orgDiv" class="form-group" th:classappend="${#fields.hasErrors('orgId') ? 'has-error' : ''}">
+                                        <label class="control-label" for="organization">Organization *</label>
+                                        <select th:field="*{orgId}" id="organization" class="form-control half">
+                                            <option value="">- Select -</option>
+                                            <th:block th:each="org, iterStat : ${organizations}">
+                                                <th:block th:if="${iterStat.index == 0 || org.helRegistry != organizations[iterStat.index - 1].helRegistry}">
+                                                     <optgroup th:label="${org.helRegistry}">
+                                                </th:block>
+                                                <option th:value="${org.id}" th:text="${org.orgName}"></option>
+                                                <th:block th:if="${iterStat.last || org.helRegistry != organizations[iterStat.index + 1].helRegistry}">
+                                                    </optgroup>
+                                                </th:block>
+                                            </th:block>
+                                        </select>
+                                        <span class="control-label" th:if="${#fields.hasErrors('orgId')}" th:errors="*{orgId}"></span>
+                                        <div th:if="${id > 0}">
+                                          <input type="hidden" id="organization" class="savedOrgId" th:field="*{orgId}" />
+                                        </div>
+                                    </div>
+                                    <div id="configNameDiv" class="form-group" th:classappend="${existingName != null ? 'has-error' : ''} + ${#fields.hasErrors('configname') ? 'has-error' : ''}">
+                                        <label class="control-label" for="configName">Unique Configuration Name *</label>
+                                        <input th:field="*{configname}" id="configName" class="form-control" type="text" maxLength="45" />
+                                        <span th:if="${existingName != null}" class="control-label" th:text="${existingName}"></span>
+                                        <span class="control-label" th:if="${#fields.hasErrors('configname')}" th:errors="*{configname}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>   
+                    </form>
+                </div>
+            </div>
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
+            <script th:src="@{/dspResources/js/overlay.js}"></script>    
+            <script th:src="@{/dspResources/js/admin/configuration/mainConfigFunctions.js}"></script>
+            <script th:src="@{/dspResources/js/admin/configuration/details.js}"></script>
+        </th:block>
+    </body>
+</html>

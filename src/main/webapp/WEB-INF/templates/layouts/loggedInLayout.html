@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html  data-bs-theme="light" lang="en" xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Health-e-Link UT</title>
+     <link rel="stylesheet" type="text/css" href="/dspResources/css/admin/main.css" />
+    <link rel="stylesheet" type="text/css" href="/dspResources/@fortawesome/fontawesome-pro/css/regular.min.css" />
+    <link rel="stylesheet" type="text/css" href="/dspResources/@fortawesome/fontawesome-pro/css/solid.min.css" />
+    <link rel="stylesheet" type="text/css" href="/dspResources/@fortawesome/fontawesome-pro/css/fontawesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="/dspResources/css/admin/themes/theme-health-e-link.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.0/dist/bootstrap-table.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script src="/dspResources/js/admin/main.js"></script>
+    <th:block layout:fragment="head"></th:block>  
+  </head>
+  <body th:id="${pageId}" th:class="${pageSection}">
+    <div class="wrap">
+        <div th:replace="fragments/header :: header"></div>
+        <div>
+            <div class="container-fluid">
+                <div class="row-fluid contain">
+                   <div layout:fragment="content"></div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="fragments/footer :: footer"></div>
+    </div>
+    <th:block layout:fragment="script"></th:block>  
+  </body>
+</html>

@@ -1,7 +1,7 @@
 package com.hel.ut.model.custom;
 
+import jakarta.validation.constraints.NotEmpty;
 import java.util.Date;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * This is a custom object as it is not tied to any tables. 90% of our look up tables have the same format, we don't want to have a million objects that we probably don't need. *

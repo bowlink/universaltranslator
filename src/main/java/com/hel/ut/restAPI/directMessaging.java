@@ -254,7 +254,7 @@ public class directMessaging {
                                                         if(directDetails.getDmFindConfig() == 1) {
                                                             
 							    if(transportDetails != null) {
-								configId = transportDetails.getconfigId();
+								configId = transportDetails.getConfigId();
 							    }
 							    else {
 								statusId = 3;

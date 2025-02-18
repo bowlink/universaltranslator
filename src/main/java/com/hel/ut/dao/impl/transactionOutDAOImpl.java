@@ -9,13 +9,10 @@ import com.hel.ut.dao.transactionOutDAO;
 import com.hel.ut.model.*;
 import com.hel.ut.model.custom.ConfigOutboundForInsert;
 import com.hel.ut.model.custom.batchErrorSummary;
-import com.hel.ut.service.sysAdminManager;
 import com.hel.ut.service.transactionInManager;
-import com.hel.ut.service.userManager;
 import com.hel.ut.service.utConfigurationTransportManager;
 import org.hibernate.query.Query;
 import org.hibernate.SessionFactory;
-import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -30,6 +27,8 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.hibernate.query.MutationQuery;
+import org.hibernate.query.SelectionQuery;
 
 /**
  *
@@ -40,12 +39,6 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 
     @Autowired
     private SessionFactory sessionFactory;
-
-    @Autowired
-    private sysAdminManager sysAdminManager;
-
-    @Autowired
-    private userManager usermanager;
 
     @Autowired
     private transactionInManager transactionInManager;
@@ -75,13 +68,9 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = false)
     public Integer submitBatchDownload(batchDownloads batchDownload) {
-	Integer batchId = null;
-
-	batchId = (Integer) sessionFactory.getCurrentSession().save(batchDownload);
-
-	return batchId;
+        sessionFactory.getCurrentSession().persist(batchDownload);
+        return batchDownload.getId();
     }
-
 
     /**
      * The 'findMergeableBatch' function will check for any batches created for the target org that are mergable and have not yet been picked up or viewed.
@@ -93,7 +82,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = true)
     public int findMergeableBatch(int orgId) {
-	Query query = sessionFactory.getCurrentSession().createQuery("select id FROM batchDownloads where orgId = :orgId and mergeable = 1 and (statusId = 23 OR statusId = 28)");
+	SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("select id FROM batchDownloads where orgId = :orgId and mergeable = 1 and (statusId = 23 OR statusId = 28)");
 	query.setParameter("orgId", orgId);
 
 	Integer batchId = (Integer) query.uniqueResult();
@@ -199,11 +188,11 @@ public class transactionOutDAOImpl implements transactionOutDAO {
                     
                     if(sourceconfigDetails != null) {
                         if (fromOrgId == 0) {
-                            sourceOrgList.add(sourceconfigDetails.getorgId());
+                            sourceOrgList.add(sourceconfigDetails.getOrgId());
                         }
                         else {
-                            if (fromOrgId == sourceconfigDetails.getorgId()) {
-                                sourceOrgList.add(sourceconfigDetails.getorgId());
+                            if (fromOrgId == sourceconfigDetails.getOrgId()) {
+                                sourceOrgList.add(sourceconfigDetails.getOrgId());
                             }
                         }
                     }
@@ -343,7 +332,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = true)
     public batchDownloads getBatchDetailsByBatchName(String batchName) throws Exception {
-	Query query = sessionFactory.getCurrentSession().createQuery("from batchDownloads where utBatchName = :batchName");
+	SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from batchDownloads where utBatchName = :batchName");
 	query.setParameter("batchName", batchName);
 
 	if (query.list().size() > 1) {
@@ -539,11 +528,11 @@ public class transactionOutDAOImpl implements transactionOutDAO {
                         configurationTransport transportDetails = (configurationTransport) sessionFactory.getCurrentSession().createQuery(transportCriteria).uniqueResult();
                         
                         if(transportDetails != null) {
-                            if (transportDetails.gettransportMethodId() == 1
-                                || transportDetails.gettransportMethodId() == 3
-                                || transportDetails.gettransportMethodId() == 5
-                                || transportDetails.gettransportMethodId() == 6
-                                || transportDetails.gettransportMethodId() == 9) {
+                            if (transportDetails.getTransportMethodId() == 1
+                                || transportDetails.getTransportMethodId() == 3
+                                || transportDetails.getTransportMethodId() == 5
+                                || transportDetails.getTransportMethodId() == 6
+                                || transportDetails.getTransportMethodId() == 9) {
 
                                 messageTypeList.add(configDetails.getMessageTypeId());
                             }
@@ -556,7 +545,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
                     utConfiguration sourceconfigDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
                     
                     if(sourceconfigDetails != null) {
-                        sourceOrgList.add(sourceconfigDetails.getorgId());
+                        sourceOrgList.add(sourceconfigDetails.getOrgId());
                     }
                 }
 	    }
@@ -644,7 +633,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Transactional(readOnly = true)
     public List<configurationSchedules> getScheduledConfigurations() {
 
-	Query query = sessionFactory.getCurrentSession().createQuery("from configurationSchedules where type = 2 or type = 3 or type = 4");
+	SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from configurationSchedules where type = 2 or type = 3 or type = 4");
 
 	List<configurationSchedules> scheduledConfigList = query.list();
 	return scheduledConfigList;
@@ -681,7 +670,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = false)
     public void saveOutputRunLog(targetOutputRunLogs log) throws Exception {
-	sessionFactory.getCurrentSession().save(log);
+	sessionFactory.getCurrentSession().persist(log);
     }
 
     /**
@@ -713,12 +702,12 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	String sql = "";
 
 	//If file type == JSON
-	if (transportDetails.getfileType() == 12) {
+	if (transportDetails.getFileType() == 12) {
 	    sql = ("call getJSONForConfig(:batchConfigId, :batchDownloadId, :filePathAndName, :jsonWrapperElement);");
 	}
 	else {
 	    if(transportDetails.isAddTargetFileHeaderRow()) {
-		String configFieldHeadings = getConfigFieldHeadingsForOutput(transportDetails.getconfigId());
+		String configFieldHeadings = getConfigFieldHeadingsForOutput(transportDetails.getConfigId());
 		if(configFieldHeadings != null) {
 		    if(!"".equals(configFieldHeadings)) {
 			sql += "SELECT " + configFieldHeadings + " UNION ALL ";
@@ -728,9 +717,9 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 
 	    sql += "SELECT " + fieldNos + " "
 	    + "FROM transactionTranslatedOut_" + batchDownloadId + " "
-	    + "where configId = " + transportDetails.getconfigId() + " and ";
+	    + "where configId = " + transportDetails.getConfigId() + " and ";
 
-	    if(transportDetails.geterrorHandling() == 4) {
+	    if(transportDetails.getErrorHandling() == 4) {
 		sql += "statusId in (9,14) ";
 	    }
 	    else {
@@ -743,8 +732,8 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	if (!"".equals(sql)) {
 	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 
-	    if (transportDetails.getfileType() == 12) {
-		query.setParameter("batchConfigId", transportDetails.getconfigId());
+	    if (transportDetails.getFileType() == 12) {
+		query.setParameter("batchConfigId", transportDetails.getConfigId());
 		query.setParameter("batchDownloadId", batchDownloadId);
 		query.setParameter("filePathAndName", filePathAndName);
 		query.setParameter("jsonWrapperElement", transportDetails.getJsonWrapperElement());
@@ -844,7 +833,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    + " FROM transactiontranslatedout_"+batchDownloadId + " "
 	    + "where configId = :configId and ";
 	
-	if(transportDetails.geterrorHandling() == 4) {
+	if(transportDetails.getErrorHandling() == 4) {
 	    sql += "statusId in (9,14)";
 	}
 	else {
@@ -852,7 +841,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	}
 	
 	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
-	query.setParameter("configId", transportDetails.getconfigId());
+	query.setParameter("configId", transportDetails.getConfigId());
 	try {
 	    return query.list();
 	} catch (Exception ex) {
@@ -913,11 +902,8 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = false)
     public Integer insertRestApiMessage(RestAPIMessagesOut APIMessageOut) throws Exception {
-	Integer newRestAPIMessageId = null;
-
-	newRestAPIMessageId = (Integer) sessionFactory.getCurrentSession().save(APIMessageOut);
-
-	return newRestAPIMessageId;
+        sessionFactory.getCurrentSession().persist(APIMessageOut);
+        return APIMessageOut.getId();
     }
 
     @SuppressWarnings("unchecked")
@@ -971,13 +957,13 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = false)
     public void saveBatchDLRetry(batchDLRetry br) throws Exception {
-	sessionFactory.getCurrentSession().save(br);
+	sessionFactory.getCurrentSession().persist(br);
     }
 
     @Override
     @Transactional(readOnly = false)
     public void clearBatchDLRetry(Integer batchDownloadId) throws Exception {
-	Query delBatch = sessionFactory.getCurrentSession().createQuery("delete from batchDLRetry where batchDownloadId = :batchDownloadId");
+	MutationQuery delBatch = sessionFactory.getCurrentSession().createMutationQuery("delete from batchDLRetry where batchDownloadId = :batchDownloadId");
 	delBatch.setParameter("batchDownloadId", batchDownloadId);
 	delBatch.executeUpdate();
     }
@@ -985,7 +971,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = false)
     public void deleteRestAPIMessageByDownloadId(int batchDownloadId) throws Exception {
-	Query deletNote = sessionFactory.getCurrentSession().createQuery("delete from RestAPIMessagesOut where batchDownloadId = :batchDownloadId");
+	MutationQuery deletNote = sessionFactory.getCurrentSession().createMutationQuery("delete from RestAPIMessagesOut where batchDownloadId = :batchDownloadId");
 	deletNote.setParameter("batchDownloadId", batchDownloadId);
 	deletNote.executeUpdate();
     }
@@ -1242,7 +1228,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    sql+= "select "+insertFields;
 	    
 	    //Source configuration error handling is set to pass through all transaction errors.
-	    if(handlingDetails.get(0).geterrorHandling() == 4) {
+	    if(handlingDetails.get(0).getErrorHandling() == 4) {
 		sql+= batchDownloadId + ","+configId +",transactionInRecordsId from temp_transactiontranslatedin_"+batchUploadId+"_"+batchDownloadId+" where statusId in (9,14);";
 	    }
 	    //Otherwise only send transactions that have zero errors
@@ -1406,7 +1392,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = false)
     public void submitBatchDownloadChanges(batchDownloads batchDownload) throws Exception {
-	sessionFactory.getCurrentSession().update(batchDownload);
+	sessionFactory.getCurrentSession().merge(batchDownload);
     }
   
     @Override
@@ -1470,10 +1456,10 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	}
 	
 	String sqlQuery = "select id, orgId, utBatchName, transportMethodId, outputFileName, totalRecordCount, totalErrorCount, configName, threshold, statusId, dateCreated,"
-	+ "startDateTime, endDateTime, statusValue, endUserDisplayText, orgName, transportMethod, fromBatchName, fromBatchFile, totalMessages, srcOrgName "
+	+ "startDateTime, endDateTime, batchUploadId, deleted, lastDownloaded, userId, mergeable, configId, statusValue, endUserDisplayText, orgName, transportMethod, fromBatchName, fromBatchFile, totalMessages, srcOrgName "
 	+ "FROM ("
 	+ "select a.id, a.orgId, a.utBatchName, a.transportMethodId, a.outputFileName, a.totalRecordCount, a.totalErrorCount, b.configName, b.threshold,"
-	+ "a.statusId, a.dateCreated, a.startDateTime, a.endDateTime, c.displayCode as statusValue, c.endUserDisplayText as endUserDisplayText, d.orgName, e.transportMethod, f.utBatchName as fromBatchName,"
+	+ "a.statusId, a.dateCreated, a.startDateTime, a.deleted, a.userId, a.lastDownloaded, a.mergeable, a.endDateTime, a.configId, a.batchUploadId, c.displayCode as statusValue, c.endUserDisplayText as endUserDisplayText, d.orgName, e.transportMethod, f.utBatchName as fromBatchName,"
 	+ "case when f.transportMethodId = 5 THEN CONCAT(f.utBatchName,'.',SUBSTRING_INDEX(f.originalFileName,'.',-1)) "
 	+ "when f.transportMethodId = 1 THEN CONCAT(f.utBatchName,'.',SUBSTRING_INDEX(f.originalFileName,'.',-1)) "
 	+ "else '' end as fromBatchFile,"
@@ -1536,17 +1522,47 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	.addScalar("fromBatchName", StandardBasicTypes.STRING)
 	.addScalar("fromBatchFile", StandardBasicTypes.STRING)
 	.addScalar("totalMessages", StandardBasicTypes.INTEGER)
-	.addScalar("srcOrgName", StandardBasicTypes.STRING);
-	
-	List<batchDownloads> batchSentMessages = query.list();
-	
+	.addScalar("srcOrgName", StandardBasicTypes.STRING)
+        .addScalar("endUserDisplayText", StandardBasicTypes.STRING)
+        .addScalar("threshold", StandardBasicTypes.INTEGER)
+        .addScalar("configId", StandardBasicTypes.INTEGER)
+        .addScalar("batchUploadId", StandardBasicTypes.INTEGER)
+        .addScalar("deleted", StandardBasicTypes.BOOLEAN)
+        .addScalar("mergeable", StandardBasicTypes.BOOLEAN)
+        .addScalar("lastDownloaded", StandardBasicTypes.TIMESTAMP)
+        .addScalar("userId", StandardBasicTypes.INTEGER);        
+        
+        List<Object[]> results = query.getResultList();
+        
+        List<batchDownloads> batchSentMessages = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            batchDownloads bDownload = new batchDownloads();
+            bDownload.setId((Integer) record[1]);
+            bDownload.setDateSubmitted((Date) record[10]);
+            bDownload.setStartDateTime((Date) record[11]);
+            bDownload.setEndDateTime((Date) record[12]);
+            bDownload.setUtBatchName((String) record[3]);
+            bDownload.setOrgName((String) record[14]);
+            bDownload.setConfigName((String) record[8]);
+            bDownload.setTransportMethod((String) record[15]);
+            bDownload.setTotalRecordCount((Integer) record[6]);
+            bDownload.setErrorRecordCount((Integer) record[7]);
+            bDownload.setTotalMessages((Integer) record[18]);
+            bDownload.setStatusId((Integer) record[9]);
+            bDownload.setEndUserDisplayText((String) record[20]);
+            bDownload.setThreshold((Integer) record[21]);
+            
+            batchSentMessages.add(bDownload);
+        });
+        
         return batchSentMessages;
     }
     
     @Override
     @Transactional(readOnly = false)
     public void insertDMMessage(directmessagesout newDirectMessageOut) throws Exception {
-	sessionFactory.getCurrentSession().save(newDirectMessageOut);
+	sessionFactory.getCurrentSession().persist(newDirectMessageOut);
     }
     
     @Override
@@ -1621,7 +1637,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = false)
     public void submitBatchActivityLog(batchdownloadactivity ba) {
-	sessionFactory.getCurrentSession().save(ba);
+	sessionFactory.getCurrentSession().persist(ba);
     }
     
     /**
@@ -1837,7 +1853,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = true)
     public List<batchDownloadDroppedValues> getBatchDroppedValues(Integer batchDownloadId) throws Exception {
-	Query query = sessionFactory.getCurrentSession().createQuery("from batchDownloadDroppedValues where batchDownloadId = :batchDownloadId");
+	SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from batchDownloadDroppedValues where batchDownloadId = :batchDownloadId");
 	query.setParameter("batchDownloadId", batchDownloadId);
 	
 	return query.list();
@@ -1893,7 +1909,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = false)
     public void clearBatchActivityLogTable(Integer batchDownloadId) {
-	Query deletActivityLog = sessionFactory.getCurrentSession().createQuery("delete from batchdownloadactivity where batchDownloadId = :batchDownloadId");
+	MutationQuery deletActivityLog = sessionFactory.getCurrentSession().createMutationQuery("delete from batchdownloadactivity where batchDownloadId = :batchDownloadId");
 	deletActivityLog.setParameter("batchDownloadId", batchDownloadId);
 
 	deletActivityLog.executeUpdate();
@@ -1981,7 +1997,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	String sql = "";
 
 	if(transportDetails.isAddTargetFileHeaderRow()) {
-	    String configFieldHeadings = getConfigFieldHeadingsForOutput(transportDetails.getconfigId());
+	    String configFieldHeadings = getConfigFieldHeadingsForOutput(transportDetails.getConfigId());
 	    if(configFieldHeadings != null) {
 		if(!"".equals(configFieldHeadings)) {
 		    sql += "SELECT " + configFieldHeadings + " UNION ALL ";
@@ -1992,9 +2008,9 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	sql += "SELECT " + fieldNos.replace("(F", "(a.F") + ", b.transactionInRecordsId "
 	+ "FROM transactionTranslatedOut_" + batchDownloadId + " a inner join "
 	+ "transactionoutrecords_" + batchDownloadId + " b on b.id = a.transactionOutRecordsId "
-	+ "where a.configId = " + transportDetails.getconfigId() + " and ";
+	+ "where a.configId = " + transportDetails.getConfigId() + " and ";
 
-	if(transportDetails.geterrorHandling() == 4) {
+	if(transportDetails.getErrorHandling() == 4) {
 	    sql += "a.statusId in (9,14) ";
 	}
 	else {
@@ -2007,8 +2023,8 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    
 	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 
-	    if (transportDetails.getfileType() == 12) {
-		query.setParameter("batchConfigId", transportDetails.getconfigId());
+	    if (transportDetails.getFileType() == 12) {
+		query.setParameter("batchConfigId", transportDetails.getConfigId());
 		query.setParameter("batchDownloadId", batchDownloadId);
 		query.setParameter("filePathAndName", filePathAndName);
 		query.setParameter("jsonWrapperElement", transportDetails.getJsonWrapperElement());

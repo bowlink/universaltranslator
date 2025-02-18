@@ -1,7 +1,7 @@
 package com.hel.ut.validator;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class PhoneConstraintValidator implements ConstraintValidator<Phone, String> {
 
@@ -16,5 +16,4 @@ public class PhoneConstraintValidator implements ConstraintValidator<Phone, Stri
         }
         return phoneField.matches("[0-9()-]*");
     }
-
 }

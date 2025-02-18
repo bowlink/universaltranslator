@@ -1,0 +1,37 @@
+<nav class="navbar navbar-default actions-nav" role="navigation"  th:fragment="actionBar">
+    <div class="contain">
+        <div class="navbar-header">
+            <h1 class="section-title navbar-brand">
+                <span th:if="${actionPage == 'listOrgs'}"><a href="#" title="Organization List" class="unstyled-link">Organizations</a></span>
+                <span th:if="${id == null and actionPage == 'orgDetails'}"><a href="#" title="Organization Details" class="unstyled-link">Create New Organization</a></span>
+                <span th:if="${id != null and actionPage == 'orgDetails'}"><a href="#" title="Organization Details" class="unstyled-link">Edit Organization</a></span>
+                <span th:if="${actionPage == 'orgConfigs'}"><a href="#" title="Organization Configurations" class="unstyled-link">Organization Configurations</a></span>
+                <span th:if="${actionPage == 'orgUsers'}"><a href="#" title="Organization Users" class="unstyled-link">Organization Users</a></span>
+            </h1>
+        </div>
+        <ul class="nav navbar-nav navbar-right navbar-actions" role="menu">
+            <!-- Organization List -->
+            <li th:if="${actionPage == 'listOrgs'}" role="menuitem">
+                <a th:href="@{/administrator/organizations/create}" title="Create New Organization" role="button">
+                    <span class="glyphicon icon-stacked glyphicon glyphicon-plus"></span>Create New
+                </a>
+            </li>
+            <!-- Organization Details -->
+            <li th:if="${actionPage == 'orgDetails'}" role="menuitem">
+                <a href="#" id="saveCloseDetails" title="Save &amp; Close" role="button">
+                    <span class="glyphicon glyphicon-floppy-disk icon-stacked"></span> Save &amp; Close
+                </a>
+            </li>
+            <li th:if="${actionPage == 'orgDetails' and id != null and allowOrgDelete}">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#confirmationOrgDelete" th:rel="${id}" title="Delete this Organization">
+                    <span class="glyphicon glyphicon-remove icon-stacked" role="button"></span>Delete
+                </a>
+            </li>
+            <li th:if="${actionPage == 'orgDetails'}" role="menuitem">
+                <a th:href="@{/administrator/organizations/list}" title="Cancel" role="button">
+                    <span class="glyphicon icon-stacked  glyphicon-ban-circle"></span>Cancel
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>

@@ -3,7 +3,6 @@ package com.hel.ut.model;
 import com.hel.ut.validator.NoHtml;
 import java.util.Date;
 import java.util.List;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,7 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -62,7 +61,7 @@ public class utConfiguration {
 
     @NoHtml
     @Column(name = "CONFIGNAME", nullable = false)
-    private String configName;
+    private String configname;
 
     @Column(name = "THRESHOLD", nullable = false)
     private Integer threshold = 100;
@@ -82,11 +81,11 @@ public class utConfiguration {
         this.id = id;
     }
 
-    public Integer getorgId() {
+    public Integer getOrgId() {
         return orgId;
     }
 
-    public void setorgId(Integer orgId) {
+    public void setOrgId(Integer orgId) {
         this.orgId = orgId;
     }
 
@@ -138,19 +137,19 @@ public class utConfiguration {
         this.messageTypeName = messageTypeName;
     }
 
-    public Integer getstepsCompleted() {
+    public Integer getStepsCompleted() {
         return stepsCompleted;
     }
 
-    public void setstepsCompleted(Integer stepsCompleted) {
+    public void setStepsCompleted(Integer stepsCompleted) {
         this.stepsCompleted = stepsCompleted;
     }
 
-    public String gettransportMethod() {
+    public String getTransportMethod() {
         return transportMethod;
     }
 
-    public void settransportMethod(String transportMethod) {
+    public void setTransportMethod(String transportMethod) {
         this.transportMethod = transportMethod;
     }
 
@@ -170,12 +169,12 @@ public class utConfiguration {
         this.connections = connections;
     }
 
-    public void setconfigName(String configName) {
-        this.configName = configName;
+    public void setConfigname(String configName) {
+        this.configname = configName;
     }
 
-    public String getconfigName() {
-        return configName;
+    public String getConfigname() {
+        return configname;
     }
 
     public Integer getScheduleType() {

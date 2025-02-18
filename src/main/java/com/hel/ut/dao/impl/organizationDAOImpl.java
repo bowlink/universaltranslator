@@ -18,7 +18,11 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.util.Date;
 import org.hibernate.exception.SQLGrammarException;
+import org.hibernate.query.MutationQuery;
+import org.hibernate.query.SelectionQuery;
+import org.hibernate.type.StandardBasicTypes;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -49,8 +53,8 @@ public class organizationDAOImpl implements organizationDAO {
     @Override
     @Transactional(readOnly = false)
     public Integer createOrganization(Organization organization) {
-        Integer lastId = (Integer) sessionFactory.getCurrentSession().save(organization);
-        return lastId;
+        sessionFactory.getCurrentSession().persist(organization);
+        return organization.getId();
     }
 
     /**
@@ -64,7 +68,7 @@ public class organizationDAOImpl implements organizationDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateOrganization(Organization organization) {
-        sessionFactory.getCurrentSession().update(organization);
+        sessionFactory.getCurrentSession().merge(organization);
     }
 
     /**
@@ -117,7 +121,7 @@ public class organizationDAOImpl implements organizationDAO {
     @Override
     @Transactional(readOnly = true)
     public Long findTotalOrgs() {
-        Query query = sessionFactory.getCurrentSession().createQuery("select count(id) as totalOrgs from Organization where cleanURL <> ''");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("select count(id) as totalOrgs from Organization where cleanURL <> ''");
 
         Long totalOrgs = (Long) query.uniqueResult();
 
@@ -136,7 +140,7 @@ public class organizationDAOImpl implements organizationDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<Organization> getOrganizations() {
-        Query query = sessionFactory.getCurrentSession().createQuery("from Organization where cleanURL <> '' order by orgName asc");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from Organization where cleanURL <> '' order by orgName asc");
 
         List<Organization> organizationList = query.list();
 
@@ -157,7 +161,7 @@ public class organizationDAOImpl implements organizationDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<Organization> getLatestOrganizations(int maxResults) {
-        Query query = sessionFactory.getCurrentSession().createQuery("from Organization where status = 1 order by dateCreated desc");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from Organization where status = 1 order by dateCreated desc");
 
         //Set the max results to display
         if (maxResults > 0) {
@@ -180,7 +184,7 @@ public class organizationDAOImpl implements organizationDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<Organization> getAllActiveOrganizations() {
-        Query query = sessionFactory.getCurrentSession().createQuery("from Organization where cleanURL <> '' and status = 1 order by orgName asc");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from Organization where cleanURL <> '' and status = 1 order by orgName asc");
 
         List<Organization> organizationList = query.list();
         return organizationList;
@@ -201,7 +205,7 @@ public class organizationDAOImpl implements organizationDAO {
     @Transactional(readOnly = true)
     public Long findTotalUsers(int orgId) {
 
-        Query query = sessionFactory.getCurrentSession().createQuery("select count(id) as totalUsers from User where orgId = :orgId");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("select count(id) as totalUsers from User where orgId = :orgId");
         query.setParameter("orgId", orgId);
 
         Long totalUsers = (Long) query.uniqueResult();
@@ -224,7 +228,7 @@ public class organizationDAOImpl implements organizationDAO {
     @Transactional(readOnly = true)
     public Long findTotalConfigurations(int orgId) {
 
-        Query query = sessionFactory.getCurrentSession().createQuery("select count(id) as totalConfigs from configuration where orgId = :orgId");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("select count(id) as totalConfigs from configuration where orgId = :orgId");
         query.setParameter("orgId", orgId);
 
         Long totalConfigs = (Long) query.uniqueResult();
@@ -248,7 +252,7 @@ public class organizationDAOImpl implements organizationDAO {
     @SuppressWarnings("unchecked")
     public List<utUser> getOrganizationUsers(int orgId) {
 
-        Query query = sessionFactory.getCurrentSession().createQuery("from User where orgId = :orgId order by lastName asc, firstName asc");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from User where orgId = :orgId order by lastName asc, firstName asc");
         query.setParameter("orgId", orgId);
 
         return query.list();
@@ -267,14 +271,14 @@ public class organizationDAOImpl implements organizationDAO {
     public void deleteOrganization(int orgId) {
         
         //Delete the logins for the users associated to the organization to be deleted.
-        Query findUsers = sessionFactory.getCurrentSession().createQuery("from utUser where orgId = :orgId");
+        SelectionQuery findUsers = sessionFactory.getCurrentSession().createSelectionQuery("from utUser where orgId = :orgId");
         findUsers.setParameter("orgId", orgId);
 
         List<utUser> users = findUsers.list();
 
-        if (users.size() > 0) {
+        if (!users.isEmpty()) {
             try {
-                Query deleteLogins = sessionFactory.getCurrentSession().createQuery("delete from utUserLogin where userId in (select id from utUser where orgId = :orgId");
+                MutationQuery deleteLogins = sessionFactory.getCurrentSession().createMutationQuery("delete from utUserLogin where userId in (select id from utUser where orgId = :orgId");
                 deleteLogins.setParameter("orgId", orgId);
                 deleteLogins.executeUpdate();
             } catch (SQLGrammarException ex) {
@@ -283,7 +287,7 @@ public class organizationDAOImpl implements organizationDAO {
 
             //Delete the user access entries for the users associated to the organization to be deleted.
             try {
-                Query deleteuserFeatures = sessionFactory.getCurrentSession().createQuery("delete from utUserActivity where userId in (select id from utUser where orgId = :orgId");
+                MutationQuery deleteuserFeatures = sessionFactory.getCurrentSession().createMutationQuery("delete from utUserActivity where userId in (select id from utUser where orgId = :orgId");
                 deleteuserFeatures.setParameter("orgId", orgId);
                 deleteuserFeatures.executeUpdate();
             } catch (SQLGrammarException ex) {
@@ -293,7 +297,7 @@ public class organizationDAOImpl implements organizationDAO {
 
         //Delete all users associated to the organization
         try {
-            Query deleteUser = sessionFactory.getCurrentSession().createQuery("delete from utUser where orgId = :orgId");
+            MutationQuery deleteUser = sessionFactory.getCurrentSession().createMutationQuery("delete from utUser where orgId = :orgId");
             deleteUser.setParameter("orgId", orgId);
             deleteUser.executeUpdate();
         } catch (SQLGrammarException ex) {
@@ -309,7 +313,7 @@ public class organizationDAOImpl implements organizationDAO {
             dir.deleteOrgDirectories(myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL());
 
             //Delete the organization
-            Query deleteOrg = sessionFactory.getCurrentSession().createQuery("delete from Organization where id = :orgId");
+            MutationQuery deleteOrg = sessionFactory.getCurrentSession().createMutationQuery("delete from Organization where id = :orgId");
             deleteOrg.setParameter("orgId", orgId);
             deleteOrg.executeUpdate();
         } catch (SQLGrammarException ex) {
@@ -383,8 +387,8 @@ public class organizationDAOImpl implements organizationDAO {
                 utConfiguration srcconfigDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configDetailsCriteria).uniqueResult();
                 
                 if(srcconfigDetails != null) {
-                    if (srcconfigDetails.getorgId() != orgId && !targetOrgIds.contains(srcconfigDetails.getorgId())) {
-                        targetOrgIds.add(srcconfigDetails.getorgId());
+                    if (srcconfigDetails.getOrgId() != orgId && !targetOrgIds.contains(srcconfigDetails.getOrgId())) {
+                        targetOrgIds.add(srcconfigDetails.getOrgId());
                     }
                 }
 
@@ -395,8 +399,8 @@ public class organizationDAOImpl implements organizationDAO {
                 utConfiguration TgtconfigDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configDetailsCriteria).uniqueResult();
                 
                 if(TgtconfigDetails != null) {
-                    if (TgtconfigDetails.getorgId() != orgId && !targetOrgIds.contains(TgtconfigDetails.getorgId())) {
-                        targetOrgIds.add(TgtconfigDetails.getorgId());
+                    if (TgtconfigDetails.getOrgId() != orgId && !targetOrgIds.contains(TgtconfigDetails.getOrgId())) {
+                        targetOrgIds.add(TgtconfigDetails.getOrgId());
                     }
                 }
             }
@@ -430,14 +434,18 @@ public class organizationDAOImpl implements organizationDAO {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<Organization> getOrganizationsPaged(Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
+    public List<Object> getOrganizationsPaged(Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
         
 	if(displayRecords < 0) {
             displayRecords = 999999;
         }
         
-        String query = "select id, orgName, address, address2, city, state, postalCode, fax, phone, dateCreated, cleanURL, orgType, helRegistryId, organizationType "
-	    + "FROM (select id, orgName, address, address2, city, state, postalCode, fax, phone, dateCreated, cleanURL, orgType, helRegistryId, "
+        String query = "select id, orgName, address, address2, city, state, postalCode, fax, phone, dateCreated, status, cleanURL, orgType, helRegistryId, organizationType,"
+            + "parsingTemplate, orgDesc, town, county, infoURL, country, helRegistryOrgId, helRegistrySchemaName, primaryContactEmail, parentOrgId, primaryContactName,"
+            + "primaryTechContactEmail, primaryTechContactName "
+	    + "FROM (select id, orgName, address, address2, city, state, postalCode, fax, phone, dateCreated, status, cleanURL, orgType, helRegistryId, "
+            + "parsingTemplate, orgDesc, town, county, infoURL, country, helRegistryOrgId, helRegistrySchemaName, primaryContactEmail, parentOrgId, primaryContactName,"
+            + "primaryTechContactEmail, primaryTechContactName, "
 	    + "CASE WHEN helRegistryId > 0 THEN (select registryName from registries.registries where id = organizations.helRegistryId) "
 		+ "ELSE '' "
 	    + "END AS helRegistry, "
@@ -451,27 +459,29 @@ public class organizationDAOImpl implements organizationDAO {
 	
 	if(!"".equals(searchTerm)){
 	    query += " and ("
-            + "id like '%"+searchTerm+"%' "        
-	    + "OR address like '%"+searchTerm+"%' "
-	    + "OR address2 like '%"+searchTerm+"%' "
-	    + "OR city like '%"+searchTerm+"%' "
-	    + "OR state like '%"+searchTerm+"%' "
-	    + "OR postalCode like '%"+searchTerm+"%' "
+            + "id like '%"+searchTerm+"%' "       
 	    + "OR dateCreated like '%"+searchTerm+"%' "
 	    + "OR orgName like '%"+searchTerm+"%'"
 	    + "OR organizationType like '%"+searchTerm+"%'"
 	    + "OR helRegistry like '%"+searchTerm+"%'"
 	    + ") ";
 	}	
-		
+        	
         query += "order by "+sortColumnName+" "+sortDirection;
-        query += " limit :displayStart , :displayRecords";
-	
-        Query q1 = sessionFactory.getCurrentSession().createNativeQuery(query,Organization.class)
+        
+        Query q1 = sessionFactory.getCurrentSession().createNativeQuery(query,Organization.class);
+        
+        List<Object> returnArray = new ArrayList<>();
+        returnArray.add(q1.list().size());
+        
+        query += " limit :displayStart, :displayRecords ";
+        q1 = sessionFactory.getCurrentSession().createNativeQuery(query,Organization.class)
         .setParameter("displayStart", displayStart)
         .setParameter("displayRecords", displayRecords);
-
-        return q1.list();
+        
+        returnArray.add(q1.list());
+        
+        return returnArray;
     }
 
     @Override
@@ -491,13 +501,81 @@ public class organizationDAOImpl implements organizationDAO {
     @Transactional(readOnly = true)
     public  List<Organization> getAllActiveOrganizationsWithSystemName() throws Exception {
 	
-        String sqlQuery = "select a.*, case when r.registryName like '%CeC' then concat(r.registryName,' (eReferral)') else r.registryName end as helRegistry "
+        String sqlQuery = "select a.id, a.orgName, a.address, a.address2, a.city, a.state, a.postalCode, a.fax, a.phone, a.dateCreated, a.status, a.cleanURL, a.orgType, a.helRegistryId,"
+        + "a.parsingTemplate, a.orgDesc, a.town, a.county, a.infoURL, a.country, a.helRegistryOrgId, a.helRegistrySchemaName, a.primaryContactEmail, a.parentOrgId, a.primaryContactName,"
+        + "a.primaryTechContactEmail, a.primaryTechContactName,"
+        + "case when r.registryName like '%CeC' then concat(r.registryName,' (eReferral)') else r.registryName end as helRegistry "
         + "from organizations a inner join "
         + "registries.registries r on r.id = a.helRegistryId "
         + "order by helRegistry asc, a.orgName asc";
         
-        Query q1 = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,Organization.class);
+        Query q1 = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,Organization.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("orgName", StandardBasicTypes.STRING)
+        .addScalar("address", StandardBasicTypes.STRING)
+        .addScalar("address2", StandardBasicTypes.STRING)
+        .addScalar("city", StandardBasicTypes.STRING)
+        .addScalar("state", StandardBasicTypes.STRING)
+        .addScalar("postalCode", StandardBasicTypes.STRING)
+        .addScalar("fax", StandardBasicTypes.STRING)
+        .addScalar("phone", StandardBasicTypes.STRING)
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
+        .addScalar("status", StandardBasicTypes.BOOLEAN)
+        .addScalar("cleanURL", StandardBasicTypes.STRING)
+        .addScalar("orgType", StandardBasicTypes.INTEGER)
+        .addScalar("helRegistryId", StandardBasicTypes.INTEGER)
+        .addScalar("parsingTemplate", StandardBasicTypes.STRING)
+        .addScalar("orgDesc", StandardBasicTypes.STRING)
+        .addScalar("town", StandardBasicTypes.STRING)
+        .addScalar("county", StandardBasicTypes.STRING)
+        .addScalar("infoURL", StandardBasicTypes.STRING)
+        .addScalar("country", StandardBasicTypes.STRING)
+        .addScalar("helRegistryOrgId", StandardBasicTypes.INTEGER)
+        .addScalar("helRegistrySchemaName", StandardBasicTypes.STRING)
+        .addScalar("primaryContactEmail", StandardBasicTypes.STRING)
+        .addScalar("parentOrgId", StandardBasicTypes.INTEGER)
+        .addScalar("primaryContactName", StandardBasicTypes.STRING)
+        .addScalar("primaryTechContactEmail", StandardBasicTypes.STRING)
+        .addScalar("primaryTechContactName", StandardBasicTypes.STRING)
+        .addScalar("helRegistry", StandardBasicTypes.STRING);    
         
-        return q1.list();
+        List<Object[]> results = q1.getResultList();
+        
+        List<Organization> orgs = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            Organization org = new Organization();
+            org.setId((Integer) record[1]);
+            org.setOrgName((String) record[2]);
+            org.setAddress((String) record[3]);
+            org.setAddress2((String) record[4]);
+            org.setCity((String) record[5]);
+            org.setState((String) record[6]);
+            org.setPostalCode((String) record[7]);
+            org.setFax((String) record[8]);
+            org.setPhone((String) record[9]);
+            org.setDateCreated((Date) record[10]);
+            org.setStatus((Boolean) record[11]);
+            org.setCleanURL((String) record[12]);
+            org.setOrgType((Integer) record[13]);
+            org.setHelRegistryId((Integer) record[14]);
+            org.setParsingTemplate((String) record[15]);
+            org.setOrgDesc((String) record[16]);
+            org.setTown((String) record[17]);
+            org.setCounty((String) record[18]);
+            org.setInfoURL((String) record[19]);
+            org.setCountry((String) record[20]);
+            org.setHelRegistryOrgId((Integer) record[21]);
+            org.setHelRegistrySchemaName((String) record[22]);
+            org.setPrimaryContactEmail((String) record[23]);
+            org.setParentOrgId((Integer) record[24]);
+            org.setPrimaryContactName((String) record[25]);
+            org.setPrimaryTechContactEmail((String) record[26]);
+            org.setPrimaryTechContactName((String) record[27]);
+            org.setHelRegistry((String) record[28]);
+            orgs.add(org);
+        });
+        
+        return orgs;
     }
 }

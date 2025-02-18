@@ -191,10 +191,10 @@ public class restful {
 					
 					if(attachmentContent != null) {
 					    
-					    if(FilenameUtils.getExtension(attachmentTitle).toLowerCase().equals(transportDetails.getfileExt().toLowerCase())) {
+					    if(FilenameUtils.getExtension(attachmentTitle).toLowerCase().equals(transportDetails.getFileExt().toLowerCase())) {
 						
-						utConfiguration configDetails = configurationManager.getConfigurationById(transportDetails.getconfigId());
-						Organization orgDetails = organizationManager.getOrganizationById(configDetails.getorgId());
+						utConfiguration configDetails = configurationManager.getConfigurationById(transportDetails.getConfigId());
+						Organization orgDetails = organizationManager.getOrganizationById(configDetails.getOrgId());
 						
 						//File Drop directory
 						List<configurationFileDropFields> fileDropFields = configurationtransportmanager.getTransFileDropDetails(transportDetails.getId());
@@ -218,13 +218,13 @@ public class restful {
 						}
 						fos.close();
 
-						Integer configId = transportDetails.getconfigId();
+						Integer configId = transportDetails.getConfigId();
 						Integer statusId = 1;
 						String sendingResponse = "Successfully received and saved your message.";
 						
 						//Create new restAPIMessage
 						RestAPIMessagesIn newRestAPIMessage = new RestAPIMessagesIn();
-						newRestAPIMessage.setOrgId(configDetails.getorgId());
+						newRestAPIMessage.setOrgId(configDetails.getOrgId());
 						newRestAPIMessage.setArchiveFileName("archivesIn/"+dateFormat.format(date)+".json");
 						newRestAPIMessage.setStatusId(1);
 						newRestAPIMessage.setConfigId(configId);

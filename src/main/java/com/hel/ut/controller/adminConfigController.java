@@ -192,9 +192,14 @@ public class adminConfigController {
      */
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     public ModelAndView listConfigurations(Authentication authentication) throws Exception {
-
+        
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/list");
+        mav.addObject("pageId", "configuration-list");
+        mav.addObject("pageSection", "section-configurations");
+        mav.addObject("sect","config");
+        mav.addObject("actionPage","listConfigs");
+        
+	mav.setViewName("administrator/configurations/list");
 	
 	utUser userDetails = userManager.getUserByUserName(authentication.getName());
 	
@@ -333,7 +338,7 @@ public class adminConfigController {
     public ModelAndView saveNewConfiguration(HttpSession session,@ModelAttribute(value = "configurationDetails") utConfiguration configurationDetails, BindingResult result, RedirectAttributes redirectAttr, @RequestParam String action, Authentication authentication) throws Exception {
 
         // Need to make sure the name isn't already taken for the org selected
-        utConfiguration existing = utconfigurationmanager.getConfigurationByName(configurationDetails.getconfigName(), configurationDetails.getorgId());
+        utConfiguration existing = utconfigurationmanager.getConfigurationByName(configurationDetails.getConfigname(), configurationDetails.getOrgId());
 
         if (existing != null) {
             ModelAndView mav = new ModelAndView();
@@ -345,11 +350,11 @@ public class adminConfigController {
             List<Organization> organizations = organizationmanager.getAllActiveOrganizationsWithSystemName();
             mav.addObject("organizations", organizations);
 
-            mav.addObject("existingName", "The configuration name " + configurationDetails.getconfigName().trim() + " already exists.");
+            mav.addObject("existingName", "The configuration name " + configurationDetails.getConfigname().trim() + " already exists.");
             return mav;
         }
 	
-	configurationDetails.setstepsCompleted(1);
+	configurationDetails.setStepsCompleted(1);
 	
         Integer id = utconfigurationmanager.createConfiguration(configurationDetails);
 
@@ -395,8 +400,14 @@ public class adminConfigController {
     public ModelAndView viewConfigurationDetails(HttpSession session,@RequestParam(value = "i", required = false) Integer id,Authentication authentication) throws Exception {
 
         Integer configId = 0;
-	
-	ModelAndView mav = new ModelAndView();
+        
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("pageId", "configuration-details");
+        mav.addObject("pageSection", "section-configurations");
+        mav.addObject("sect","config");
+        mav.addObject("actionPage","configDetails");
+        
+	mav.setViewName("administrator/configurations/details");
 	
         //Set the static variable messageTypeId to hold the passed in id
         if (id == null && session.getAttribute("manageconfigId") == null) {
@@ -410,8 +421,7 @@ public class adminConfigController {
 	    session.setAttribute("manageconfigId", id);
 	    configId = id;
 	}
-        mav.setViewName("/administrator/configurations/details");
-
+        
         utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
         
         configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(configurationDetails.getId());
@@ -429,7 +439,7 @@ public class adminConfigController {
 	
 	List<Organization> validOrganizations = new ArrayList<>();
 	for(Organization org : organizations) {
-	    if("bowlinkTest".equals(configurationDetails.getconfigName()) || "Bowlink Test Target".equals(configurationDetails.getconfigName()) || (!"bowlinktest".equals(org.getCleanURL().trim().toLowerCase()) && !"bowlinkTest".equals(configurationDetails.getconfigName()))) {
+	    if("bowlinkTest".equals(configurationDetails.getConfigname()) || "Bowlink Test Target".equals(configurationDetails.getConfigname()) || (!"bowlinktest".equals(org.getCleanURL().trim().toLowerCase()) && !"bowlinkTest".equals(configurationDetails.getConfigname()))) {
 		validOrganizations.add(org);
 	    }
 	}
@@ -437,17 +447,17 @@ public class adminConfigController {
         mav.addObject("organizations", validOrganizations);
 
         //Need to get a list of organization users 
-        List<utUser> users = userManager.getUsersByOrganization(configurationDetails.getorgId());
+        List<utUser> users = userManager.getUsersByOrganization(configurationDetails.getOrgId());
         mav.addObject("users", users);
 
         mav.addObject("id", configId);
 
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
         if (transportDetails != null) {
-            configurationDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+            configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
 	    session.setAttribute("configmappings", 1);
 	    
-	    if (transportDetails.getfileType() == 4 && configurationDetails.getType() == 2) {
+	    if (transportDetails.getFileType() == 4 && configurationDetails.getType() == 2) {
 		session.setAttribute("configHL7", true);
 		session.setAttribute("configCCD", false);
 	    } else {
@@ -455,7 +465,7 @@ public class adminConfigController {
 		session.setAttribute("configCCD", false);
 	    }
 
-	    if ((transportDetails.getfileType() == 9 || transportDetails.getfileType() == 12) && configurationDetails.getType() == 2) {
+	    if ((transportDetails.getFileType() == 9 || transportDetails.getFileType() == 12) && configurationDetails.getType() == 2) {
 		session.setAttribute("configHL7", false);
 		session.setAttribute("configCCD", true);
 	    } else {
@@ -500,20 +510,20 @@ public class adminConfigController {
         List<Organization> organizations = organizationmanager.getAllActiveOrganizationsWithSystemName();
 
         //Need to get a list of organization users 
-        List<utUser> users = userManager.getUsersByOrganization(configurationDetails.getorgId());
+        List<utUser> users = userManager.getUsersByOrganization(configurationDetails.getOrgId());
 	
 	boolean configNameChanged = false;
 	boolean organizationChanged = false;
 	
 	utConfiguration currentConfigDetails = utconfigurationmanager.getConfigurationById(configurationDetails.getId());
 	
-	Organization currentOrgDetails = organizationmanager.getOrganizationById(currentConfigDetails.getorgId());
+	Organization currentOrgDetails = organizationmanager.getOrganizationById(currentConfigDetails.getOrgId());
 	
-	if(!currentConfigDetails.getconfigName().trim().equals(configurationDetails.getconfigName().trim())) {
+	if(!currentConfigDetails.getConfigname().trim().equals(configurationDetails.getConfigname().trim())) {
 	    configNameChanged = true;
 	}
 	
-	if(!currentConfigDetails.getorgId().equals(configurationDetails.getorgId())) {
+	if(!currentConfigDetails.getOrgId().equals(configurationDetails.getOrgId())) {
 	    organizationChanged = true;
 	}
 	
@@ -527,10 +537,10 @@ public class adminConfigController {
 		//get file drop fields
 		List<configurationFileDropFields> fileDropFields = utconfigurationTransportManager.getTransFileDropDetails(transportDetails.getId());
 		
-		Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getorgId());
+		Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getOrgId());
 		
 		if(organizationChanged) {
-		    transportDetails.setfileLocation(orgDetails.getcleanURL() + "/input files/");
+		    transportDetails.setFileLocation(orgDetails.getcleanURL() + "/input files/");
 		    utconfigurationTransportManager.updateTransportDetails(configurationDetails, transportDetails);
 		    
 		    //Check if a parsing template exists (if so it must be copied)
@@ -544,7 +554,7 @@ public class adminConfigController {
 		    }
 		    
 		    //Need to modify the org id for all associated CWs
-		    messagetypemanager.moveCWForConfigToNewOrg(configurationDetails.getorgId(),currentConfigDetails.getorgId(),configurationDetails.getId(),currentOrgDetails.getcleanURL(),orgDetails.getcleanURL());
+		    messagetypemanager.moveCWForConfigToNewOrg(configurationDetails.getOrgId(),currentConfigDetails.getOrgId(),configurationDetails.getId(),currentOrgDetails.getcleanURL(),orgDetails.getcleanURL());
 		}
 		
 		if(!fileDropFields.isEmpty()) {
@@ -556,17 +566,17 @@ public class adminConfigController {
 				fileLocationConfigName = fileLocationConfigName.replace("/input files/","");
 				
 				if(!"".equals(fileLocationConfigName)) {
-				    if(!fileLocationConfigName.equals(configurationDetails.getconfigName().toLowerCase().replace(" ", "")) || organizationChanged) {
+				    if(!fileLocationConfigName.equals(configurationDetails.getConfigname().toLowerCase().replace(" ", "")) || organizationChanged) {
 					//Create new directory
 					String directory = myProps.getProperty("ut.directory.utRootDir");
 					fileSystem dir = new fileSystem();
-					dir.createFileDroppedDirectory(directory.replace("/home/","/") + orgDetails.getcleanURL() + "/input files/"+configurationDetails.getconfigName().toLowerCase().replace(" ", "")+"/");
+					dir.createFileDroppedDirectory(directory.replace("/home/","/") + orgDetails.getcleanURL() + "/input files/"+configurationDetails.getConfigname().toLowerCase().replace(" ", "")+"/");
 					
 					//Remove old directory
 					dir.deleteDirectory(directory.replace("/home/","/") + fileDropField.getDirectory().trim());
 
 					//Update file drop location
-					fileDropField.setDirectory(orgDetails.getcleanURL() + "/input files/"+configurationDetails.getconfigName().toLowerCase().replace(" ", "")+"/");
+					fileDropField.setDirectory(orgDetails.getcleanURL() + "/input files/"+configurationDetails.getConfigname().toLowerCase().replace(" ", "")+"/");
 					utconfigurationTransportManager.saveTransportFileDrop(fileDropField);
 				    }
 				}
@@ -614,7 +624,7 @@ public class adminConfigController {
         } //If the "Next Step" button was pressed.
         else {
             redirectAttr.addFlashAttribute("savedStatus", "updated");
-            ModelAndView mav = new ModelAndView(new RedirectView("transport"));
+            ModelAndView mav = new ModelAndView(new RedirectView("/administrator/configurations/transport"));
             return mav;
         }
     }
@@ -647,18 +657,31 @@ public class adminConfigController {
 	    configId = (Integer) session.getAttribute("manageconfigId");
 	}
 	
-        mav.setViewName("/administrator/configurations/transport");
-
         //Get the utConfiguration details for the selected config
         utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
-	mav.addObject("messageTypeId", configurationDetails.getMessageTypeId());
+       
+        mav.addObject("pageId", "configuration-transport");
+        mav.addObject("pageSection", "section-configurations");
+        mav.addObject("sect","config");
+        mav.addObject("actionPage","transport");
+        
+        if(configurationDetails.getType() == 1) {
+            mav.setViewName("administrator/configurations/inboundTransport");
+        }
+        else {
+            mav.setViewName("administrator/configurations/outboundTransport");
+        }
+        
+        mav.addObject("messageTypeId", configurationDetails.getMessageTypeId());
+        
 
         // Get organization directory name
-        Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getorgId());
+        Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getOrgId());
 	
 	configurationDetails.setOrgName(orgDetails.getOrgName());
 	
 	String helRegistryFolderName = "";
+        String helSystemName = "";
 	
 	//This is for eReferral configurations only
 	if(configurationDetails.getMessageTypeId() == 1) {
@@ -670,29 +693,45 @@ public class adminConfigController {
 			if(registry.getId() == orgDetails.getHelRegistryId()) {
 			    helRegistryFolderName = registry.getRegistryName().replace(" ", "-").toLowerCase();
 			    mav.addObject("helRegistryFolderName", helRegistryFolderName);
+                            helSystemName = registry.getRegistryName();
 			}
 		    }
 		}
 	    }
 	}
+        else {
+            if(orgDetails.getHelRegistryOrgId() > 0 || (orgDetails.getHelRegistryOrgId() == 0 && orgDetails.getHelRegistryId() > 0)) {
+		List<helRegistry> helRegistries = helregistrymanager.getAllActiveRegistries();
+
+		if(!helRegistries.isEmpty()) {
+		    for(helRegistry registry : helRegistries) {
+			if(registry.getId() == orgDetails.getHelRegistryId()) {
+			    helSystemName = registry.getRegistryName();
+			}
+		    }
+		}
+	    }
+        }
 	mav.addObject("helRegistryFolderName", helRegistryFolderName);
+        mav.addObject("helSystemName", helSystemName);
 	
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
+        
         if (transportDetails == null) {
             transportDetails = new configurationTransport();
 
             if (configurationDetails.getType() == 1) {
-                transportDetails.setfileLocation(orgDetails.getcleanURL() + "/input files/");
+                transportDetails.setFileLocation(orgDetails.getcleanURL() + "/input files/");
             } else {
-                transportDetails.setfileLocation(orgDetails.getcleanURL() + "/output files/");
+                transportDetails.setFileLocation(orgDetails.getcleanURL() + "/output files/");
             }
 
             List<Integer> assocMessageTypes = new ArrayList<>();
             assocMessageTypes.add(configurationDetails.getId());
-            transportDetails.setmessageTypes(assocMessageTypes);
+            transportDetails.setMessageTypes(assocMessageTypes);
         }
 	else {
-	    transportDetails.setfileLocation(transportDetails.getfileLocation());
+	    transportDetails.setFileLocation(transportDetails.getFileLocation());
 	}
 	
 	transportDetails.setHelRegistryId(orgDetails.getHelRegistryId());
@@ -707,26 +746,27 @@ public class adminConfigController {
 
         if (ftpFields.isEmpty()) {
 
-            List<configurationFTPFields> emptyFTPFields = new ArrayList<configurationFTPFields>();
+            List<configurationFTPFields> emptyFTPFields = new ArrayList<>();
             configurationFTPFields pushFTPFields = new configurationFTPFields();
-            pushFTPFields.setmethod(1);
-            pushFTPFields.setdirectory("");
+            pushFTPFields.setMethod(1);
+            pushFTPFields.setDirectory("");
 
             configurationFTPFields getFTPFields = new configurationFTPFields();
-            getFTPFields.setmethod(2);
-            getFTPFields.setdirectory("");
+            getFTPFields.setMethod(2);
+            getFTPFields.setDirectory("");
 
             emptyFTPFields.add(pushFTPFields);
             emptyFTPFields.add(getFTPFields);
 
             transportDetails.setFTPFields(emptyFTPFields);
-        } else {
+        } 
+        else {
             transportDetails.setFTPFields(ftpFields);
         }
 
         //get file drop fields
         List<configurationFileDropFields> fileDropFields = utconfigurationTransportManager.getTransFileDropDetails(transportDetails.getId());
-	
+        
         if (fileDropFields.isEmpty()) {
 	    
 	    List<configurationFileDropFields> emptyFileDropFields = new ArrayList<>();
@@ -737,10 +777,10 @@ public class adminConfigController {
 		 pushRFields.setDirectory("/bowlink/");
 	    }
 	    else if(configurationDetails.getMessageTypeId() == 1) { 
-		 pushRFields.setDirectory(orgDetails.getcleanURL() + "/input files/"+configurationDetails.getconfigName().toLowerCase().replace(" ", "")+"/");
+		 pushRFields.setDirectory(orgDetails.getcleanURL() + "/input files/"+configurationDetails.getConfigname().toLowerCase().replace(" ", "")+"/");
 	    }
 	    else {
-		pushRFields.setDirectory(orgDetails.getcleanURL() + "/input files/"+configurationDetails.getconfigName().toLowerCase().replace(" ", "")+"/");
+		pushRFields.setDirectory(orgDetails.getcleanURL() + "/input files/"+configurationDetails.getConfigname().toLowerCase().replace(" ", "")+"/");
 	    }
 
 	    configurationFileDropFields getRFields = new configurationFileDropFields();
@@ -749,7 +789,7 @@ public class adminConfigController {
 		getRFields.setDirectory("/bowlink/");
 	    }
 	    else if(configurationDetails.getMessageTypeId() == 1) { 
-		getRFields.setDirectory(orgDetails.getcleanURL() + "/output files/"+configurationDetails.getconfigName().toLowerCase().replace(" ", "")+"/");
+		getRFields.setDirectory(orgDetails.getcleanURL() + "/output files/"+configurationDetails.getConfigname().toLowerCase().replace(" ", "")+"/");
 	    }
 	    else {
 		getRFields.setDirectory("/");
@@ -770,17 +810,17 @@ public class adminConfigController {
 			fileLocationConfigName = fileDropField.getDirectory().substring(fileDropField.getDirectory().lastIndexOf("/input files/"), fileDropField.getDirectory().length()-1);
 			fileLocationConfigName = fileLocationConfigName.replace("/input files/","");
 			if(!"".equals(fileLocationConfigName)) {
-			    if(!fileLocationConfigName.equals(configurationDetails.getconfigName().toLowerCase().replace(" ", ""))) {
+			    if(!fileLocationConfigName.equals(configurationDetails.getConfigname().toLowerCase().replace(" ", ""))) {
 				//Create new directory
 				String directory = myProps.getProperty("ut.directory.utRootDir");
 				fileSystem dir = new fileSystem();
-				dir.createFileDroppedDirectory(directory.replace("/home/","/") + orgDetails.getcleanURL() + "/input files/"+configurationDetails.getconfigName().toLowerCase().replace(" ", "")+"/");
+				dir.createFileDroppedDirectory(directory.replace("/home/","/") + orgDetails.getcleanURL() + "/input files/"+configurationDetails.getConfigname().toLowerCase().replace(" ", "")+"/");
 				
 				//Remove old directory
 				dir.deleteDirectory(directory.replace("/home/","/") + orgDetails.getcleanURL() + "/input files/"+fileLocationConfigName);
 				
 				//Update file drop location
-				fileDropField.setDirectory(orgDetails.getcleanURL() + "/input files/"+configurationDetails.getconfigName().toLowerCase().replace(" ", "")+"/");
+				fileDropField.setDirectory(orgDetails.getcleanURL() + "/input files/"+configurationDetails.getConfigname().toLowerCase().replace(" ", "")+"/");
 				utconfigurationTransportManager.saveTransportFileDrop(fileDropField);
 			    }
 			}
@@ -793,13 +833,13 @@ public class adminConfigController {
         }
 
 	//get direct messaging fields
-	organizationDirectDetails  directMessageDetails = utconfigurationTransportManager.getDirectMessagingDetailsById(configurationDetails.getorgId());
+	organizationDirectDetails  directMessageDetails = utconfigurationTransportManager.getDirectMessagingDetailsById(configurationDetails.getOrgId());
 
 	List<organizationDirectDetails> directMessageFields = new ArrayList<>();
 	
 	if(directMessageDetails == null) {
 	    directMessageDetails = new organizationDirectDetails();
-	    directMessageDetails.setOrgId(configurationDetails.getorgId());
+	    directMessageDetails.setOrgId(configurationDetails.getOrgId());
 	    
 	    directMessageFields.add(directMessageDetails);
 	}
@@ -808,10 +848,10 @@ public class adminConfigController {
 	}
 	
 	transportDetails.setDirectMessageFields(directMessageFields);
-	
+        
 	mav.addObject("transportDetails", transportDetails);
 
-        transportDetails.setconfigId(configId);
+        transportDetails.setConfigId(configId);
 	transportDetails.setThreshold(configurationDetails.getThreshold());
         
 	if(transportDetails.getRestAPIType() == 2) {
@@ -829,7 +869,7 @@ public class adminConfigController {
 	mav.addObject("showAllConfigOptions", session.getAttribute("showAllConfigOptions"));
 	mav.addObject("cleanOrgURL",orgDetails.getCleanURL());
 	
-        configurationDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+        configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
         
         configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(configurationDetails.getId());
         
@@ -841,10 +881,10 @@ public class adminConfigController {
 
         //pass the utConfiguration detail object back to the page.
         mav.addObject("configurationDetails", configurationDetails);
-
+        
         //Get the list of available transport methods
         List transportMethods = utconfigurationTransportManager.getTransportMethodsByType(configurationDetails);
-	mav.addObject("transportMethods", transportMethods);
+        mav.addObject("transportMethods", transportMethods);
 
         //Get the list of available file delimiters
         List delimiters = messagetypemanager.getDelimiters();
@@ -867,7 +907,7 @@ public class adminConfigController {
         mav.addObject("restAPITypes", restAPITypes);
 	
 	//Get the list of available rest api types
-        List restAPIFunctions = utconfigurationmanager.getrestAPIFunctions(configurationDetails.getorgId());
+        List restAPIFunctions = utconfigurationmanager.getrestAPIFunctions(configurationDetails.getOrgId());
         mav.addObject("restAPIFunctions", restAPIFunctions);
 	
 	//Get a list of availbale HISPs
@@ -881,9 +921,17 @@ public class adminConfigController {
 	String dateinTZ = "";
 	
 	//Get latest configuration note
-	List<configurationUpdateLogs> configNotes = utconfigurationmanager.getConfigurationUpdateLogs(configId);
-	if(!configNotes.isEmpty()) {
-	    mav.addObject("lastConfigUpdate", dft.parse(requiredFormat.format(configNotes.get(0).getDateCreated())));
+	List configNotes = utconfigurationmanager.getConfigurationUpdateLogs(configId);
+        
+        if(!configNotes.isEmpty()) {
+            Iterator<Object[]> notesIterator = configNotes.iterator();
+            Date dateCreated = new Date();
+            while(notesIterator.hasNext()) {
+                Object[] noteData = notesIterator.next();
+                dateCreated = (Date) noteData[4];
+                break;
+            }
+	    mav.addObject("lastConfigUpdate", dft.parse(requiredFormat.format(dateCreated)));
 	}
 	else {
 	    mav.addObject("lastConfigUpdate", dft.parse(requiredFormat.format(configurationDetails.getDateCreated())));
@@ -923,8 +971,8 @@ public class adminConfigController {
         Integer currTransportId = transportDetails.getId();
 	
         utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
-	if(configurationDetails.getstepsCompleted() < 2) {
-	    configurationDetails.setstepsCompleted(2);
+	if(configurationDetails.getStepsCompleted() < 2) {
+	    configurationDetails.setStepsCompleted(2);
 	    utconfigurationmanager.updateConfiguration(configurationDetails);
 	}
         
@@ -936,18 +984,18 @@ public class adminConfigController {
         if(currTransportDetails != null) {
             if(configurationDetails.getMessageTypeId() == 2 && configurationDetails.getType() == 1 && 
                 (
-                    (transportDetails.getfileType() != currTransportDetails.getfileType())
+                    (transportDetails.getFileType() != currTransportDetails.getFileType())
                     ||
-                    (transportDetails.getmaxFileSize() != currTransportDetails.getmaxFileSize())
+                    (transportDetails.getMaxFileSize() != currTransportDetails.getMaxFileSize())
                     ||
-                    (transportDetails.getfileDelimiter() != currTransportDetails.getfileDelimiter())
+                    (transportDetails.getFileDelimiter() != currTransportDetails.getFileDelimiter())
                 )) {
                 //Need to get the FP system database 
                 String fpSchemaName = "";
-                fpSchemaName = organizationmanager.getOrganizationById(configurationDetails.getorgId()).getHelRegistrySchemaName();
+                fpSchemaName = organizationmanager.getOrganizationById(configurationDetails.getOrgId()).getHelRegistrySchemaName();
                 if(!"".equals(fpSchemaName)) {
                     try {
-                        utconfigurationTransportManager.updateFamilyPlanningAssociatedImport(fpSchemaName,configId,transportDetails.getfileType(),transportDetails.getfileDelimiter(),transportDetails.getmaxFileSize());
+                        utconfigurationTransportManager.updateFamilyPlanningAssociatedImport(fpSchemaName,configId,transportDetails.getFileType(),transportDetails.getFileDelimiter(),transportDetails.getMaxFileSize());
                     }
                     catch (Exception ex) {
                         mailMessage mail = new mailMessage();
@@ -958,9 +1006,9 @@ public class adminConfigController {
                         emailBody.append("There was an error trying to update a family planning import type.");
                         emailBody.append("<br/>FP Database Name: ").append(fpSchemaName);
                         emailBody.append("<br/>Configuration Id: ").append(configId);
-                        emailBody.append("<br/>Updated File Type: ").append(transportDetails.getfileType());
-                        emailBody.append("<br/>Updated File Delimiter: ").append(transportDetails.getfileDelimiter());
-                        emailBody.append("<br/>Updated Max File Size: ").append(transportDetails.getmaxFileSize());
+                        emailBody.append("<br/>Updated File Type: ").append(transportDetails.getFileType());
+                        emailBody.append("<br/>Updated File Delimiter: ").append(transportDetails.getFileDelimiter());
+                        emailBody.append("<br/>Updated Max File Size: ").append(transportDetails.getMaxFileSize());
                         emailBody.append("<br/><br/>").append(ex.getMessage());
                         mail.setmessageBody(emailBody.toString());
                         emailMessageManager.sendEmail(mail);
@@ -983,7 +1031,7 @@ public class adminConfigController {
 	updateLog.setUpdateMade("Configuration Transport Method Updated");
 	utconfigurationmanager.saveConfigurationUpdateLog(updateLog);
 	
-        if (transportDetails.getfileType() == 4 && configurationDetails.getType() == 2) {
+        if (transportDetails.getFileType() == 4 && configurationDetails.getType() == 2) {
             session.setAttribute("configHL7", true);
             session.setAttribute("configCCD", false);
         } else {
@@ -991,7 +1039,7 @@ public class adminConfigController {
             session.setAttribute("configCCD", false);
         }
 
-        if ((transportDetails.getfileType() == 9 || transportDetails.getfileType() == 12) && configurationDetails.getType() == 2) {
+        if ((transportDetails.getFileType() == 9 || transportDetails.getFileType() == 12) && configurationDetails.getType() == 2) {
 	    session.setAttribute("configHL7", false);
 	    session.setAttribute("configCCD", true);
         } else {
@@ -1005,16 +1053,16 @@ public class adminConfigController {
 	
 	if(configurationDetails.getType() == 2) {
 	    //Need to set up the FTP information if any has been entered
-	    if(transportDetails.gettransportMethodId() != 3) {
+	    if(transportDetails.getTransportMethodId() != 3) {
 		utconfigurationmanager.deleteConfigurationFTPInformation(transportId);
 	    }
 	    else {
-		if (transportDetails.gettransportMethodId() == 3 && !transportDetails.getFTPFields().isEmpty()) {
+		if (transportDetails.getTransportMethodId() == 3 && !transportDetails.getFTPFields().isEmpty()) {
 		    for (configurationFTPFields ftpFields : transportDetails.getFTPFields()) {
-			if(ftpFields.getip() != null) {
-			    if(!"".equals(ftpFields.getip())) {
-				ftpFields.settransportId(transportId);
-				utconfigurationTransportManager.saveTransportFTP(configurationDetails.getorgId(), ftpFields);
+			if(ftpFields.getIp() != null) {
+			    if(!"".equals(ftpFields.getIp())) {
+				ftpFields.setTransportId(transportId);
+				utconfigurationTransportManager.saveTransportFTP(configurationDetails.getOrgId(), ftpFields);
 			    }
 			}
 		    }
@@ -1024,10 +1072,10 @@ public class adminConfigController {
 	else {
 	    if (!transportDetails.getFTPFields().isEmpty()) {
 		for (configurationFTPFields ftpFields : transportDetails.getFTPFields()) {
-		    if(ftpFields.getip() != null) {
-			if(!"".equals(ftpFields.getip())) {
-			    ftpFields.settransportId(transportId);
-			    utconfigurationTransportManager.saveTransportFTP(configurationDetails.getorgId(), ftpFields);
+		    if(ftpFields.getIp() != null) {
+			if(!"".equals(ftpFields.getIp())) {
+			    ftpFields.setTransportId(transportId);
+			    utconfigurationTransportManager.saveTransportFTP(configurationDetails.getOrgId(), ftpFields);
 			}
 		    }
 		}
@@ -1053,8 +1101,8 @@ public class adminConfigController {
 	if(transportDetails.getDirectMessageFields() != null) {
 	    if(!transportDetails.getDirectMessageFields().isEmpty()) {
 		if(transportDetails.getDirectMessageFields().get(0).getHispId() > 0) {
-		    transportDetails.getDirectMessageFields().get(0).setFileTypeId(transportDetails.getfileType());
-		    transportDetails.getDirectMessageFields().get(0).setExpectedFileExt(transportDetails.getfileExt());
+		    transportDetails.getDirectMessageFields().get(0).setFileTypeId(transportDetails.getFileType());
+		    transportDetails.getDirectMessageFields().get(0).setExpectedFileExt(transportDetails.getFileExt());
 		    transportDetails.getDirectMessageFields().get(0).setStatus(true);
 		    transportDetails.getDirectMessageFields().get(0).setDateModified(new Date());
 		    
@@ -1066,9 +1114,9 @@ public class adminConfigController {
 	
         utconfigurationTransportManager.deleteTransportMessageTypes(transportId);
 
-        if (transportDetails.getmessageTypes() != null) {
+        if (transportDetails.getMessageTypes() != null) {
             configurationTransportMessageTypes messageType;
-            for (Integer selconfigId : transportDetails.getmessageTypes()) {
+            for (Integer selconfigId : transportDetails.getMessageTypes()) {
                 messageType = new configurationTransportMessageTypes();
                 messageType.setconfigId(selconfigId);
                 messageType.setconfigTransportId(transportId);
@@ -1081,14 +1129,14 @@ public class adminConfigController {
 	//If transport method == 10 (From HEL Registry online form) we can prepoulate the fields from
 	//the selected configuration. No need to have a custom template uploaded. The file submitted 
 	//to UT with this transport method will always have the same fields set up.
-	if(((transportDetails.gettransportMethodId() == 13 && configurationDetails.getType() == 2 && configurationDetails.getMessageTypeId() == 1 && transportDetails.getHelRegistryId() > 0) || transportDetails.gettransportMethodId() == 10)) {
+	if(((transportDetails.getTransportMethodId() == 13 && configurationDetails.getType() == 2 && configurationDetails.getMessageTypeId() == 1 && transportDetails.getHelRegistryId() > 0) || transportDetails.getTransportMethodId() == 10)) {
 	    
-	    List<configurationFormFields> existingFormFields = utconfigurationTransportManager.getConfigurationFieldsToCopy(transportDetails.getconfigId());
+	    List<configurationFormFields> existingFormFields = utconfigurationTransportManager.getConfigurationFieldsToCopy(transportDetails.getConfigId());
 	    
 	    if(existingFormFields.isEmpty()) {
 		if(transportDetails.getHelRegistryConfigId() != null && transportDetails.getHelSchemaName() != null) {
 		    if(transportDetails.getHelRegistryConfigId() > 0 && !"".equals(transportDetails.getHelSchemaName())) {
-			 utconfigurationTransportManager.populateFieldsFromHELConfiguration(transportDetails.getconfigId(), transportDetails.getId(),transportDetails.getHelRegistryConfigId(),transportDetails.getHelSchemaName(),false);
+			 utconfigurationTransportManager.populateFieldsFromHELConfiguration(transportDetails.getConfigId(), transportDetails.getId(),transportDetails.getHelRegistryConfigId(),transportDetails.getHelSchemaName(),false);
 		    }
 		}
 	    }
@@ -1111,7 +1159,7 @@ public class adminConfigController {
 		}
                
             } else {
-		if(transportDetails.gettransportMethodId() == 8) {
+		if(transportDetails.getTransportMethodId() == 8) {
 		    ModelAndView mav = new ModelAndView(new RedirectView("mappings"));
 		    return mav;
 		}
@@ -1168,7 +1216,7 @@ public class adminConfigController {
         }
 	
 	// Get organization directory name
-        Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getorgId());
+        Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getOrgId());
 	
         mav.setViewName("/administrator/configurations/messagespecs");
 
@@ -1221,9 +1269,9 @@ public class adminConfigController {
 
         //Need to pass the selected transport Type
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
-        mav.addObject("transportType", transportDetails.gettransportMethodId());
-	mav.addObject("fileType", transportDetails.getfileType());
-	mav.addObject("fileDelim", transportDetails.getfileDelimiter());
+        mav.addObject("transportType", transportDetails.getTransportMethodId());
+	mav.addObject("fileType", transportDetails.getFileType());
+	mav.addObject("fileDelim", transportDetails.getFileDelimiter());
 	mav.addObject("transportDetails", transportDetails);
 
         //Set the variable id to hold the current utConfiguration id
@@ -1237,7 +1285,7 @@ public class adminConfigController {
 	
 	configurationDetails.setOrgName(orgDetails.getOrgName());
 	
-	configurationDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+	configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
 
         //pass the utConfiguration detail object back to the page.
         mav.addObject("configurationDetails", configurationDetails);
@@ -1299,7 +1347,7 @@ public class adminConfigController {
             if(configDetails.getMessageTypeId() == 2 && configDetails.getType() == 1 && messageSpecs.getcontainsHeaderRow() != currMessageSpecs.getcontainsHeaderRow()) {
                 //Need to get the FP system database 
                 String fpSchemaName = "";
-                fpSchemaName = organizationmanager.getOrganizationById(configDetails.getorgId()).getHelRegistrySchemaName();
+                fpSchemaName = organizationmanager.getOrganizationById(configDetails.getOrgId()).getHelRegistrySchemaName();
                 if(!"".equals(fpSchemaName)) {
                     try {
                         utconfigurationTransportManager.updateFamilyPlanningAssociatedImportHeaderRow(fpSchemaName,messageSpecs.getconfigId(),messageSpecs.getcontainsHeaderRow());
@@ -1324,7 +1372,7 @@ public class adminConfigController {
 
         //Save/Update the configuration message specs
 	try {
-	    utconfigurationmanager.updateMessageSpecs(messageSpecs, transportDetails.getId(), transportDetails.getfileType(), messageSpecs.isHasHeader(), messageSpecs.getFileLayout());
+	    utconfigurationmanager.updateMessageSpecs(messageSpecs, transportDetails.getId(), transportDetails.getFileType(), messageSpecs.isHasHeader(), messageSpecs.getFileLayout());
 	}
 	catch (Exception ex) {
 	    if(ex.getMessage().contains("The uploaded template")) {
@@ -1336,14 +1384,14 @@ public class adminConfigController {
 	
         redirectAttr.addFlashAttribute("savedStatus", "updated");
 	
-	if(configDetails.getstepsCompleted() < 3) {
-	    configDetails.setstepsCompleted(3);
+	if(configDetails.getStepsCompleted() < 3) {
+	    configDetails.setStepsCompleted(3);
 	    utconfigurationmanager.updateConfiguration(configDetails);
 	}
 	
 	//If excel enter in the ref_configexceldetails
-	if(transportDetails.getfileType() == 11) {
-	    utconfigurationmanager.updateExcelConfigDetails(configDetails.getorgId(),messageSpecs);
+	if(transportDetails.getFileType() == 11) {
+	    utconfigurationmanager.updateExcelConfigDetails(configDetails.getOrgId(),messageSpecs);
 	}
 	
 	//Log the update
@@ -1400,10 +1448,10 @@ public class adminConfigController {
         //Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
 
-	Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getorgId());
+	Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getOrgId());
         configurationDetails.setOrgName(orgDetails.getOrgName());
        
-        configurationDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+        configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
         
         configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(configurationDetails.getId());
         
@@ -1421,7 +1469,7 @@ public class adminConfigController {
 
         mav.addObject("transportDetails", transportDetails);
 
-        mav.addObject("selTransportMethod", transportDetails.gettransportMethodId());
+        mav.addObject("selTransportMethod", transportDetails.getTransportMethodId());
 
         List validationTypes = messagetypemanager.getValidationTypes();
         mav.addObject("validationTypes", validationTypes);
@@ -1466,8 +1514,8 @@ public class adminConfigController {
 	Integer configId = (Integer) session.getAttribute("manageconfigId");
 	
 	utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
-	if(configurationDetails.getstepsCompleted() < 4) {
-	    configurationDetails.setstepsCompleted(4);
+	if(configurationDetails.getStepsCompleted() < 4) {
+	    configurationDetails.setStepsCompleted(4);
 	    utconfigurationmanager.updateConfiguration(configurationDetails);
 	}
 	
@@ -1619,8 +1667,8 @@ public class adminConfigController {
         //Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
 
-        configurationDetails.setOrgName(organizationmanager.getOrganizationById(configurationDetails.getorgId()).getOrgName());
-	configurationDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+        configurationDetails.setOrgName(organizationmanager.getOrganizationById(configurationDetails.getOrgId()).getOrgName());
+	configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
 
         //pass the utConfiguration detail object back to the page.
         mav.addObject("configurationDetails", configurationDetails);
@@ -1632,7 +1680,7 @@ public class adminConfigController {
         mav.addObject("fields", fields);
 
         //Return a list of available crosswalks
-        List<Crosswalks> crosswalks = messagetypemanager.getCrosswalksForConfig(1, 0, configurationDetails.getorgId(),configurationDetails.getId(), false);
+        List<Crosswalks> crosswalks = messagetypemanager.getCrosswalksForConfig(1, 0, configurationDetails.getOrgId(),configurationDetails.getId(), false);
         List<Crosswalks> crosswalksToUse = new ArrayList<>();
         if(!crosswalks.isEmpty()) {
             Integer cId = 0;
@@ -1661,7 +1709,7 @@ public class adminConfigController {
         }
         
         mav.addObject("crosswalks", crosswalksToUse);
-        mav.addObject("orgId", configurationDetails.getorgId());
+        mav.addObject("orgId", configurationDetails.getOrgId());
 
         //Return a list of available macros
         List<Macros> macros = utconfigurationmanager.getMacros();
@@ -1766,7 +1814,7 @@ public class adminConfigController {
 	   utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
 
 	   //Return a list of available crosswalks
-	   List<Crosswalks> crosswalks = messagetypemanager.getCrosswalksForConfig(1, 0, configurationDetails.getorgId(),configurationDetails.getId(), false); 
+	   List<Crosswalks> crosswalks = messagetypemanager.getCrosswalksForConfig(1, 0, configurationDetails.getOrgId(),configurationDetails.getId(), false); 
 	    
 	   mav.addObject("crosswalks", crosswalks);
 	}
@@ -1793,20 +1841,20 @@ public class adminConfigController {
 	
 	utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
 	if(categoryId == 2) {
-	    if(configurationDetails.getstepsCompleted() < 10) {
-		configurationDetails.setstepsCompleted(10);
+	    if(configurationDetails.getStepsCompleted() < 10) {
+		configurationDetails.setStepsCompleted(10);
 		utconfigurationmanager.updateConfiguration(configurationDetails);
 	    }
 	}
 	else if(categoryId == 3) {
-	    if(configurationDetails.getstepsCompleted() < 11) {
-		configurationDetails.setstepsCompleted(11);
+	    if(configurationDetails.getStepsCompleted() < 11) {
+		configurationDetails.setStepsCompleted(11);
 		utconfigurationmanager.updateConfiguration(configurationDetails);
 	    }
 	}
 	else {
-	    if(configurationDetails.getstepsCompleted() < 5) {
-		configurationDetails.setstepsCompleted(5);
+	    if(configurationDetails.getStepsCompleted() < 5) {
+		configurationDetails.setStepsCompleted(5);
 		utconfigurationmanager.updateConfiguration(configurationDetails);
 	    }
 	}
@@ -2171,8 +2219,8 @@ public class adminConfigController {
         //Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
 
-        configurationDetails.setOrgName(organizationmanager.getOrganizationById(configurationDetails.getorgId()).getOrgName());
-	configurationDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+        configurationDetails.setOrgName(organizationmanager.getOrganizationById(configurationDetails.getOrgId()).getOrgName());
+	configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
 
         //pass the utConfiguration detail object back to the page.
         mav.addObject("configurationDetails", configurationDetails);
@@ -2218,8 +2266,8 @@ public class adminConfigController {
 	Integer configId = (Integer) session.getAttribute("manageconfigId");
 	
 	utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
-	if(configurationDetails.getstepsCompleted() < 6) {
-	    configurationDetails.setstepsCompleted(6);
+	if(configurationDetails.getStepsCompleted() < 6) {
+	    configurationDetails.setStepsCompleted(6);
 	    utconfigurationmanager.updateConfiguration(configurationDetails);
 	}
 	
@@ -2337,8 +2385,8 @@ public class adminConfigController {
         //Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
 
-        configurationDetails.setOrgName(organizationmanager.getOrganizationById(configurationDetails.getorgId()).getOrgName());
-        configurationDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+        configurationDetails.setOrgName(organizationmanager.getOrganizationById(configurationDetails.getOrgId()).getOrgName());
+        configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
 
         //pass the utConfiguration detail object back to the page.
         mav.addObject("configurationDetails", configurationDetails);
@@ -2691,8 +2739,8 @@ public class adminConfigController {
         //Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
 
-        configurationDetails.setOrgName(organizationmanager.getOrganizationById(configurationDetails.getorgId()).getOrgName());
-	configurationDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+        configurationDetails.setOrgName(organizationmanager.getOrganizationById(configurationDetails.getOrgId()).getOrgName());
+	configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
 
         //pass the utConfiguration detail object back to the page.
         mav.addObject("configurationDetails", configurationDetails);
@@ -2761,8 +2809,8 @@ public class adminConfigController {
         //Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
 
-        configurationDetails.setOrgName(organizationmanager.getOrganizationById(configurationDetails.getorgId()).getOrgName());
-	configurationDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+        configurationDetails.setOrgName(organizationmanager.getOrganizationById(configurationDetails.getOrgId()).getOrgName());
+	configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
 
         //pass the utConfiguration detail object back to the page.
         mav.addObject("configurationDetails", configurationDetails);
@@ -2873,8 +2921,8 @@ public class adminConfigController {
         //Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
 
-        configurationDetails.setOrgName(organizationmanager.getOrganizationById(configurationDetails.getorgId()).getOrgName());
-        configurationDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+        configurationDetails.setOrgName(organizationmanager.getOrganizationById(configurationDetails.getOrgId()).getOrgName());
+        configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
 
         //pass the utConfiguration detail object back to the page.
         mav.addObject("configurationDetails", configurationDetails);
@@ -3046,12 +3094,12 @@ public class adminConfigController {
 	
 	//New Configuration
 	utConfiguration newConfig = new utConfiguration();
-	newConfig.setorgId(configDetails.getorgId());
+	newConfig.setOrgId(configDetails.getOrgId());
 	newConfig.setStatus(false);
 	newConfig.setType(configDetails.getType());
 	newConfig.setMessageTypeId(configDetails.getMessageTypeId());
-	newConfig.setstepsCompleted(6);
-	newConfig.setconfigName(configDetails.getconfigName() + " - COPY");
+	newConfig.setStepsCompleted(6);
+	newConfig.setConfigname(configDetails.getConfigname() + " - COPY");
 	newConfig.setThreshold(configDetails.getThreshold());
 	
 	//Save new Configuration
@@ -3064,20 +3112,20 @@ public class adminConfigController {
 	
 	//Save new transport Details
 	configurationTransport newTransportDetails = new configurationTransport();
-	newTransportDetails.setconfigId(id);
-	newTransportDetails.settransportMethodId(transportDetails.gettransportMethodId());
-	newTransportDetails.setfileType(transportDetails.getfileType());
-	newTransportDetails.setfileDelimiter(transportDetails.getfileDelimiter());
-	newTransportDetails.setstatus(true);
-	newTransportDetails.settargetFileName(transportDetails.gettargetFileName());
-	newTransportDetails.setappendDateTime(transportDetails.getappendDateTime());
-	newTransportDetails.setmaxFileSize(transportDetails.getmaxFileSize());
-	newTransportDetails.setclearRecords(true);
-	newTransportDetails.setfileLocation(transportDetails.getfileLocation());
-	newTransportDetails.setautoRelease(true);
-	newTransportDetails.seterrorHandling(transportDetails.geterrorHandling());
-	newTransportDetails.setmergeBatches(transportDetails.getmergeBatches());
-	newTransportDetails.setfileExt(transportDetails.getfileExt());
+	newTransportDetails.setConfigId(id);
+	newTransportDetails.setTransportMethodId(transportDetails.getTransportMethodId());
+	newTransportDetails.setFileType(transportDetails.getFileType());
+	newTransportDetails.setFileDelimiter(transportDetails.getFileDelimiter());
+	newTransportDetails.setStatus(true);
+	newTransportDetails.setTargetFileName(transportDetails.getTargetFileName());
+	newTransportDetails.setAppendDateTime(transportDetails.isAppendDateTime());
+	newTransportDetails.setMaxFileSize(transportDetails.getMaxFileSize());
+	newTransportDetails.setClearRecords(true);
+	newTransportDetails.setFileLocation(transportDetails.getFileLocation());
+	newTransportDetails.setAutoRelease(true);
+	newTransportDetails.setErrorHandling(transportDetails.getErrorHandling());
+	newTransportDetails.setMergeBatches(transportDetails.isMergeBatches());
+	newTransportDetails.setFileExt(transportDetails.getFileExt());
 	newTransportDetails.setEncodingId(transportDetails.getEncodingId());
 	newTransportDetails.setCcdSampleTemplate(transportDetails.getCcdSampleTemplate());
 	newTransportDetails.setHL7PDFSampleTemplate(transportDetails.getHL7PDFSampleTemplate());
@@ -3488,7 +3536,7 @@ public class adminConfigController {
 	
 	DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssS");
 	Date date = new Date();
-	String fileName = new StringBuilder().append("configId").append("-").append(configId).append("-").append(configurationDetails.getconfigName().trim().replaceAll(" ","")).append("-").append("dt").append("-").append(dateFormat.format(date)).toString();
+	String fileName = new StringBuilder().append("configId").append("-").append(configId).append("-").append(configurationDetails.getConfigname().trim().replaceAll(" ","")).append("-").append("dt").append("-").append(dateFormat.format(date)).toString();
         
 	mav.addObject("fileName", fileName.toLowerCase());
 
@@ -3601,10 +3649,10 @@ public class adminConfigController {
 
         utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
 	
-	Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getorgId());
+	Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getOrgId());
 	
 	String orgName = orgDetails.getOrgName().toLowerCase().trim().replaceAll(" ", "-");
-	String configName = configurationDetails.getconfigName().toLowerCase().trim().replaceAll(" ", "-");
+	String configName = configurationDetails.getConfigname().toLowerCase().trim().replaceAll(" ", "-");
 	
 	DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssS");
 	Date date = new Date();
@@ -3727,14 +3775,14 @@ public class adminConfigController {
             for (utConfiguration configuration : configurations) {
                 configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configuration.getId());
 
-                configuration.setOrgName(organizationmanager.getOrganizationById(configuration.getorgId()).getOrgName());
+                configuration.setOrgName(organizationmanager.getOrganizationById(configuration.getOrgId()).getOrgName());
 		configuration.setMessageTypeName("N/A");
 		
 		if(transportDetails != null) {
-		    configuration.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+		    configuration.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
 		}
 		else {
-		    configuration.settransportMethod("N/A");
+		    configuration.setTransportMethod("N/A");
 		}
             }
         }
@@ -3864,10 +3912,10 @@ public class adminConfigController {
     public String printConfiguration(@RequestParam int configId) throws Exception {
 
         utConfiguration configDetails = utconfigurationmanager.getConfigurationById(configId);
-	Organization orgDetails = organizationmanager.getOrganizationById(configDetails.getorgId());
+	Organization orgDetails = organizationmanager.getOrganizationById(configDetails.getOrgId());
 	
 	String configDetailFile = System.getProperty("java.io.tmpdir") + "/" + "configDetails-" + configId + ".txt";
-	String configPrintFile = System.getProperty("java.io.tmpdir") + "/" + configDetails.getconfigName().toLowerCase().replaceAll(" ", "-") + ".pdf";
+	String configPrintFile = System.getProperty("java.io.tmpdir") + "/" + configDetails.getConfigname().toLowerCase().replaceAll(" ", "-") + ".pdf";
 	
 	File detailsFile = new File(configDetailFile);
 	detailsFile.delete();
@@ -3915,7 +3963,7 @@ public class adminConfigController {
 	File configDetailsFile = new File(configDetailFile);
 	configDetailsFile.delete();
 
-	return configDetails.getconfigName().toLowerCase().replaceAll(" ", "-");
+	return configDetails.getConfigname().toLowerCase().replaceAll(" ", "-");
     }
 
     @RequestMapping(value = "/printConfig/{file}", method = RequestMethod.GET)
@@ -3958,7 +4006,7 @@ public class adminConfigController {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("/administrator/configurations/configUploadFile");
         mav.addObject("fileDropLocation", fileDropLocation);
-	mav.addObject("expectedExt", transportDetails.getfileExt());
+	mav.addObject("expectedExt", transportDetails.getFileExt());
         return mav;
     }
     
@@ -4039,7 +4087,7 @@ public class adminConfigController {
 	    DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
 	    Date date = new Date();
 
-	    fileName = dateFormat.format(date) + "-" + configDetails.getconfigName().toLowerCase().replace(" ", "-");
+	    fileName = dateFormat.format(date) + "-" + configDetails.getConfigname().toLowerCase().replace(" ", "-");
 
 	    File file = new File(System.getProperty("java.io.tmpdir") + "/" + fileName + ".xlsx");
 	    file.createNewFile();
@@ -4191,7 +4239,7 @@ public class adminConfigController {
 	    DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
 	    Date date = new Date();
 
-	    fileName = dateFormat.format(date) + "-" + configDetails.getconfigName().replace(" ", "-");
+	    fileName = dateFormat.format(date) + "-" + configDetails.getConfigname().replace(" ", "-");
 
 	    File file = new File(System.getProperty("java.io.tmpdir") + "/" + fileName + ".xlsx");
 	    file.createNewFile();
@@ -4383,13 +4431,13 @@ public class adminConfigController {
 	mav.addObject("messageTypeId", configurationDetails.getMessageTypeId());
 	
         // Get organization directory name
-        Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getorgId());
+        Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getOrgId());
 	
 	configurationDetails.setOrgName(orgDetails.getOrgName());
 	
 	//Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
-	configurationDetails.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+	configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
 
 	
 	mav.addObject("configurationDetails", configurationDetails);
@@ -4810,7 +4858,7 @@ public class adminConfigController {
     public String createConfigExportFile(HttpSession session, @RequestParam int configId) throws Exception {
 
         utConfiguration configDetails = utconfigurationmanager.getConfigurationById(configId);
-	Organization orgDetails = organizationmanager.getOrganizationById(configDetails.getorgId());
+	Organization orgDetails = organizationmanager.getOrganizationById(configDetails.getOrgId());
 	
 	//Get transport details
 	configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
@@ -4821,7 +4869,7 @@ public class adminConfigController {
 	    configType = "tgtConfigExport";
 	}
 	
-	String configDetailFile = System.getProperty("java.io.tmpdir") + "/" +configType+"-"+configDetails.getconfigName().toLowerCase().replaceAll(" ", "-") + ".txt";
+	String configDetailFile = System.getProperty("java.io.tmpdir") + "/" +configType+"-"+configDetails.getConfigname().toLowerCase().replaceAll(" ", "-") + ".txt";
 	
 	File detailsFile = new File(configDetailFile);
 	detailsFile.delete();
@@ -4836,7 +4884,7 @@ public class adminConfigController {
 	else {
 	    emailBodySB.append("The target configuration has been successfully exported.<br /><br />");
 	}
-	emailBodySB.append("Configuration Name: ").append(configDetails.getconfigName().trim());
+	emailBodySB.append("Configuration Name: ").append(configDetails.getConfigname().trim());
 	emailBodySB.append("<br />Configuration Type: ");
 	if(configDetails.getType() == 1) {
 	    emailBodySB.append("Source Configuration");
@@ -4887,7 +4935,7 @@ public class adminConfigController {
 	    session.removeAttribute("emailBody");
 	}
 	
-	return configType+"-"+configDetails.getconfigName().toLowerCase().replaceAll(" ", "-");
+	return configType+"-"+configDetails.getConfigname().toLowerCase().replaceAll(" ", "-");
     }
 
     @RequestMapping(value = "/printConfigExport/{file}", method = RequestMethod.GET)
@@ -5294,12 +5342,12 @@ public class adminConfigController {
 	
 	if(configDetails == null) {
 	    utConfiguration newConfig = new utConfiguration();
-	    newConfig.setorgId(orgId);
+	    newConfig.setOrgId(orgId);
 	    newConfig.setStatus(false);
 	    newConfig.setType(Integer.parseInt(strArrayValues[3]));
 	    newConfig.setMessageTypeId(Integer.parseInt(strArrayValues[4]));
-	    newConfig.setstepsCompleted(6);
-	    newConfig.setconfigName(strArrayValues[6]);
+	    newConfig.setStepsCompleted(6);
+	    newConfig.setConfigname(strArrayValues[6]);
 	    newConfig.setThreshold(Integer.parseInt(strArrayValues[7]));
 	    newConfig.setConfigurationType(Integer.parseInt(strArrayValues[8]));
 	    newConfig.setDeleted(false);
@@ -5322,33 +5370,33 @@ public class adminConfigController {
 	Integer configTransportId = 0; 
 	
 	configurationTransport newConfigTransport = new configurationTransport();
-	newConfigTransport.setconfigId(configId);
-	newConfigTransport.settransportMethodId(Integer.parseInt(strArrayValues[2]));
-	newConfigTransport.setfileType(Integer.parseInt(strArrayValues[3]));
-	newConfigTransport.setfileDelimiter(Integer.parseInt(strArrayValues[4]));
-	newConfigTransport.setstatus(true);
+	newConfigTransport.setConfigId(configId);
+	newConfigTransport.setTransportMethodId(Integer.parseInt(strArrayValues[2]));
+	newConfigTransport.setFileType(Integer.parseInt(strArrayValues[3]));
+	newConfigTransport.setFileDelimiter(Integer.parseInt(strArrayValues[4]));
+	newConfigTransport.setStatus(true);
 	if(!"null".equals(strArrayValues[6])) {
-	    newConfigTransport.settargetFileName(strArrayValues[6]);
+	    newConfigTransport.setTargetFileName(strArrayValues[6]);
 	}
 	if(strArrayValues[7].equals("true")) {
-	    newConfigTransport.setappendDateTime(true);
+	    newConfigTransport.setAppendDateTime(true);
 	}
 	else {
-	    newConfigTransport.setappendDateTime(false);
+	    newConfigTransport.setAppendDateTime(false);
 	}
-	newConfigTransport.setmaxFileSize(Integer.parseInt(strArrayValues[8]));
+	newConfigTransport.setMaxFileSize(Integer.parseInt(strArrayValues[8]));
 	if(strArrayValues[9].equals("true")) {
-	    newConfigTransport.setclearRecords(true);
+	    newConfigTransport.setClearRecords(true);
 	}
 	else {
-	    newConfigTransport.setclearRecords(false);
+	    newConfigTransport.setClearRecords(false);
 	}
-	newConfigTransport.setfileLocation(strArrayValues[10]);
-	newConfigTransport.setautoRelease(true);
-	newConfigTransport.seterrorHandling(Integer.parseInt(strArrayValues[12]));
-	newConfigTransport.setmergeBatches(true);
-	newConfigTransport.setcopiedTransportId(Integer.parseInt(strArrayValues[14]));
-	newConfigTransport.setfileExt(strArrayValues[15]);
+	newConfigTransport.setFileLocation(strArrayValues[10]);
+	newConfigTransport.setAutoRelease(true);
+	newConfigTransport.setErrorHandling(Integer.parseInt(strArrayValues[12]));
+	newConfigTransport.setMergeBatches(true);
+	newConfigTransport.setCopiedTransportId(Integer.parseInt(strArrayValues[14]));
+	newConfigTransport.setFileExt(strArrayValues[15]);
 	newConfigTransport.setEncodingId(Integer.parseInt(strArrayValues[16]));
 	if(!"null".equals(strArrayValues[17])) {
 	    newConfigTransport.setCcdSampleTemplate(strArrayValues[17]);
@@ -5470,14 +5518,14 @@ public class adminConfigController {
     public void processImportConfigFTPDetails(String[] strArrayValues, Integer transportId) {
 	
 	configurationFTPFields newFTP = new configurationFTPFields();
-	newFTP.settransportId(transportId);
-	newFTP.setip(strArrayValues[2]);
-	newFTP.setdirectory(strArrayValues[3]);
-	newFTP.setusername(strArrayValues[4]);
-	newFTP.setmethod(Integer.parseInt(strArrayValues[6]));
-	newFTP.setport(Integer.parseInt(strArrayValues[7]));
-	newFTP.setprotocol(strArrayValues[8]);
-	newFTP.setcertification(strArrayValues[9]);
+	newFTP.setTransportId(transportId);
+	newFTP.setIp(strArrayValues[2]);
+	newFTP.setDirectory(strArrayValues[3]);
+	newFTP.setUsername(strArrayValues[4]);
+	newFTP.setMethod(Integer.parseInt(strArrayValues[6]));
+	newFTP.setPort(Integer.parseInt(strArrayValues[7]));
+	newFTP.setProtocol(strArrayValues[8]);
+	newFTP.setCertification(strArrayValues[9]);
 	
 	try {
 	    utconfigurationTransportManager.saveTransportFTP(0,newFTP);
@@ -5833,7 +5881,7 @@ public class adminConfigController {
 	
         ModelAndView mav = new ModelAndView();
         mav.setViewName("/administrator/configurations/configFTPCheck");
-	mav.addObject("ftpLocation", ftpDetails.getdirectory());
+	mav.addObject("ftpLocation", ftpDetails.getDirectory());
 	mav.addObject("transportId", transportId);
 	
         return mav;

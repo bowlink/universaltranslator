@@ -1,0 +1,12 @@
+<aside class="secondary"  th:fragment="menuBar">
+    <nav class="secondary-nav" role="navigation">
+        <ul class="nav nav-pills" role="menu">
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'orgDetails' ? 'active' : ''}">
+                <a class="nav-link" th:classappend="${actionPage == 'orgDetails' ? 'active' : ''}" th:href="@{./}" title="Organization Details">Details</a>
+            </li>
+            <li style="width:100%" role="menuitem" th:if="${id > 0}" class="nav-item" th:classappend="${actionPage == 'orgConfigs' ? 'active' : ''}">
+                <a class="nav-link" th:classappend="${actionPage == 'orgConfigs' ? 'active' : ''}" th:href="@{configurations}" title="Organization Configurations">Configurations</a>
+            </li>
+        </ul>
+    </nav>
+</aside>

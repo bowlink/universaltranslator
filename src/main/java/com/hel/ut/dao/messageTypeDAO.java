@@ -2,7 +2,6 @@ package com.hel.ut.dao;
 
 import com.hel.ut.model.CrosswalkData;
 import java.util.List;
-
 import com.hel.ut.model.Crosswalks;
 import com.hel.ut.model.validationType;
 import org.springframework.stereotype.Repository;

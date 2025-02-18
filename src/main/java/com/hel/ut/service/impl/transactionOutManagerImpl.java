@@ -16,7 +16,6 @@ import com.hel.ut.restAPI.directManager;
 import com.hel.ut.restAPI.restfulManager;
 import com.hel.ut.security.decryptObject;
 import com.hel.ut.service.*;
-import com.hel.ut.webServices.WSManager;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -93,9 +92,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
     private messageTypeDAO messageTypeDAO;
 
     @Autowired
-    private userManager userManager;
-
-    @Autowired
     private organizationManager organizationManager;
 
     @Autowired
@@ -103,12 +99,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
     @Autowired
     private fileManager filemanager;
-
-    @Autowired
-    private userManager usermanager;
-
-    @Autowired
-    private WSManager wsManager;
 
     @Autowired
     private utilManager utilmanager;
@@ -135,7 +125,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
     ThreadPoolTaskExecutor executor;
 
     private int processingSysErrorId = 5;
-    
 
     //list of final status - these records we skip
     private List<Integer> transRELId = Arrays.asList(11, 12, 13, 16, 18, 20, 9);
@@ -194,13 +183,13 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	InputStream inputStream = null;
 	OutputStream outputStream = null;
 
-	String filelocation = transportDetails.getfileLocation().trim();
+	String filelocation = transportDetails.getFileLocation().trim();
 	String directory = myProps.getProperty("ut.directory.utRootDir") + filelocation;
 
 	boolean hl7 = false;
 	boolean CCD = false;
 	boolean json = false;
-	String fileType = (String) configurationManager.getFileTypesById(transportDetails.getfileType());
+	String fileType = (String) configurationManager.getFileTypesById(transportDetails.getFileType());
 
 	if ("hl7".equals(fileType)) {
 	    hl7 = true;
@@ -215,7 +204,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	if (findExt >= 0) {
 	    fileName = batchDetails.getOutputFileName();
 	} else {
-	    fileName = new StringBuilder().append(batchDetails.getOutputFileName()).append(".").append(transportDetails.getfileExt()).toString();
+	    fileName = new StringBuilder().append(batchDetails.getOutputFileName()).append(".").append(transportDetails.getFileExt()).toString();
 	}
 
 	File newFile = new File(directory + fileName);
@@ -251,24 +240,24 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	// Need to get the records for the transaction
 	String recordRow = "";
 
-	List<configurationFormFields> formFields = configurationTransportManager.getConfigurationFields(transportDetails.getconfigId(), 0);
+	List<configurationFormFields> formFields = configurationTransportManager.getConfigurationFields(transportDetails.getConfigId(), 0);
 	
 	utConfiguration targetConfigDetails = configurationManager.getConfigurationById(batchDetails.getConfigId());
 	
 	List<transactionOutRecords> records = null;
 	
 	if(targetConfigDetails.getMessageTypeId() == 2) {
-	    records = transactionOutDAO.getTransactionRecordsForFP(batchId, transportDetails.getconfigId(), formFields.size());
+	    records = transactionOutDAO.getTransactionRecordsForFP(batchId, transportDetails.getConfigId(), formFields.size());
 	}
 	else {
-	    records = transactionOutDAO.getTransactionRecords(batchId, transportDetails.getconfigId(), formFields.size());
+	    records = transactionOutDAO.getTransactionRecords(batchId, transportDetails.getConfigId(), formFields.size());
 	}
 	
 	// Need to get the max field number
-	int maxFieldNo = transactionOutDAO.getMaxFieldNo(transportDetails.getconfigId());
+	int maxFieldNo = transactionOutDAO.getMaxFieldNo(transportDetails.getConfigId());
 
 	// Need to get the correct delimiter for the output file
-	String delimChar = (String) messageTypeDAO.getDelimiterChar(transportDetails.getfileDelimiter());
+	String delimChar = (String) messageTypeDAO.getDelimiterChar(transportDetails.getFileDelimiter());
 
 	if (records != null) {
 
@@ -296,7 +285,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		String contentToUpdate = new String(Files.readAllBytes(newFilePath));
 
 		// Get the configurationCCDElements
-		List<configurationCCDElements> ccdElements = configurationManager.getCCDElements(transportDetails.getconfigId());
+		List<configurationCCDElements> ccdElements = configurationManager.getCCDElements(transportDetails.getConfigId());
 
 		if (!ccdElements.isEmpty()) {
 		    String fieldValue = "";
@@ -462,7 +451,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	    else if (hl7 == true) {
 
 		/* Get the hl7 details */
-		HL7Details hl7Details = configurationManager.getHL7Details(transportDetails.getconfigId());
+		HL7Details hl7Details = configurationManager.getHL7Details(transportDetails.getConfigId());
 
 		if (hl7Details != null) {
 
@@ -501,7 +490,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 					    WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.load(new java.io.File(inputfilepath));
 
 					    //MainDocumentPart documentPart = wordMLPackage.getMainDocumentPart();
-					    List<configurationCCDElements> hl7PDFElements = configurationManager.getCCDElements(transportDetails.getconfigId());
+					    List<configurationCCDElements> hl7PDFElements = configurationManager.getCCDElements(transportDetails.getConfigId());
 
 					    if (!hl7PDFElements.isEmpty()) {
 
@@ -595,7 +584,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
 					    String contentToUpdate = new String(Files.readAllBytes(newFilePath));
 
-					    List<configurationCCDElements> hl7PDFElements = configurationManager.getCCDElements(transportDetails.getconfigId());
+					    List<configurationCCDElements> hl7PDFElements = configurationManager.getCCDElements(transportDetails.getConfigId());
 
 					    if (!hl7PDFElements.isEmpty()) {
 
@@ -797,11 +786,8 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			}
 
 			fw.close();
-
 		    }
-
 		}
-
 	    } //JSON File Type
 	    else if (json) {
 		StringBuilder sb = new StringBuilder("");
@@ -1038,7 +1024,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	}
 
 	return systemSummary;
-
     }
 
     @Override
@@ -1080,7 +1065,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	}
 
 	return matchFound;
-
     }
 
     @Override
@@ -1130,7 +1114,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	}
 
 	return matchFound;
-
     }
 
     @Override
@@ -1156,24 +1139,24 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	String batchName = "";
 	String sourceFileName = batchUploadDetails.getOriginalFileName();
 	
-	if (transportDetails.gettargetFileName() == null) {
+	if (transportDetails.getTargetFileName() == null) {
 	    // Create the batch name (OrgId+MessageTypeId)
 	    if(!"".equals(utbatchName)) {
 		batchName = utbatchName;
 	    }
 	    else {
-		batchName = new StringBuilder().append(configDetails.getorgId()).append(configDetails.getMessageTypeId()).toString();
+		batchName = new StringBuilder().append(configDetails.getOrgId()).append(configDetails.getMessageTypeId()).toString();
 	    }
 	} 
-	else if ("".equals(transportDetails.gettargetFileName())) {
+	else if ("".equals(transportDetails.getTargetFileName())) {
 	    if(!"".equals(utbatchName)) {
 		batchName = utbatchName;
 	    }
 	    else {
-		batchName = new StringBuilder().append(configDetails.getorgId()).append(configDetails.getMessageTypeId()).toString();
+		batchName = new StringBuilder().append(configDetails.getOrgId()).append(configDetails.getMessageTypeId()).toString();
 	    }
 	}
-	else if ("USE SOURCE FILE".equals(transportDetails.gettargetFileName())) {
+	else if ("USE SOURCE FILE".equals(transportDetails.getTargetFileName())) {
 	    int lastPeriodPos = sourceFileName.lastIndexOf(".");
 
 	    if (lastPeriodPos <= 0) {
@@ -1183,12 +1166,12 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	    }
 
 	} else {
-	    batchName = transportDetails.gettargetFileName();
+	    batchName = transportDetails.getTargetFileName();
 
 	}
 
 	/* Append the date time */
-	if (transportDetails.getappendDateTime() == true) {
+	if (transportDetails.isAppendDateTime() == true) {
 	    batchName = new StringBuilder().append(batchName).append(dateFormat.format(date)).toString();
 	}
 
@@ -1295,7 +1278,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
     public Integer genericValidation(configurationFormFields cff, Integer validationTypeId, Integer batchDownloadId, String regEx) {
 	return transactionOutDAO.genericValidation(cff, validationTypeId, batchDownloadId, regEx);
     }
-
 
     /**
      * this will select an upload batch that has status of 24, check its config to make sure it is for mass translation and start translating utConfiguration that is for mass translation
@@ -1612,11 +1594,11 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	// some macros have to error in the macro and do not return macro_error, those are R errors, we add them to totalErrorCount so that populateOutboundAuditReport will run
 	totalErrorCount = totalErrorCount + totalRequiredErrorsFound;
 		
-	if (totalRequiredErrorsFound > 0 && (sourceConfigTransportDetails.geterrorHandling() == 3 || transportDetails.geterrorHandling() == 3)) {
+	if (totalRequiredErrorsFound > 0 && (sourceConfigTransportDetails.getErrorHandling() == 3 || transportDetails.getErrorHandling() == 3)) {
 	    
 	    ba = new batchdownloadactivity();
 	    
-	    if(transportDetails.geterrorHandling() == 3) {
+	    if(transportDetails.getErrorHandling() == 3) {
 		ba.setActivity("Target batch batchId:"+batchDownload.getId()+" was rejected due to finding an error and the target config error handling set to reject entire file on single error.");
 	    }
 	    else {
@@ -1695,7 +1677,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	    String configFields = getConfigFieldsForOutput(batchDownload.getConfigId());
 
 	    //we move the file extension
-	    String fileExt = transportDetails.getfileExt();
+	    String fileExt = transportDetails.getFileExt();
 
 	    boolean encryptMessage = false;
 	    // we only support base64 for now
@@ -1713,7 +1695,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	    }
 	    
 	    String generatedFilePath = generateTargetFile(true, batchDownload.getId(), transportDetails, encryptMessage);
-	    transportDetails.setDelimChar(messageTypeDAO.getDelimiterChar(transportDetails.getfileDelimiter()));
+	    transportDetails.setDelimChar(messageTypeDAO.getDelimiterChar(transportDetails.getFileDelimiter()));
 	    
 	    //make sure we remove old file
 	    File generatedFile = new File(generatedFilePath);
@@ -1739,7 +1721,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		List recordsToWrite = transactionOutDAO.getOutputForCustomTargetFile(transportDetails, batchDownload.getId(), configFields,batchDownload.getBatchUploadId());
 		
 		if (recordsToWrite != null) {
-		    Organization orgDetails = organizationManager.getOrganizationById(configurationManager.getConfigurationById(transportDetails.getconfigId()).getorgId());
+		    Organization orgDetails = organizationManager.getOrganizationById(configurationManager.getConfigurationById(transportDetails.getConfigId()).getOrgId());
 		    
 		    String ccdSampleTemplate = transportDetails.getCcdSampleTemplate();
 
@@ -1938,7 +1920,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 				repeatingSectionCopy = repeatingSectionCopy.replace(element.getElement(), fieldValue);
 
 			    }
-			    if (transportDetails.getfileType() == 12) {
+			    if (transportDetails.getFileType() == 12) {
 				sb.append(repeatingSectionCopy);
 				if (recordCounter != recordsToWrite.size()) {
 				    sb.append(",");
@@ -2058,7 +2040,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	    }
 
 	    //If the transport method File Drop (13) and associated to a eReferral Registry and Configuration
-	    if(transportDetails.gettransportMethodId() == 13 && transportDetails.getHelRegistryConfigId() > 0 && configDetails.getMessageTypeId() == 1 && !"".equals(transportDetails.getHelSchemaName()) && transportDetails.getHelRegistryId() > 0) {
+	    if(transportDetails.getTransportMethodId() == 13 && transportDetails.getHelRegistryConfigId() > 0 && configDetails.getMessageTypeId() == 1 && !"".equals(transportDetails.getHelSchemaName()) && transportDetails.getHelRegistryId() > 0) {
 		inserteReferralMessage = false;
 
 		//Need to get the health-e-link registry details
@@ -2231,7 +2213,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	    }
 	    
 	    //File Drop (Not to a eReferral Registry)
-	    else if (transportDetails.gettransportMethodId() == 13) {
+	    else if (transportDetails.getTransportMethodId() == 13) {
 		
 		//Check to see if there is file drop details
 		//File Drop directory
@@ -2287,18 +2269,18 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		    updateTargetBatchStatus(batchDownload.getId(), 58, "endDateTime");
 		     
 		    ba = new batchdownloadactivity();
-		    ba.setActivity("Failed to move the target file because the target file drop directory for configId:"+transportDetails.getconfigId()+" was empty.");
+		    ba.setActivity("Failed to move the target file because the target file drop directory for configId:"+transportDetails.getConfigId()+" was empty.");
 		    ba.setBatchDownloadId(batchDownload.getId());
 		    transactionOutDAO.submitBatchActivityLog(ba);
 		}
 	    }
 
 	    //Secure FTP Transport Method
-	    else if (transportDetails.gettransportMethodId() == 3) {
+	    else if (transportDetails.getTransportMethodId() == 3) {
 		
 		configurationFTPFields FTPPushDetails = configurationTransportManager.getTransportFTPDetailsPush(transportDetails.getId());
 		
-		if("SFTP".equals(FTPPushDetails.getprotocol().trim())) {
+		if("SFTP".equals(FTPPushDetails.getProtocol().trim())) {
 		
 		    JSch jSch = new JSch();
 
@@ -2313,7 +2295,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			    jSch.addIdentity(privateKey, "Private Key for Key file");
 			*/
 
-			session = jSch.getSession(FTPPushDetails.getusername(),FTPPushDetails.getip(),FTPPushDetails.getport());
+			session = jSch.getSession(FTPPushDetails.getUsername(),FTPPushDetails.getIp(),FTPPushDetails.getPort());
 			
 			String ftpPassword = new String(FTPPushDetails.getPassword());
 
@@ -2338,19 +2320,19 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			channel.connect();
 			channelSftp = (ChannelSftp) channel;
 			
-			channelSftp.cd(FTPPushDetails.getdirectory());
+			channelSftp.cd(FTPPushDetails.getDirectory());
 
 			String filename = batchDownload.getOutputFileName();
 			
-			FileInputStream fis = new FileInputStream(new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getfileLocation() + filename));
+			FileInputStream fis = new FileInputStream(new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getFileLocation() + filename));
 			
 			//Check to see if the target config needs the target file decoded (archivefile is always Base64 encoded)
 			if(transportDetails.getEncodingId() == 1) {
-			    File decodedTargetFile = new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getfileLocation() + "decoded_"+filename);
+			    File decodedTargetFile = new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getFileLocation() + "decoded_"+filename);
 			    String strDecode = filemanager.decodeFileToBase64Binary(archiveFile);
 			    String decodeFilePath = decodedTargetFile.getAbsolutePath();
 			    filemanager.writeFile(decodeFilePath, strDecode);
-			    fis = new FileInputStream(new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getfileLocation() + "decoded_"+filename));
+			    fis = new FileInputStream(new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getFileLocation() + "decoded_"+filename));
 			    
 			    //delete decoded file for ftp
 			    decodedTargetFile.delete();
@@ -2360,7 +2342,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			    channelSftp.put(fis, batchDownload.getOutputFileName());
 
 			    ba = new batchdownloadactivity();
-			    ba.setActivity("Successfully FTPd the target file: " +batchDownload.getOutputFileName()+ " to the following directory: "+FTPPushDetails.getdirectory() + " for IP: " + FTPPushDetails.getip() + " Port:" + FTPPushDetails.getport());
+			    ba.setActivity("Successfully FTPd the target file: " +batchDownload.getOutputFileName()+ " to the following directory: "+FTPPushDetails.getDirectory() + " for IP: " + FTPPushDetails.getIp() + " Port:" + FTPPushDetails.getPort());
 			    ba.setBatchDownloadId(batchDownload.getId());
 			    transactionOutDAO.submitBatchActivityLog(ba);
 			}
@@ -2371,7 +2353,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			    e.printStackTrace(new PrintWriter(errors));
 
 			    ba = new batchdownloadactivity();
-			    ba.setActivity("Failed to FTP the target file: " +batchDownload.getOutputFileName()+ " to the following directory: "+FTPPushDetails.getdirectory() + " for IP: " + FTPPushDetails.getip() + " Port:" + FTPPushDetails.getport());
+			    ba.setActivity("Failed to FTP the target file: " +batchDownload.getOutputFileName()+ " to the following directory: "+FTPPushDetails.getDirectory() + " for IP: " + FTPPushDetails.getIp() + " Port:" + FTPPushDetails.getPort());
 			    ba.setBatchDownloadId(batchDownload.getId());
 			    transactionOutDAO.submitBatchActivityLog(ba);
 
@@ -2380,7 +2362,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			    ba.setBatchDownloadId(batchDownload.getId());
 			    transactionOutDAO.submitBatchActivityLog(ba);
 
-			    String emailBody = "IP: " + FTPPushDetails.getip() + "<br/> Port:" + FTPPushDetails.getport() + "<br />Folder: " + FTPPushDetails.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
+			    String emailBody = "IP: " + FTPPushDetails.getIp() + "<br/> Port:" + FTPPushDetails.getPort() + "<br />Folder: " + FTPPushDetails.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
 			    mailMessage mail = new mailMessage();
 			    mail.setfromEmailAddress("support@health-e-link.net");
 			    mail.setmessageBody(emailBody);
@@ -2397,7 +2379,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			e.printStackTrace(new PrintWriter(errors));
 
 			ba = new batchdownloadactivity();
-			ba.setActivity("Failed to FTP the target file: " +batchDownload.getOutputFileName()+ " to the following directory: "+FTPPushDetails.getdirectory() + " for IP: " + FTPPushDetails.getip() + " Port:" + FTPPushDetails.getport());
+			ba.setActivity("Failed to FTP the target file: " +batchDownload.getOutputFileName()+ " to the following directory: "+FTPPushDetails.getDirectory() + " for IP: " + FTPPushDetails.getIp() + " Port:" + FTPPushDetails.getPort());
 			ba.setBatchDownloadId(batchDownload.getId());
 			transactionOutDAO.submitBatchActivityLog(ba);
 
@@ -2406,7 +2388,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			ba.setBatchDownloadId(batchDownload.getId());
 			transactionOutDAO.submitBatchActivityLog(ba);
 
-			String emailBody = "IP: " + FTPPushDetails.getip() + "<br/> Port:" + FTPPushDetails.getport() + "<br />Folder: " + FTPPushDetails.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
+			String emailBody = "IP: " + FTPPushDetails.getIp() + "<br/> Port:" + FTPPushDetails.getPort() + "<br />Folder: " + FTPPushDetails.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
 			mailMessage mail = new mailMessage();
 			mail.setfromEmailAddress("support@health-e-link.net");
 			mail.setmessageBody(emailBody);
@@ -2422,7 +2404,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			e.printStackTrace(new PrintWriter(errors));
 
 			ba = new batchdownloadactivity();
-			ba.setActivity("Failed to FTP the target file: " +batchDownload.getOutputFileName()+ " to the following directory: "+FTPPushDetails.getdirectory() + " for IP: " + FTPPushDetails.getip() + " Port:" + FTPPushDetails.getport());
+			ba.setActivity("Failed to FTP the target file: " +batchDownload.getOutputFileName()+ " to the following directory: "+FTPPushDetails.getDirectory() + " for IP: " + FTPPushDetails.getIp() + " Port:" + FTPPushDetails.getPort());
 			ba.setBatchDownloadId(batchDownload.getId());
 			transactionOutDAO.submitBatchActivityLog(ba);
 
@@ -2431,7 +2413,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			ba.setBatchDownloadId(batchDownload.getId());
 			transactionOutDAO.submitBatchActivityLog(ba);
 
-			String emailBody = "IP: " + FTPPushDetails.getip() + "<br/> Port:" + FTPPushDetails.getport() + "<br />Folder: " + FTPPushDetails.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
+			String emailBody = "IP: " + FTPPushDetails.getIp() + "<br/> Port:" + FTPPushDetails.getPort() + "<br />Folder: " + FTPPushDetails.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
 			mailMessage mail = new mailMessage();
 			mail.setfromEmailAddress("support@health-e-link.net");
 			mail.setmessageBody(emailBody);
@@ -2454,13 +2436,13 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		    FTPClient ftpClient = new FTPClient();
 		    
 		    try {
-			ftpClient.connect(FTPPushDetails.getip(),FTPPushDetails.getport());
+			ftpClient.connect(FTPPushDetails.getIp(),FTPPushDetails.getPort());
 
 			int replyCode = ftpClient.getReplyCode();
 
 			if (!FTPReply.isPositiveCompletion(replyCode)) {
 			    try {
-				String emailBody = "IP: " + FTPPushDetails.getip() + "<br/> Port:" + FTPPushDetails.getport() + "<br />Folder: " + FTPPushDetails.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Connection Failed<br />";
+				String emailBody = "IP: " + FTPPushDetails.getIp() + "<br/> Port:" + FTPPushDetails.getPort() + "<br />Folder: " + FTPPushDetails.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Connection Failed<br />";
 				mailMessage mail = new mailMessage();
 				mail.setfromEmailAddress("support@health-e-link.net");
 				mail.setmessageBody(emailBody);
@@ -2484,12 +2466,12 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
 			    String decryptedPwd = (String) obj.get("pwd");
 			    
-			    boolean success = ftpClient.login(FTPPushDetails.getusername().trim(), decryptedPwd);
+			    boolean success = ftpClient.login(FTPPushDetails.getUsername().trim(), decryptedPwd);
 
 			    if (!success) {
 				ftpClient.disconnect();
 				try {
-				    String emailBody = "IP: " + FTPPushDetails.getip() + "<br/> Port:" + FTPPushDetails.getport() + "<br />Folder: " + FTPPushDetails.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Credentials Failed<br />";
+				    String emailBody = "IP: " + FTPPushDetails.getIp() + "<br/> Port:" + FTPPushDetails.getPort() + "<br />Folder: " + FTPPushDetails.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Credentials Failed<br />";
 				    mailMessage mail = new mailMessage();
 				    mail.setfromEmailAddress("support@health-e-link.net");
 				    mail.setmessageBody(emailBody);
@@ -2502,17 +2484,17 @@ public class transactionOutManagerImpl implements transactionOutManager {
 				}
 			    }
 			    else {
-				ftpClient.changeWorkingDirectory(FTPPushDetails.getdirectory());
+				ftpClient.changeWorkingDirectory(FTPPushDetails.getDirectory());
 
 				String filename = batchDownload.getOutputFileName();
 
-				fis = new FileInputStream(new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getfileLocation() + filename));
+				fis = new FileInputStream(new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getFileLocation() + filename));
 				ftpClient.storeFile(filename, fis);
 				ftpClient.logout();
 				ftpClient.disconnect();
 
 				ba = new batchdownloadactivity();
-				ba.setActivity("Successfully FTPd the target file: " +archiveFile.getAbsolutePath()+ " to the following directory: "+FTPPushDetails.getdirectory() + " for IP: " + FTPPushDetails.getip() + " Port:" + FTPPushDetails.getport());
+				ba.setActivity("Successfully FTPd the target file: " +archiveFile.getAbsolutePath()+ " to the following directory: "+FTPPushDetails.getDirectory() + " for IP: " + FTPPushDetails.getIp() + " Port:" + FTPPushDetails.getPort());
 				ba.setBatchDownloadId(batchDownload.getId());
 				transactionOutDAO.submitBatchActivityLog(ba);
 			    }
@@ -2522,7 +2504,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			updateTargetBatchStatus(batchDownload.getId(), 58, "endDateTime");
 
 			ba = new batchdownloadactivity();
-			ba.setActivity("Failed to FTP the target file: " +archiveFile.getAbsolutePath()+ " to the following directory: "+FTPPushDetails.getdirectory() + " for IP: " + FTPPushDetails.getip() + " Port:" + FTPPushDetails.getport());
+			ba.setActivity("Failed to FTP the target file: " +archiveFile.getAbsolutePath()+ " to the following directory: "+FTPPushDetails.getDirectory() + " for IP: " + FTPPushDetails.getIp() + " Port:" + FTPPushDetails.getPort());
 			ba.setBatchDownloadId(batchDownload.getId());
 			transactionOutDAO.submitBatchActivityLog(ba);
 
@@ -2549,7 +2531,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		}
 	    } 
 	    // REST API 
-	    else if (transportDetails.gettransportMethodId() == 9) {
+	    else if (transportDetails.getTransportMethodId() == 9) {
 
 		//we need to update our totals
 		transactionInManager.updateRecordCounts(batchDownload.getId(), rejectIds, true, "totalErrorCount");
@@ -2566,13 +2548,13 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		transactionOutDAO.submitBatchActivityLog(ba);
 	    }
 	    // REST API VIA DIRECT
-	    else if (transportDetails.gettransportMethodId() == 12) {
+	    else if (transportDetails.getTransportMethodId() == 12) {
 
 		//we need to update our totals
 		transactionInManager.updateRecordCounts(batchDownload.getId(), rejectIds, true, "totalErrorCount");
 		transactionInManager.updateRecordCounts(batchDownload.getId(), new ArrayList<>(), true, "totalRecordCount");
 		
-		organizationDirectDetails directDetails = configurationTransportManager.getDirectMessagingDetailsById(configDetails.getorgId());
+		organizationDirectDetails directDetails = configurationTransportManager.getDirectMessagingDetailsById(configDetails.getOrgId());
 		
 		String methodName = "";
 		
@@ -2593,7 +2575,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		    updateTargetBatchStatus(batchDownload.getId(), 58, "endDateTime");
 		     
 		    ba = new batchdownloadactivity();
-		    ba.setActivity("The directDetails were not found for orgId: " + configDetails.getorgId());
+		    ba.setActivity("The directDetails were not found for orgId: " + configDetails.getOrgId());
 		    ba.setBatchDownloadId(batchDownload.getId());
 		    transactionOutDAO.submitBatchActivityLog(ba);
 		}
@@ -2608,7 +2590,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	    transactionOutDAO.submitBatchActivityLog(ba);
 	}
 
-	if (transportDetails.gettransportMethodId() != 9 && transportDetails.gettransportMethodId() != 12) {
+	if (transportDetails.getTransportMethodId() != 9 && transportDetails.getTransportMethodId() != 12) {
 	    //restful manager already took care of status
 
 	    //we need to update our totals
@@ -2666,8 +2648,8 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		    List<configurationConnectionReceivers> connectionReceivers = configurationManager.getConnectionReceivers(connectionDetails.get(0).getId());
 		    List<configurationConnectionSenders> connectionSenders = configurationManager.getConnectionSenders(connectionDetails.get(0).getId());
 		    
-		    Organization targetOrgDetails = organizationManager.getOrganizationById(configDetails.getorgId());
-		    Organization sourceOrgDetails = organizationManager.getOrganizationById(uploadConfigDetails.getorgId());
+		    Organization targetOrgDetails = organizationManager.getOrganizationById(configDetails.getOrgId());
+		    Organization sourceOrgDetails = organizationManager.getOrganizationById(uploadConfigDetails.getOrgId());
 		    
 		    if(!connectionSenders.isEmpty()) {
 			String fromName = "";
@@ -2695,11 +2677,11 @@ public class transactionOutManagerImpl implements transactionOutManager {
 				msg.setccEmailAddress(fromCCAddressList);
 			    }
 
-			    msg.setmessageSubject("Your " + uploadConfigDetails.getconfigName() + " message has been successfully delivered (" + myProps.getProperty("server.identity") + ")");
+			    msg.setmessageSubject("Your " + uploadConfigDetails.getConfigname() + " message has been successfully delivered (" + myProps.getProperty("server.identity") + ")");
 
 			    /* Build the body of the email */
 			    StringBuilder sb = new StringBuilder();
-			    sb.append("The ").append(uploadConfigDetails.getconfigName()).append(" sent to ").append(targetOrgDetails.getOrgName()).append(" has been successfully delivered.");
+			    sb.append("The ").append(uploadConfigDetails.getConfigname()).append(" sent to ").append(targetOrgDetails.getOrgName()).append(" has been successfully delivered.");
 			    msg.setmessageBody(sb.toString());
 
 			    /* Send the email */
@@ -2744,7 +2726,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			    StringBuilder sb = new StringBuilder();
 			    sb.append("You have received a new message from ").append(sourceOrgDetails.getOrgName());
 			    sb.append("<br /><br />");
-			    sb.append("Configuration: ").append(configDetails.getconfigName());
+			    sb.append("Configuration: ").append(configDetails.getConfigname());
 			    sb.append("<br />");
 			    sb.append("Total Records: ").append(batchDownload.getTotalRecordCount());
 			    msg.setmessageBody(sb.toString());
@@ -2783,8 +2765,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
     }
 
     @Override
-    public List<batchDownloads> getDLBatchesByStatusIds(List<Integer> statusIds)
-	    throws Exception {
+    public List<batchDownloads> getDLBatchesByStatusIds(List<Integer> statusIds) throws Exception {
 	return transactionOutDAO.getDLBatchesByStatusIds(statusIds);
     }
 
@@ -2854,7 +2835,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
     public void sendPassThruFiles(batchUploads batchULDetails, batchDownloads batchDLDetails,configurationTransport transportDetails,File archiveFile) throws Exception {
 	
 	//we have file already, we just need to move it
-	if (transportDetails.gettransportMethodId() == 10) {
+	if (transportDetails.getTransportMethodId() == 10) {
 	   
 	   // Get the File Drop Details
 	   configurationFileDropFields fileDropDetails = configurationTransportManager.getTransFileDropDetailsPush(transportDetails.getId());
@@ -2864,22 +2845,22 @@ public class transactionOutManagerImpl implements transactionOutManager {
 	} 
 	
 	//SFTP
-	else if (transportDetails.gettransportMethodId() == 3) {
+	else if (transportDetails.getTransportMethodId() == 3) {
 	    
 	    //Get the ftp fields
 	    configurationFTPFields ftpDetails = configurationTransportManager.getTransportFTPDetailsPush(transportDetails.getId());
 	    
 	    if(ftpDetails != null) {
-		if(!ftpDetails.getdirectory().equals("")) {
+		if(!ftpDetails.getDirectory().equals("")) {
 		   
-		    File targetFile = new File(myProps.getProperty("ut.directory.utRootDir") + ftpDetails.getdirectory() + batchDLDetails.getOutputFileName());
+		    File targetFile = new File(myProps.getProperty("ut.directory.utRootDir") + ftpDetails.getDirectory() + batchDLDetails.getOutputFileName());
 		    Files.copy(archiveFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		}
 	    }
 	}
 	
 	// REST API 
-	else if (transportDetails.gettransportMethodId() == 9) {
+	else if (transportDetails.getTransportMethodId() == 9) {
 	    
 	    //we need to update our totals
 	    String methodName = configurationTransportManager.getRestAPIMethodName(transportDetails.getRestAPIFunctionId());
@@ -3016,7 +2997,6 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			}
 		    }
 		});
-		
 	    }
 	}
     }

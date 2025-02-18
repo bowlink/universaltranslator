@@ -1,9 +1,7 @@
 package com.hel.ut.service.impl;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import com.hel.ut.model.TransportMethod;
 import com.hel.ut.model.configurationFormFields;
 import com.hel.ut.model.configurationMessageSpecs;
@@ -79,7 +77,7 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
 
             String CCDTemplatefileName = CCDTemplatefile.getOriginalFilename();
 
-            int orgId = utConfigurationManager.getConfigurationById(transportDetails.getconfigId()).getorgId();
+            int orgId = utConfigurationManager.getConfigurationById(transportDetails.getConfigId()).getOrgId();
 
             Organization orgDetails = organizationManager.getOrganizationById(orgId);
 
@@ -110,7 +108,7 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
                 transportDetails.setCcdSampleTemplate(CCDTemplatefileName);
 		
 		//If configuration is a target, populate the CCD data elements from the uploaded file.
-		if(configurationDetails.getType() == 2 && "xml".equals(transportDetails.getfileExt())) {
+		if(configurationDetails.getType() == 2 && "xml".equals(transportDetails.getFileExt())) {
 		    insertCCDDataElements(configurationDetails.getId(),newCCDTemplateFile);
 		}
 
@@ -177,12 +175,12 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
     public void saveTransportFTP(int orgId, configurationFTPFields FTPFields) throws Exception {
 
         /* Need to upload the certificate if uploaded */
-        if (FTPFields.getfile() != null && FTPFields.getfile().getSize() > 0) {
+        if (FTPFields.getFile() != null && FTPFields.getFile().getSize() > 0) {
 
             //Need to get the cleanURL of the organization for the brochure
             Organization orgDetails = organizationManager.getOrganizationById(orgId);
 
-            MultipartFile file = FTPFields.getfile();
+            MultipartFile file = FTPFields.getFile();
             String fileName = file.getOriginalFilename();
 
             InputStream inputStream = null;
@@ -208,7 +206,7 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
                 outputStream.close();
 
                 //Set the filename to the original file name
-                FTPFields.setcertification(fileName);
+                FTPFields.setCertification(fileName);
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -230,12 +228,12 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
 	    FTPFields.setPassword(encryptedPassword.getBytes());
 	}
 	else {
-	    if(FTPFields.getmethod() == 1) {
-		configurationFTPFields currftpDetails = configurationTransportDAO.getTransportFTPDetailsPull(FTPFields.gettransportId());
+	    if(FTPFields.getMethod() == 1) {
+		configurationFTPFields currftpDetails = configurationTransportDAO.getTransportFTPDetailsPull(FTPFields.getTransportId());
 		FTPFields.setPassword(currftpDetails.getPassword());
 	    }
 	    else {
-		configurationFTPFields currftpDetails = configurationTransportDAO.getTransportFTPDetailsPush(FTPFields.gettransportId());
+		configurationFTPFields currftpDetails = configurationTransportDAO.getTransportFTPDetailsPush(FTPFields.getTransportId());
 		FTPFields.setPassword(currftpDetails.getPassword());
 	    }
 	}
@@ -310,8 +308,7 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
     }
 
     @Override
-    public Integer getOrgIdForFTPPath(configurationFTPFields ftpInfo)
-            throws Exception {
+    public Integer getOrgIdForFTPPath(configurationFTPFields ftpInfo) throws Exception {
         return configurationTransportDAO.getOrgIdForFTPPath(ftpInfo);
     }
 
@@ -328,12 +325,10 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
     @Override
     public List<Integer> getConfigCount(String fileExt, Integer transportMethodId, Integer fileDelimiter) {
         return configurationTransportDAO.getConfigCount(fileExt, transportMethodId, fileDelimiter);
-
     }
 
     @Override
-    public List<configurationTransport> getDistinctDelimCharForFileExt(
-            String fileExt, Integer transportMethodId) {
+    public List<configurationTransport> getDistinctDelimCharForFileExt(String fileExt, Integer transportMethodId) {
         return configurationTransportDAO.getDistinctDelimCharForFileExt(fileExt, transportMethodId);
     }
 
@@ -343,7 +338,6 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
 	//Makes sure the directory is created
         fileSystem dir = new fileSystem();
 	dir.creatFTPDirectory(myProps.getProperty("ut.directory.utRootDir") + fileDropFields.getDirectory());
-	
     }
 
     @Override
@@ -367,8 +361,7 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
     }
 
     @Override
-    public Integer getOrgIdForFileDropPath(
-           configurationFileDropFields fileDropInfo) throws Exception {
+    public Integer getOrgIdForFileDropPath(configurationFileDropFields fileDropInfo) throws Exception {
         return configurationTransportDAO.getOrgIdForFileDropPath(fileDropInfo);
     }
 
@@ -378,9 +371,7 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
     }
 
     @Override
-    public List<configurationTransport> getConfigurationTransportFileExtByFileType(
-            Integer orgId, Integer transportMethodId,
-            List<Integer> fileTypeIds, List<Integer> statusIds, boolean distinctOnly, boolean foroutboundProcessing) {
+    public List<configurationTransport> getConfigurationTransportFileExtByFileType(Integer orgId, Integer transportMethodId,List<Integer> fileTypeIds, List<Integer> statusIds, boolean distinctOnly, boolean foroutboundProcessing) {
         return configurationTransportDAO.getConfigurationTransportFileExtByFileType(orgId, transportMethodId, fileTypeIds, statusIds, distinctOnly, foroutboundProcessing);
     }
 
@@ -401,14 +392,12 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
     }
 
     @Override
-    public List<configurationTransport> getDistinctTransportDetailsForOrgByTransportMethodId(
-            Integer transportMethodId, Integer status, Integer orgId) {
+    public List<configurationTransport> getDistinctTransportDetailsForOrgByTransportMethodId(Integer transportMethodId, Integer status, Integer orgId) {
         return configurationTransportDAO.getDistinctTransportDetailsForOrgByTransportMethodId(transportMethodId, status, orgId);
     }
 
     @Override
-    public List<configurationTransport> getCTForOrgByTransportMethodId(
-            Integer transportMethodId, Integer status, Integer orgId) {
+    public List<configurationTransport> getCTForOrgByTransportMethodId(Integer transportMethodId, Integer status, Integer orgId) {
         return configurationTransportDAO.getCTForOrgByTransportMethodId(transportMethodId, status, orgId);
     }
 
@@ -423,26 +412,22 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
     }
 
     @Override
-    public List<configurationWebServiceSenders> getWSSenderList(
-            int transportDetailId) throws Exception {
+    public List<configurationWebServiceSenders> getWSSenderList(int transportDetailId) throws Exception {
         return configurationTransportDAO.getWSSenderList(transportDetailId);
     }
 
     @Override
-    public void saveWSSender(configurationWebServiceSenders wsSender)
-            throws Exception {
+    public void saveWSSender(configurationWebServiceSenders wsSender) throws Exception {
         configurationTransportDAO.saveWSSender(wsSender);
     }
 
     @Override
-    public void deleteWSSender(configurationWebServiceSenders wsSender)
-            throws Exception {
+    public void deleteWSSender(configurationWebServiceSenders wsSender) throws Exception {
         configurationTransportDAO.deleteWSSender(wsSender);
     }
 
     @Override
-    public boolean hasConfigsWithMasstranslations(
-            Integer orgId, Integer transportMethodId) throws Exception {
+    public boolean hasConfigsWithMasstranslations(Integer orgId, Integer transportMethodId) throws Exception {
         return configurationTransportDAO.hasConfigsWithMasstranslations(orgId, transportMethodId);
     }
     

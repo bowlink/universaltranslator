@@ -21,7 +21,6 @@ import com.hel.ut.model.mainHL7Segments;
  */
 public interface sysAdminManager {
 
-
     LookUpTable getTableInfo(String urlId);
 
     List<TableData> getDataList(String utTableName, String searchTerm);

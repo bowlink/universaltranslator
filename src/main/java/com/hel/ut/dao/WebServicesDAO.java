@@ -2,9 +2,7 @@ package com.hel.ut.dao;
 
 import java.util.Date;
 import java.util.List;
-
 import org.springframework.stereotype.Repository;
-
 import com.hel.ut.model.WSMessagesIn;
 import com.hel.ut.model.wsMessagesOut;
 
@@ -26,5 +24,4 @@ public interface WebServicesDAO {
     List<WSMessagesIn> getWSMessagesInByBatchId(Integer batchId) throws Exception;
 
     void saveWSMessagesIn(WSMessagesIn wsIn) throws Exception;
-
 }

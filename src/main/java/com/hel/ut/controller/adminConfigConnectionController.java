@@ -213,11 +213,11 @@ public class adminConfigConnectionController {
 	if(id != null) {
 	    configurationConnection connectionDetails = utconfigurationmanager.getConnection(id);
 	    
-	    sourceOrgId = utconfigurationmanager.getConfigurationById(connectionDetails.getsourceConfigId()).getorgId();
+	    sourceOrgId = utconfigurationmanager.getConfigurationById(connectionDetails.getsourceConfigId()).getOrgId();
 	    sourceConfigId = connectionDetails.getsourceConfigId();
 	    
 	    utConfiguration targetConfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.gettargetConfigId());
-	    targetOrgId = targetConfigDetails.getorgId();
+	    targetOrgId = targetConfigDetails.getOrgId();
 	    targetConfigId = connectionDetails.gettargetConfigId();
 	    connectionId = connectionDetails.getId();
 	    
@@ -250,7 +250,7 @@ public class adminConfigConnectionController {
 	   
 	   if(!sourceConfigurations.isEmpty()) {
 	       for(utConfiguration srcConfig : sourceConfigurations) {
-		   if(srcConfig.getorgId() == org.getId()) {
+		   if(srcConfig.getOrgId() == org.getId()) {
 		       if(sourceOrganizations.isEmpty()) {
 			   sourceOrganizations.add(org);
 		       }
@@ -268,7 +268,7 @@ public class adminConfigConnectionController {
 		   }
 	       } 
 	       for(utConfiguration tgtConfig : targetConfigurations) {
-		   if(tgtConfig.getorgId() == org.getId()) {
+		   if(tgtConfig.getOrgId() == org.getId()) {
 		       if(targetOrganizations.isEmpty()) {
 			   targetOrganizations.add(org);
 		       }
@@ -339,11 +339,11 @@ public class adminConfigConnectionController {
         configurationConnection connectionDetails = utconfigurationmanager.getConnection(connectionId);
 
         utConfiguration srcconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.getsourceConfigId());
-        srcconfigDetails.setorgId(organizationmanager.getOrganizationById(srcconfigDetails.getorgId()).getId());
+        srcconfigDetails.setOrgId(organizationmanager.getOrganizationById(srcconfigDetails.getOrgId()).getId());
         connectionDetails.setsrcConfigDetails(srcconfigDetails);
 
         utConfiguration tgtconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.gettargetConfigId());
-        tgtconfigDetails.setorgId(organizationmanager.getOrganizationById(tgtconfigDetails.getorgId()).getId());
+        tgtconfigDetails.setOrgId(organizationmanager.getOrganizationById(tgtconfigDetails.getOrgId()).getId());
         connectionDetails.settgtConfigDetails(tgtconfigDetails);
 
         
@@ -361,12 +361,12 @@ public class adminConfigConnectionController {
 	for(Organization org : organizations) {
 	   if(!sourceConfigurations.isEmpty()) {
 	       for(utConfiguration srcConfig : sourceConfigurations) {
-		   if(srcConfig.getorgId() == org.getId()) {
+		   if(srcConfig.getOrgId() == org.getId()) {
 		       sourceOrganizations.add(org);
 		   }
 	       } 
 	       for(utConfiguration tgtConfig : targetConfigurations) {
-		   if(tgtConfig.getorgId() == org.getId()) {
+		   if(tgtConfig.getOrgId() == org.getId()) {
 		       targetOrganizations.add(org);
 		   }
 	       }
@@ -548,9 +548,9 @@ public class adminConfigConnectionController {
             for (utConfiguration configuration : configurations) {
                 configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configuration.getId());
 
-                configuration.setOrgName(organizationmanager.getOrganizationById(configuration.getorgId()).getOrgName());
+                configuration.setOrgName(organizationmanager.getOrganizationById(configuration.getOrgId()).getOrgName());
 		
-                configuration.settransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+                configuration.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
 		
 		if(configuration.getType() == 1 && "srcConfig".equals(selectBoxId)) {
 		    availableConfigurations.add(configuration);
@@ -890,10 +890,10 @@ public class adminConfigConnectionController {
 	configurationConnection connectionDetails = utconfigurationmanager.getConnection(connectionId);
 
         utConfiguration srcconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.getsourceConfigId());
-	Organization srcorgDetails = organizationmanager.getOrganizationById(srcconfigDetails.getorgId());
+	Organization srcorgDetails = organizationmanager.getOrganizationById(srcconfigDetails.getOrgId());
 	
         utConfiguration tgtconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.gettargetConfigId());
-	Organization tgtorgDetails = organizationmanager.getOrganizationById(tgtconfigDetails.getorgId());
+	Organization tgtorgDetails = organizationmanager.getOrganizationById(tgtconfigDetails.getOrgId());
 
 	String connectionDetailFile = System.getProperty("java.io.tmpdir") +"/connectionExport-" + connectionDetails.getId() + ".txt";
 	
@@ -906,8 +906,8 @@ public class adminConfigConnectionController {
 	StringBuffer emailBodySB = new StringBuffer();
 	emailBodySB.append("The connection has been successfully exported.<br /><br />");
 	emailBodySB.append("Connection Id: ").append(connectionDetails.getId());
-	emailBodySB.append("<br />Source Configuration Name: ").append(srcconfigDetails.getconfigName().trim());
-	emailBodySB.append("<br />Target Configuration Name: ").append(tgtconfigDetails.getconfigName().trim());
+	emailBodySB.append("<br />Source Configuration Name: ").append(srcconfigDetails.getConfigname().trim());
+	emailBodySB.append("<br />Target Configuration Name: ").append(tgtconfigDetails.getConfigname().trim());
 	session.setAttribute("emailBody", emailBodySB);
 	
 	PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(connectionDetailFile, true)));
@@ -1288,7 +1288,7 @@ public class adminConfigConnectionController {
 	    
 	    if(!orgConfigs.isEmpty()) {
 		for(utConfiguration config : orgConfigs) {
-		    if(config.getconfigName().trim().equals(configName) && !config.isDeleted() && config.getStatus() && config.getType() == type) {
+		    if(config.getConfigname().trim().equals(configName) && !config.isDeleted() && config.getStatus() && config.getType() == type) {
 			configId = config.getId();
 			break;
 		    }

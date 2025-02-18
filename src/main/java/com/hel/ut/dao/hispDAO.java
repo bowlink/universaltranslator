@@ -2,7 +2,6 @@ package com.hel.ut.dao;
 
 import com.hel.ut.model.hisps;
 import java.util.List;
-
 import org.springframework.stereotype.Repository;
 
 @Repository

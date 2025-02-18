@@ -1,7 +1,7 @@
 package com.hel.ut.model.custom;
 
+import jakarta.validation.constraints.NotEmpty;
 import java.util.Date;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * This is a custom object that defines what a look up table is. A look up table has a name it has a certain number of columns (from this we can send it to a custom object since medical services, procedure look up tables have more information.

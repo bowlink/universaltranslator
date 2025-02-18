@@ -41,9 +41,6 @@ public class JSONtoTxt {
     @Resource(name = "myProps")
     private Properties myProps;
 
-    @Autowired
-    private utConfigurationTransportManager configurationTransportManager;
-
     public String TranslateJSONtoTxt(String fileLocation, String fileName, int orgId, int configId, Integer batchId) throws Exception {
 
         Organization orgDetails = organizationmanager.getOrganizationById(orgId);
@@ -180,7 +177,5 @@ public class JSONtoTxt {
 	}
         
         return newfileName;
-
     }
-
 }

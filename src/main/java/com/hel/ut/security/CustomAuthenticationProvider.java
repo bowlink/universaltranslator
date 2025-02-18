@@ -34,6 +34,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     // API
     @Override
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
+       
         final String name = authentication.getName();
         final String password = authentication.getCredentials().toString();
         String loginUser = name;

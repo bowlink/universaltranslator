@@ -8,7 +8,6 @@ import com.hel.ut.model.*;
 import com.hel.ut.service.emailMessageManager;
 import com.hel.ut.service.utConfigurationManager;
 import org.apache.commons.io.FileUtils;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,9 +22,6 @@ import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 
 @Service
 public class utConfigurationManagerImpl implements utConfigurationManager {
-
-    @Autowired
-    private SessionFactory sessionFactory;
 
     @Autowired
     private utConfigurationDAO utConfigurationDAO;
@@ -47,8 +43,8 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 
     @Override
     public Integer createConfiguration(utConfiguration configuration) {
-	if(configuration.getstepsCompleted() < 6) {
-	    configuration.setstepsCompleted(1);
+	if(configuration.getStepsCompleted() < 6) {
+	    configuration.setStepsCompleted(1);
 	}
 	return utConfigurationDAO.createConfiguration(configuration);
     }
@@ -244,7 +240,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 
 	//Need to get the selected organization clean url
 	utConfiguration configDetails = utConfigurationDAO.getConfigurationById(messageSpecs.getconfigId());
-	Organization orgDetails = organizationDAO.getOrganizationById(configDetails.getorgId());
+	Organization orgDetails = organizationDAO.getOrganizationById(configDetails.getOrgId());
 	String cleanURL = orgDetails.getcleanURL();
 	
 	boolean processFile = false;
@@ -356,9 +352,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		e1.printStackTrace();
 		throw new Exception(e1);
 	    }
-
 	}
-
     }
 
     /**
@@ -489,8 +483,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
     }
 
     @Override
-    public configurationExcelDetails getExcelDetails(Integer configId, Integer orgId)
-	    throws Exception {
+    public configurationExcelDetails getExcelDetails(Integer configId, Integer orgId) throws Exception {
 	return utConfigurationDAO.getExcelDetails(configId, orgId);
     }
 
@@ -521,8 +514,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
     }
 
     @Override
-    public List<configurationConnection> getConnectionsBySrcAndTargetConfigurations(
-	    int sourceConfigId, int targetConfigId) {
+    public List<configurationConnection> getConnectionsBySrcAndTargetConfigurations(int sourceConfigId, int targetConfigId) {
 	return utConfigurationDAO.getConnectionsBySrcAndTargetConfigurations(sourceConfigId, targetConfigId);
     }
     
@@ -530,7 +522,6 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
     public List getrestAPIFunctions(Integer orgId) {
 	return utConfigurationDAO.getrestAPIFunctions(orgId);
     }
-    
     
     @Override
     public List<watchlist> getDashboardWatchList() throws Exception {
@@ -688,7 +679,6 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	    + "order by configName, processOrder";
 	
 	return utConfigurationDAO.getDTCWForDownload(sqlStatement);
-	
     }
     
     @Override
@@ -747,7 +737,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	
 	StringBuffer reportBody = new StringBuffer();
 	reportBody.append("<div style='text-align:center'>");
-	reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 16px;'>").append(configDetails.getconfigName()).append("</span><br />");
+	reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 16px;'>").append(configDetails.getConfigname()).append("</span><br />");
 	reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'>Organization: ").append(orgDetails.getOrgName()).append("</span><br />");
 	reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>This configuration was created on ").append(new SimpleDateFormat("M/dd/yyyy h:mm a").format(createDate)).append("</span><br />");
 	if(lastConfigUpdatelog != null) {
@@ -834,7 +824,6 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	reportBody.append("</div>");
 
 	return reportBody;
-	
     }
     
     @Override 
@@ -854,28 +843,28 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 
 	    String transportMethod = "File Drop";
 
-	    if(transportDetails.gettransportMethodId() == 1) {
+	    if(transportDetails.getTransportMethodId() == 1) {
 		transportMethod = "File Upload";
 	    }
-	    else if(transportDetails.gettransportMethodId() == 3) {
+	    else if(transportDetails.getTransportMethodId() == 3) {
 		transportMethod = "Secure FTP";
 	    }
-	    else if(transportDetails.gettransportMethodId() == 6) {
+	    else if(transportDetails.getTransportMethodId() == 6) {
 		transportMethod = "Web Service";
 	    }
-	    else if(transportDetails.gettransportMethodId() == 8) {
+	    else if(transportDetails.getTransportMethodId() == 8) {
 		transportMethod = "To a eReferral Registry";
 	    }
-	    else if(transportDetails.gettransportMethodId() == 9) {
+	    else if(transportDetails.getTransportMethodId() == 9) {
 		transportMethod = "Rest API";
 	    }
-	    else if(transportDetails.gettransportMethodId() == 10) {
+	    else if(transportDetails.getTransportMethodId() == 10) {
 		transportMethod = "Online Form";
 	    }
-	    else if(transportDetails.gettransportMethodId() == 11) {
+	    else if(transportDetails.getTransportMethodId() == 11) {
 		transportMethod = "From a eReferral Registry (File Upload)";
 	    }
-	    else if(transportDetails.gettransportMethodId() == 12) {
+	    else if(transportDetails.getTransportMethodId() == 12) {
 		transportMethod = "Direct Message";
 	    }
 
@@ -892,49 +881,49 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 
 	    String fileType = "Text File";
 
-	    if(transportDetails.getfileType() == 1) {
+	    if(transportDetails.getFileType() == 1) {
 		fileType = "Does not apply";
 	    }
-	    else if(transportDetails.getfileType() == 3) {
+	    else if(transportDetails.getFileType() == 3) {
 		fileType = "CSV";
 	    }
-	    else if(transportDetails.getfileType() == 4) {
+	    else if(transportDetails.getFileType() == 4) {
 		fileType = "HL7";
 	    }
-	    else if(transportDetails.getfileType() == 5) {
+	    else if(transportDetails.getFileType() == 5) {
 		fileType = "MS Access DB File (MDB)";
 	    }
-	    else if(transportDetails.getfileType() == 6) {
+	    else if(transportDetails.getFileType() == 6) {
 		fileType = "PDF";
 	    }
-	    else if(transportDetails.getfileType() == 8) {
+	    else if(transportDetails.getFileType() == 8) {
 		fileType = "Excel (XLS)";
 	    }
-	    else if(transportDetails.getfileType() == 9) {
+	    else if(transportDetails.getFileType() == 9) {
 		fileType = "CCD";
 	    }
-	    else if(transportDetails.getfileType() == 10) {
+	    else if(transportDetails.getFileType() == 10) {
 		fileType = "MS Word Document";
 	    }
-	    else if(transportDetails.getfileType() == 11) {
+	    else if(transportDetails.getFileType() == 11) {
 		fileType = "Excel (XLSX)";
 	    }
-	    else if(transportDetails.getfileType() == 12) {
+	    else if(transportDetails.getFileType() == 12) {
 		fileType = "JSON";
 	    }
 
 	    String delim = "comma";
 
-	    if(transportDetails.getfileDelimiter() == 2) {
+	    if(transportDetails.getFileDelimiter() == 2) {
 		delim = "pipe (|)";
 	    }
-	    else if(transportDetails.getfileDelimiter() == 3) {
+	    else if(transportDetails.getFileDelimiter() == 3) {
 		delim = "colon (:)";
 	    }
-	    else if(transportDetails.getfileDelimiter() == 11) {
+	    else if(transportDetails.getFileDelimiter() == 11) {
 		delim = "semi-colon (;)";
 	    }
-	    else if(transportDetails.getfileDelimiter() == 12) {
+	    else if(transportDetails.getFileDelimiter() == 12) {
 		delim = "tab";
 	    }
 
@@ -952,13 +941,13 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 
 	    String errorHandling = "";
 
-	    if(transportDetails.geterrorHandling() == 2) {
+	    if(transportDetails.getErrorHandling() == 2) {
 		errorHandling = "Reject individual transactions on error";
 	    }
-	    else if(transportDetails.geterrorHandling() == 3) {
+	    else if(transportDetails.getErrorHandling() == 3) {
 		errorHandling = "Reject entire file on a single transaction error";
 	    }
-	    else if(transportDetails.geterrorHandling() == 4) {
+	    else if(transportDetails.getErrorHandling() == 4) {
 		errorHandling = "Send errors through to the target file";
 	    }
 	    
@@ -967,9 +956,9 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>How is the file getting to the UT?</strong></span><br />");
 	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(transportMethod).append("</span><br /><br />");
 	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Where will the file be stored on the UT prior to processing?</strong></span><br />");
-	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(transportDetails.getfileLocation()).append("</span><br /><br />");
+	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(transportDetails.getFileLocation()).append("</span><br /><br />");
 	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Max Accepted File Size (mb)</strong></span><br />");
-	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(transportDetails.getmaxFileSize()).append("</span><br /><br />");
+	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(transportDetails.getMaxFileSize()).append("</span><br /><br />");
 	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Is the file Zipped?</strong></span><br />");
 	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(isZipped).append("</span><br /><br />");
 	    if(!"".equals(zipType)) {
@@ -981,7 +970,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	    
 	    if("CSV".equals(fileType) || "Text File".equals(fileType)) {
 		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>File Extension</strong></span><br />");
-		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>.").append(transportDetails.getfileExt()).append("</span><br /><br />");
+		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>.").append(transportDetails.getFileExt()).append("</span><br /><br />");
 		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>File Delimiter</strong></span><br />");
 		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(delim).append("</span><br /><br />");
 		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Line Terminator</strong></span><br />");
@@ -991,7 +980,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	     reportBody.append("</div>");
 	    
 	    if(fileDropFields != null) {
-		if(fileDropFields.size() > 0) {
+		if(!fileDropFields.isEmpty()) {
 		    reportBody.append("<div>");
 		    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>File Drop Location</strong></span><br />");
 		    for(configurationFileDropFields dropField : fileDropFields) {
@@ -1021,23 +1010,23 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	    }
 	    
 	    if(ftpFields != null) {
-		if(ftpFields.size() > 0) {
+		if(!ftpFields.isEmpty()) {
 		    reportBody.append("<div>");
 		    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>FTP Details</strong></span><br />");
 		    for(configurationFTPFields ftpField : ftpFields) {
-			if(ftpField.getmethod() == 1) {
+			if(ftpField.getMethod() == 1) {
 			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Protocal</strong></span><br />");
-			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(ftpField.getprotocol()).append("</span><br /><br />");
+			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(ftpField.getProtocol()).append("</span><br /><br />");
 			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Host</strong></span><br />");
-			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(ftpField.getip()).append("</span><br /><br />");
+			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(ftpField.getIp()).append("</span><br /><br />");
 			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Username</strong></span><br />");
-			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(ftpField.getusername()).append("</span><br /><br />");
+			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(ftpField.getUsername()).append("</span><br /><br />");
 			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Password</strong></span><br />");
 			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append("Password is Encrypted for security").append("</span><br /><br />");
 			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Directory</strong></span><br />");
-			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(ftpField.getdirectory()).append("</span><br /><br />");
+			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(ftpField.getDirectory()).append("</span><br /><br />");
 			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Port</strong></span><br />");
-			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(ftpField.getport()).append("</span><br /><br />");
+			    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(ftpField.getPort()).append("</span><br /><br />");
 			}
 		    }
 		    reportBody.append("</div>");
@@ -1047,9 +1036,9 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	    if(configDetails.getType() == 2) {
 		reportBody.append("<div>");
 		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Target File Name</strong></span><br />");
-		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(transportDetails.gettargetFileName()).append("</span><br /><br />");
+		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(transportDetails.getTargetFileName()).append("</span><br /><br />");
 		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Append Date and Time to file Name?</strong></span><br />");
-		if(transportDetails.getappendDateTime()) {
+		if(transportDetails.isAppendDateTime()) {
 		    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Yes</span><br /><br />");
 		}
 		else {
@@ -1091,7 +1080,6 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	}
 	
 	return reportBody;
-	
     }
     
     @Override 
@@ -1215,7 +1203,6 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	}
 	
 	return reportBody;
-	
     }
     
     @Override 
@@ -1305,10 +1292,10 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 
         List<Macros> macros = utConfigurationDAO.getMacros();
 
-        List<Crosswalks> crosswalks = messageTypeDAO.getCrosswalks(1, 0, configDetails.getorgId());
+        List<Crosswalks> crosswalks = messageTypeDAO.getCrosswalks(1, 0, configDetails.getOrgId());
 
         List crosswalksWithData = messageTypeDAO.getConfigCrosswalksWithDataForPrint(configDetails.getId());
-
+        
         StringBuffer reportBody = new StringBuffer();
         reportBody.append("<div style='padding-top:10px;'>");
         reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 16px;'><strong>DATA TRANSLATIONS</strong></span><br /><br />");
@@ -1436,67 +1423,66 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 
         if(crosswalksWithData != null) {
             if(!crosswalksWithData.isEmpty()) {
-            reportBody.append("</div>");
-            Iterator<Object[]> cwIterator = crosswalksWithData.iterator();
-            String cwname = "";
-            String delim = "";
-            String dateCreated = "";
-            String lastUpdated = "";
-            while(cwIterator.hasNext()) {
-                Object[] cwData = cwIterator.next();
+                reportBody.append("</div>");
+                Iterator<Object[]> cwIterator = crosswalksWithData.iterator();
+                String cwname = "";
+                String delim = "";
+                String dateCreated = "";
+                String lastUpdated = "";
+                while(cwIterator.hasNext()) {
+                    Object[] cwData = cwIterator.next();
+                    
+                    if("".equals(cwname) || !cwname.equals(cwData[0])) {
+                    if(!"".equals(cwname)) {
+                         reportBody.append("</tbody></table></div><br />");
+                    }
+                    cwname = cwData[0].toString();
+                    if(Integer.parseInt(cwData[6].toString()) == 1) {
+                        delim = "comma";
+                    }
+                    else if(Integer.parseInt(cwData[6].toString()) == 2) {
+                        delim = "pipe";
+                    }
+                    else if(Integer.parseInt(cwData[6].toString()) == 3) {
+                        delim = "colon";
+                    }
+                    else if(Integer.parseInt(cwData[6].toString()) == 11) {
+                        delim = "semi-colon";
+                    }
+                    else if(Integer.parseInt(cwData[6].toString()) == 12) {
+                        delim = "tab";
+                    }
 
-                if("".equals(cwname) || !cwname.equals(cwData[0])) {
-                if(!"".equals(cwname)) {
-                     reportBody.append("</tbody></table></div><br />");
+                    dateCreated = cwData[7].toString();
+                    lastUpdated = cwData[8].toString();
+
+                    TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
+                    DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    requiredFormat.setTimeZone(timeZone);
+
+                    Date createDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateCreated);
+                    Date lastUpdateDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(lastUpdated);
+
+                    reportBody.append("<div><span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>CW Name: "+cwname+" (ID=" + cwData[4].toString() + ")</strong></span><br />");
+                    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Date Created: " + new SimpleDateFormat("M/dd/yyyy").format(createDate) + "</strong></span><br />");
+                    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Last Updated: " + new SimpleDateFormat("M/dd/yyyy").format(lastUpdateDate) + "</strong></span><br />");
+                    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Delimiter Used: " + delim+ "</strong></span><br />");
+                    reportBody.append("<table border='1' cellpadding='1' cellspacing='1' width='100%'>");
+                    reportBody.append("<thead><tr><th style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Source Value</th><th style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Target Value</th><th style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Desc</th>");
+                    reportBody.append("</tr></thead><tbody>");
+                    }
+
+                    reportBody.append("<tr><td>")
+                    .append(escapeHtml(cwData[1].toString()))
+                    .append("</td><td>")
+                    .append(escapeHtml(cwData[2].toString()))
+                    .append("</td><td>")
+                    .append(escapeHtml(cwData[3].toString()))
+                    .append("</td></tr>");
                 }
-                cwname = (String) cwData[0];
-                if((Integer) cwData[5] == 1) {
-                    delim = "comma";
-                }
-                else if((Integer) cwData[5] == 2) {
-                    delim = "pipe";
-                }
-                else if((Integer) cwData[5] == 3) {
-                    delim = "colon";
-                }
-                else if((Integer) cwData[5] == 11) {
-                    delim = "semi-colon";
-                }
-                else if((Integer) cwData[5] == 12) {
-                    delim = "tab";
-                }
 
-                dateCreated = cwData[6].toString();
-                lastUpdated = cwData[7].toString();
-
-                TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
-                DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                requiredFormat.setTimeZone(timeZone);
-
-                Date createDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateCreated);
-                Date lastUpdateDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(lastUpdated);
-
-                reportBody.append("<div><span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>CW Name: "+cwname+" (ID=" + cwData[4].toString() + ")</strong></span><br />");
-                reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Date Created: " + new SimpleDateFormat("M/dd/yyyy").format(createDate) + "</strong></span><br />");
-                reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Last Updated: " + new SimpleDateFormat("M/dd/yyyy").format(lastUpdateDate) + "</strong></span><br />");
-                reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Delimiter Used: " + delim+ "</strong></span><br />");
-                reportBody.append("<table border='1' cellpadding='1' cellspacing='1' width='100%'>");
-                reportBody.append("<thead><tr><th style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Source Value</th><th style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Target Value</th><th style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Desc</th>");
-                reportBody.append("</tr></thead><tbody>");
-                }
-
-                reportBody.append("<tr><td>")
-                .append(escapeHtml(cwData[1].toString()))
-                .append("</td><td>")
-                .append(escapeHtml(cwData[2].toString()))
-                .append("</td><td>")
-                .append(escapeHtml(cwData[3].toString()))
-                .append("</td></tr>");
-
-            }
-
-            reportBody.append("</tbody></table></div>");
+                reportBody.append("</tbody></table></div>");
             }
             else {
             reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 16px;'>No crosswalks have been uploaded for this organization.</span><br />");
@@ -1508,15 +1494,14 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
            reportBody.append("</div>");
         }
 	
-	    return reportBody;
-	
+        return reportBody;
     }
     
     @Override 
     public StringBuffer printConnectionDetails(utConfiguration srcconfigDetails,utConfiguration tgtconfigDetails) throws Exception {
 	
-	Organization srcorgDetails = organizationDAO.getOrganizationById(srcconfigDetails.getorgId());
-	Organization tgtorgDetails = organizationDAO.getOrganizationById(tgtconfigDetails.getorgId());
+	Organization srcorgDetails = organizationDAO.getOrganizationById(srcconfigDetails.getOrgId());
+	Organization tgtorgDetails = organizationDAO.getOrganizationById(tgtconfigDetails.getOrgId());
 	
 	List<configurationFormFields> sourceconfigurationDataElements = configurationTransportDAO.getConfigurationFields(srcconfigDetails.getId(), 0);
 	List<configurationFormFields> targetconfigurationDataElements = configurationTransportDAO.getConfigurationFields(tgtconfigDetails.getId(), 0);
@@ -1535,7 +1520,6 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		}
 	    }
 	}
-
 	
 	StringBuffer reportBody = new StringBuffer();
 	reportBody.append("<div style='text-align:center'>");
@@ -1550,8 +1534,8 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	reportBody.append("<tr><td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Configuration</strong></td>");
 	reportBody.append("<td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Configuration</strong></td></tr>");
 	
-	reportBody.append("<tr><td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(srcconfigDetails.getconfigName()).append("</td>");
-	reportBody.append("<td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(tgtconfigDetails.getconfigName()).append("</td></tr>");
+	reportBody.append("<tr><td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(srcconfigDetails.getConfigname()).append("</td>");
+	reportBody.append("<td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(tgtconfigDetails.getConfigname()).append("</td></tr>");
 	reportBody.append("</tbody></table>");
 	reportBody.append("<br /><br /></div>");
 	
@@ -1559,7 +1543,6 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	reportBody.append("<table border='0' cellpadding='1' cellspacing='1' width='100%'><tbody>");
 	reportBody.append("<tr><td width='50%' style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 16px;'><strong>Source Configuration Data Elements</strong></td>");
 	reportBody.append("<td width='50%' style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 16px;'><strong>Target Configuration Data Elements</strong></td></tr>");
-	
 	
 	reportBody.append("<tr>");
 	reportBody.append("<td width='50%' valign='top'><span style='color:red;'>Rows in red are not in use</span><br />");
@@ -1609,19 +1592,13 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		reportBody.append("<tr><td>").append(tgtFormField.getFieldNo()).append("</td><td>").append(tgtFormField.getFieldDesc()).append("</td><td>").append(required).append("</td><td>").append(mappedField).append("</td></tr>");
 	    }
 	}
-	
-	
 	reportBody.append("</tbody></table>");
 	reportBody.append("</td>");
 	reportBody.append("</tr>");
-	
-	
-	
 	reportBody.append("</tbody></table>");
 	reportBody.append("</div>");
 	
 	return reportBody;
-	
     }
     
     @Override
@@ -1760,13 +1737,10 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 			    
 			    fileWriter.close();
 			}
-			
-			
 		    }
 		}
 	    }
 	}
-	
     }
     
     @Override
@@ -1945,8 +1919,8 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	sb.append(configDetails.getStatus()).append("|");
 	sb.append(configDetails.getType()).append("|");
 	sb.append(configDetails.getMessageTypeId()).append("|");
-	sb.append(configDetails.getstepsCompleted()).append("|");
-	sb.append(configDetails.getconfigName()).append("|");
+	sb.append(configDetails.getStepsCompleted()).append("|");
+	sb.append(configDetails.getConfigname()).append("|");
 	sb.append(configDetails.getThreshold()).append("|");
 	sb.append(configDetails.getConfigurationType()).append("|");
 	sb.append("0");
@@ -1961,20 +1935,20 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	StringBuffer sb = new StringBuffer();
 	sb.append("[transportDetails|");
 	sb.append("0|");
-	sb.append(transportDetails.gettransportMethodId()).append("|");
-	sb.append(transportDetails.getfileType()).append("|");
-	sb.append(transportDetails.getfileDelimiter()).append("|");
-	sb.append(transportDetails.getstatus()).append("|");
-	sb.append(transportDetails.gettargetFileName()).append("|");
-	sb.append(transportDetails.getappendDateTime()).append("|");
-	sb.append(transportDetails.getmaxFileSize()).append("|");
-	sb.append(transportDetails.getclearRecords()).append("|");
-	sb.append(transportDetails.getfileLocation()).append("|");
-	sb.append(transportDetails.getautoRelease()).append("|");
-	sb.append(transportDetails.geterrorHandling()).append("|");
-	sb.append(transportDetails.getmergeBatches()).append("|");
-	sb.append(transportDetails.getcopiedTransportId()).append("|");
-	sb.append(transportDetails.getfileExt()).append("|");
+	sb.append(transportDetails.getTransportMethodId()).append("|");
+	sb.append(transportDetails.getFileType()).append("|");
+	sb.append(transportDetails.getFileDelimiter()).append("|");
+	sb.append(transportDetails.isStatus()).append("|");
+	sb.append(transportDetails.getTargetFileName()).append("|");
+	sb.append(transportDetails.isAppendDateTime()).append("|");
+	sb.append(transportDetails.getMaxFileSize()).append("|");
+	sb.append(transportDetails.isClearRecords()).append("|");
+	sb.append(transportDetails.getFileLocation()).append("|");
+	sb.append(transportDetails.isAutoRelease()).append("|");
+	sb.append(transportDetails.getErrorHandling()).append("|");
+	sb.append(transportDetails.isMergeBatches()).append("|");
+	sb.append(transportDetails.getCopiedTransportId()).append("|");
+	sb.append(transportDetails.getFileExt()).append("|");
 	sb.append(transportDetails.getEncodingId()).append("|");
 	sb.append(transportDetails.getCcdSampleTemplate()).append("|");
 	sb.append(transportDetails.getHL7PDFSampleTemplate()).append("|");
@@ -2039,19 +2013,19 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		sb.append(System.getProperty("line.separator"));
 		sb.append("[ftpDropDetails|");
 		sb.append("0|");
-		sb.append(ftpDetails.getip()).append("|");
-		sb.append(ftpDetails.getdirectory()).append("|");
-		sb.append(ftpDetails.getusername()).append("|");
+		sb.append(ftpDetails.getIp()).append("|");
+		sb.append(ftpDetails.getDirectory()).append("|");
+		sb.append(ftpDetails.getUsername()).append("|");
 		sb.append("null|");
-		sb.append(ftpDetails.getmethod()).append("|");
-		sb.append(ftpDetails.getport()).append("|");
-		sb.append(ftpDetails.getprotocol()).append("|");
-		sb.append(ftpDetails.getcertification());
+		sb.append(ftpDetails.getMethod()).append("|");
+		sb.append(ftpDetails.getPort()).append("|");
+		sb.append(ftpDetails.getProtocol()).append("|");
+		sb.append(ftpDetails.getCertification());
 		sb.append("]");
 		
-		if(ftpDetails.getcertification() != null) {
-		    if(!ftpDetails.getcertification().isEmpty()) {
-			emailBodySB.append("<br />The following FTP Certificate File needs to be MOVED to the organizations certificate folder<br />").append("File Name: ").append(ftpDetails.getcertification().trim());
+		if(ftpDetails.getCertification() != null) {
+		    if(!ftpDetails.getCertification().isEmpty()) {
+			emailBodySB.append("<br />The following FTP Certificate File needs to be MOVED to the organizations certificate folder<br />").append("File Name: ").append(ftpDetails.getCertification().trim());
 		    }
 		}
 		else {
@@ -2225,8 +2199,8 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	+ "configurationdatatranslations c on (c.crosswalkid = a.id or (c.macroId in (129,160,177,195,199,201) and (c.constant1 = a.id or c.constant2 = a.id))) and c.configId = " + configId + " "
 	+ "where a.orgId = 0 or a.orgId = " + orgId + " "
 	+ "order by a.id";
-	 
-	return utConfigurationDAO.getDTCWForDownload(sqlStatement);
+        
+	return utConfigurationDAO.getCrosswalksForExport(sqlStatement);
     }
     
     @Override 
@@ -2234,7 +2208,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	
 	StringBuffer sb = new StringBuffer();
 	sb.append("[srcconfig|");
-	sb.append(configDetails.getconfigName().trim()).append("|");
+	sb.append(configDetails.getConfigname().trim()).append("|");
 	sb.append(orgDetails.getCleanURL().trim());
 	sb.append("]");
 	
@@ -2246,7 +2220,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	
 	StringBuffer sb = new StringBuffer();
 	sb.append("[tgtconfig|");
-	sb.append(configDetails.getconfigName().trim()).append("|");
+	sb.append(configDetails.getConfigname().trim()).append("|");
 	sb.append(orgDetails.getCleanURL().trim());
 	sb.append("]");
 	
@@ -2374,9 +2348,8 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	utConfigurationDAO.executeSQLStatement(sqlStatement);
     }
 
-@Override
+    @Override
     public List<configurationConnection> getAllConnectionsSingleQuery() {
 	return utConfigurationDAO.getAllConnectionsSingleQuery();
     }
 }
-

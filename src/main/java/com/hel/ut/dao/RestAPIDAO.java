@@ -4,9 +4,7 @@ import com.hel.ut.model.RestAPIMessagesIn;
 import com.hel.ut.model.RestAPIMessagesOut;
 import java.util.Date;
 import java.util.List;
-
 import org.springframework.stereotype.Repository;
-
 
 @Repository
 public interface RestAPIDAO {
@@ -24,5 +22,4 @@ public interface RestAPIDAO {
     List<RestAPIMessagesIn> getRestAPIMessagesInListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
 
     List<RestAPIMessagesOut> getRestAPIMessagesOutListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
-    
 }

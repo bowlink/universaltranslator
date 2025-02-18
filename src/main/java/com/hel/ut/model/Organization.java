@@ -8,9 +8,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import org.hibernate.validator.constraints.NotEmpty;
 import com.hel.ut.validator.Phone;
 import jakarta.persistence.Transient;
+import jakarta.validation.constraints.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,12 +31,12 @@ public class Organization {
     @Column(name = "ID", nullable = false)
     private int id;
 
-    @NotEmpty
     @NoHtml
     @Column(name = "ORGNAME", nullable = false)
     private String orgName;
 
-    @NoHtml
+    @NoHtml  
+    //@Size(min = 10, max = 200, message = "About Me must be between 10 and 200 characters")
     @Column(name = "ADDRESS", nullable = false)
     private String address;
 

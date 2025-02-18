@@ -1,202 +1,143 @@
 
 
-require(['./main'], function () {
+jQuery(function ($) {
     
-    $(document).on('click', '.exportConfig', function() {
-            
-        var configId = $(this).attr('rel');
+     $(document).ready(function () {
+    
+        //Selected transport method
+        var transportMethod = $('#transportMethod').val();
+        var helRegistryId = $('#helRegistryId').val();
+        var helSchemaName = $('#helSchemaName').val();
+        var messageTypeId = $('#messageTypeId').val();
+        var fileType = $('#fileType').val();
 
-        if(confirm("Are you sure you want to export this configuration?")) {
+        showCorrectFieldsByTransportMethod(transportMethod);
+        showCorrectFileDetails(fileType,0);
 
-            $.ajax({
-                url: 'createConfigExportFile.do',
-                data: {
-                    'configId': configId
-                },
-                type: "GET",
-                dataType : 'text',
-                contentType : 'application/json;charset=UTF-8',
-                success: function(data) {
-                    if(data !== '') {
-                        window.location.href = '/administrator/configurations/printConfigExport/'+ data;
-                        //$('#dtDownloadModal').modal('toggle');
-                    }
-                    else {
-                        $('#exportErrorMsg').show();
-                    }
-                }
-            });
+        //if the selected transport method is From a Health-e-Link Registry or going to a Health-e-Link registry
+        //show the conifguration box
+        if(messageTypeId == 1 && helRegistryId > 0 && helSchemaName !== "") {
+            populateHELRegistryConfigs(helRegistryId,helSchemaName);
         }
-    });
-        
-    $(document).on('click','.printConfig',function() {
-       $('body').overlay({
-           glyphicon : 'print',
-           message : 'Gathering Details...'
-       });
 
-        var configId = $(this).attr('rel');
+        $('#transportMethod').change(function () {
+            var methodId = $(this).val();
 
-        $.ajax({
-            url: 'createConfigPrintPDF.do',
-            data: {
-                'configId': configId
-            },
-            type: "GET",
-            dataType : 'text',
-            contentType : 'application/json;charset=UTF-8',
-            success: function(data) {
-                if(data !== '') {
-                    window.location.href = '/administrator/configurations/printConfig/'+ data;
-                    $('.overlay').css('display','none');
-                }
-                else {
-                    $('#errorMsg').show();
+            if(messageTypeId == 1 && helRegistryId > 0 && helSchemaName !== "") {
+                populateHELRegistryConfigs(helRegistryId,helSchemaName);
+
+                //If method == 10 (Coming from a HEL Registry online form preset the values
+                $('#fileType').val(2);
+                $('#fileExt').val('txt');
+            }
+            else {
+                $('#helRegistryConfigDiv').hide();
+                $('#helRegistryConfigId').find('option').remove().end().append('<option value="">- Select Registry Configuration -</option>').val('');
+            }
+
+            showCorrectFieldsByTransportMethod(methodId);
+        });
+
+        $(document).on('change','#enableDirect', function() {
+            if($(this).is(':checked')) {
+                $('.directDetails').removeClass('collapse');
+            }
+            else {
+                $('.directDetails').addClass('collapse');
+            }
+        });
+
+        $(document).on('change','#enableRest', function() {
+            if($(this).is(':checked')) {
+                $('.restDetails').removeClass('collapse');
+            }
+            else {
+                $('.restDetails').addClass('collapse');
+            }
+        });
+
+        $(document).on('change','#enableFTP', function() {
+            if($(this).is(':checked')) {
+                $('.ftpDetails').removeClass('collapse');
+            }
+            else {
+
+                var transportId = $('#id').val();
+
+                if(confirm("Are you sure you want to Remove the FTP information for this configuration?")) {
+
+                    $.ajax({
+                        url: 'deleteConfigurationFTPInformation.do',
+                        data: {
+                            'transportId': transportId
+                        },
+                        type: 'POST',
+                        success: function(data) {
+                            $('.ftpDetails').addClass('collapse');
+                        }
+                    });
                 }
             }
         });
-    });
 
-    $("input:text,form").attr("autocomplete", "off");
-
-    //Fade out the updated/created message after being displayed.
-    if ($('.alert').length > 0) {
-        $('.alert').delay(2000).fadeOut(1000);
-    }
-
-    //Selected transport method
-    var transportMethod = $('#transportMethod').val();
-    var helRegistryId = $('#helRegistryId').val();
-    var helSchemaName = $('#helSchemaName').val();
-    var messageTypeId = $('#messageTypeId').val();
-    var fileType = $('#fileType').val();
-
-    showCorrectFieldsByTransportMethod(transportMethod);
-    showCorrectFileDetails(fileType,0);
-
-    //if the selected transport method is From a Health-e-Link Registry or going to a Health-e-Link registry
-    //show the conifguration box
-    if(messageTypeId == 1 && helRegistryId > 0 && helSchemaName !== "") {
-        populateHELRegistryConfigs(helRegistryId,helSchemaName);
-    }
-
-    $('#transportMethod').change(function () {
-        var methodId = $(this).val();
-        
-        if(messageTypeId == 1 && helRegistryId > 0 && helSchemaName !== "") {
-            populateHELRegistryConfigs(helRegistryId,helSchemaName);
-
-            //If method == 10 (Coming from a HEL Registry online form preset the values
-            $('#fileType').val(2);
-            $('#fileExt').val('txt');
-        }
-        else {
-            $('#helRegistryConfigDiv').hide();
-            $('#helRegistryConfigId').find('option').remove().end().append('<option value="">- Select Registry Configuration -</option>').val('');
-        }
-
-        showCorrectFieldsByTransportMethod(methodId);
-    });
-
-    $(document).on('change','#enableDirect', function() {
-        if($(this).is(':checked')) {
-            $('.directDetails').removeClass('collapse');
-        }
-        else {
-            $('.directDetails').addClass('collapse');
-        }
-    });
-
-    $(document).on('change','#enableRest', function() {
-        if($(this).is(':checked')) {
-            $('.restDetails').removeClass('collapse');
-        }
-        else {
-            $('.restDetails').addClass('collapse');
-        }
-    });
-
-    $(document).on('change','#enableFTP', function() {
-        if($(this).is(':checked')) {
-            $('.ftpDetails').removeClass('collapse');
-        }
-        else {
-            
-            var transportId = $('#id').val();
-            
-            if(confirm("Are you sure you want to Remove the FTP information for this configuration?")) {
-               
-                $.ajax({
-                    url: 'deleteConfigurationFTPInformation.do',
-                    data: {
-                        'transportId': transportId
-                    },
-                    type: 'POST',
-                    success: function(data) {
-                        $('.ftpDetails').addClass('collapse');
-                    }
-                });
+        $(document).on('change','#dmFindConfig',function() {
+            if($(this).val() == 1) {
+                $('.dmConfigKeywordDiv').show();
             }
-        }
-    });
+            else {
+                $('#dmConfigKeyword').val("");
+                $('.dmConfigKeywordDiv').hide();
+            }
+        });
 
-    $(document).on('change','#dmFindConfig',function() {
-        if($(this).val() == 1) {
-            $('.dmConfigKeywordDiv').show();
-        }
-        else {
-            $('#dmConfigKeyword').val("");
-            $('.dmConfigKeywordDiv').hide();
-        }
-    });
-    
-    $(document).on('change','#errorHandling',function() {
-        if($(this).val() == 3) {
-            $('#errorEmailAddressesDiv').show();
-        }
-        else {
-            $('#errorEmailAddresses').val("");
-            $('#errorEmailAddressesDiv').hide();
-        }
-    });
-    
-    //This function will save the messgae type field mappings
-    $('#saveDetails').click(function () {
-        $('#action').val('save');
+        $(document).on('change','#errorHandling',function() {
+            if($(this).val() == 3) {
+                $('#errorEmailAddressesDiv').show();
+            }
+            else {
+                $('#errorEmailAddresses').val("");
+                $('#errorEmailAddressesDiv').hide();
+            }
+        });
 
-        //Need to make sure all required fields are marked if empty.
-        var hasErrors = 0;
-        hasErrors = checkFormFields();
+        //This function will save the messgae type field mappings
+        $('#saveDetails').click(function () {
+            $('#action').val('save');
 
-        if (hasErrors == 0) {
-            $('#transportDetails').submit();
-        }
-    });
+            //Need to make sure all required fields are marked if empty.
+            var hasErrors = 0;
+            hasErrors = checkFormFields();
 
-    $('#next').click(function (event) {
-        $('#action').val('next');
+            if (hasErrors == 0) {
+                $('#transportDetails').submit();
+            }
+        });
 
-        var hasErrors = 0;
-        hasErrors = checkFormFields();
+        $('#next').click(function (event) {
+            $('#action').val('next');
 
-        if (hasErrors == 0) {
-            $('#transportDetails').submit();
-        }
-    });
+            var hasErrors = 0;
+            hasErrors = checkFormFields();
 
-    //Set the default file extension when the file type is selected
-    $('#fileType').change(function () {
-         var fileType = $(this).val();
-         showCorrectFileDetails(fileType,1);
-    });
-     
-    $('.zipped').change(function () {
-       if($(this).val() == 1) {
-           $('#zipTypeTopDiv').show();
-       }
-       else {
-           $('#zipTypeTopDiv').hide();
-       }
+            if (hasErrors == 0) {
+                $('#transportDetails').submit();
+            }
+        });
+
+        //Set the default file extension when the file type is selected
+        $('#fileType').change(function () {
+             var fileType = $(this).val();
+             showCorrectFileDetails(fileType,1);
+        });
+
+        $('.zipped').change(function () {
+           if($(this).val() == 1) {
+               $('#zipTypeTopDiv').show();
+           }
+           else {
+               $('#zipTypeTopDiv').hide();
+           }
+        });
     });
 });
 

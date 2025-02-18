@@ -9,8 +9,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 
-import org.hibernate.validator.constraints.NotEmpty;
-
 @Entity
 @Table(name = "MACRO_NAMES")
 public class Macros {
@@ -21,7 +19,6 @@ public class Macros {
     @Column(name = "ID", nullable = false)
     private int id;
 
-    @NotEmpty
     @Column(name = "MACRO_NAME", nullable = false)
     private String macroName;
 
@@ -35,7 +32,6 @@ public class Macros {
     @Column(name = "DATE_DISPLAY", nullable = true)
     private String dateDisplay;
 
-    @NotEmpty
     @NoHtml
     @Column(name = "FORMULA", nullable = false)
     private String formula;

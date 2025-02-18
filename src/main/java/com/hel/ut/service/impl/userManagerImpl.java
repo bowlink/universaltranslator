@@ -2,10 +2,8 @@ package com.hel.ut.service.impl;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.hel.ut.dao.userDAO;
 import com.hel.ut.model.utUser;
 import com.hel.ut.service.userManager;
@@ -28,9 +26,7 @@ public class userManagerImpl implements userManager {
     @Override
 
     public Integer createUser(utUser user) {
-        Integer lastId = null;
-        lastId = (Integer) userDAO.createUser(user);
-        return lastId;
+        return (Integer) userDAO.createUser(user);
     }
 
     @Override
@@ -153,7 +149,7 @@ public class userManagerImpl implements userManager {
         // http://blog.crackpassword.com/2010/09/smartphone-forensics-cracking-blackberry-backup-passwords/
         int iterations = 20000;
 
-// byte[] b = string.getBytes(Charset.forName("UTF-8"));
+        // byte[] b = string.getBytes(Charset.forName("UTF-8"));
         KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterations, derivedKeyLength);
 
         SecretKeyFactory f = SecretKeyFactory.getInstance(algorithm);
@@ -162,8 +158,7 @@ public class userManagerImpl implements userManager {
     }
 
     @Override
-    public boolean authenticate(String attemptedPassword, byte[] encryptedPassword, byte[] salt)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public boolean authenticate(String attemptedPassword, byte[] encryptedPassword, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
 
         // Encrypt the clear-text password using the same salt that was used to
         // encrypt the original password
@@ -197,10 +192,8 @@ public class userManagerImpl implements userManager {
     }
 
     @Override
-    public List<utUser> getUsersByStatuRolesAndOrg(boolean status, List<Integer> rolesToExclude, List<Integer> orgs, boolean include)
-            throws Exception {
+    public List<utUser> getUsersByStatuRolesAndOrg(boolean status, List<Integer> rolesToExclude, List<Integer> orgs, boolean include) throws Exception {
         return userDAO.getUsersByStatuRolesAndOrg(status, rolesToExclude, orgs, include);
-
     }
 
     @Override

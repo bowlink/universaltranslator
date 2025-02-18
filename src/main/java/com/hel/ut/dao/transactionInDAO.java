@@ -34,11 +34,9 @@ import com.hel.ut.model.directmessagesin;
 import com.hel.ut.model.generatedActivityReportAgencies;
 import com.hel.ut.model.generatedActivityReports;
 import com.hel.ut.model.referralActivityExports;
-
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
-
 import org.springframework.stereotype.Repository;
 
 /**

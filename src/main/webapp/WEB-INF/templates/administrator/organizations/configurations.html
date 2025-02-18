@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+     <head>
+        <title>Health-e-Link UT Organization Configurations</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/organizations/actionBar :: actionBar}"></div>
+            <div th:insert="~{administrator/organizations/menuBar :: menuBar}"></div>
+            <div class="main clearfix" role="main">
+                <div class="col-md-12">
+                    <section class="panel panel-default">
+                        <div class="panel-body">
+                            <dt>
+                            <dt>Organization Summary:</dt>
+                            <dd><strong>Organization:</strong> <span th:text="${orgName}"></span></dd>
+                            </dt>
+                        </div>
+                    </section>
+
+                    <section class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Configurations</h3>
+                        </div>
+                        <div class="panel-body">
+
+                            <div class="form-container scrollable">
+                                <div th:if="${not #lists.isEmpty(configurations)}">
+                                    <table class="table table-striped table-hover table-default">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Configuration Name</th>
+                                                <th scope="col">Configuration Type</th>
+                                                <th scope="col" class="center-text">Transport Method</th>
+                                                <th scope="col" class="center-text">Date Created</th>
+                                                <th scope="col"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr style="cursor: pointer" th:each="config : ${configurations}">
+                                                 <td scope="row">
+                                                     <a th:href="${'/administrator/configurations/details?i='+config.id}" title="Edit this configuration">
+                                                         <span th:text="${config.configname}"></span>
+                                                     </a>
+                                                    <br />
+                                                    <span class="text-success" th:if="${config.status}" th:text="Active"></span>
+                                                    <span class="text-danger" th:if="${!config.status}" th:text="Inactive"></span>
+                                                 </td>
+                                                <td>
+                                                    <span th:if="${config.type == 1}">Source Configuration</span>
+                                                    <span th:if="${config.type == 2}">Target Configuration</span>
+                                                </td>
+                                                <td scope="row" class="center-text" th:text="${config.transportMethod}"></td>
+                                                <td scope="row" class="center-text" th:text="${#dates.format(config.dateCreated, 'M/dd/yy h:mm a')}"></td>
+                                                <td scope="row" class="actions-col">
+                                                    <a th:href="${'/administrator/configurations/details?i='+config.id}" class="btn btn-link" title="Edit this configuration">
+                                                        <span class="glyphicon glyphicon-edit"></span>
+                                                        View	
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div th:if="${#lists.isEmpty(configurations)}">
+                                    <tr><td colspan="3" class="center-text">There are currently no configurations set up for this organization.</td></tr>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>		
+            </div>
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/admin/organization/configs.js}"></script>
+        </th:block>
+    </body>
+</html>

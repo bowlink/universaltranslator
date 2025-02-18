@@ -71,7 +71,7 @@
                         <li role="menuitem" class="exportConnectionnBtn"> <a href="#" class="exportConnection" rel="${connectionId}" title="Export this Connection"><span class="glyphicon icon-stacked glyphicon glyphicon-export"></span>Export Connection</a></li>
                     </c:if>
                     <li role="menuitem">
-			<a href="#" class="printConfig" title="Print this Connection" rel="${connectionId}" role="button"><span class="glyphicon glyphicon-print icon-stacked"></span> Print </a>
+			<a href="#" class="printConfig" title="Print this Connection" th:rel="${connectionId}" role="button"><span class="glyphicon glyphicon-print icon-stacked"></span> Print </a>
 		    </li>
                     <li role="menuitem"><a href="#" id="saveDetails" title="Save this Connection" role="button"><span class="glyphicon glyphicon-ok icon-stacked"></span> Save </a></li>
                     <li role="menuitem"><a href="#" id="saveCloseDetails" title="Save &amp; Close" role="button"><span class="glyphicon glyphicon-floppy-disk icon-stacked"></span> Save &amp; Close</a></li>

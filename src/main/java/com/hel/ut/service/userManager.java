@@ -50,11 +50,9 @@ public interface userManager {
 
     byte[] generateSalt() throws NoSuchAlgorithmException;
 
-    byte[] getEncryptedPassword(String password, byte[] salt)
-            throws NoSuchAlgorithmException, InvalidKeySpecException;
+    byte[] getEncryptedPassword(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException;
 
-    boolean authenticate(String attemptedPassword, byte[] encryptedPassword, byte[] salt)
-            throws NoSuchAlgorithmException, InvalidKeySpecException;
+    boolean authenticate(String attemptedPassword, byte[] encryptedPassword, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException;
 
     utUser encryptPW(utUser user) throws Exception;
 

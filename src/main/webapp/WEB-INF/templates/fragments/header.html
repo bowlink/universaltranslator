@@ -1,0 +1,55 @@
+<header id="header" class="header" role="banner" th:fragment="header">
+    <!-- Primary Nav -->
+    <!--role="navigation" used for accessibility -->
+    <nav class="navbar primary-nav" role="navigation">
+        <div class="contain">
+            <div class="navbar-header">
+                <a th:href="@{/administrator}" class="navbar-brand" title="">
+                   <span style="color:white; font-family: sans-serif; font-size: 20px">Health-e-Link UT</span>
+                </a>
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav" role="menu">
+                    <li th:if="${session.userDetails.roleId == 1}" role="menuitem" th:class="${sect == 'dash' ? 'active' : 'none'}">
+                        <a th:href="@{/administrator}" title="Dashboard">Dashboard</a>
+                        <span th:if="${sect == 'dash'}" class="indicator-active arrow-up"></span>
+                    </li>
+                    <li th:if="${session.userDetails.roleId == 1}" role="menuitem" th:class="${sect == 'org' ? 'active' : 'none'}">
+                        <a th:href="@{/administrator/organizations/list}" title="Organization Manager">Organizations</a>
+                        <span th:if="${sect == 'org'}" class="indicator-active arrow-up"></span></li>
+                    <li th:if="${session.userDetails.roleId == 1}" role="menuitem" th:class="${sect == 'config' ? 'active' : 'none'}">
+                        <a th:href="@{/administrator/configurations/list}" title="Configuration Manager">Configurations</a>
+                        <span th:if="${sect == 'config'}" class="indicator-active arrow-up"></span></li>
+                    <li th:if="${session.userDetails.roleId == 1}" role="menuitem" th:class="${sect == 'connect' ? 'active' : 'none'}">
+                        <a th:href="@{/administrator/configurations/connections}" title="Configuration Connection Manager">Connections</a>
+                        <span th:if="${sect == 'connect'}" class="indicator-active arrow-up"></span></li>
+                    <li th:if="${session.userDetails.roleId == 3}" role="menuitem" th:class="${sect == 'dash' ? 'active' : 'none'}">
+                        <a th:href="@{/administrator}" title="Dashboard">Dashboard</a><c:if test="${param['sect'] == 'dash'}">
+                        <span th:if="${sect == 'dash'}" class="indicator-active arrow-up"></span>
+                    </li>
+                    <li role="menuitem" th:class="${sect == 'activity' ? 'active' : 'none'}">
+                        <a th:href="@{/administrator/processing-activity/inbound}" title="Processing Activity">Processing Activity</a>
+                        <span th:if="${sect == 'activity'}" class="indicator-active arrow-up"></span>
+                    </li>
+		    <li th:if="${session.userDetails.roleId == 1}" role="menuitem" th:class="${sect == 'sysadmin' ? 'active' : 'none'}">
+                        <a th:href="@{/administrator/sysadmin/}" title="System Administration">System Admin</a>
+                        <span th:if="${sect == 'sysadmin'}" class="indicator-active arrow-up"></span>
+                    </li>
+		    <li th:if="${session.userDetails.roleId == 4}" role="menuitem" th:class="${sect == 'org' ? 'active' : 'none'}">
+                        <a th:href="@{/administrator/organizations/list}" title="Organization Manager">Organizations</a>
+                        <span th:if="${sect == 'org'}" class="indicator-active arrow-up"></span>
+                    </li>
+		  </ul>
+                <ul class="nav navbar-nav navbar-right" id="secondary-nav">
+                    <li><a class="logout" th:href="@{/userlogout}">Log out </a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>

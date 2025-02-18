@@ -1,7 +1,102 @@
 
 
 
-require(['./main'], function () {
+jQuery(function ($) {
+    
+    $(document).ready(function () {
+        const triggerTabList = document.querySelectorAll('#pills-tab button')
+        triggerTabList.forEach(triggerEl => {
+          const tabTrigger = new bootstrap.Tab(triggerEl)
+
+          triggerEl.addEventListener('click', event => {
+            event.preventDefault()
+            tabTrigger.show()
+          });
+        });
+
+        $('#sourceconfigdatatable').DataTable({
+            bAutoWidth: false,
+            bStateSave: true,
+            iCookieDuration: 60,
+            aaSorting: [[4,'desc']],
+            
+            "oLanguage": {
+                "sSearch": "_INPUT_",
+                sSearchPlaceholder: 'Filter Configurations',
+                "sLengthMenu": '<select class="form-control" style="width:150px">' +
+                        '<option value="10">10 Records</option>' +
+                        '<option value="20">20 Records</option>' +
+                        '<option value="30">30 Records</option>' +
+                        '<option value="40">40 Records</option>' +
+                        '<option value="50">50 Records</option>' +
+                        '<option value="-1">All</option>' +
+                        '</select>'
+            },
+           "aoColumns" : [
+                { "sWidth": "5%" },
+                { "sWidth": "20%" },
+                { "sWidth": "30%" },
+                { "sWidth": "10%" },
+                { "sWidth": "15%" },
+                { "sWidth": "15%" },
+                { "sWidth": "5%" }
+            ]
+        });
+        
+        $('#sourceconfigdatatable').on("click", 'td.link', function(e){
+            window.location.href = "details?i=" + $(this).attr('rel');
+        });
+        
+        $('#targetconfigdatatable').DataTable({
+            bAutoWidth: false,
+            bStateSave: true,
+            iCookieDuration: 60,
+            aaSorting: [[4,'desc']],
+            
+            "oLanguage": {
+                "sSearch": "_INPUT_",
+                sSearchPlaceholder: 'Filter Configurations',
+                "sLengthMenu": '<select class="form-control" style="width:150px">' +
+                        '<option value="10">10 Records</option>' +
+                        '<option value="20">20 Records</option>' +
+                        '<option value="30">30 Records</option>' +
+                        '<option value="40">40 Records</option>' +
+                        '<option value="50">50 Records</option>' +
+                        '<option value="-1">All</option>' +
+                        '</select>'
+            },
+           "aoColumns" : [
+                { "sWidth": "5%" },
+                { "sWidth": "20%" },
+                { "sWidth": "30%" },
+                { "sWidth": "10%" },
+                { "sWidth": "15%" },
+                { "sWidth": "15%" },
+                { "sWidth": "5%" }
+            ]
+        });
+        
+        $('#targetconfigdatatable').on("click", 'td.link', function(e){
+            window.location.href = "details?i=" + $(this).attr('rel');
+        });
+
+        $.ajaxSetup({
+            cache: false
+        });
+
+        //Fade out the updated/created message after being displayed.
+        if ($('.alert').length > 0) {
+            $('.alert').delay(2000).fadeOut(1000);
+        }
+
+        $("input:text,form").attr("autocomplete", "off");
+    });
+    
+    $.extend($.fn.dataTableExt.oStdClasses, {
+        "sSortAsc": "tableheader headerSortDown",
+        "sSortDesc": "tableheader headerSortUp",
+        "sSortable": "tableheader"
+    });
     
     $(document).on('click', '.checkFTP', function() {
         $.ajax({
@@ -64,7 +159,7 @@ require(['./main'], function () {
              data: {},
              type: "GET",
              success: function(data) {
-                 $("#configFileUploadModal").html(data);
+                 $("#UploadModalContent").html(data);
              }
          });
     });
@@ -132,8 +227,8 @@ require(['./main'], function () {
                 }
             });
         }
-     });
-        
+    });
+     
     $(document).on('click', '.uploadFile', function() {
         var fileDropLocation = $(this).attr('rel2');
         var configId = $(this).attr('rel');
@@ -223,7 +318,7 @@ require(['./main'], function () {
          var configId = $(this).attr('rel');
 
          $.ajax({
-             url: 'createConfigPrintPDF.do',
+             url: '/administrator/configurations/createConfigPrintPDF.do',
              data: {
                  'configId': configId
              },
@@ -242,74 +337,8 @@ require(['./main'], function () {
          });
          
          return false;
-     });
-
-    $('#myTabContent a[href="#source-config"]').tab('show');
-
-    $("a[data-toggle=\"tab\"]").on("shown.bs.tab", function (e) {
-        $($.fn.dataTable.tables( true ) ).css('width', '100%');
-        $($.fn.dataTable.tables( true ) ).DataTable().columns.adjust().draw();
-    });
-
-     try {
-         /* Table initialisation */
-         var sourceconfigdatatable = $('#sourceconfigdatatable').dataTable({
-             "bStateSave": false,
-             "sPaginationType": "bootstrap",
-             columnDefs: [ { type: 'date', 'targets': [4,5] } ],
-             "oLanguage": {
-                 "sSearch": "_INPUT_",
-                 "sLengthMenu": '<select class="form-control" style="width:150px">' +
-                         '<option value="10">10 Records</option>' +
-                         '<option value="20">20 Records</option>' +
-                         '<option value="30">30 Records</option>' +
-                         '<option value="40">40 Records</option>' +
-                         '<option value="50">50 Records</option>' +
-                         '<option value="-1">All</option>' +
-                         '</select>'
-             }
-         });
-         sourceconfigdatatable.fnSort([[5, 'desc']]);
-     }
-     catch(err) {}
-
-     try {
-         /* Table initialisation */
-         var targetconfigdatatable = $('#targetconfigdatatable').dataTable({
-             "bStateSave": false,
-             "sPaginationType": "bootstrap",
-              columnDefs: [ { type: 'date', 'targets': [4,5] } ],
-             "oLanguage": {
-                 "sSearch": "_INPUT_",
-                 "sLengthMenu": '<select class="form-control" style="width:150px">' +
-                         '<option value="10">10 Records</option>' +
-                         '<option value="20">20 Records</option>' +
-                         '<option value="30">30 Records</option>' +
-                         '<option value="40">40 Records</option>' +
-                         '<option value="50">50 Records</option>' +
-                         '<option value="-1">All</option>' +
-                         '</select>'
-             }
-         });
-         targetconfigdatatable.fnSort([[5, 'desc']]);
-     }
-     catch(err) {}
-
-     $.ajaxSetup({
-         cache: false
-     });
-
-     //Fade out the updated/created message after being displayed.
-     if ($('.alert').length > 0) {
-         $('.alert').delay(2000).fadeOut(1000);
-     }
-
-     $("input:text,form").attr("autocomplete", "off");
-
-     $(document).on('click', '.editConfig', function () {
-         window.location.href = "details?i=" + $(this).attr('rel');
-     });
-
+    }); 
+    
      $(document).on('click', '.deleteConfig', function() {
 
          var configId = $(this).attr('rel');
@@ -391,5 +420,3 @@ require(['./main'], function () {
         }
     });
 });
-
-

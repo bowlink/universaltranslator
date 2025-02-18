@@ -16,5 +16,4 @@ public interface emailMessageManager {
 
     @Async
     void sendEmail(mailMessage messageDetails) throws Exception;
-
 }

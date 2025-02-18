@@ -150,7 +150,4 @@ public class hisps {
     public void setPrimaryContactPhone(String primaryContactPhone) {
 	this.primaryContactPhone = primaryContactPhone;
     }
-    
-    
-
 }

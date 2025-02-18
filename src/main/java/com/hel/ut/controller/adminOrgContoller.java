@@ -3,7 +3,6 @@ package com.hel.ut.controller;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,6 +44,7 @@ import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 
 /**
@@ -102,20 +102,21 @@ public class adminOrgContoller {
      */
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     public ModelAndView listOrganizations() throws Exception {
-	
+        
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/organizations/listOrganizations");
-
-	//List<Organization> organizations = organizationManager.getOrganizations();
-	//mav.addObject("organizationList",organizations);
-	
+        mav.addObject("pageId", "organization-list");
+        mav.addObject("pageSection", "section-organizations");
+        mav.addObject("sect","org");
+        mav.addObject("actionPage","listOrgs");
+        
+	mav.setViewName("administrator/organizations/list");
+        
         return mav;
     }
     
     @RequestMapping(value = "/ajax/getOrganizations", method = RequestMethod.GET)
-    @ResponseBody
-    public String getOrganizations(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-	
+    public @ResponseBody String getOrganizations(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
+        
 	Gson gson = new Gson();
         JsonObject jsonResponse = new JsonObject();
 	Integer iDisplayStart = Integer.parseInt(request.getParameter("iDisplayStart"));
@@ -127,15 +128,14 @@ public class adminOrgContoller {
         String sortDirection = request.getParameter("sSortDir_0");
         Integer totalRecords = 0;
 	
-	List<Organization> organizations = organizationManager.getOrganizationsPaged(iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
-	List<Organization> totalOrgs = organizationManager.getOrganizations();
-	
+	List<Object> organizations = organizationManager.getOrganizationsPaged(iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
 	List<helRegistry> helRegistries = helregistrymanager.getAllActiveRegistries();
 	
-	for(Organization org : totalOrgs) {
-	    if(!"bowlinktest".equals(org.getCleanURL().trim().toLowerCase())) {
-		totalRecords++;
-	    }
+        totalRecords = (Integer) organizations.get(0);
+        
+        List<Organization> returnedOrgs = (List<Organization>) organizations.get(1);
+        
+	for(Organization org : returnedOrgs) {
 	    if(org.getHelRegistryId() > 0) {
 		if(helRegistries != null) {
 		    for(helRegistry reg : helRegistries) {
@@ -146,23 +146,12 @@ public class adminOrgContoller {
 		}
 	    }
 	}
-	
-	for(Organization org : organizations) {
-	    if(org.getHelRegistryId() > 0) {
-		if(helRegistries != null) {
-		    for(helRegistry reg : helRegistries) {
-			if(reg.getId() == org.getHelRegistryId()) {
-			    org.setHelRegistry(reg.getRegistryName());
-			}
-		    }
-		}
-	    }
-	}
+       
 	
 	jsonResponse.addProperty("sEcho", sEcho);
         jsonResponse.addProperty("iTotalRecords", totalRecords);
         jsonResponse.addProperty("iTotalDisplayRecords", totalRecords);
-        jsonResponse.add("aaData", gson.toJsonTree(organizations));
+        jsonResponse.add("aaData", gson.toJsonTree(returnedOrgs));
         
         return jsonResponse.toString();
     }
@@ -180,7 +169,14 @@ public class adminOrgContoller {
     public ModelAndView createOrganization() throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/organizations/organizationDetails");
+        mav.addObject("pageId", "organization-details");
+        mav.addObject("pageSection", "section-organizations");
+        mav.addObject("sect","org");
+        mav.addObject("actionPage","orgDetails");
+        mav.addObject("cleanURL","create");
+        
+	mav.setViewName("administrator/organizations/details");
+        
         mav.addObject("organization", new Organization());
 
         //Get a list of states
@@ -223,22 +219,34 @@ public class adminOrgContoller {
 	
 	if (result.hasErrors()) {
             ModelAndView mav = new ModelAndView();
-            mav.setViewName("/administrator/organizations/organizationDetails");
-            //Get the object that will hold the states
+            mav.setViewName("administrator/organizations/details");
             mav.addObject("stateList", stateList.getStates());
             mav.addObject("countryList", countryList.getCountries());
+            mav.addObject("pageId", "organization-details");
+            mav.addObject("pageSection", "section-organizations");
+            mav.addObject("sect","org");
+            mav.addObject("actionPage","orgDetails");
+            mav.addObject("allowOrgDelete",false);
+            mav.addObject("cleanURL","create");
+            
             return mav;
         }
        
         List<Organization> existing = organizationManager.getOrganizationByName(organization.getcleanURL());
         if (!existing.isEmpty()) {
             ModelAndView mav = new ModelAndView();
-            mav.setViewName("/administrator/organizations/organizationDetails");
+            mav.setViewName("administrator/organizations/details");
             mav.addObject("id", organization.getId());
-            mav.addObject("existingOrg", "Organization " + organization.getOrgName() + " already exists.");
-            //Get the object that will hold the states
+            mav.addObject("selOrgType", organization.getOrgType());
+            mav.addObject("existingOrg", "Organization " + organization.getOrgName().trim() + " already exists.");
             mav.addObject("stateList", stateList.getStates());
             mav.addObject("countryList", countryList.getCountries());
+            mav.addObject("pageId", "organization-details");
+            mav.addObject("pageSection", "section-organizations");
+            mav.addObject("sect","org");
+            mav.addObject("actionPage","orgDetails");
+            mav.addObject("allowOrgDelete",false);
+            mav.addObject("cleanURL","create");
             return mav;
         }
 	
@@ -250,10 +258,10 @@ public class adminOrgContoller {
         redirectAttr.addFlashAttribute("savedStatus", "created");
 
         if (action.equals("save")) {
-            ModelAndView mav = new ModelAndView(new RedirectView(latestorg.getcleanURL() + "/"));
+            ModelAndView mav = new ModelAndView(new RedirectView("/administrator/organizations/" + latestorg.getcleanURL() + "/"));
             return mav;
         } else {
-            ModelAndView mav = new ModelAndView(new RedirectView("list"));
+            ModelAndView mav = new ModelAndView(new RedirectView("/administrator/organizations/list"));
             return mav;
         }
     }
@@ -271,11 +279,17 @@ public class adminOrgContoller {
      * @throws Exception
      *
      */
-    @RequestMapping(value = "/{cleanURL}", method = RequestMethod.GET)
+    @RequestMapping(value = {"/{cleanURL}/", "/{cleanURL}"}, method = RequestMethod.GET)
     public ModelAndView viewOrganizationDetails(@PathVariable String cleanURL, Authentication authentication) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/organizations/organizationDetails");
+        mav.addObject("pageId", "organization-details");
+        mav.addObject("pageSection", "section-organizations");
+        mav.addObject("sect","org");
+        mav.addObject("actionPage","orgDetails");
+        mav.addObject("cleanURL",cleanURL);
+        
+	mav.setViewName("administrator/organizations/details");
 
         List<Organization> organization = organizationManager.getOrganizationByName(cleanURL);
         Organization orgDetails = organization.get(0);
@@ -333,6 +347,7 @@ public class adminOrgContoller {
 	    }
  	}
 	
+        mav.addObject("currUsername",authentication.getName());
 	mav.addObject("allowOrgDelete",allowOrgDelete);
 	
         return mav;
@@ -351,7 +366,7 @@ public class adminOrgContoller {
      * @Objects	(1) The object containing all the information for the clicked org (2) The 'id' of the clicked org that will be used in the menu and action bar
      * @throws Exception
      */
-    @RequestMapping(value = "/{cleanURL}", method = RequestMethod.POST)
+    @RequestMapping(value = {"/{cleanURL}/", "/{cleanURL}"}, method = RequestMethod.POST)
     public ModelAndView updateOrganization(@Valid Organization organization, BindingResult result, RedirectAttributes redirectAttr, @RequestParam String action) throws Exception {
 
         //Get a list of states
@@ -359,15 +374,19 @@ public class adminOrgContoller {
         
         //Get a list of countries
         CountryList countryList = new CountryList();
-
+        
         if (result.hasErrors()) {
             ModelAndView mav = new ModelAndView();
-            mav.setViewName("/administrator/organizations/organizationDetails");
+            mav.setViewName("administrator/organizations/details");
             mav.addObject("id", organization.getId());
             mav.addObject("selOrgType", organization.getOrgType());
-            //Get the object that will hold the states
             mav.addObject("stateList", stateList.getStates());
             mav.addObject("countryList", countryList.getCountries());
+            mav.addObject("pageId", "organization-details");
+            mav.addObject("pageSection", "section-organizations");
+            mav.addObject("sect","org");
+            mav.addObject("actionPage","orgDetails");
+            mav.addObject("allowOrgDelete",false);
             return mav;
         }
 
@@ -388,13 +407,17 @@ public class adminOrgContoller {
 	    updatedName = true;
             if (!existing.isEmpty()) {
                 ModelAndView mav = new ModelAndView();
-                mav.setViewName("/administrator/organizations/organizationDetails");
+                mav.setViewName("administrator/organizations/details");
                 mav.addObject("id", organization.getId());
                 mav.addObject("selOrgType", organization.getOrgType());
                 mav.addObject("existingOrg", "Organization " + organization.getOrgName().trim() + " already exists.");
-                //Get the object that will hold the states
                 mav.addObject("stateList", stateList.getStates());
                 mav.addObject("countryList", countryList.getCountries());
+                mav.addObject("pageId", "organization-details");
+                mav.addObject("pageSection", "section-organizations");
+                mav.addObject("sect","org");
+                mav.addObject("actionPage","orgDetails");
+                mav.addObject("allowOrgDelete",false);
                 return mav;
             }
         }
@@ -402,7 +425,7 @@ public class adminOrgContoller {
 	//Make sure the organization folder name exists
 	String UTDirectory = myProps.getProperty("ut.directory.utRootDir");
 	File directory = new File(UTDirectory.replace("/home/","/") + organization.getcleanURL());
-	if (!directory.exists()) {
+        if (!directory.exists()) {
 	    missingDirs = true;
 	}
 
@@ -436,11 +459,11 @@ public class adminOrgContoller {
 
         //If the "Save" button was pressed 
         if (action.equals("save")) {
-            ModelAndView mav = new ModelAndView(new RedirectView("../" + organization.getcleanURL() + "/"));
+            ModelAndView mav = new ModelAndView(new RedirectView("/administrator/organizations/" + organization.getcleanURL() + "/"));
             return mav;
         } //If the "Save & Close" button was pressed.
         else {
-            ModelAndView mav = new ModelAndView(new RedirectView("../list"));
+            ModelAndView mav = new ModelAndView(new RedirectView("/administrator/organizations/list"));
             return mav;
         }
     }
@@ -488,25 +511,31 @@ public class adminOrgContoller {
 	
 	List<Organization> organization = organizationManager.getOrganizationByName(cleanURL);
         Organization orgDetails = organization.get(0);
-
+        
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/organizations/configurations");
+        mav.addObject("pageId", "organization-configs");
+        mav.addObject("pageSection", "section-organizations");
+        mav.addObject("sect","org");
+        mav.addObject("actionPage","orgConfigs");
+        
+	mav.setViewName("administrator/organizations/configurations");
 
         List<utConfiguration> configurations = configurationmanager.getConfigurationsByOrgId(orgDetails.getId(), "");
 
         mav.addObject("orgName", orgDetails.getOrgName());
         mav.addObject("id", orgDetails.getId());
         mav.addObject("selOrgType", orgDetails.getOrgType());
-        mav.addObject("configs", configurations);
-
+        
         configurationTransport transportDetails;
 
         for (utConfiguration config : configurations) {
             transportDetails = configurationTransportManager.getTransportDetails(config.getId());
             if (transportDetails != null) {
-                config.settransportMethod(configurationTransportManager.getTransportMethodById(transportDetails.gettransportMethodId()));
+                config.setTransportMethod(configurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
             }
         }
+        
+        mav.addObject("configurations", configurations);
 
         return mav;
     }

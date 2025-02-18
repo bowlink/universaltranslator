@@ -1,0 +1,24 @@
+<aside class="secondary"  th:fragment="menuBar">
+    <nav class="secondary-nav" role="navigation">
+        <ul class="nav nav-pills" role="menu">
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'configDetails' ? 'active' : ''}">
+                <a class="nav-link" th:classappend="${actionPage == 'configDetails' ? 'active' : ''}" th:href="${'details?i='+configurationDetails.id}" title="Details">Details</a>
+            </li>
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'transport' ? 'active' : ''}">
+                <a class="nav-link" th:classappend="${actionPage == 'transport' ? 'active' : ''}" th:href="@{transport}" title="Transport Method">Transport Method</a>
+            </li>
+	    <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'specs' ? 'active' : '') + (configurationDetails.id > 0 and configurationDetails.configurationType == 1 and configurationDetails.stepsCompleted >= 2 ? '' : 'disabled')}">
+	       <a class="nav-link" th:classappend="${actionPage == 'specs' ? 'active' : ''}" th:href="@{specs}" title="Detail Message Specs">Message Specs</a>
+	    </li>
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'fieldsettings' ? 'active' : ''}">
+		<a class="nav-link" th:classappend="${actionPage == 'fieldsettings' ? 'active' : ''}" th:href="@{fieldsettings}" title="Field Settings">Field Settings</a>
+	    </li>
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'translations' ? 'active' : ''}">
+                <a class="nav-link" th:classappend="${actionPage == 'translations' ? 'active' : ''}" th:href="@{translations}" title="Data Translations">Data Translations</a>
+            </li>
+	    <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'notes' ? 'active' : ''}">
+                <a  class="nav-link" th:classappend="${actionPage == 'notes' ? 'active' : ''}" th:href="@{notes}" title="Configuration Notes">Configuration Notes</a>
+            </li>
+        </ul>
+    </nav>
+</aside>

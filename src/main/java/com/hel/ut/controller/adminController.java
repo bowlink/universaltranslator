@@ -12,10 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.custom.searchParameters;
 import com.hel.ut.model.watchlist;
-import com.hel.ut.service.messageTypeManager;
 import com.hel.ut.service.organizationManager;
-import com.hel.ut.service.transactionOutManager;
-import com.hel.ut.service.userManager;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -30,7 +27,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import com.hel.ut.service.utConfigurationManager;
-import com.hel.ut.service.utConfigurationTransportManager;
 
 /**
  * The adminController class will handle administrator page requests that fall outside specific sections.
@@ -46,24 +42,13 @@ public class adminController {
     private organizationManager organizationManager;
 
     @Autowired
-    private messageTypeManager messagetypemanager;
-
-    @Autowired
     private utConfigurationManager configurationmanager;
-
-    @Autowired
-    private utConfigurationTransportManager configurationTransportManager;
-
-    @Autowired
-    private userManager userManager;
-
-    @Autowired
-    private transactionOutManager transactionOutManager;
 
     private int maxResults = 3;
     
     /**
-     * This shows a dashboard with info for sysadmin components. *
+     * This shows a dashboard with info for sysadmin components.*
+     * @param session
      * @param request
      * @param response
      * @return 
@@ -71,10 +56,13 @@ public class adminController {
      */
     @RequestMapping(value = "/administrator", method = RequestMethod.GET)
     public ModelAndView HIMDashboard(HttpSession session, HttpServletRequest request, HttpServletResponse response) throws Exception {
-	
-
+        
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/himdashboard");
+        mav.addObject("pageId", "dashboard-details");
+        mav.addObject("pageSection", "section-dashboard");
+        mav.addObject("sect","dash");
+        
+	mav.setViewName("administrator/dashboard/dashboard");
         
 	int year = 118;
         int month = 5;

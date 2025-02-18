@@ -67,12 +67,10 @@ public class mainController {
      */
     @RequestMapping(value = {"/", "/login"}, method = RequestMethod.GET)
     public ModelAndView login() throws Exception {
-        
-	ModelAndView mav = new ModelAndView();
-	mav.setViewName("common/layout");
-        mav.addObject("contentPage","loginPage.jsp");
-        
-        mav.addObject("pageTitle", "Health-e-Link Account Login");
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("pageId", "login");
+        mav.addObject("pageSection", "section-login");
+	mav.setViewName("login");
 
 	return mav;
     }
@@ -87,12 +85,13 @@ public class mainController {
      */
     @RequestMapping(value = "/loginfailed", method = RequestMethod.GET)
     public ModelAndView loginerror(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
 	ModelAndView mav = new ModelAndView();
-	mav.setViewName("/login");
+	mav.setViewName("login");
+        mav.addObject("pageId", "login");
+        mav.addObject("pageSection", "section-login");
+        
 	mav.addObject("error", "true");
 	return mav;
-
     }
 	
     /**
@@ -146,10 +145,12 @@ public class mainController {
      *
      */
     @RequestMapping(value = "/forgotPassword", method = RequestMethod.GET)
-	public ModelAndView forgotPassword(HttpSession session) throws Exception {
-
-	ModelAndView mav = new ModelAndView();
-	mav.setViewName("/forgotPassword");
+    public ModelAndView forgotPassword(HttpSession session) throws Exception {
+            
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("pageId", "login");
+        mav.addObject("pageSection", "section-login");
+	mav.setViewName("forgotPassword");    
 
 	return mav;
     }
@@ -158,30 +159,32 @@ public class mainController {
      * The '/forgotPassword.do' POST request will be used to find the account information for the user and send an email.
      *
      *
+     * @param identifier
+     * @throws java.lang.Exception
      */
     @RequestMapping(value = "/forgotPassword.do", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody
-    Integer findPassword(@RequestParam String identifier) throws Exception {
-
+    public @ResponseBody Integer findPassword(@RequestParam String identifier) throws Exception {
+        
 	Integer userId = usermanager.getUserByIdentifier(identifier);
 
 	if (userId == null) {
 	    return 0;
-	} else {
-
+	} 
+        else {
 	    return userId;
 	}
-
     }
 
     /**
      * The '/sendPassword.do' POST request will be used to send the reset email to the user.
      *
      * @param userId The id of the return user.
+     * @param request
+     * @throws java.lang.Exception
      */
     @RequestMapping(value = "/sendPassword.do", method = RequestMethod.POST)
-	public void sendPassword(@RequestParam Integer userId, HttpServletRequest request) throws Exception {
-
+    public @ResponseBody String sendPassword(@RequestParam Integer userId, HttpServletRequest request) throws Exception {
+            
 	String randomCode = generateRandomCode();
 
 	utUser userDetails = usermanager.getUserById(userId);
@@ -189,7 +192,6 @@ public class mainController {
 
 	usermanager.updateUser(userDetails);
 
-	/* Sent Reset Email */
 	mailMessage messageDetails = new mailMessage();
 
 	messageDetails.settoEmailAddress(userDetails.getEmail());
@@ -199,32 +201,39 @@ public class mainController {
 
 	StringBuilder sb = new StringBuilder();
 
-	sb.append("Dear " + userDetails.getFirstName() + ",<br />");
+	sb.append("Dear ").append(userDetails.getFirstName()).append(",<br />");
 	sb.append("You have recently asked to reset your Health-e-Link HDR password.<br /><br />");
-	sb.append("<a href='" + resetURL + randomCode + "'>Click here to reset your password.</a>");
+	sb.append("<a href='").append(resetURL).append(randomCode).append("'>Click here to reset your password.</a>");
 
 	messageDetails.setmessageBody(sb.toString());
 	messageDetails.setfromEmailAddress("support@health-e-link.net");
 
 	emailMessageManager.sendEmail(messageDetails);
-
+        
+        return "";
     }
 
     /**
      * The '/resetPassword' GET request will be used to display the reset password form
      *
      *
+     * @param resetCode
+     * @param session
      * @return	The forget password form page
+     * @throws java.lang.Exception
      *
      *
      */
     @RequestMapping(value = "/resetPassword", method = RequestMethod.GET)
-	public ModelAndView resetPassword(@RequestParam(value = "b", required = false) String resetCode, HttpSession session) throws Exception {
-
-	ModelAndView mav = new ModelAndView();
-	mav.setViewName("/resetPassword");
-	mav.addObject("resetCode", resetCode);
-
+    public ModelAndView resetPassword(@RequestParam(value = "b", required = false) String resetCode, HttpSession session) throws Exception {
+        
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("resetPassword");
+        
+        mav.addObject("pageId", "login");
+        mav.addObject("pageSection", "section-login");
+        mav.addObject("resetCode", resetCode);
+        
 	return mav;
     }
 
@@ -233,19 +242,22 @@ public class mainController {
      *
      * @param resetCode The code that was set to reset a user for.
      * @param newPassword The password to update the user to
+     * @param session
+     * @param redirectAttr
      *
      */
     @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
-	public ModelAndView resetPassword(@RequestParam String resetCode, @RequestParam String newPassword, HttpSession session, RedirectAttributes redirectAttr) throws Exception {
+    public ModelAndView resetPassword(@RequestParam String resetCode, @RequestParam String newPassword, HttpSession session, RedirectAttributes redirectAttr) throws Exception {
 
 	utUser userDetails = usermanager.getUserByResetCode(resetCode);
-
+        
 	if (userDetails == null) {
 	    redirectAttr.addFlashAttribute("msg", "notfound");
 
 	    ModelAndView mav = new ModelAndView(new RedirectView("/login"));
 	    return mav;
-	} else {
+	} 
+        else {
 	    userDetails.setresetCode(null);
 	    userDetails.setPassword(newPassword);
 	    userDetails = usermanager.encryptPW(userDetails);
@@ -257,7 +269,6 @@ public class mainController {
 	    ModelAndView mav = new ModelAndView(new RedirectView("/login"));
 	    return mav;
 	}
-
     }
 
     /**
@@ -275,12 +286,10 @@ public class mainController {
 
 	if (usedCode == null) {
 	    return randomCode;
-	} else {
-
+	} 
+        else {
 	    return generateRandomCode();
-
 	}
-
     }
     
     /**

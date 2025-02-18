@@ -1,7 +1,6 @@
 package com.hel.ut.service;
 
 import java.util.List;
-
 import com.hel.ut.model.Organization;
 import com.hel.ut.model.utUser;
 
@@ -33,7 +32,7 @@ public interface organizationManager {
 
     List<Organization> getAssociatedOrgs(int orgId);
     
-    List<Organization> getOrganizationsPaged(Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
+    List<Object> getOrganizationsPaged(Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
     
     List<Organization> getAgenciesForReport(Integer registryType) throws Exception;
     

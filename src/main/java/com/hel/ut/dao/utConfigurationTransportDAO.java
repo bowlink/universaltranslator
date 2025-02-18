@@ -1,9 +1,7 @@
 package com.hel.ut.dao;
 
 import com.hel.ut.model.configurationFTPFields;
-
 import java.util.List;
-
 import com.hel.ut.model.TransportMethod;
 import com.hel.ut.model.configurationFormFields;
 import com.hel.ut.model.configurationMessageSpecs;
@@ -11,9 +9,7 @@ import com.hel.ut.model.configurationFileDropFields;
 import com.hel.ut.model.configurationTransport;
 import com.hel.ut.model.configurationTransportMessageTypes;
 import com.hel.ut.model.configurationWebServiceSenders;
-
 import org.springframework.stereotype.Repository;
-
 import com.hel.ut.model.configurationWebServiceFields;
 import com.hel.ut.model.configurationconnectionfieldmappings;
 import com.hel.ut.model.logftpconnectionerrors;

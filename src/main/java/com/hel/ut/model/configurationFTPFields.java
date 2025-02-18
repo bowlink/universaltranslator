@@ -28,7 +28,7 @@ public class configurationFTPFields {
     private int id;
 
     @Column(name = "TRANSPORTID", nullable = false)
-    private int transportId = 0;
+    private Integer transportId = 0;
 
     @Column(name = "IP", nullable = true)
     private String ip = null;
@@ -44,10 +44,10 @@ public class configurationFTPFields {
     private byte[] password = null;
 
     @Column(name = "METHOD", nullable = false)
-    private int method = 1;
+    private Integer method = 1;
 
     @Column(name = "PORT", nullable = true)
-    private int port = 0;
+    private Integer port = 0;
 
     @NoHtml
     @Column(name = "PROTOCOL", nullable = true)
@@ -55,6 +55,22 @@ public class configurationFTPFields {
 
     @Column(name = "CERTIFICATION", nullable = true)
     private String certification = null;
+
+    public MultipartFile getFile() {
+        return file;
+    }
+
+    public void setFile(MultipartFile file) {
+        this.file = file;
+    }
+
+    public String getFTPPassword() {
+        return FTPPassword;
+    }
+
+    public void setFTPPassword(String FTPPassword) {
+        this.FTPPassword = FTPPassword;
+    }
 
     public int getId() {
         return id;
@@ -64,91 +80,75 @@ public class configurationFTPFields {
         this.id = id;
     }
 
-    public int gettransportId() {
+    public Integer getTransportId() {
         return transportId;
     }
 
-    public void settransportId(int transportId) {
+    public void setTransportId(Integer transportId) {
         this.transportId = transportId;
     }
 
-    public String getip() {
+    public String getIp() {
         return ip;
     }
 
-    public void setip(String ip) {
+    public void setIp(String ip) {
         this.ip = ip;
     }
 
-    public String getdirectory() {
+    public String getDirectory() {
         return directory;
     }
 
-    public void setdirectory(String directory) {
+    public void setDirectory(String directory) {
         this.directory = directory;
     }
 
-    public String getusername() {
+    public String getUsername() {
         return username;
     }
 
-    public void setusername(String username) {
+    public void setUsername(String username) {
         this.username = username;
     }
 
     public byte[] getPassword() {
-	return password;
+        return password;
     }
 
     public void setPassword(byte[] password) {
-	this.password = password;
+        this.password = password;
     }
 
-    public int getmethod() {
+    public Integer getMethod() {
         return method;
     }
 
-    public void setmethod(int method) {
+    public void setMethod(Integer method) {
         this.method = method;
     }
 
-    public int getport() {
+    public Integer getPort() {
         return port;
     }
 
-    public void setport(int port) {
+    public void setPort(Integer port) {
         this.port = port;
     }
 
-    public String getprotocol() {
+    public String getProtocol() {
         return protocol;
     }
 
-    public void setprotocol(String protocol) {
+    public void setProtocol(String protocol) {
         this.protocol = protocol;
     }
 
-    public String getcertification() {
+    public String getCertification() {
         return certification;
     }
 
-    public void setcertification(String certification) {
+    public void setCertification(String certification) {
         this.certification = certification;
-    }
-
-    public MultipartFile getfile() {
-        return file;
-    }
-
-    public void setfile(MultipartFile file) {
-        this.file = file;
-    }
-
-    public String getFTPPassword() {
-	return FTPPassword;
-    }
-
-    public void setFTPPassword(String FTPPassword) {
-	this.FTPPassword = FTPPassword;
     }
 }

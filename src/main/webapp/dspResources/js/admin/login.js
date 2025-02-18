@@ -4,14 +4,10 @@
  * and open the template in the editor.
  */
 
-
-require(['./main'], function () {
-
-        if (document.cookie.indexOf('js=true') == -1) {
-            document.cookie = 'js=true';
-            window.location.reload(true);
-        }
-
-        $("input:text,form").attr("autocomplete", "off");
-
+jQuery(function ($) {
+    
+    $(document).ready(function () {
+        
+        
+    });
 });

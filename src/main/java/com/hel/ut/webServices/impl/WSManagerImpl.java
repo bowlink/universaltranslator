@@ -131,11 +131,8 @@ public class WSManagerImpl implements WSManager {
         try {
             xmlValue = xml.substring(startLoc, endLoc);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println("Utilities:getXMLValue - xmlTag is " + xmlTag + " error is:" + e);
         }
         return xmlValue;
-
     }
 
     @Override
@@ -180,15 +177,12 @@ public class WSManagerImpl implements WSManager {
 
             return soapMessage;
         } catch (Exception ex) {
-            ex.printStackTrace();
             return null;
         }
-
     }
 
     @Override
-    public List<WSMessagesIn> getWSMessagesInList(Date fromDate, Date toDate,
-            Integer fetchSize) throws Exception {
+    public List<WSMessagesIn> getWSMessagesInList(Date fromDate, Date toDate,Integer fetchSize) throws Exception {
         return webservicesDAO.getWSMessagesInList(fromDate, toDate, fetchSize);
     }
 
@@ -203,8 +197,7 @@ public class WSManagerImpl implements WSManager {
     }
 
     @Override
-    public List<wsMessagesOut> getWSMessagesOutList(Date fromDate, Date toDate,
-            Integer fetchSize) throws Exception {
+    public List<wsMessagesOut> getWSMessagesOutList(Date fromDate, Date toDate,Integer fetchSize) throws Exception {
         return webservicesDAO.getWSMessagesOutList(fromDate, toDate, fetchSize);
     }
 
@@ -214,14 +207,12 @@ public class WSManagerImpl implements WSManager {
     }
 
     @Override
-    public List<wsMessagesOut> getWSMessagesOutByBatchId(Integer batchId)
-            throws Exception {
+    public List<wsMessagesOut> getWSMessagesOutByBatchId(Integer batchId) throws Exception {
         return webservicesDAO.getWSMessagesOutByBatchId(batchId);
     }
 
     @Override
-    public List<WSMessagesIn> getWSMessagesInByBatchId(Integer batchId)
-            throws Exception {
+    public List<WSMessagesIn> getWSMessagesInByBatchId(Integer batchId) throws Exception {
         return webservicesDAO.getWSMessagesInByBatchId(batchId);
     }
 
@@ -229,5 +220,4 @@ public class WSManagerImpl implements WSManager {
     public void saveWSMessagesIn(WSMessagesIn wsIn) throws Exception {
         webservicesDAO.saveWSMessagesIn(wsIn);
     }
-
 }

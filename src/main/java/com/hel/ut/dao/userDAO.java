@@ -1,12 +1,10 @@
 package com.hel.ut.dao;
 
 import java.util.List;
-
 import com.hel.ut.model.utUser;
 import com.hel.ut.model.utUserActivity;
 import com.hel.ut.model.configurationConnectionSenders;
 import com.hel.ut.model.utUserLogin;
-
 import org.springframework.stereotype.Repository;
 
 @Repository

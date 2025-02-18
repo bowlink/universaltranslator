@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Properties;
 import org.hibernate.query.Query;
 import org.hibernate.SessionFactory;
-import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -25,6 +24,10 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.util.Objects;
+import org.hibernate.HibernateException;
+import org.hibernate.query.MutationQuery;
+import org.hibernate.query.SelectionQuery;
 
 /**
  * @see com.hel.ut.dao.sysAdminDAO
@@ -46,6 +49,9 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     /**
      * this method takes the table name and searchTerm (if there is one) and return the data in the table
      *
+     * @param utTableName
+     * @param searchTerm
+     * @return 
      */
     @Override
     @Transactional(readOnly = true)
@@ -203,7 +209,7 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Transactional(readOnly = true)
     public List<Macros> getMarcoList(String searchTerm) {
 
-        Query query = sessionFactory.getCurrentSession().createQuery("from Macros where "
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from Macros where "
                 + "macro_short_name like :searchTerm OR macro_name like :searchTerm "
                 + "order by categoryId, macro_short_name asc");
         query.setParameter("searchTerm", "%"+searchTerm+"%");
@@ -214,7 +220,7 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = true)
     public Long findTotalMacroRows() {
-        Query query = sessionFactory.getCurrentSession().createQuery("select count(id) as totalMacros from Macros");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("select count(id) as totalMacros from Macros");
         Long totalMacros = (Long) query.uniqueResult();
         return totalMacros;
     }
@@ -222,7 +228,7 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = true)
     public Long findtotalHL7Entries() {
-        Query query = sessionFactory.getCurrentSession().createQuery("select count(id) as totalHL7 from mainHL7Details");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("select count(id) as totalHL7 from mainHL7Details");
         Long totalHL7Entries = (Long) query.uniqueResult();
         return totalHL7Entries;
     }
@@ -230,7 +236,7 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = true)
     public Long findtotalNewsArticles() {
-        Query query = sessionFactory.getCurrentSession().createQuery("select count(id) as totalArticles from newsArticle");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("select count(id) as totalArticles from newsArticle");
         Long totalNewsArticles = (Long) query.uniqueResult();
         return totalNewsArticles;
     }
@@ -241,7 +247,7 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = false)
     public boolean deleteMacro(int id) {
-        Query deletMarco = sessionFactory.getCurrentSession().createQuery("delete from Macros where id = :macroId)");
+        MutationQuery deletMarco = sessionFactory.getCurrentSession().createMutationQuery("delete from Macros where id = :macroId)");
         deletMarco.setParameter("macroId", id);
         deletMarco.executeUpdate();
         try {
@@ -255,15 +261,15 @@ public class sysAdminDAOImpl implements sysAdminDAO {
 
     /**
      * this method adds a macro*
+     * @param macro
      */
     @Override
     @Transactional(readOnly = false)
     public void createMacro(Macros macro) {
         try {
-            sessionFactory.getCurrentSession().save(macro);
-        } catch (Throwable ex) {
-            System.err.println("create macro failed." + ex);
-
+            sessionFactory.getCurrentSession().persist(macro);
+        } 
+        catch (HibernateException ex) {
         }
     }
 
@@ -271,10 +277,9 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Transactional(readOnly = false)
     public boolean updateMacro(Macros macro) {
         try {
-            sessionFactory.getCurrentSession().update(macro);
+            sessionFactory.getCurrentSession().merge(macro);
             return true;
-        } catch (Throwable ex) {
-            System.err.println("update macro failed." + ex);
+        } catch (HibernateException ex) {
             return false;
         }
     }
@@ -283,9 +288,8 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Transactional(readOnly = false)
     public void createProcessStatus(lu_ProcessStatus lu) {
         try {
-            sessionFactory.getCurrentSession().save(lu);
-        } catch (Throwable ex) {
-            System.err.println("create ProcessStatus failed." + ex);
+            sessionFactory.getCurrentSession().persist(lu);
+        } catch (HibernateException ex) {
         }
     }
 
@@ -304,7 +308,7 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Transactional(readOnly = false)
     public void updateProcessStatus(lu_ProcessStatus lu) {
         try {
-            sessionFactory.getCurrentSession().update(lu);
+            sessionFactory.getCurrentSession().merge(lu);
         } catch (Throwable ex) {
             System.err.println("update ProcessStatus failed." + ex);
         }
@@ -313,12 +317,14 @@ public class sysAdminDAOImpl implements sysAdminDAO {
 
     /**
      * The 'getHL7List' function will return the list of saved hl7 standard versions.
+     * @return 
+     * @throws java.lang.Exception
      */
     @Override
     @Transactional(readOnly = true)
     public List<mainHL7Details> getHL7List() throws Exception {
 
-        Query query = sessionFactory.getCurrentSession().createQuery("from mainHL7Details order by id desc");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from mainHL7Details order by id desc");
 
         List<mainHL7Details> HL7List = query.list();
         return HL7List;
@@ -358,6 +364,7 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     /**
      * The 'getHL7Segments' function will return the list of segments for a specific HL7 Message.
      *
+     * @param hl7Id
      * @Table configurationHL7Segments
      *
      * @return This function will return a list of HL7Segment objects
@@ -380,6 +387,8 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     /**
      * The 'getHL7Elements' function will return the list of elements for a specific HL7 Message segment.
      *
+     * @param hl7Id
+     * @param segmentId
      * @Table configurationHL7Elements
      *
      * @return This function will return a list of HL7Elements objects
@@ -411,7 +420,11 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateHL7Details(mainHL7Details details) {
-        sessionFactory.getCurrentSession().saveOrUpdate(details);
+        if (Objects.isNull(sessionFactory.getCurrentSession().find(mainHL7Details.class, details.getId()))) {
+            sessionFactory.getCurrentSession().persist(details);
+        } else {
+            sessionFactory.getCurrentSession().merge(details);
+        }
     }
 
     /**
@@ -422,7 +435,7 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateHL7Segments(mainHL7Segments segment) {
-        sessionFactory.getCurrentSession().update(segment);
+        sessionFactory.getCurrentSession().merge(segment);
     }
 
     /**
@@ -433,52 +446,46 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateHL7Elements(mainHL7Elements element) {
-        sessionFactory.getCurrentSession().update(element);
+        sessionFactory.getCurrentSession().merge(element);
     }
 
     /**
      * The 'createHL7' function will save the new HL7 Segment
      *
      * @param HL7Details The object holding the new HL7 Object
+     * @return 
      */
     @Override
     @Transactional(readOnly = false)
     public int createHL7(mainHL7Details HL7Details) {
-        Integer lastId;
-
-        lastId = (Integer) sessionFactory.getCurrentSession().save(HL7Details);
-
-        return lastId;
+        sessionFactory.getCurrentSession().persist(HL7Details);
+        return HL7Details.getId();
     }
 
     /**
      * The 'saveHL7Segment' function will save the new HL7 Segment
      *
      * @param newSegment The object holding the new HL7 Object
+     * @return 
      */
     @Override
     @Transactional(readOnly = false)
     public int saveHL7Segment(mainHL7Segments newSegment) {
-        Integer lastId;
-
-        lastId = (Integer) sessionFactory.getCurrentSession().save(newSegment);
-
-        return lastId;
+        sessionFactory.getCurrentSession().persist(newSegment);
+        return newSegment.getId();
     }
 
     /**
      * The 'saveHL7Element' function will save the new HL7 Segment Element
      *
      * @param newElement The object holding the new HL7 Element Object
+     * @return 
      */
     @Override
     @Transactional(readOnly = false)
     public int saveHL7Element(mainHL7Elements newElement) {
-        Integer lastId;
-
-        lastId = (Integer) sessionFactory.getCurrentSession().save(newElement);
-
-        return lastId;
+        sessionFactory.getCurrentSession().persist(newElement);
+        return newElement.getId();
     }
 
     @Override
@@ -518,11 +525,10 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = true)
     public Long findTotalUsers() throws Exception {
-        Query query = sessionFactory.getCurrentSession().createQuery("select count(id) as totalUsers from User");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("select count(id) as totalUsers from User");
         Long totalUsers = (Long) query.uniqueResult();
         return totalUsers;
     }
-    
     
     @Override
     @Transactional(readOnly = true)
@@ -543,7 +549,7 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = false)
     public void deleteMoveFilesLog(MoveFilesLog moveFileLog) throws Exception {
-        Query deleteFields = sessionFactory.getCurrentSession().createQuery("delete from MoveFilesLog where id = :moveFilePathId");
+        MutationQuery deleteFields = sessionFactory.getCurrentSession().createMutationQuery("delete from MoveFilesLog where id = :moveFilePathId");
         deleteFields.setParameter("moveFilePathId", moveFileLog.getId());
         deleteFields.executeUpdate();
     }
@@ -551,7 +557,7 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = true)
     public Long findTotalStandardCrosswalks() {
-        Query query = sessionFactory.getCurrentSession().createQuery("select count(id) as totalCrosswalks from crosswalks where orgId = 0");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("select count(id) as totalCrosswalks from crosswalks where orgId = 0");
         Long totalCrosswalks = (Long) query.uniqueResult();
         return totalCrosswalks;
     }
@@ -559,7 +565,7 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = true)
     public List<Crosswalks> getStandardCrosswalks() throws Exception {
-        Query query = sessionFactory.getCurrentSession().createQuery("from Crosswalks where orgId = 0 order by dateCreated desc");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from Crosswalks where orgId = 0 order by dateCreated desc");
         return query.list();
     }
 }

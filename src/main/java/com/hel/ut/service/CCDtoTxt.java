@@ -39,9 +39,6 @@ public class CCDtoTxt {
     @Resource(name = "myProps")
     private Properties myProps;
 
-    @Autowired
-    private utConfigurationTransportManager configurationTransportManager;
-
     public String TranslateCCDtoTxt(String fileLocation, String ccdFileName, int orgId, int configId, String targetOrgName, Integer batchId) throws Exception {
 	
         Organization orgDetails = organizationmanager.getOrganizationById(orgId);
@@ -184,7 +181,5 @@ public class CCDtoTxt {
 	}
         
         return newfileName;
-
     }
-
 }

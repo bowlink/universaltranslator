@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+     <head>
+        <title>Health-e-Link UT Organizations</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/organizations/actionBar :: actionBar}"></div>
+            <div th:insert="~{administrator/organizations/menuBar :: menuBar}"></div>
+            <div class="main clearfix" role="main">
+                <div class="col-md-12">
+
+                    <div class="alert alert-success" role="alert"  th:if="${savedStatus != null}">
+                        <strong>Success!</strong> 
+                        <p th:if="${savedStatus == 'updated'}">The organization has been successfully updated!</p>
+                        <p th:if="${savedStatus == 'created'}">The organization has been successfully added!</p>
+                    </div>
+
+                    <form id="organization" th:action="${'/administrator/organizations/'+cleanURL}" th:object="${organization}" method="post" role="form" enctype="multipart/form-data">
+                        <input type="hidden" id="action" name="action" value="save" />
+                        <input type="hidden" th:field="*{id}"/>
+                        <input type="hidden" th:field="*{cleanURL}"/>
+                        <input type="hidden" th:field="*{dateCreated}"/>
+                        <input type="hidden" th:field="*{helRegistrySchemaName}"/>
+                        <input type="hidden" th:field="*{helRegistryId}"/>
+
+                        <section class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Details</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-container">
+                                    <div class="form-group">
+                                        <label for="status">Status * </label>
+                                        <div>
+                                            <label class="radio-inline">
+                                                <input type="radio" th:field="*{status}" value="true" /> Active
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" th:field="*{status}" value="false" />Inactive
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div id="parentOrgId">
+                                        <div id="parentOrgIdDiv" class="form-group">
+                                            <label class="control-label" for="parentOrgId">Parent Organization</label>
+                                            <select th:field="*{parentOrgId}" class="form-control half">
+                                                <option value="0">- Select Parent Organization -</option>
+                                                <option th:each="parentOrg : ${organizationList}" th:value="${parentOrg.id}" th:text="${parentOrg.orgName}"></option>
+                                            </select>
+                                            <span id="parentOrgIdMsg" class="control-label"></span>
+                                        </div>
+                                    </div>
+                                    <div id="orgType">
+                                        <div id="orgTypeDiv" class="form-group">
+                                            <label class="control-label" for="orgType">Organization Type *</label>
+                                            <select id="orgType" th:field="*{orgType}" class="form-control half">
+                                                <option value="" label=" - Select - ">- Select Organization Type - </option>
+                                                <option value="2">Community Based Organization</option>
+                                                <option value="4">Data Warehouse</option>
+                                                <option value="1">Health Care Provider</option>
+                                                <option value="3">Health Management Information System</option>
+                                                <option value="5">Internal Health-e-Link Registry</option>
+                                            </select>
+                                            <errors path="orgType" cssClass="control-label" element="label" />
+                                        </div>
+                                    </div>  
+                                    <div id="helRegistryId">
+                                        <div id="helRegistryIdDiv" class="form-group">
+                                            <label for="orgType">Is this organization from a Health-e-Link Registry?</label>
+                                            <select id="isHELRegistry" class="form-control half">
+                                                <option value="">- Select -</option>
+                                                <option value="1" th:selected="*{helRegistryId > 0 ? 'true' : 'false'}">Yes</option>
+                                                <option value="0" th:selected="*{helRegistryId == 0 ? 'true' : 'false'}">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div id="HELRegistryDetails" th:style="*{helRegistryId > 0 ? 'display:block':'display:none'}">
+                                        <div id="helRegistryDiv" class="form-group ${status.error ? 'has-error' : '' }">
+                                            <label class="control-label" for="helRegistry">Select the Health-e-Link Registry</label>
+                                            <select id="helRegistry" th:rel="*{helRegistryId}+'-'+*{helRegistrySchemaName}+*{#strings.contains(helRegistrySchemaName,'fp') ? '-2' : '-1'}" class="form-control half">
+                                                <option value="0">- Select -</option>
+                                            </select>
+                                            <span id="helRegistryMsg" class="control-label"></span>
+                                        </div>
+                                        <div id="HELRegistryOrgsDiv" th:style="*{helRegistryId > 0 ? 'display:block':'display:none'}">
+                                            <div id="helRegistryOrgIdDiv" class="form-group">
+                                                <label class="control-label" for="helRegistryOrgId">Select the Registry Organization</label>
+                                                <select th:field="*{helRegistryOrgId}" id="helRegistryOrgId" schema="" th:rel="*{helRegistryOrgId}" class="form-control half">
+                                                    <option value="0">N/A </option>
+                                                </select>
+                                                <span id="helRegistryOrgIdMsg" class="control-label"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="orgDetails" th:style="*{id > 0 ? 'display:block':'display:none'}">
+                                        <div id="orgNameDiv" class="form-group" th:classappend="${existingOrg != null ? 'has-error' : ''} + ${#fields.hasErrors('orgName') ? 'has-error' : ''}">
+                                            <label class="control-label" for="orgName">Organization Name *</label>
+                                            <input th:field="*{orgName}" id="orgName" class="form-control" type="text" maxLength="255" />
+                                            <span th:if="${existingOrg != null}" class="control-label" th:text="${existingOrg}"></span>
+                                            <span id="orgNameErrorMsg" class="control-label"></span>
+                                            <span class="control-label" th:if="${#fields.hasErrors('orgName')}" th:errors="*{orgName}"></span>
+                                        </div>
+                                        <div class="form-group" th:classappend="${#fields.hasErrors('address') ? 'has-error' : ''}">
+                                            <label class="control-label" for="address">Address</label>
+                                            <input th:field="*{address}" id="address" class="form-control" type="text" maxLength="45" />
+                                            <span class="control-label" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></span>
+                                        </div>
+                                        <div class="form-group" th:classappend="${#fields.hasErrors('address2') ? 'has-error' : ''}">
+                                            <label class="control-label" for="address2">Address 2</label>
+                                            <input th:field="*{address2}" id="address2" class="form-control" type="text" maxLength="45" />
+                                            <span class="control-label" th:if="${#fields.hasErrors('address2')}" th:errors="*{address2}"></span>
+                                        </div>
+                                        <div class="form-group" th:classappend="${#fields.hasErrors('city') ? 'has-error' : ''}">
+                                            <label class="control-label" for="city">City</label>
+                                            <input th:field="*{city}" id="city" class="form-control" type="text" maxLength="45" />
+                                            <span class="control-label" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></span>
+                                        </div>
+                                        <div id="stateDiv">
+                                            <div class="form-group" th:classappend="${#fields.hasErrors('state') ? 'has-error' : ''}">
+                                                <label class="control-label" for="state">State</label>
+                                                <select id="state" th:field="*{state}" class="form-control half">
+                                                    <option value="" label=" - Select - " ></option>
+                                                    <option th:each="state : ${stateList}" th:value="${state.key}" th:text="${state.value}"></option>
+                                                </select>
+                                               <span class="control-label" th:if="${#fields.hasErrors('state')}" th:errors="*{state}"></span>
+                                            </div>
+                                        </div>   
+                                        <div class="form-group" th:classappend="${#fields.hasErrors('country') ? 'has-error' : ''}">
+                                            <label class="control-label" for="country">Country</label>
+                                            <select id="country" th:field="*{country}" class="form-control half">
+                                                <option value="" label=" - Select - "></option>
+                                                <option th:each="country : ${countryList}" th:value="${country.key}" th:text="${country.value}"></option>
+                                            </select>
+                                            <span class="control-label" th:if="${#fields.hasErrors('country')}" th:errors="*{country}"></span>
+                                        </div>
+                                        <div class="form-group" th:classappend="${#fields.hasErrors('postalCode') ? 'has-error' : ''}">
+                                            <label class="control-label" for="postalCode">Postal Code</label>
+                                            <input th:field="*{postalCode}" id="postalCode" class="form-control xs-input" type="text" maxLength="15" />
+                                            <span class="control-label" th:if="${#fields.hasErrors('postalCode')}" th:errors="*{postalCode}"></span>
+                                        </div>
+                                         <div class="form-group" th:classappend="${#fields.hasErrors('phone') ? 'has-error' : ''}">
+                                            <label class="control-label" for="phone">Phone</label>
+                                            <input th:field="*{phone}" id="phone" class="form-control sm-input" type="text" maxLength="45" />
+                                            <span class="control-label" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></span>
+                                        </div>
+                                        <div class="form-group" th:classappend="${#fields.hasErrors('fax') ? 'has-error' : ''}">
+                                            <label class="control-label" for="fax">Fax</label>
+                                            <input th:field="*{fax}" id="fax" class="form-control sm-input" type="text" maxLength="45" />
+                                            <span class="control-label" th:if="${#fields.hasErrors('fax')}" th:errors="*{fax}"></span>
+                                        </div>
+                                        <div class="form-group" th:classappend="${#fields.hasErrors('primaryContactName') ? 'has-error' : ''}">
+                                            <label class="control-label" for="primaryContactName">Primary Contact</label>
+                                            <input th:field="*{primaryContactName}" id="primaryContactName" class="form-control sm-input" type="text" maxLength="255" />
+                                            <span class="control-label" th:if="${#fields.hasErrors('primaryContactName')}" th:errors="*{primaryContactName}"></span>
+                                        </div>
+                                        <div class="form-group" th:classappend="${#fields.hasErrors('primaryContactEmail') ? 'has-error' : ''}">
+                                            <label class="control-label" for="primaryContactEmail">Primary Contact Email Address</label>
+                                            <input th:field="*{primaryContactEmail}" id="primaryContactEmail" class="form-control sm-input" type="text" maxLength="255" />
+                                            <span class="control-label" th:if="${#fields.hasErrors('primaryContactEmail')}" th:errors="*{primaryContactEmail}"></span>
+                                        </div>
+                                        <div class="form-group" th:classappend="${#fields.hasErrors('primaryTechContactName') ? 'has-error' : ''}">
+                                            <label class="control-label" for="primaryTechContactName">Primary Technical Contact</label>
+                                            <input th:field="*{primaryTechContactName}" id="primaryTechContactName" class="form-control sm-input" type="text" maxLength="255" />
+                                            <span class="control-label" th:if="${#fields.hasErrors('primaryTechContactName')}" th:errors="*{primaryTechContactName}"></span>
+                                        </div>
+                                        <div class="form-group" th:classappend="${#fields.hasErrors('primaryTechContactEmail') ? 'has-error' : ''}">
+                                            <label class="control-label" for="primaryTechContactEmail">Primary Technical Contact Email Address</label>
+                                            <input th:field="*{primaryTechContactEmail}" id="primaryTechContactEmail" class="form-control sm-input" type="text" maxLength="255" />
+                                            <span class="control-label" th:if="${#fields.hasErrors('primaryTechContactEmail')}" th:errors="*{primaryTechContactEmail}"></span>
+                                        </div>
+                                        <div class="form-group" th:classappend="${#fields.hasErrors('infoURL') ? 'has-error' : ''}">
+                                            <label class="control-label" for="infoURL">Information URL</label>
+                                            <input th:field="*{infoURL}" id="infoURL" class="form-control" type="text" maxLength="255" />
+                                            <span class="control-label" th:if="${#fields.hasErrors('infoURL')}" th:errors="*{infoURL}"></span>
+                                        </div>
+                                        <div th:if="*{id > 0}">
+                                            <div class="form-group" th:if="*{parsingTemplate != null and parsingTemplate != ''}">
+                                                <label class="control-label" for="parsingTemplate">Current Inbound File (CCD/HL7) Parsing Script</label>
+                                                <input th:field="*{parsingTemplate}" type="text" disabled id="parsingTemplate" class="form-control" />
+                                                <input type="hidden" id="parsingTemplate" th:field="*{parsingTemplate}" />
+                                            </div>
+                                            <div id="parsingTemplateDiv" class="form-group" th:classappend="${#fields.hasErrors('file') ? 'has-error' : ''}">
+                                                <label class="control-label" for="file">Inbound File (CCD/HL7) Parsing Script (JAR file)</label>
+                                                <input th:field="*{file}" id="file" class="form-control" type="file" />
+                                                <span id="parsingTemplateMsg" class="control-label"></span>
+                                                <span class="control-label" th:if="${#fields.hasErrors('file')}" th:errors="*{file}"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/admin/organization/orgDetails.js}"></script>
+        </th:block>
+    </body>
+</html>
+            
+
+<!-- The delete an organization modal -->
+<div class="modal fade" id="confirmationOrgDelete" role="dialog" tabindex="-1" aria-labeledby="Delete Organization" aria-hidden="true" aria-describedby="Delete Organization">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true" role="button">&times;</button>
+                <h3 class="panel-title" style="padding-left:10px;">Organization Delete</h3>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Are you <strong>ABSOLUTELY</strong> sure?
+                </p>
+                <p>
+                    This action <strong>CANNOT</strong> be undone. This will delete all associated configurations, connections and uploaded batches.
+                    An alternative would be to make the organization inactive. This will set all configurations and connections to an inactive state.
+                </p>
+                <form id="confirmOrgDelete" method="post" role="form" action="delete">
+                    <div id="confirmDiv" class="form-group" >
+                        <input type="hidden" name="id" th:value="${id}" />
+                        <input type="hidden" id="realUsername" name="realUsername" th:value="${currUsername}" />
+                        <div class="form-group">
+                            <label for="username">Please type in your username to confirm this deletion:</label>
+                            <input type="text" id="username" name="username" class="form-control" maxLength="15"  />
+                            <span id="confirmMsg" class="control-label"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input type="button" id="confirmDeleteOrg" class="btn btn-primary" value="I understand the consequences, delete this organization" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

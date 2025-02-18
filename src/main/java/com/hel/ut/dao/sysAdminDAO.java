@@ -2,7 +2,6 @@ package com.hel.ut.dao;
 
 import com.hel.ut.model.Crosswalks;
 import java.util.List;
-
 import com.hel.ut.model.custom.LookUpTable;
 import com.hel.ut.model.custom.TableData;
 import com.hel.ut.model.lutables.lu_ProcessStatus;
@@ -11,7 +10,6 @@ import com.hel.ut.model.MoveFilesLog;
 import com.hel.ut.model.mainHL7Details;
 import com.hel.ut.model.mainHL7Elements;
 import com.hel.ut.model.mainHL7Segments;
-
 import org.springframework.stereotype.Repository;
 
 @Repository

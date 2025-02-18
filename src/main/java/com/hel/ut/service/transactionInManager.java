@@ -381,7 +381,4 @@ public interface transactionInManager {
     List<batchUploads> getBatchesByOrgId(Integer orgId) throws Exception;
     
     void sendEmailToAdmin(String message, String subject, boolean sendToC, boolean dedicatedEmail) throws Exception;
-
-    
-    
 }

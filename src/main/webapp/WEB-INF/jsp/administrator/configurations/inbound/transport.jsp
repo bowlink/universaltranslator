@@ -64,8 +64,7 @@
 	</div>
 	<div class="panel-body">
 	    <div class="form-container">
-		<%-- File Details --%>
-		<div id="fileDetailsDiv"  style="display:none">
+		<div id="fileDetailsDiv" style="display:none">
 		    <spring:bind path="fileLocation">
 			<div class="form-group ${status.error ? 'has-error' : '' }">
 			    <label class="control-label" for="fileLocation">Where will the file be stored on the UT prior to processing? *</label>

@@ -5,8 +5,8 @@
  */
 package com.hel.ut.validator;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 
@@ -37,6 +37,5 @@ public class NoHtmlValidator implements ConstraintValidator<NoHtml, String> {
 
             return sanitized.equals(value);
         }
-
     }
 }

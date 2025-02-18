@@ -1,0 +1,54 @@
+<nav class="navbar navbar-default actions-nav" role="navigation"  th:fragment="actionBar">
+    <div class="contain">
+        <div class="navbar-header">
+            <h1 class="section-title navbar-brand">
+                <span th:if="${actionPage == 'listConfigs'}" th:text="Configurations"></span>
+                <span th:if="${actionPage == 'configDetails'}" th:text="Configuration + ' - ' + Details"></span>
+                <span th:if="${actionPage == 'transport'}" th:text="Configuration + ' - ' + Transport + ' ' + Method"></span>
+                <span th:if="${actionPage == 'translations'}" th:text="Configuration + ' - ' + Data + ' ' + Translations"></span>
+                <span th:if="${actionPage == 'specs'}" th:text="Configuration + ' - ' + Message + ' ' + Specs"></span>
+                <span th:if="${actionPage == 'schedule'}" th:text="Configuration + ' - ' + Schedule"></span>
+                <span th:if="${actionPage == 'notes'}" th:text="Configuration Notes"></span>
+            </h1>
+        </div>
+        <ul class="nav navbar-nav navbar-right navbar-actions" role="menu">
+            <!-- Configuration List -->
+             <li th:if="${actionPage == 'listConfigs' and allowConfigImport != null}" role="menuitem" class="importConfigBtn">
+               <a href="#" data-bs-target="#configFileUploadModal" data-bs-toggle="modal" class="importConfig" title="Import Configuration" role="button">
+                   <span class="glyphicon icon-stacked glyphicon glyphicon-import"></span>Import Configuration</a>
+             </li>
+            </li>
+            <li th:if="${actionPage == 'listConfigs'}" role="menuitem">
+               <a th:href="@{/administrator/configurations/create}" title="Create New Configuration" role="button">
+                    <span class="glyphicon icon-stacked glyphicon glyphicon-plus"></span>Create New
+                </a>
+            </li>
+            <!-- Configuration Details -->
+            <li th:if="${actionPage != 'listConfigs' && configurationDetails.id > 0}">
+                <a href="#" class="exportConfig" th:rel="${configurationDetails.id}" title="Export this Configuration" role="button">
+                    <span class="glyphicon glyphicon-export icon-stacked"></span>Export
+                </a>
+             </li> 
+             <li th:if="${actionPage != 'listConfigs' && configurationDetails.id > 0}">
+                <a href="#" class="printConfig" title="Print this Configuration" th:rel="${configurationDetails.id}" role="button">
+                    <span class="glyphicon glyphicon-print icon-stacked"></span> Print 
+                </a>
+            </li>
+            <li th:if="${actionPage != 'listConfigs' && configurationDetails.id > 0}">
+                <a href="#" id="saveDetails" title="Save this Configuration initial setup" role="button">
+                    <span class="glyphicon glyphicon-ok icon-stacked"></span> Save 
+                </a>
+            </li>
+            <li th:if="${actionPage != 'listConfigs' && configurationDetails.id > 0 and (configurationDetails.configurationType == 1 or (configurationDetails.configurationType == 2 and actionPage != 'schedule' and actionPage != 'notes'))}">
+                <a href="#" id="next" title="Save and Proceed to the Next Step">
+                    <span class="glyphicon glyphicon-forward icon-stacked" role="button"></span>Next Step
+                </a>
+            </li>
+            <li th:if="${actionPage != 'listConfigs' && configurationDetails.id > 0}">
+                <a th:href="@{/administrator/configurations/list}" title="Cancel" role="button">
+                    <span class="glyphicon glyphicon-remove icon-stacked"></span>Cancel
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>

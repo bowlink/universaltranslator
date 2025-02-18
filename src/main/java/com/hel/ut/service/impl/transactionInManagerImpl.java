@@ -376,8 +376,6 @@ public class transactionInManagerImpl implements transactionInManager {
 	}
     }
     
-    
-
     @Override
     public void updateBatchStatus(Integer batchUploadId, Integer statusId, String timeField) throws Exception {
 
@@ -418,7 +416,6 @@ public class transactionInManagerImpl implements transactionInManager {
     @Override
     public void flagAndEmailAdmin(Integer batchUploadId) {
 	// TODO Auto-generated method stub
-
     }
 
     @Override
@@ -529,8 +526,8 @@ public class transactionInManagerImpl implements transactionInManager {
     }
 
     @Override
-    public List<Integer> getFeedbackReportConnection(int configId, int targetorgId) {
-	return transactionInDAO.getFeedbackReportConnection(configId, targetorgId);
+    public List<Integer> getFeedbackReportConnection(int configId, int targetOrgId) {
+	return transactionInDAO.getFeedbackReportConnection(configId, targetOrgId);
     }
 
     @Override
@@ -585,7 +582,6 @@ public class transactionInManagerImpl implements transactionInManager {
 	    e.printStackTrace();
 	    return 9999999;
 	}
-
     }
 
     @Override
@@ -626,7 +622,6 @@ public class transactionInManagerImpl implements transactionInManager {
 	   //e.printStackTrace();
 	   return 9999999;
 	}
-
     }
 
     @Override
@@ -729,9 +724,7 @@ public class transactionInManagerImpl implements transactionInManager {
 	    updateBatchStatus(batchId, 29, "endDateTime");
 	} catch (Exception ex1) {
 	    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ("loadBatch error at updating batch status - " + ex1));
-
 	}
-
     }
 
     @Override
@@ -795,11 +788,9 @@ public class transactionInManagerImpl implements transactionInManager {
 		    matchFound = true;
 		}
 	    }
-
 	}
 
 	return matchFound;
-
     }
 
     @Override
@@ -870,7 +861,6 @@ public class transactionInManagerImpl implements transactionInManager {
 	}
 
 	return systemSummary;
-
     }
 
     @Override
@@ -971,7 +961,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			//we insert job so if anything goes wrong or the scheduler overlaps, we won't be checking the same folder over and over
 			MoveFilesLog sftpJob = new MoveFilesLog();
 			sftpJob.setStatusId(1);
-			sftpJob.setFolderPath(ftpPath.getdirectory());
+			sftpJob.setFolderPath(ftpPath.getDirectory());
 			sftpJob.setTransportMethodId(3);
 			sftpJob.setMethod(1);
 			
@@ -980,7 +970,7 @@ public class transactionInManagerImpl implements transactionInManager {
 
 			// check if directory exists
 			fileSystem fileSystem = new fileSystem();
-			String inPath = sftpHome + ftpPath.getdirectory();
+			String inPath = sftpHome + ftpPath.getDirectory();
 			File f = new File(inPath);
 			if (!f.exists()) {
 			    sftpJob.setNotes(("Directory " + inPath + " does not exist"));
@@ -992,7 +982,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			if (sysErrors == 0) {
 			    //we look up org for this path
 			    Integer orgId = configurationtransportmanager.getOrgIdForFTPPath(ftpPath);
-			    sysErrors = sysErrors + moveFilesByPath(sftpHome, ftpPath.getdirectory(), 3, orgId, ftpPath.gettransportId());
+			    sysErrors = sysErrors + moveFilesByPath(sftpHome, ftpPath.getDirectory(), 3, orgId, ftpPath.getTransportId());
 			}
 			if (sysErrors == 0) {
 			    sftpJob.setStatusId(2);
@@ -1201,30 +1191,30 @@ public class transactionInManagerImpl implements transactionInManager {
 				    if (errorId == 0) {
 					encodingId = transports.get(0).getEncodingId();
 					configurationTransport ct = configurationtransportmanager.getTransportDetailsByTransportId(transportId);
-					fileSize = ct.getmaxFileSize();
+					fileSize = ct.getMaxFileSize();
 					if (transportList.size() > 1) {
 					    configId = 0;
 					    fileSize = configurationtransportmanager.getMinMaxFileSize(fileExt, transportMethodId);
 					    // here we need to check to see if there is a naming convention
 					    for (configurationTransport cdt : transportList) {
 						//get message specs
-						configurationMessageSpecs messageSpecs = configurationManager.getMessageSpecs(cdt.getconfigId());
+						configurationMessageSpecs messageSpecs = configurationManager.getMessageSpecs(cdt.getConfigId());
 						if (fileName.toLowerCase().startsWith(messageSpecs.getFileNameConfigHeader().toLowerCase())) {
 						    configId = messageSpecs.getconfigId();
-						    fileSize = cdt.getmaxFileSize();
+						    fileSize = cdt.getMaxFileSize();
 						    break;
 						}
 					    }
 
 					} else {
-					    configId = ct.getconfigId();
+					    configId = ct.getConfigId();
 					}
 
 					if(newBatchRecord) {
 					    batchDetails.setConfigId(configId);
 					    batchDetails.setContainsHeaderRow(transports.get(0).getContainsHeaderRow());
 					    batchDetails.setDelimChar(transports.get(0).getDelimChar());
-					    batchDetails.setFileLocation(ct.getfileLocation());
+					    batchDetails.setFileLocation(ct.getFileLocation());
 					    batchDetails.setOrgId(orgId);
 					    batchDetails.setOriginalFileName(fileName);
 					    batchDetails.setEncodingId(encodingId);
@@ -1271,9 +1261,9 @@ public class transactionInManagerImpl implements transactionInManager {
 					    int delimCount = (Integer) dir.checkFileDelimiter(file, ctdelim.getDelimChar());
 					    if (delimCount > 3) {
 						delimiter = ctdelim.getDelimChar();
-						fileDelimiter = ctdelim.getfileDelimiter();
+						fileDelimiter = ctdelim.getFileDelimiter();
 						statusId = 2;
-						fileLocation = ctdelim.getfileLocation();
+						fileLocation = ctdelim.getFileLocation();
 						break;
 					    }
 					}
@@ -1352,8 +1342,8 @@ public class transactionInManagerImpl implements transactionInManager {
 					    }
 
 					    //get path
-					    fileLocation = configurationtransportmanager.getTransportDetails(totalConfigs.get(0)).getfileLocation();
-					    fileSize = configurationtransportmanager.getTransportDetails(totalConfigs.get(0)).getmaxFileSize();
+					    fileLocation = configurationtransportmanager.getTransportDetails(totalConfigs.get(0)).getFileLocation();
+					    fileSize = configurationtransportmanager.getTransportDetails(totalConfigs.get(0)).getMaxFileSize();
 					    List<utUser> users = usermanager.getSendersForConfig(totalConfigs);
 					    if (users.size() == 0) {
 						users = usermanager.getOrgUsersForConfig(totalConfigs);
@@ -1442,7 +1432,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				    
                                         configurationTransport ct = configurationtransportmanager.getTransportDetails(batchDetails.getConfigId());
 
-                                        if(ct.getfileDelimiter() == 12) {
+                                        if(ct.getFileDelimiter() == 12) {
                                             delimiter = "tab";
                                         }
                                         else {
@@ -1619,7 +1609,7 @@ public class transactionInManagerImpl implements transactionInManager {
 	    File newFile = null;
 	    
 
-	    String filelocation = transportDetails.getfileLocation().trim();
+	    String filelocation = transportDetails.getFileLocation().trim();
 	    newFile = new File(myProps.getProperty("ut.directory.utRootDir") + filelocation + fileName);
 
 	    if (newFile.exists()) {
@@ -1726,7 +1716,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			    
 			    configurationTransport transportDetails = configurationtransportmanager.getTransportDetailsByTransportId(fileDropInfo.getTransportId());
 			    
-			    sysErrors = sysErrors + moveFilesByPath(directoryHome, fileDropInfo.getDirectory(), transportDetails.gettransportMethodId(), orgId, fileDropInfo.getTransportId());
+			    sysErrors = sysErrors + moveFilesByPath(directoryHome, fileDropInfo.getDirectory(), transportDetails.getTransportMethodId(), orgId, fileDropInfo.getTransportId());
 
 			    if (sysErrors == 0) {
 				moveJob.setStatusId(2);
@@ -1769,8 +1759,7 @@ public class transactionInManagerImpl implements transactionInManager {
     }
 
     @Override
-    public Integer processMultiValueCWData(Integer configId, Integer batchId,
-	    configurationDataTranslations cdt, List<CrosswalkData> cwdList, boolean foroutboundProcessing) {
+    public Integer processMultiValueCWData(Integer configId, Integer batchId,configurationDataTranslations cdt, List<CrosswalkData> cwdList, boolean foroutboundProcessing) {
 
 	try {
 	    Integer error = 0;
@@ -1819,7 +1808,6 @@ public class transactionInManagerImpl implements transactionInManager {
 	    return 1;
 
 	}
-
     }
 
     @Override
@@ -1840,7 +1828,6 @@ public class transactionInManagerImpl implements transactionInManager {
     @Override
     public void sendEmailToAdmin(String message, String subject) throws Exception {
     	 sendEmailToAdmin(message, subject, true, false);
-    			
     }
 
     @Override
@@ -1879,8 +1866,7 @@ public class transactionInManagerImpl implements transactionInManager {
     }
 
     @Override
-    public Integer rejectInvalidSourceSubOrg(batchUploads batch,
-	    configurationConnection confConn, boolean nofinalStatus) {
+    public Integer rejectInvalidSourceSubOrg(batchUploads batch,configurationConnection confConn, boolean nofinalStatus) {
 	return transactionInDAO.rejectInvalidSourceSubOrg(batch, confConn, nofinalStatus);
     }
 
@@ -1911,7 +1897,6 @@ public class transactionInManagerImpl implements transactionInManager {
 	String dateTo = df.format(toDate);
 
 	return transactionInDAO.getMessagesSent(dateFrom, dateTo);
-
     }
 
     @Override
@@ -1922,7 +1907,6 @@ public class transactionInManagerImpl implements transactionInManager {
 	String dateTo = df.format(toDate);
 
 	return transactionInDAO.getRejectedCount(dateFrom, dateTo);
-
     }
     
     @Override
@@ -1933,7 +1917,6 @@ public class transactionInManagerImpl implements transactionInManager {
 	String dateTo = df.format(toDate);
 	
 	return transactionInDAO.getRejectedReceivedCount(dateFrom, dateTo);
-
     }
 
     @Override
@@ -2006,7 +1989,7 @@ public class transactionInManagerImpl implements transactionInManager {
 	mail.setmessageSubject("Uploaded File submitted on " + myProps.getProperty("server.identity") + " environment contains rejected transactions");
 	mail.settoEmailAddress(myProps.getProperty("reject.email"));
 
-	if (ccAddresses.size() > 0) {
+	if (!ccAddresses.isEmpty()) {
 	    String[] ccEmailAddresses = new String[ccAddresses.size()];
 	    ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
 	    mail.setccEmailAddress(ccEmailAddresses);
@@ -2019,9 +2002,7 @@ public class transactionInManagerImpl implements transactionInManager {
     public List<Transaction> getTransactionsByStatusId(Integer batchId, List<Integer> statusIds, Integer howMany) throws Exception {
 
 	List<Transaction> transactions = setTransactionInInfoByStatusId(batchId, statusIds, howMany);
-
 	return transactions;
-
     }
 
     @Override
@@ -2365,7 +2346,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		    if (batch.getConfigId() != 0) {
 			configurationTransport ct = configurationtransportmanager.getTransportDetails(batch.getConfigId());
 			messageSpecs = configurationManager.getMessageSpecs(batch.getConfigId());
-			switch (ct.getfileType()) {
+			switch (ct.getFileType()) {
 			    case 9:
 				changeToExtension = "xml";
 				break;
@@ -2378,7 +2359,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			    default:
 				break;
 			}
-			delimId = ct.getfileDelimiter();
+			delimId = ct.getFileDelimiter();
 			lineTerminator = ct.getLineTerminator();
 
 		    } 
@@ -2407,14 +2388,14 @@ public class transactionInManagerImpl implements transactionInManager {
 				transactionInDAO.submitBatchActivityLog(ba);
 			    }
 			} else if (ctList.size() == 1) {
-			    if (ctList.get(0).getfileType() == 9) {
+			    if (ctList.get(0).getFileType() == 9) {
 				changeToExtension = "xml";
-			    } else if (ctList.get(0).getfileType() == 4) {
+			    } else if (ctList.get(0).getFileType() == 4) {
 				changeToExtension = "hr";
-			    } else if (ctList.get(0).getfileType() == 12) {
+			    } else if (ctList.get(0).getFileType() == 12) {
 				changeToExtension = "json";
 			    }
-			    delimId = ctList.get(0).getfileDelimiter();
+			    delimId = ctList.get(0).getFileDelimiter();
 			    lineTerminator = ctList.get(0).getLineTerminator();
 			}
 		    }
@@ -2579,7 +2560,7 @@ public class transactionInManagerImpl implements transactionInManager {
                             
 			    //log batch activity
 			    ba = new batchuploadactivity();
-			    ba.setActivity(configDetails.getconfigName() + " - Formula error found in excel file. First instance found at -  "  + newfilename);
+			    ba.setActivity(configDetails.getConfigname() + " - Formula error found in excel file. First instance found at -  "  + newfilename);
 			    ba.setBatchUploadId(batchId);
 			    transactionInDAO.submitBatchActivityLog(ba);
 			    
@@ -2594,7 +2575,7 @@ public class transactionInManagerImpl implements transactionInManager {
                                 transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                             }
                             
-			    sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Formula found, first instance found at " + newfilename + ".  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Formula Error");
+			    sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getConfigname() + " file. Formula found, first instance found at " + newfilename + ".  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Formula Error");
 			    
                             //clean
                             cleanAuditErrorTable(batch.getId());
@@ -2612,12 +2593,12 @@ public class transactionInManagerImpl implements transactionInManager {
 				
 			    //log batch activity
 			    ba = new batchuploadactivity();
-			    ba.setActivity(configDetails.getconfigName() + " - Cell data error found in excel file. First instance at -  "  + newfilename);
+			    ba.setActivity(configDetails.getConfigname() + " - Cell data error found in excel file. First instance at -  "  + newfilename);
 			    ba.setBatchUploadId(batchId);
 			    transactionInDAO.submitBatchActivityLog(ba);
 			    
 			    updateBatchStatus(batchId, 7, "endDateTime");
-			    sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Cell error data found, first instance at " + newfilename + ".  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Cell Data Error");
+			    sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getConfigname() + " file. Cell error data found, first instance at " + newfilename + ".  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Cell Data Error");
 			    
                             //Update original RR submission to show rejected status
                             if(!"".equals(HELRRSchemaName)) {
@@ -3168,7 +3149,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		
 		if (batchHandling.size() == 1) {
 		    //reject submission on error
-		    if (batchHandling.get(0).geterrorHandling() == 3) {
+		    if (batchHandling.get(0).getErrorHandling() == 3) {
 			// at this point we will only have invalid records
 			if (getRecordCounts(batchId, errorStatusIds, false) > 0) {
 			    updateBatchStatus(batchId, 7, "endDateTime");
@@ -3642,7 +3623,7 @@ public class transactionInManagerImpl implements transactionInManager {
 	    }
 
 	    // if auto and batch contains transactions that are not final status
-	    if (batch.getStatusId() == 6 || (handlingDetails.get(0).getautoRelease() && (handlingDetails.get(0).geterrorHandling() == 2 || handlingDetails.get(0).geterrorHandling() == 4 || handlingDetails.get(0).geterrorHandling() == 3))) {
+	    if (batch.getStatusId() == 6 || (handlingDetails.get(0).isAutoRelease() && (handlingDetails.get(0).getErrorHandling() == 2 || handlingDetails.get(0).getErrorHandling() == 4 || handlingDetails.get(0).getErrorHandling() == 3))) {
 
 		//run check to make sure we have records 
 		if (getRecordCounts(batchUploadId, Arrays.asList(12), false, true) > 0) {
@@ -3655,7 +3636,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		batchStatusId = 24;
 
 	    } 
-	    else if (!handlingDetails.get(0).getautoRelease()) { //manual release
+	    else if (!handlingDetails.get(0).isAutoRelease()) { //manual release
 		//transaction will be set to saved, batch will be set to RP
 		batchStatusId = 5;
 		//we leave status alone as we already set them
@@ -3739,7 +3720,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		    catch (Exception ex) {}
 		    
 		    //if errors are found and the configuration is not set to "Reject entire file on a single transaction error" then create the batch download entry.
-		    if(totalErrorRows > 0 && handlingDetails.get(0).geterrorHandling() == 3) {
+		    if(totalErrorRows > 0 && handlingDetails.get(0).getErrorHandling() == 3) {
 			batchStatusId = 7;
 			updateBatchStatus(batchUploadId, batchStatusId, "endDateTime");
 			
@@ -3787,7 +3768,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		File fileToDelete = new File(myProps.getProperty("ut.directory.utRootDir") + "loadFiles/" + batch.getUtBatchName() + batch.getOriginalFileName().substring(batch.getOriginalFileName().lastIndexOf(".")).toLowerCase());
 
 		//Don't delete file if the delimiter is set to Fixed Length
-		if (fileToDelete.exists() && handlingDetails.get(0).getfileDelimiter() != 13) {
+		if (fileToDelete.exists() && handlingDetails.get(0).getFileDelimiter() != 13) {
 		    //log batch activity
 		    ba = new batchuploadactivity();
 		    ba.setActivity("Deleted file: " + fileToDelete.getAbsolutePath());
@@ -4073,18 +4054,18 @@ public class transactionInManagerImpl implements transactionInManager {
 	    } 
             else {
 		//Get the utConfiguration details
-		utConfiguration configDetails = configurationManager.getConfigurationById(ct.getconfigId());
+		utConfiguration configDetails = configurationManager.getConfigurationById(ct.getConfigId());
 
 		encodingId = ct.getEncodingId();
-		String fileExt = "." + ct.getfileExt();
-		writeToFolder = ct.getfileLocation();
+		String fileExt = "." + ct.getFileExt();
+		writeToFolder = ct.getFileLocation();
 		fileNamePath = myProps.getProperty("ut.directory.utRootDir") + writeToFolder + batchName + fileExt;
 		String archivefileNamePath = myProps.getProperty("ut.directory.utRootDir") + writeToFolder +"encoded_" + batchName + fileExt;
-		maxfileSize = ct.getmaxFileSize();
+		maxfileSize = ct.getMaxFileSize();
 
 		batchInfo.setContainsHeaderRow(ct.getContainsHeaderRow());
 		batchInfo.setDelimChar(ct.getDelimChar());
-		batchInfo.setFileLocation(ct.getfileLocation());
+		batchInfo.setFileLocation(ct.getFileLocation());
 		batchInfo.setEncodingId(encodingId);
 		batchInfo.setUserId(0);
 
@@ -4128,7 +4109,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			String delimiter = "";
 			
 			if(!"".equals(ct.getDelimChar())) {
-			   delimiter = (String) messageTypeDAO.getDelimiterChar(ct.getfileDelimiter());
+			   delimiter = (String) messageTypeDAO.getDelimiterChar(ct.getFileDelimiter());
 			}
 			else {
 			    delimiter = ct.getDelimChar();
@@ -4289,7 +4270,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		utConfiguration configDetails = configurationManager.getConfigurationById(configId);
 		
 		//get the target org details
-		Organization targetOrg = organizationmanager.getOrganizationById(configDetails.getorgId());
+		Organization targetOrg = organizationmanager.getOrganizationById(configDetails.getOrgId());
 		
 		//We need to check to see if the configuration is looking for the target in specific column
 		List<configurationMessageSpecs> configurationMessageSpecs = configurationtransportmanager.getConfigurationMessageSpecsForOrgTransport(batchUploadDetails.getOrgId(), batchUploadDetails.getTransportMethodId(), true);
@@ -4345,14 +4326,14 @@ public class transactionInManagerImpl implements transactionInManager {
 		   
 		    configurationTransport transportDetails = configurationtransportmanager.getTransportDetails(configDetails.getId());
 
-		    String utbatchName = new StringBuilder().append(transportDetails.gettransportMethodId()).append("_m_").append(batchUploadId).append(configDetails.getorgId()).append(configDetails.getMessageTypeId()).append(dateFormat.format(date)).toString();
+		    String utbatchName = new StringBuilder().append(transportDetails.getTransportMethodId()).append("_m_").append(batchUploadId).append(configDetails.getOrgId()).append(configDetails.getMessageTypeId()).append(dateFormat.format(date)).toString();
 
 		    // Get the userId for the utConfiguration
 		    List<configurationConnection> connections = configurationManager.getConnectionsBySrcAndTargetConfigurations(batchUploadDetails.getConfigId(), configDetails.getId());
 
 		    int userId = 0;
                     
-                    if(transportDetails.gettransportMethodId() == 12) {
+                    if(transportDetails.getTransportMethodId() == 12) {
                         
                         if(batchUploadDetails.getAssociatedBatchId() > 0) {
                             batchUploads originalbatchUploadDetails = getBatchDetails(batchUploadDetails.getAssociatedBatchId());
@@ -4394,10 +4375,10 @@ public class transactionInManagerImpl implements transactionInManager {
                         }
 
                         //we determine output file name
-                        batchDownload.setOutputFileName(transactionoutmanager.generateDLBatchName(utbatchName,transportDetails, configDetails, batchUploadDetails, date) + "." + transportDetails.getfileExt());
+                        batchDownload.setOutputFileName(transactionoutmanager.generateDLBatchName(utbatchName,transportDetails, configDetails, batchUploadDetails, date) + "." + transportDetails.getFileExt());
                         batchDownload.setMergeable(false);
                         //batchDownload.setStartDateTime(new Date());
-                        batchDownload.setTransportMethodId(transportDetails.gettransportMethodId());
+                        batchDownload.setTransportMethodId(transportDetails.getTransportMethodId());
                         batchDownload.setOrgId(useTargetOrgId);
                         batchDownload.setUserId(userId);
                         batchDownload.setTotalErrorCount(0);
@@ -4490,32 +4471,6 @@ public class transactionInManagerImpl implements transactionInManager {
                 }
             }
         }
-	
-	/*//Get a list of batches that can be cleaned up
-	List<batchDownloads> batchesToCleanup = transactionInDAO.findBatchesToCleanUp();
-
-	if (batchesToCleanup != null) {
-	    if (!batchesToCleanup.isEmpty()) {
-		transactionInDAO.batchUploadTableCleanUp(batchesToCleanup);
-	    }
-	}
-	
-	//Get a list of rejected batches to clean up
-	List<batchUploads> rejectedInboundBatchesToCleanup = transactionInDAO.findRejectedBatchesToCleanUp();
-	
-	if (rejectedInboundBatchesToCleanup != null) {
-	    if (!rejectedInboundBatchesToCleanup.isEmpty()) {
-		transactionInDAO.rejectedBatchUploadTableCleanUp(rejectedInboundBatchesToCleanup);
-	    }
-	}
-        
-        List<batchUploads> DNPInboundBatchesToCleanup = transactionInDAO.finDNPBatchesToCleanUp();
-	
-	if (DNPInboundBatchesToCleanup != null) {
-	    if (!DNPInboundBatchesToCleanup.isEmpty()) {
-		transactionInDAO.DNPBatchUploadTableCleanUp(DNPInboundBatchesToCleanup);
-	    }
-	}*/
     }
 
     @Override
@@ -4556,7 +4511,7 @@ public class transactionInManagerImpl implements transactionInManager {
 
 		configurationTransport transportDetails = configurationtransportmanager.getTransportDetails(tgtconfigDetails.getId());
 
-		String utbatchName = new StringBuilder().append(transportDetails.gettransportMethodId()).append("_m_").append(batchDetails.getId()).append(tgtconfigDetails.getorgId()).append(tgtconfigDetails.getMessageTypeId()).append(dateFormat.format(date)).toString();
+		String utbatchName = new StringBuilder().append(transportDetails.getTransportMethodId()).append("_m_").append(batchDetails.getId()).append(tgtconfigDetails.getOrgId()).append(tgtconfigDetails.getMessageTypeId()).append(dateFormat.format(date)).toString();
 
 		//we create a batchDownloads
 		batchDownloads batchDownload = new batchDownloads();
@@ -4568,12 +4523,12 @@ public class transactionInManagerImpl implements transactionInManager {
 		batchDownload.setStatusId(28);
 
 		//we determine output file name
-		batchDownload.setOutputFileName(transactionoutmanager.generateDLBatchName(utbatchName,transportDetails, tgtconfigDetails, batchDetails, date) + "." + transportDetails.getfileExt());
+		batchDownload.setOutputFileName(transactionoutmanager.generateDLBatchName(utbatchName,transportDetails, tgtconfigDetails, batchDetails, date) + "." + transportDetails.getFileExt());
 		batchDownload.setMergeable(false);
 		batchDownload.setStartDateTime(new Date());
 		batchDownload.setEndDateTime(new Date());
-		batchDownload.setTransportMethodId(transportDetails.gettransportMethodId());
-		batchDownload.setOrgId(tgtconfigDetails.getorgId());
+		batchDownload.setTransportMethodId(transportDetails.getTransportMethodId());
+		batchDownload.setOrgId(tgtconfigDetails.getOrgId());
 		batchDownload.setUserId(0);
 		batchDownload.setTotalErrorCount(0);
 		batchDownload.setTotalRecordCount(1);
@@ -4591,14 +4546,14 @@ public class transactionInManagerImpl implements transactionInManager {
 		String fileName = new StringBuilder().append(batchDLDetails.getOutputFileName()).toString();
 		fileSystem dir = new fileSystem();
 
-		String filelocation = transportDetails.getfileLocation().trim();
+		String filelocation = transportDetails.getFileLocation().trim();
 
 		File targetFile = new File(myProps.getProperty("ut.directory.utRootDir") + filelocation + fileName);
 		Files.copy(new File(sourceFile).toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
 		//Copy the file to the archive path as well
-		File archiveFile = new File(myProps.getProperty("ut.directory.utRootDir") + "archivesIn/" + batchDownload.getUtBatchName() + "." + transportDetails.getfileExt());
-		File archiveOutFile = new File(myProps.getProperty("ut.directory.utRootDir") + "archivesOut/" + batchDownload.getUtBatchName() + "." + transportDetails.getfileExt());
+		File archiveFile = new File(myProps.getProperty("ut.directory.utRootDir") + "archivesIn/" + batchDownload.getUtBatchName() + "." + transportDetails.getFileExt());
+		File archiveOutFile = new File(myProps.getProperty("ut.directory.utRootDir") + "archivesOut/" + batchDownload.getUtBatchName() + "." + transportDetails.getFileExt());
 
 		//at this point, message it not encrypted
 		//we always encrypt the archive file
@@ -4676,7 +4631,6 @@ public class transactionInManagerImpl implements transactionInManager {
 		System.err.println("processRestAPIMessages - can't send email for rest api service job error " + ex1.toString());
 	    }
 	}
-
     }
 
     @Override
@@ -4772,18 +4726,18 @@ public class transactionInManagerImpl implements transactionInManager {
 	    } else {
 
 		//Get the utConfiguration details
-		utConfiguration configDetails = configurationManager.getConfigurationById(ct.getconfigId());
+		utConfiguration configDetails = configurationManager.getConfigurationById(ct.getConfigId());
 
 		encodingId = ct.getEncodingId();
-		fileExt = "." + ct.getfileExt();
-		writeToFolder = ct.getfileLocation();
+		fileExt = "." + ct.getFileExt();
+		writeToFolder = ct.getFileLocation();
 		fileNamePath = myProps.getProperty("ut.directory.utRootDir") + writeToFolder + batchName + fileExt;
 		String archivefileNamePath = myProps.getProperty("ut.directory.utRootDir") + writeToFolder +"encoded_" + batchName + fileExt;
-		maxfileSize = ct.getmaxFileSize();
+		maxfileSize = ct.getMaxFileSize();
 
 		batchInfo.setContainsHeaderRow(ct.getContainsHeaderRow());
 		batchInfo.setDelimChar(ct.getDelimChar());
-		batchInfo.setFileLocation(ct.getfileLocation());
+		batchInfo.setFileLocation(ct.getFileLocation());
 		batchInfo.setEncodingId(encodingId);
 		batchInfo.setUserId(0);
 
@@ -4828,7 +4782,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			String delimiter = "";
 			
 			if(!"".equals(ct.getDelimChar())) {
-			   delimiter = (String) messageTypeDAO.getDelimiterChar(ct.getfileDelimiter());
+			   delimiter = (String) messageTypeDAO.getDelimiterChar(ct.getFileDelimiter());
 			}
 			else {
 			    delimiter = ct.getDelimChar();
@@ -4960,7 +4914,7 @@ public class transactionInManagerImpl implements transactionInManager {
 	    for (configurationFTPFields ftpConfiguration : ftpConfigurations) {
 		try {
 		   connectionResult += connectToRemoteFTP(ftpConfiguration);
-		   System.out.println("Dir: " + ftpConfiguration.getdirectory() + " Response: " + connectionResult);
+		   System.out.println("Dir: " + ftpConfiguration.getDirectory() + " Response: " + connectionResult);
 		} catch (Exception ex) {}
 	    }
 	}
@@ -4980,17 +4934,17 @@ public class transactionInManagerImpl implements transactionInManager {
 	if(ftpConfiguration != null) {
 	    
 	    //Need to get the configuration file drop details
-	    configurationFileDropFields fileDropDetails = configurationtransportmanager.getTransFileDropDetailsPull(ftpConfiguration.gettransportId());
+	    configurationFileDropFields fileDropDetails = configurationtransportmanager.getTransFileDropDetailsPull(ftpConfiguration.getTransportId());
 	    
-	    configurationTransport transportDetails= configurationtransportmanager.getTransportDetailsByTransportId(ftpConfiguration.gettransportId());
+	    configurationTransport transportDetails= configurationtransportmanager.getTransportDetailsByTransportId(ftpConfiguration.getTransportId());
 	    
 	    //Get configuration details
-	    utConfiguration configDetails = configurationManager.getConfigurationById(transportDetails.getconfigId());
+	    utConfiguration configDetails = configurationManager.getConfigurationById(transportDetails.getConfigId());
 	    
 	    if(fileDropDetails != null) {
 		if(!"".equals(fileDropDetails.getDirectory())) {
 		    
-		    if("SFTP".equals(ftpConfiguration.getprotocol().trim())) {
+		    if("SFTP".equals(ftpConfiguration.getProtocol().trim())) {
 			
 			JSch jSch = new JSch();
 		    
@@ -5006,7 +4960,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				jSch.addIdentity(privateKey, "Private Key for Key file");
 			    */
 
-			    session = jSch.getSession(ftpConfiguration.getusername().trim(),ftpConfiguration.getip(),ftpConfiguration.getport());
+			    session = jSch.getSession(ftpConfiguration.getUsername().trim(),ftpConfiguration.getIp(),ftpConfiguration.getPort());
 			    
 			    String ftpPassword = new String(ftpConfiguration.getPassword());
 
@@ -5041,9 +4995,9 @@ public class transactionInManagerImpl implements transactionInManager {
 				channel.connect();
 				channelSftp = (ChannelSftp) channel;
 
-				channelSftp.cd(ftpConfiguration.getdirectory());
+				channelSftp.cd(ftpConfiguration.getDirectory());
 
-				Vector filelist = channelSftp.ls(ftpConfiguration.getdirectory());
+				Vector filelist = channelSftp.ls(ftpConfiguration.getDirectory());
 				
 				if(filelist.size() > 0) {
 				    Integer totalFilesMoved = 0;
@@ -5075,7 +5029,7 @@ public class transactionInManagerImpl implements transactionInManager {
 						    e.printStackTrace(new PrintWriter(errors));
 
 						    try {
-							 String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
+							 String emailBody = "IP: " + ftpConfiguration.getIp() + "<br/> Port:" + ftpConfiguration.getPort() + "<br />Folder: " + ftpConfiguration.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
 							 mailMessage mail = new mailMessage();
 							 mail.setfromEmailAddress("support@health-e-link.net");
 							 mail.setmessageBody(emailBody);
@@ -5132,7 +5086,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				e.printStackTrace(new PrintWriter(errors));
 				
 				try {
-				    String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
+				    String emailBody = "IP: " + ftpConfiguration.getIp() + "<br/> Port:" + ftpConfiguration.getPort() + "<br />Folder: " + ftpConfiguration.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
 				    mailMessage mail = new mailMessage();
 				    mail.setfromEmailAddress("support@health-e-link.net");
 				    mail.setmessageBody(emailBody);
@@ -5167,7 +5121,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				StringWriter errors = new StringWriter();
 				e.printStackTrace(new PrintWriter(errors));
 				try {
-				    String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
+				    String emailBody = "IP: " + ftpConfiguration.getIp() + "<br/> Port:" + ftpConfiguration.getPort() + "<br />Folder: " + ftpConfiguration.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
 				    mailMessage mail = new mailMessage();
 				    mail.setfromEmailAddress("support@health-e-link.net");
 				    mail.setmessageBody(emailBody);
@@ -5192,7 +5146,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			FTPClient ftpClient = new FTPClient();
 			
 			try {
-			    ftpClient.connect(ftpConfiguration.getip(),ftpConfiguration.getport());
+			    ftpClient.connect(ftpConfiguration.getIp(),ftpConfiguration.getPort());
 			    
 			    int replyCode = ftpClient.getReplyCode();
 			    
@@ -5209,7 +5163,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				
 				if(connectionErrors.isEmpty()) {
 				    try {
-					String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Connection Failed<br />";
+					String emailBody = "IP: " + ftpConfiguration.getIp() + "<br/> Port:" + ftpConfiguration.getPort() + "<br />Folder: " + ftpConfiguration.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Connection Failed<br />";
 					mailMessage mail = new mailMessage();
 					mail.setfromEmailAddress("support@health-e-link.net");
 					mail.setmessageBody(emailBody);
@@ -5233,8 +5187,8 @@ public class transactionInManagerImpl implements transactionInManager {
 
 				String decryptedPwd = (String) obj.get("pwd");
 
-				boolean success = ftpClient.login(ftpConfiguration.getusername().trim(), decryptedPwd);
-			    
+				boolean success = ftpClient.login(ftpConfiguration.getUsername().trim(), decryptedPwd);
+			   
 				if (!success) {
 				    returnMessage = "The FTP check ran into a connection error";
 				    
@@ -5251,7 +5205,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				    
 				    if(connectionErrors.isEmpty()) {
 					try {
-					    String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Credentials Failed<br />";
+					    String emailBody = "IP: " + ftpConfiguration.getIp() + "<br/> Port:" + ftpConfiguration.getPort() + "<br />Folder: " + ftpConfiguration.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Credentials Failed<br />";
 					    mailMessage mail = new mailMessage();
 					    mail.setfromEmailAddress("support@health-e-link.net");
 					    mail.setmessageBody(emailBody);
@@ -5265,13 +5219,13 @@ public class transactionInManagerImpl implements transactionInManager {
 				    }
 				}
 				else {
-				    FTPFile[] filelist = ftpClient.listFiles(ftpConfiguration.getdirectory());
+				    FTPFile[] filelist = ftpClient.listFiles(ftpConfiguration.getDirectory());
 				    
 				    if(filelist.length > 0) {
 					OutputStream outputStream;
 					for(FTPFile file: filelist){
 					    if(file.isFile()) {
-						InputStream inputStream = ftpClient.retrieveFileStream(myProps.getProperty("ut.directory.utRootDir") + ftpConfiguration.getdirectory()+"/"+file.getName());
+						InputStream inputStream = ftpClient.retrieveFileStream(myProps.getProperty("ut.directory.utRootDir") + ftpConfiguration.getDirectory()+"/"+file.getName());
 						byte[] buffer = new byte[inputStream.available()];
 						inputStream.read(buffer);
 						
@@ -5281,7 +5235,7 @@ public class transactionInManagerImpl implements transactionInManager {
 						
 						returnMessage += "The " + file.getName() + " file was successfully picked up.<br/>";
 						
-						ftpClient.deleteFile(ftpConfiguration.getdirectory()+"/"+file.getName());
+						ftpClient.deleteFile(ftpConfiguration.getDirectory()+"/"+file.getName());
 					    }
 					}
 				    }
@@ -5312,7 +5266,7 @@ public class transactionInManagerImpl implements transactionInManager {
 				e.printStackTrace(new PrintWriter(errors));
 			    
 				try {
-				    String emailBody = "IP: " + ftpConfiguration.getip() + "<br/> Port:" + ftpConfiguration.getport() + "<br />Folder: " + ftpConfiguration.getdirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
+				    String emailBody = "IP: " + ftpConfiguration.getIp() + "<br/> Port:" + ftpConfiguration.getPort() + "<br />Folder: " + ftpConfiguration.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
 				    mailMessage mail = new mailMessage();
 				    mail.setfromEmailAddress("support@health-e-link.net");
 				    mail.setmessageBody(emailBody);
@@ -5939,7 +5893,7 @@ public class transactionInManagerImpl implements transactionInManager {
 	message = message + "<br/>Total Transactions: " + batch.getTotalRecordCount();
 	message = message + "<br/>Total Errors: " + batch.getErrorRecordCount();
 	message += "<br /><br />Sending Organization: " + orgDetails.getOrgName();
-	message += "<br />Configuration Name: " + configDetails.getconfigName().trim();
+	message += "<br />Configuration Name: " + configDetails.getConfigname().trim();
 
 	mail.setmessageBody(message);
 	mail.setmessageSubject("Uploaded File has been rejected due to one or more transaction errors");

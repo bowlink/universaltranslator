@@ -113,6 +113,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.ParseException;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -1000,7 +1001,7 @@ public class adminProcessingActivity {
 	    }
 	    
 	    mav.addObject("transportMethod",transportMethod);
-	    mav.addObject("fileDelimiter", transportDetails.getfileDelimiter());
+	    mav.addObject("fileDelimiter", transportDetails.getFileDelimiter());
 	    
 	    Organization orgDetails = organizationmanager.getOrganizationById(batchDetails.getOrgId());
             batchDetails.setOrgName(orgDetails.getOrgName());
@@ -1067,7 +1068,7 @@ public class adminProcessingActivity {
             }
 
             if (batchDetails.getConfigId() != 0) {
-                batchDetails.setConfigName(configDetails.getconfigName());
+                batchDetails.setConfigName(configDetails.getConfigname());
             } else {
                 batchDetails.setConfigName("Multiple Message Types");
             }
@@ -1626,7 +1627,7 @@ public class adminProcessingActivity {
                 List<utConfiguration> configurationList = configurationManager.getConfigurations();
                 Map<Integer, String> cMap = new HashMap<>();
 		configurationList.forEach((c) -> {
-		    cMap.put(c.getId(), c.getconfigName());
+		    cMap.put(c.getId(), c.getConfigname());
 		});
 		
                 //we can map the process status so we only have to query once
@@ -2519,7 +2520,7 @@ public class adminProcessingActivity {
                 List<utConfiguration> configurationList = configurationManager.getConfigurations();
                 Map<Integer, String> cMap = new HashMap<>();
 		configurationList.forEach((c) -> {
-		    cMap.put(c.getId(), c.getconfigName());
+		    cMap.put(c.getId(), c.getConfigname());
 		});
 		
                 //we can map the process status so we only have to query once
@@ -2748,7 +2749,7 @@ public class adminProcessingActivity {
                 List<utConfiguration> configurationList = configurationManager.getConfigurations();
                 Map<Integer, String> cMap = new HashMap<>();
 		configurationList.forEach((c) -> {
-		    cMap.put(c.getId(), c.getconfigName());
+		    cMap.put(c.getId(), c.getConfigname());
 		});
 
                 //we can map the process status so we only have to query once
@@ -3084,8 +3085,8 @@ public class adminProcessingActivity {
      */
     @RequestMapping(value = "/dashboardInBoundBatches", method = RequestMethod.GET)
     public @ResponseBody String dashboardInBoundBatches(HttpServletRequest request, HttpServletResponse response, HttpSession session, @RequestParam Date fromDate, @RequestParam Date toDate) throws Exception {
-
-	Gson gson = new Gson();
+   
+        Gson gson = new Gson();
         JsonObject jsonResponse = new JsonObject();
 	Integer iDisplayStart = Integer.parseInt(request.getParameter("iDisplayStart"));
         Integer iDisplayLength = Integer.parseInt(request.getParameter("iDisplayLength"));
@@ -3109,13 +3110,13 @@ public class adminProcessingActivity {
 	List<batchUploads> batchUploadList = transactionInManager.getAllUploadBatchesPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
 	
 	List<batchUploads> batchUploadsToReturn = new ArrayList<>();
-	
+        
 	TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
 	DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	requiredFormat.setTimeZone(timeZone);
 	String dateinTZ = "";
-	
+        
 	if(batchUploadList.isEmpty()) {
 	    totalRecords = 0;
 	}
@@ -3156,7 +3157,7 @@ public class adminProcessingActivity {
 		batchUploadsToReturn.add(watchlistEntry);
 	    }
 	}
-	
+        
 	jsonResponse.addProperty("sEcho", sEcho);
         jsonResponse.addProperty("iTotalRecords", totalRecords);
         jsonResponse.addProperty("iTotalDisplayRecords", totalRecords);
@@ -3260,7 +3261,7 @@ public class adminProcessingActivity {
     public @ResponseBody ModelAndView dashboardGenericBatches(@RequestParam Date fromDate, @RequestParam Date toDate, HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activities/genericdashboard");
+        mav.setViewName("administrator/dashboard/genericDashboard");
 	
 	// Retrieve search parameters from session
         searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters");
@@ -3277,7 +3278,7 @@ public class adminProcessingActivity {
 
 	    //Need to get any watch list entries
 	    List<watchlistEntry> watchlistEntries = configurationManager.getGenericWatchListEntries(fromDate, toDate);
-	    
+            
 	    if(watchlistEntries != null) {
 		if(!watchlistEntries.isEmpty()) {
 		    watchlistEntries.stream().map((entry) -> {
@@ -3289,6 +3290,7 @@ public class adminProcessingActivity {
 			else {
 			    watchlistEntry.setDashboardRowColor("table-primary");
 			}
+                       
 			watchlistEntry.setId(entry.getId());
 			watchlistEntry.setUploadType("Watch List Entry");
 			watchlistEntry.setEntryMessage(entry.getEntryMessage());
@@ -3521,10 +3523,10 @@ public class adminProcessingActivity {
 		    //Need to get the configuration details and transport method
 		    configurationTransport transportDetails = configurationTransportManager.getTransportDetails(batchUploadDetails.getConfigId());
 		    
-		    File encodedUploadedFile = new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getfileLocation() + "encoded_" + batchUploadDetails.getUtBatchName());
+		    File encodedUploadedFile = new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getFileLocation() + "encoded_" + batchUploadDetails.getUtBatchName());
 		    
 		    //File Dropped
-		    if(transportDetails.gettransportMethodId() == 10 || transportDetails.gettransportMethodId() == 13) {
+		    if(transportDetails.getTransportMethodId() == 10 || transportDetails.getTransportMethodId() == 13) {
 			List<configurationFileDropFields> fileDropDetails = configurationTransportManager.getTransFileDropDetails(transportDetails.getId());
 			
 			if(fileDropDetails != null) {
@@ -3546,14 +3548,14 @@ public class adminProcessingActivity {
 			}
 		    }
 		    //SFTP
-		    else if(transportDetails.gettransportMethodId() == 8) {
+		    else if(transportDetails.getTransportMethodId() == 8) {
 			List<configurationFTPFields> ftpDetails = configurationTransportManager.getTransportFTPDetails(transportDetails.getId());
 			
 			if(ftpDetails != null) {
 			    for(configurationFTPFields ftpDetail : ftpDetails) {
-				if(ftpDetail.getmethod()== 1) {
+				if(ftpDetail.getMethod()== 1) {
 				    
-				    if(archiveFile.renameTo(new File(myProps.getProperty("ut.directory.utRootDir") + ftpDetail.getdirectory().replace("/sFTP","sFTP") + batchUploadDetails.getOriginalFileName()))) {
+				    if(archiveFile.renameTo(new File(myProps.getProperty("ut.directory.utRootDir") + ftpDetail.getDirectory().replace("/sFTP","sFTP") + batchUploadDetails.getOriginalFileName()))) {
 					archiveFile.delete();
 					
 					if(archiveDecFile.exists()) {
@@ -3568,7 +3570,7 @@ public class adminProcessingActivity {
 			}
 		    }
 		    else {
-			if(archiveFile.renameTo(new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getfileLocation() + batchUploadDetails.getOriginalFileName()))) {
+			if(archiveFile.renameTo(new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getFileLocation() + batchUploadDetails.getOriginalFileName()))) {
 			    archiveFile.delete();
 
 			    if(archiveDecFile.exists()) {
@@ -3980,7 +3982,7 @@ public class adminProcessingActivity {
 	    Date date = new Date();
 	    
 	    if(configDetails != null) {
-		fileName = configDetails.getconfigName().toLowerCase().replaceAll(" ","-")+"-"+batchName+ "-auditErrors";
+		fileName = configDetails.getConfigname().toLowerCase().replaceAll(" ","-")+"-"+batchName+ "-auditErrors";
 	    }
 	    else {
 		fileName = batchName + "-auditErrors";
@@ -4649,7 +4651,7 @@ public class adminProcessingActivity {
 	String auditReportPrintFile = System.getProperty("java.io.tmpdir") + "/";
 	
 	if(configDetails != null) {
-	    auditReportPrintFile = auditReportPrintFile + configDetails.getconfigName().toLowerCase().replaceAll(" ","-")+"-"+batchName + "-auditErrors.pdf";
+	    auditReportPrintFile = auditReportPrintFile + configDetails.getConfigname().toLowerCase().replaceAll(" ","-")+"-"+batchName + "-auditErrors.pdf";
 	}
 	else {
 	    auditReportPrintFile = auditReportPrintFile + batchName + "-auditErrors.pdf";
@@ -4681,7 +4683,7 @@ public class adminProcessingActivity {
 	if(configDetails != null) {
 	    reportBody.append("<div style='padding-top:10px;'>");
 	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 16px;'><strong>Configuration Name:</strong></span><br />");
-	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 16px;'>").append(configDetails.getconfigName()).append("</span><br />");
+	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 16px;'>").append(configDetails.getConfigname()).append("</span><br />");
 	    reportBody.append("</div>");
 	}
 	
@@ -5207,7 +5209,7 @@ public class adminProcessingActivity {
 	auditReportDetailsFile.delete();
 	
 	if(configDetails != null) {
-	    return configDetails.getconfigName().toLowerCase().replaceAll(" ","-")+"-"+batchName +"-auditErrors";
+	    return configDetails.getConfigname().toLowerCase().replaceAll(" ","-")+"-"+batchName +"-auditErrors";
 	}
 	else {
 	    return batchName + "-auditErrors";

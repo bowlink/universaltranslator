@@ -11,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,7 +30,6 @@ public class Crosswalks {
     @Column(name = "ID", nullable = false)
     private int id;
 
-    @NotEmpty
     @NoHtml
     @Column(name = "NAME", nullable = false)
     private String name;

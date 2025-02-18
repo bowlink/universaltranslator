@@ -1,7 +1,6 @@
 package com.hel.ut.dao;
 
 import java.util.List;
-
 import com.hel.ut.model.CrosswalkData;
 import com.hel.ut.model.HL7Details;
 import com.hel.ut.model.HL7ElementComponents;
@@ -21,7 +20,6 @@ import com.hel.ut.model.configurationUpdateLogs;
 import com.hel.ut.model.watchlist;
 import com.hel.ut.model.watchlistEntry;
 import java.util.Date;
-
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -221,4 +219,6 @@ public interface utConfigurationDAO {
     void executeSQLStatement(String sqlStatement) throws Exception;
 
     List<configurationConnection> getAllConnectionsSingleQuery();
+    
+    List getCrosswalksForExport(String sqlStatement) throws Exception;
 }

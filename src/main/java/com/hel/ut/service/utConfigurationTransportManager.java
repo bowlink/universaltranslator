@@ -1,9 +1,7 @@
 package com.hel.ut.service;
 
 import com.hel.ut.model.configurationFTPFields;
-
 import java.util.List;
-
 import com.hel.ut.model.TransportMethod;
 import com.hel.ut.model.configurationFormFields;
 import com.hel.ut.model.configurationMessageSpecs;

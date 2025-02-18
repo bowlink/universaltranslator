@@ -118,7 +118,7 @@ public class restfulManager {
 	    boolean clearRecords = false;
 
 	    if (transportDetails != null) {
-		clearRecords = transportDetails.getclearRecords();
+		clearRecords = transportDetails.isClearRecords();
 	    }
 
 	    /* get the batch details */
@@ -136,16 +136,16 @@ public class restfulManager {
 	    if (findExt >= 0) {
 		fileName = batchFileInfo.getOutputFileName();
 	    } else {
-		fileName = new StringBuilder().append(batchFileInfo.getOutputFileName()).append(".").append(transportDetails.getfileExt()).toString();
+		fileName = new StringBuilder().append(batchFileInfo.getOutputFileName()).append(".").append(transportDetails.getFileExt()).toString();
 	    }
 	    
 	    //Submit the restAPImessageOut
 	    RestAPIMessagesOut apiMessageOut = new RestAPIMessagesOut();
-	    apiMessageOut.setConfigId(transportDetails.getconfigId());
+	    apiMessageOut.setConfigId(transportDetails.getConfigId());
 	    apiMessageOut.setBatchDownloadId(batchId);
 	    apiMessageOut.setOrgId(batchFileInfo.getOrgId());
 
-	    String filelocation = transportDetails.getfileLocation().trim();
+	    String filelocation = transportDetails.getFileLocation().trim();
 
 	    File file = new File(myProps.getProperty("ut.directory.utRootDir") + filelocation + fileName);
 
@@ -247,19 +247,19 @@ public class restfulManager {
 	    if (sendEmail) {
 		try {
 		    //Check to see if we need to send out an email that the message was sent.
-		    List<utUser> receivingusers = usermanager.getSuccessEmailReceiversForConfig(transportDetails.getconfigId());
+		    List<utUser> receivingusers = usermanager.getSuccessEmailReceiversForConfig(transportDetails.getConfigId());
 
 		    //Check to see if we need to send out an email that the message was sent.
-		    List<utUser> users = usermanager.getSuccessEmailSendersForConfig(transportDetails.getconfigId());
+		    List<utUser> users = usermanager.getSuccessEmailSendersForConfig(transportDetails.getConfigId());
 
-		    List<configurationConnection> connections = configurationmanager.getConnectionsByTargetConfiguration(transportDetails.getconfigId());
+		    List<configurationConnection> connections = configurationmanager.getConnectionsByTargetConfiguration(transportDetails.getConfigId());
 
 		    if (connections != null) {
 
 			if (users != null || receivingusers != null) {
 
 			    // Get the utConfiguration details
-			    utConfiguration configDetails = configurationmanager.getConfigurationById(transportDetails.getconfigId());
+			    utConfiguration configDetails = configurationmanager.getConfigurationById(transportDetails.getConfigId());
 
 			    String message = "";
 
@@ -270,7 +270,7 @@ public class restfulManager {
 				String sendingOrgName = "";
 
 				if (sendingConfigDetails != null) {
-				    sendingOrgName = organizationmanager.getOrganizationById(sendingConfigDetails.getorgId()).getOrgName();
+				    sendingOrgName = organizationmanager.getOrganizationById(sendingConfigDetails.getOrgId()).getOrgName();
 				}
 
 				//build message
@@ -279,7 +279,7 @@ public class restfulManager {
 
 				message = message + "<br/><br/>Please see details below.";
 
-				message = message + "<br/><br/>Transaction Type: " + configDetails.getconfigName();
+				message = message + "<br/><br/>Transaction Type: " + configDetails.getConfigname();
 
 				message = message + "<br/><br/>Sending Organization: " + sendingOrgName;
 
@@ -316,7 +316,7 @@ public class restfulManager {
 				    //bccAddresses.add("monitor@health-e-link.net");
 
 				    mail.setmessageBody(message);
-				    mail.setmessageSubject(configDetails.getconfigName() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
+				    mail.setmessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
 				    mail.settoEmailAddress(toEmail);
 
 				    if (!ccAddresses.isEmpty()) {
@@ -366,7 +366,7 @@ public class restfulManager {
 				    }
 
 				    mail.setmessageBody(message);
-				    mail.setmessageSubject(configDetails.getconfigName() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
+				    mail.setmessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
 				    mail.settoEmailAddress(toEmail);
 
 				    if (!ccAddresses.isEmpty()) {
@@ -418,7 +418,7 @@ public class restfulManager {
 	    boolean clearRecords = false;
 
 	    if (transportDetails != null) {
-		clearRecords = transportDetails.getclearRecords();
+		clearRecords = transportDetails.isClearRecords();
 	    }
 
 	    /* get the batch details */
@@ -436,17 +436,17 @@ public class restfulManager {
 	    if (findExt >= 0) {
 		fileName = batchFileInfo.getOutputFileName();
 	    } else {
-		fileName = new StringBuilder().append(batchFileInfo.getOutputFileName()).append(".").append(transportDetails.getfileExt()).toString();
+		fileName = new StringBuilder().append(batchFileInfo.getOutputFileName()).append(".").append(transportDetails.getFileExt()).toString();
 	    }
 
-	    String filelocation = transportDetails.getfileLocation().trim();
+	    String filelocation = transportDetails.getFileLocation().trim();
 	    
 	    File file = new File(myProps.getProperty("ut.directory.utRootDir") + filelocation + fileName);
 	    File folder = new File(myProps.getProperty("ut.directory.utRootDir") + filelocation);
 
 	    //Submit the restAPImessageOut
 	    RestAPIMessagesOut apiMessageOut = new RestAPIMessagesOut();
-	    apiMessageOut.setConfigId(transportDetails.getconfigId());
+	    apiMessageOut.setConfigId(transportDetails.getConfigId());
 	    apiMessageOut.setBatchDownloadId(batchId);
 	    apiMessageOut.setOrgId(batchFileInfo.getOrgId());
 
@@ -589,19 +589,19 @@ public class restfulManager {
 	    if (sendEmail) {
 		try {
 		    //Check to see if we need to send out an email that the message was sent.
-		    List<utUser> receivingusers = usermanager.getSuccessEmailReceiversForConfig(transportDetails.getconfigId());
+		    List<utUser> receivingusers = usermanager.getSuccessEmailReceiversForConfig(transportDetails.getConfigId());
 
 		    //Check to see if we need to send out an email that the message was sent.
-		    List<utUser> users = usermanager.getSuccessEmailSendersForConfig(transportDetails.getconfigId());
+		    List<utUser> users = usermanager.getSuccessEmailSendersForConfig(transportDetails.getConfigId());
 
-		    List<configurationConnection> connections = configurationmanager.getConnectionsByTargetConfiguration(transportDetails.getconfigId());
+		    List<configurationConnection> connections = configurationmanager.getConnectionsByTargetConfiguration(transportDetails.getConfigId());
 
 		    if (connections != null) {
 
 			if (users != null || receivingusers != null) {
 
 			    // Get the utConfiguration details
-			    utConfiguration configDetails = configurationmanager.getConfigurationById(transportDetails.getconfigId());
+			    utConfiguration configDetails = configurationmanager.getConfigurationById(transportDetails.getConfigId());
 
 			    String message = "";
 
@@ -612,7 +612,7 @@ public class restfulManager {
 				String sendingOrgName = "";
 
 				if (sendingConfigDetails != null) {
-				    sendingOrgName = organizationmanager.getOrganizationById(sendingConfigDetails.getorgId()).getOrgName();
+				    sendingOrgName = organizationmanager.getOrganizationById(sendingConfigDetails.getOrgId()).getOrgName();
 				}
 
 				//build message
@@ -621,7 +621,7 @@ public class restfulManager {
 
 				message = message + "<br/><br/>Please see details below.";
 
-				message = message + "<br/><br/>Transaction Type: " + configDetails.getconfigName();
+				message = message + "<br/><br/>Transaction Type: " + configDetails.getConfigname();
 
 				message = message + "<br/><br/>Sending Organization: " + sendingOrgName;
 
@@ -658,7 +658,7 @@ public class restfulManager {
 				    //bccAddresses.add("monitor@health-e-link.net");
 
 				    mail.setmessageBody(message);
-				    mail.setmessageSubject(configDetails.getconfigName() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
+				    mail.setmessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
 				    mail.settoEmailAddress(toEmail);
 
 				    if (!ccAddresses.isEmpty()) {
@@ -708,7 +708,7 @@ public class restfulManager {
 				    }
 
 				    mail.setmessageBody(message);
-				    mail.setmessageSubject(configDetails.getconfigName() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
+				    mail.setmessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
 				    mail.settoEmailAddress(toEmail);
 
 				    if (!ccAddresses.isEmpty()) {
@@ -760,7 +760,7 @@ public class restfulManager {
 	    boolean clearRecords = false;
 
 	    if (transportDetails != null) {
-		clearRecords = transportDetails.getclearRecords();
+		clearRecords = transportDetails.isClearRecords();
 	    }
 
 	   
@@ -779,16 +779,16 @@ public class restfulManager {
 	    if (findExt >= 0) {
 		fileName = batchFileInfo.getOutputFileName();
 	    } else {
-		fileName = new StringBuilder().append(batchFileInfo.getOutputFileName()).append(".").append(transportDetails.getfileExt()).toString();
+		fileName = new StringBuilder().append(batchFileInfo.getOutputFileName()).append(".").append(transportDetails.getFileExt()).toString();
 	    }
 	    
 	    //Submit the restAPImessageOut
 	    RestAPIMessagesOut apiMessageOut = new RestAPIMessagesOut();
-	    apiMessageOut.setConfigId(transportDetails.getconfigId());
+	    apiMessageOut.setConfigId(transportDetails.getConfigId());
 	    apiMessageOut.setBatchDownloadId(batchId);
 	    apiMessageOut.setOrgId(batchFileInfo.getOrgId());
 
-	    String filelocation = transportDetails.getfileLocation().trim();
+	    String filelocation = transportDetails.getFileLocation().trim();
 	    
 	    File file = new File(myProps.getProperty("ut.directory.utRootDir") + filelocation + fileName);
 
@@ -887,19 +887,19 @@ public class restfulManager {
 	    if (sendEmail) {
 		try {
 		    //Check to see if we need to send out an email that the message was sent.
-		    List<utUser> receivingusers = usermanager.getSuccessEmailReceiversForConfig(transportDetails.getconfigId());
+		    List<utUser> receivingusers = usermanager.getSuccessEmailReceiversForConfig(transportDetails.getConfigId());
 
 		    //Check to see if we need to send out an email that the message was sent.
-		    List<utUser> users = usermanager.getSuccessEmailSendersForConfig(transportDetails.getconfigId());
+		    List<utUser> users = usermanager.getSuccessEmailSendersForConfig(transportDetails.getConfigId());
 
-		    List<configurationConnection> connections = configurationmanager.getConnectionsByTargetConfiguration(transportDetails.getconfigId());
+		    List<configurationConnection> connections = configurationmanager.getConnectionsByTargetConfiguration(transportDetails.getConfigId());
 
 		    if (connections != null) {
 
 			if (users != null || receivingusers != null) {
 
 			    // Get the utConfiguration details
-			    utConfiguration configDetails = configurationmanager.getConfigurationById(transportDetails.getconfigId());
+			    utConfiguration configDetails = configurationmanager.getConfigurationById(transportDetails.getConfigId());
 
 			    String message = "";
 
@@ -910,7 +910,7 @@ public class restfulManager {
 				String sendingOrgName = "";
 
 				if (sendingConfigDetails != null) {
-				    sendingOrgName = organizationmanager.getOrganizationById(sendingConfigDetails.getorgId()).getOrgName();
+				    sendingOrgName = organizationmanager.getOrganizationById(sendingConfigDetails.getOrgId()).getOrgName();
 				}
 
 				//build message
@@ -919,7 +919,7 @@ public class restfulManager {
 
 				message = message + "<br/><br/>Please see details below.";
 
-				message = message + "<br/><br/>Transaction Type: " + configDetails.getconfigName();
+				message = message + "<br/><br/>Transaction Type: " + configDetails.getConfigname();
 
 				message = message + "<br/><br/>Sending Organization: " + sendingOrgName;
 
@@ -956,7 +956,7 @@ public class restfulManager {
 				    //bccAddresses.add("monitor@health-e-link.net");
 
 				    mail.setmessageBody(message);
-				    mail.setmessageSubject(configDetails.getconfigName() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
+				    mail.setmessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
 				    mail.settoEmailAddress(toEmail);
 
 				    if (!ccAddresses.isEmpty()) {
@@ -1006,7 +1006,7 @@ public class restfulManager {
 				    }
 
 				    mail.setmessageBody(message);
-				    mail.setmessageSubject(configDetails.getconfigName() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
+				    mail.setmessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
 				    mail.settoEmailAddress(toEmail);
 
 				    if (!ccAddresses.isEmpty()) {

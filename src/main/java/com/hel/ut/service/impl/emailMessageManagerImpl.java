@@ -7,9 +7,12 @@ package com.hel.ut.service.impl;
 
 import com.hel.ut.model.mailMessage;
 import com.hel.ut.service.emailMessageManager;
+import jakarta.annotation.Resource;
+import jakarta.mail.*;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import java.util.Date;
+import java.util.Properties;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -19,42 +22,37 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class emailMessageManagerImpl implements emailMessageManager {
-
-    private JavaMailSender mailSender;
-
-    public void setMailSender(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-    }
+    
+    @Resource(name = "myProps")
+    private Properties myProps;
 
     @Async
     public void sendEmail(mailMessage messageDetails) throws Exception {
+        
+        Properties props = new Properties();
+        props.put("mail.smtp.host", myProps.getProperty("mailserver.host"));
+        props.put("mail.smtp.port", myProps.getProperty("mailserver.port"));
+        props.put("mail.smtp.starttls.enable", "true");
+	props.put("mail.smtp.ssl.protocols", myProps.getProperty("mailserver.protocols"));
+        
+        Session session = Session.getInstance(props);
+        
+        Transport transport = session.getTransport("smtp");
 
-        MimeMessage msg = mailSender.createMimeMessage();
+        transport.connect(myProps.getProperty("mailserver.host"), myProps.getProperty("mailserver.username"), myProps.getProperty("mailserver.password"));
 
-        try {
-            MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(messageDetails.getfromEmailAddress()));
+        InternetAddress[] address = {new InternetAddress(messageDetails.gettoEmailAddress())};
+        message.setRecipients(Message.RecipientType.TO, address);
+        message.setReplyTo(InternetAddress.parse(messageDetails.getfromEmailAddress()));
 
-            helper.setFrom(messageDetails.getfromEmailAddress());
-            helper.setTo(messageDetails.gettoEmailAddress());
-	    
-            if (messageDetails.getccEmailAddress() != null) {
-		helper.setCc(messageDetails.getccEmailAddress());
-            }
-	    
-	    if(messageDetails.getBccEmailAddress() != null) {
-		helper.setBcc(messageDetails.getBccEmailAddress());
-	    }
-	   
-            helper.setSubject(messageDetails.getmessageSubject());
-	    
-            helper.setText("", messageDetails.getmessageBody());
-            helper.setReplyTo(messageDetails.getfromEmailAddress());
-
-            mailSender.send(msg);
-
-        } catch (Exception e) {
-            throw new Exception(e);
-        }
-
+        message.setSubject(messageDetails.getmessageSubject());
+        message.setSentDate(new Date());
+        
+        message.setContent(messageDetails.getmessageBody(), "text/html");
+        message.saveChanges();
+        transport.sendMessage(message, address);
+        transport.close();
     }
 }

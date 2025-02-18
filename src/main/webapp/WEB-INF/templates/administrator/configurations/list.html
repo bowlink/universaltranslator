@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+    <head>
+        <title>Health-e-Link UT Organizations</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/configurations/actionBar :: actionBar}"></div>
+            <div class="main clearfix full-width" role="main">
+                <div class="col-md-12">
+                    <div class="alert alert-danger" id="exportErrorMsg" style="display:none;">
+                        <strong>Export Error!</strong> 
+                        An error occurred while trying to export the configuration.
+                    </div>
+                    <div class="alert alert-success" role="alert" th:if="${savedStatus != null}">
+                        <strong>Success!</strong> 
+                        <p th:if="${savedStatus == 'updated'}">The configuration has been successfully updated!</p>
+                        <p th:if="${savedStatus == 'created'}">The configuration has been successfully added!</p>
+                        <p th:if="${savedStatus == 'deleted'}">The configuration has been successfully removed!</p>
+                    </div>
+                    <div class="alert alert-success" role="alert" th:if="${savedStatus != null}">
+                        <strong>Success!</strong> 
+                        <p th:if="${savedStatus == 'updated'}">The configuration has been successfully updated!</p>
+                        <p th:if="${savedStatus == 'deleted'}">The configuration has been successfully removed!</p>
+                    </div>
+                    <ul class="nav nav-pills" id="pills-tab" role="tablist" aria-orientation="hotizontal" style="margin-bottom:20px;">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="source-config-tab" data-bs-toggle="tab" data-bs-target="#source-config" type="button" role="tab" aria-controls="source-config" aria-selected="true">Source Configurations</button>
+                        </li>
+                        <li  class="nav-item" role="presentation">
+                            <button class="nav-link" id="target-config-tab" data-bs-toggle="tab" data-bs-target="#target-config" type="button" role="tab" aria-controls="target-config" aria-selected="false">Target Configurations</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content clearfix">
+                        <div class="tab-pane active" id="source-config">
+                             <section class="panel panel-info container-fluid">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Source Configurations</h3>
+                                </div>
+                               <div class="panel-body">
+                                    <div class="form-container scrollable">
+                                        <table class="table table-striped table-hover table-default" th:id="${not #lists.isEmpty(sourceconfigurations) ? 'sourceconfigdatatable' : ''}" style="cursor:pointer;">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" class="center-text" style="width:5%">Id</th>
+                                                    <th scope="col" style="width:20%">Organization</th>
+                                                    <th scope="col" style="width:30%">Configuration Name</th>
+                                                    <th scope="col" class="center-text"style="width:10%">Transport Method</th>
+                                                    <th scope="col" class="center-text" style="width:15%">Date Created</th>
+                                                    <th scope="col" class="center-text" style="width:15%">Date Last Updated</th>
+                                                    <th scope="col" style="width:5%"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <div th:if="${not #lists.isEmpty(sourceconfigurations)}">
+                                                    <th:block th:each="srcConfigs : ${sourceconfigurations}">
+                                                        <tr>
+                                                            <td scope="row" class="center-text link" th:rel="${srcConfigs.id}" th:text=" ${srcConfigs.id}"></td>
+                                                            <td class="link" th:rel="${srcConfigs.id}">
+                                                                <span th:text="${srcConfigs.orgName}"></span>
+                                                                <span th:if="${srcConfigs.helRegistry != ''}" th:utext="${'<br /><strong>' + srcConfigs.helRegistry + '</strong>'}"></span>
+                                                            </td>
+                                                            <td class="link" th:rel="${srcConfigs.id}">
+                                                                <a href="#" th:rel="${srcConfigs.id}" title="Edit this configuration" th:text="${srcConfigs.configname}"></a>
+                                                                <br />
+                                                                <span class="text-success" th:if="${srcConfigs.status}" th:text="Active"></span>
+                                                                <span class="text-danger" th:if="${!srcConfigs.status}" th:text="Inactive"></span>
+                                                            </td>
+                                                            <td class="center-text link" th:rel="${srcConfigs.id}">
+                                                                <span th:if="${srcConfigs.transportMethod  == 'File Upload' and srcConfigs.type == 1}" th:text="File Upload"></span>
+                                                                <span th:if="${srcConfigs.transportMethod  == 'File Upload' and srcConfigs.type != 1}" th:text="File Download"></span>
+                                                                <span th:if="${srcConfigs.transportMethod  != 'File Upload'}" th:text="${srcConfigs.transportMethod}"></span>
+                                                            </td>
+                                                            <td class="center-text link" th:rel="${srcConfigs.id}" th:text="${#dates.format(srcConfigs.dateCreated, 'M/dd/yy h:mm a')}"></td>
+                                                            <td class="center-text link" th:rel="${srcConfigs.id}">
+                                                                <span th:if="${srcConfigs.dateUpdated == ''}" th:text="${#dates.format(srcConfigs.dateCreated, 'M/dd/yy h:mm a')}"></span>
+                                                                <span th:if="${srcConfigs.dateUpdated != ''}" th:text="${#dates.format(srcConfigs.dateUpdated, 'M/dd/yy h:mm a')}"></span>
+                                                            </td>
+                                                            <td>
+                                                                <div class="dropdown pull-left">
+                                                                    <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                                        <i class="fa fa-cog"></i>
+                                                                    </button>
+                                                                    <ul class="dropdown-menu pull-right">
+                                                                        <li th:if="${srcConfigs.type == 1 and srcConfigs.status}">
+                                                                            <a href="#" class="copyConfig" th:rel="${srcConfigs.id}" title="Copy this Configuration">
+                                                                                <span class="glyphicon glyphicon-transfer"></span>
+                                                                                Copy
+                                                                            </a>
+                                                                        </li>
+                                                                        <li th:if="${srcConfigs.type == 1 and srcConfigs.status and srcConfigs.allowFTPLink}">
+                                                                            <a href="#" data-bs-target="#configFTPCheckdModal" data-bs-toggle="modal" class="checkFTP" th:rel="${srcConfigs.id}" th:rel2="${srcConfigs.transportDetailId}" title="Check FTP location for new file to process">
+                                                                                <span class="glyphicon glyphicon-play-circle"></span>
+                                                                                Check FTP Location
+                                                                            </a>
+                                                                        </li>
+                                                                        <li class="divider"></li>
+                                                                        <li>
+                                                                            <a th:href="${'/administrator/configurations/details?i='+srcConfigs.id}" class="editConfig" th:rel="${srcConfigs.id}" title="Edit this configuration">
+                                                                                <span class="glyphicon glyphicon-edit"></span>
+                                                                                Edit
+                                                                            </a>
+                                                                        </li>       
+                                                                        <li>
+                                                                           <a href="#" class="printConfig" th:rel="${srcConfigs.id}" title="Print this Configuration">
+                                                                               <span class="glyphicon glyphicon-print"></span>
+                                                                               Print
+                                                                           </a>
+                                                                        </li>
+                                                                        <li th:if="${srcConfigs.allowExport}">
+                                                                            <a href="#" class="exportConfig" th:rel="${srcConfigs.id}" title="Export this Configuration">
+                                                                                <span class="glyphicon glyphicon-export"></span>
+                                                                                Export
+                                                                            </a>
+                                                                         </li> 
+                                                                        <li>
+                                                                            <a href="#" class="deleteConfig" th:rel="${srcConfigs.id}" title="Delete this configuration">
+                                                                                <span class="glyphicon glyphicon-remove-circle"></span>
+                                                                                Delete
+                                                                            </a>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </th:block>
+                                                </div>
+                                                <div th:if="${#lists.isEmpty(sourceconfigurations)}">
+                                                    <tr><td colspan="6" class="center-text">There are currently no source configurations set up.</td></tr>
+                                                </div>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                               </div>
+                             </section>
+                        </div>
+                        <div class="tab-pane" id="target-config">
+                            <section class="panel panel-info container-fluid">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Target Configurations</h3>
+                                </div>
+                               <div class="panel-body">
+                                   <div class="form-container scrollable">
+                                       <table class="table table-striped table-hover table-default" th:id="${not #lists.isEmpty(targetconfigurations) ? 'targetconfigdatatable' : ''}" style="cursor:pointer;">
+                                           <thead>
+                                                <tr>
+                                                    <th scope="col" class="center-text" style="width:5%">Id</th>
+                                                    <th scope="col" style="width:20%">Organization</th>
+                                                    <th scope="col" style="width:30%">Configuration Name</th>
+                                                    <th scope="col" class="center-text"style="width:10%">Transport Method</th>
+                                                    <th scope="col" class="center-text" style="width:15%">Date Created</th>
+                                                    <th scope="col" class="center-text" style="width:15%">Date Last Updated</th>
+                                                    <th scope="col" style="width:5%"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <div th:if="${not #lists.isEmpty(targetconfigurations)}">
+                                                    <th:block th:each="tgtConfigs : ${targetconfigurations}">
+                                                        <tr>
+                                                            <td scope="row" class="center-text" th:text=" ${tgtConfigs.id}"></td>
+                                                            <td th:text="${tgtConfigs.orgName}"></td>
+                                                            <td>
+                                                                <a href="#" class="editConfig" th:rel="${tgtConfigs.id}" title="Edit this configuration" th:text="${tgtConfigs.configname}"></a>
+                                                                <br />
+                                                                <span class="text-success" th:if="${tgtConfigs.status}" th:text="Active"></span>
+                                                                <span class="text-danger" th:if="${!tgtConfigs.status}" th:text="Inactive"></span>
+                                                            </td>
+                                                            <td class="center-text">
+                                                                <span th:if="${tgtConfigs.transportMethod  == 'File Upload' and tgtConfigs.type == 1}" th:text="File Upload"></span>
+                                                                <span th:if="${tgtConfigs.transportMethod  == 'File Upload' and tgtConfigs.type != 1}" th:text="File Download"></span>
+                                                                <span th:if="${tgtConfigs.transportMethod  != 'File Upload'}" th:text="${tgtConfigs.transportMethod}"></span>
+                                                            </td>
+                                                            <td class="center-text" th:text="${#dates.format(tgtConfigs.dateCreated, 'M/dd/yy h:mm a')}"></td>
+                                                            <td class="center-text">
+                                                                <span th:if="${tgtConfigs.dateUpdated == ''}" th:text="${#dates.format(tgtConfigs.dateCreated, 'M/dd/yy h:mm a')}"></span>
+                                                                <span th:if="${tgtConfigs.dateUpdated != ''}" th:text="${#dates.format(tgtConfigs.dateUpdated, 'M/dd/yy h:mm a')}"></span>
+                                                            </td>
+                                                            <td>
+                                                                <div class="dropdown pull-left">
+                                                                    <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                                        <i class="fa fa-cog"></i>
+                                                                    </button>
+                                                                    <ul class="dropdown-menu pull-right">
+                                                                        <li th:if="${tgtConfigs.status}">
+                                                                            <a href="#" class="copyConfig" th:rel="${tgtConfigs.id}" title="Copy this Configuration">
+                                                                                <span class="glyphicon glyphicon-transfer"></span>
+                                                                                Copy
+                                                                            </a>
+                                                                        </li>
+                                                                        <li class="divider"></li>
+                                                                        <li>
+                                                                            <a href="#" class="editConfig" th:rel="${tgtConfigs.id}" title="Edit this configuration">
+                                                                                <span class="glyphicon glyphicon-edit"></span>
+                                                                                Edit
+                                                                            </a>
+                                                                        </li>       
+                                                                        <li>
+                                                                           <a href="#" class="printConfig" th:rel="${tgtConfigs.id}" title="Print this Configuration">
+                                                                               <span class="glyphicon glyphicon-print"></span>
+                                                                               Print
+                                                                           </a>
+                                                                        </li>
+                                                                        <li th:if="${tgtConfigs.allowExport}">
+                                                                            <a href="#" class="exportConfig" th:rel="${tgtConfigs.id}" title="Export this Configuration">
+                                                                                <span class="glyphicon glyphicon-export"></span>
+                                                                                Export
+                                                                            </a>
+                                                                         </li> 
+                                                                        <li>
+                                                                            <a href="#" class="deleteConfig" th:rel="${tgtConfigs.id}" title="Delete this configuration">
+                                                                                <span class="glyphicon glyphicon-remove-circle"></span>
+                                                                                Delete
+                                                                            </a>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </th:block>
+                                                </div>
+                                                <div th:if="${#lists.isEmpty(targetconfigurations)}">
+                                                    <tr><td colspan="6" class="center-text">There are currently no target configurations set up.</td></tr>
+                                                </div>
+                                            </tbody>
+                                        </table>
+                                   </div>
+                               </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>		
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
+            <script th:src="@{/dspResources/js/overlay.js}"></script>    
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.min.js}"></script>
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.bootstrap.min.js}"></script>
+            <script th:src="@{/dspResources/js/admin/configuration/list.js}"></script>
+        </th:block>
+    </body>
+</html>
+<div class="modal fade" id="configFileUploadModal" role="dialog" tabindex="-1" aria-labeledby="Configuration File Upload" aria-hidden="true" aria-describedby="Configuration File Upload">
+    <div class="modal-dialog"><div class="modal-content" id="UploadModalContent"></div></div>
+</div>

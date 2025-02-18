@@ -137,7 +137,7 @@ public class excelToTxt {
                     if (totalNoColsInSheet != totalFields) {
                         try {
                             utConfiguration configDetails = configurationManager.getConfigurationById(batch.getConfigId());
-                            transactioninmanager.sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getconfigName() + " file. Column Size Mismatch " + totalNoColsInSheet + " found. Expecting  "+totalFields+" columns. <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), ("Columns size mismatch " + configDetails.getconfigName()), false, true);			   
+                            transactioninmanager.sendEmailToAdmin((new Date() + "<br/>Please login and review " + configDetails.getConfigname() + " file. Column Size Mismatch " + totalNoColsInSheet + " found. Expecting  "+totalFields+" columns. <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), ("Columns size mismatch " + configDetails.getConfigname()), false, true);			   
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

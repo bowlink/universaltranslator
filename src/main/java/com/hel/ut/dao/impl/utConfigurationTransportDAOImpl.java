@@ -5,7 +5,6 @@ import org.hibernate.query.Query;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.hibernate.transform.Transformers;
 import com.hel.ut.model.TransportMethod;
 import com.hel.ut.model.configurationFTPFields;
 import com.hel.ut.model.configurationFormFields;
@@ -26,6 +25,11 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.util.Objects;
+import org.hibernate.HibernateException;
+import org.hibernate.query.MutationQuery;
+import org.hibernate.query.SelectionQuery;
+import org.hibernate.type.StandardBasicTypes;
 
 @Repository
 public class utConfigurationTransportDAOImpl implements utConfigurationTransportDAO {
@@ -46,7 +50,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = true)
     @Override
     public configurationTransport getTransportDetails(int configId) throws Exception {
-        Query query = sessionFactory.getCurrentSession().createQuery("from configurationTransport where configId = :configId");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from configurationTransport where configId = :configId");
         query.setParameter("configId", configId);
 	
 	try {
@@ -69,7 +73,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = true)
     @Override
     public configurationTransport getTransportDetailsByTransportMethod(int configId, int transportMethod) {
-        Query query = sessionFactory.getCurrentSession().createQuery("from configurationTransport where configId = :configId and transportMethodId = :transportMethod");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from configurationTransport where configId = :configId and transportMethodId = :transportMethod");
         query.setParameter("configId", configId);
         query.setParameter("transportMethod", transportMethod);
 
@@ -88,11 +92,11 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     public Integer updateTransportDetails(configurationTransport transportDetails) {
         if (transportDetails.getId() > 0) {
-            sessionFactory.getCurrentSession().update(transportDetails);
+            sessionFactory.getCurrentSession().merge(transportDetails);
             return transportDetails.getId();
         } else {
-            int detailId = (Integer) sessionFactory.getCurrentSession().save(transportDetails);
-            return detailId;
+            sessionFactory.getCurrentSession().persist(transportDetails);
+            return transportDetails.getId();
         }
     }
 
@@ -118,25 +122,29 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = true)
     public List getTransportMethodsByType(utConfiguration configurationDetails) {
 	
-	Query query;
+	String sql = "";
 	 
 	//Source configuration
 	if(configurationDetails.getType() == 1) {
 	    //eReferral configuration (allow online form and file drop)
 	    if(configurationDetails.getMessageTypeId() == 1) {
-		query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, transportMethod FROM ref_transportMethods where active = 1 and id in (10,13) order by transportMethod asc", String.class);
+		sql = "SELECT id, transportMethod FROM ref_transportMethods where active = 1 and id in (10,13) order by transportMethod asc";
 	    }
 	    else {
-		query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, transportMethod FROM ref_transportMethods where active = 1 and id = 13 order by transportMethod asc", String.class);
+		sql = "SELECT id, transportMethod FROM ref_transportMethods where active = 1 and id = 13 order by transportMethod asc";
 	    }
 	}
 	
 	//Target configuration
 	else {
-	    query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, transportMethod FROM ref_transportMethods where active = 1 and id in (3,9,12,13) order by transportMethod asc", String.class);
+	    sql = "SELECT id, transportMethod FROM ref_transportMethods where active = 1 and id in (3,9,12,13) order by transportMethod asc";
 	}
+        
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("transportMethod", StandardBasicTypes.STRING);
 	
-        return query.list();
+        return query.getResultList();
     }
     
     /**
@@ -303,7 +311,11 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = false)
     @Override
     public void updateConfigurationFormFields(configurationFormFields formField) {
-        sessionFactory.getCurrentSession().saveOrUpdate(formField);
+        if (Objects.isNull(sessionFactory.getCurrentSession().find(configurationFormFields.class, formField.getId()))) {
+            sessionFactory.getCurrentSession().persist(formField);
+        } else {
+            sessionFactory.getCurrentSession().merge(formField);
+        }
     }
 
     /**
@@ -391,7 +403,11 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = false)
     public void saveTransportFTP(configurationFTPFields FTPFields) {
-        sessionFactory.getCurrentSession().saveOrUpdate(FTPFields);
+        if (Objects.isNull(sessionFactory.getCurrentSession().find(configurationFTPFields.class, FTPFields.getId()))) {
+            sessionFactory.getCurrentSession().persist(FTPFields);
+        } else {
+            sessionFactory.getCurrentSession().merge(FTPFields);
+        }
     }
 
     /**
@@ -424,7 +440,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public List<configurationTransportMessageTypes> getTransportMessageTypes(int configTransportId) {
-        Query query = sessionFactory.getCurrentSession().createQuery("FROM configurationTransportMessageTypes where configTransportId = :configTransportId");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("FROM configurationTransportMessageTypes where configTransportId = :configTransportId");
         query.setParameter("configTransportId", configTransportId);
 
         return query.list();
@@ -440,7 +456,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = false)
     public void deleteTransportMessageTypes(int configTransportId) {
-        Query query = sessionFactory.getCurrentSession().createQuery("DELETE FROM configurationTransportMessageTypes where configTransportId = :configTransportId");
+        MutationQuery query = sessionFactory.getCurrentSession().createMutationQuery("DELETE FROM configurationTransportMessageTypes where configTransportId = :configTransportId");
         query.setParameter("configTransportId", configTransportId);
         query.executeUpdate();
     }
@@ -453,7 +469,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = false)
     @Override
     public void saveTransportMessageTypes(configurationTransportMessageTypes messageType) {
-        sessionFactory.getCurrentSession().save(messageType);
+        sessionFactory.getCurrentSession().persist(messageType);
     }
 
     /**
@@ -694,7 +710,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = true)
     public configurationTransport getTransportDetailsByTransportId(Integer transportId) {
         try {
-            Query query = sessionFactory.getCurrentSession().createQuery("from configurationTransport where id = :id");
+            SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from configurationTransport where id = :id");
             query.setParameter("id", transportId);
             return (configurationTransport) query.uniqueResult();
         } catch (Exception ex) {
@@ -714,7 +730,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 		    + "where a.id = :transportId");
 	    
             Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
-            query.setParameter("transportId", ftpInfo.gettransportId());
+            query.setParameter("transportId", ftpInfo.getTransportId());
 
             Integer orgId = (Integer) query.list().get(0);
 
@@ -815,8 +831,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
 
             return configurationTransports;
 
-        } catch (Exception ex) {
-            System.err.println("getDistinctDelimCharForFileExt " + ex.getCause());
+        } catch (HibernateException ex) {
             return null;
         }
     }
@@ -831,9 +846,12 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = false)
     public void saveTransportFileDrop(configurationFileDropFields fileDropFields) throws Exception {
         try {
-            sessionFactory.getCurrentSession().saveOrUpdate(fileDropFields);
-        } catch (Exception ex) {
-            System.err.println("saveTransportFileDrop " + ex.getCause());
+            if (Objects.isNull(sessionFactory.getCurrentSession().find(configurationFileDropFields.class, fileDropFields.getId()))) {
+                sessionFactory.getCurrentSession().persist(fileDropFields);
+            } else {
+                sessionFactory.getCurrentSession().merge(fileDropFields);
+            }
+        } catch (HibernateException ex) {
         }
     }
 
@@ -1045,7 +1063,11 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = false)
     public void saveTransportWebService(configurationWebServiceFields wsFields) throws Exception {
-        sessionFactory.getCurrentSession().saveOrUpdate(wsFields);
+        if (Objects.isNull(sessionFactory.getCurrentSession().find(configurationWebServiceFields.class, wsFields.getId()))) {
+            sessionFactory.getCurrentSession().persist(wsFields);
+        } else {
+            sessionFactory.getCurrentSession().merge(wsFields);
+        }
     }
 
     @Override
@@ -1192,13 +1214,19 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = false)
     public void saveWSSender(configurationWebServiceSenders wsSender)throws Exception {
-        sessionFactory.getCurrentSession().saveOrUpdate(wsSender);
+        if (Objects.isNull(sessionFactory.getCurrentSession().find(configurationWebServiceSenders.class, wsSender.getId()))) {
+            sessionFactory.getCurrentSession().persist(wsSender);
+        } else {
+            sessionFactory.getCurrentSession().merge(wsSender);
+        }
     }
 
     @Override
     @Transactional(readOnly = false)
     public void deleteWSSender(configurationWebServiceSenders wsSender)throws Exception {
-        sessionFactory.getCurrentSession().delete(wsSender);
+        MutationQuery deleteWSSender = sessionFactory.getCurrentSession().createMutationQuery("delete from configurationWebServiceSenders where id = :wsSenderId");
+        deleteWSSender.setParameter("wsSenderId", wsSender.getId());
+        deleteWSSender.executeUpdate();
     }
 
     @SuppressWarnings("unchecked")
@@ -1302,8 +1330,8 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = false)
     @Override
     public Integer saveConfigurationFormFields(configurationFormFields formField) {
-	Integer lastId = (Integer) sessionFactory.getCurrentSession().save(formField);
-	return lastId;
+        sessionFactory.getCurrentSession().persist(formField);
+        return formField.getId();
     }
     
     /**
@@ -1361,7 +1389,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
      */
     @Transactional(readOnly = false)
     public void deleteConfigurationFormField(Integer formFieldId) {
-        Query query = sessionFactory.getCurrentSession().createQuery("DELETE FROM configurationFormFields where id = :formFieldId");
+        MutationQuery query = sessionFactory.getCurrentSession().createMutationQuery("DELETE FROM configurationFormFields where id = :formFieldId");
         query.setParameter("formFieldId", formFieldId);
 
         query.executeUpdate();
@@ -1375,7 +1403,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
      */
     @Transactional(readOnly = false)
     public void configurationDataTranslations(Integer formFieldId) {
-        Query query = sessionFactory.getCurrentSession().createQuery("DELETE FROM configurationDataTranslations where fieldId = :formFieldId");
+        MutationQuery query = sessionFactory.getCurrentSession().createMutationQuery("DELETE FROM configurationDataTranslations where fieldId = :formFieldId");
         query.setParameter("formFieldId", formFieldId);
 
         query.executeUpdate();
@@ -1393,7 +1421,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public organizationDirectDetails getDirectMessagingDetails(String DMDomain) throws Exception {
-        Query query = sessionFactory.getCurrentSession().createQuery("from organizationDirectDetails where FIND_IN_SET(:directDomain,directDomain) <> 0");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from organizationDirectDetails where FIND_IN_SET(:directDomain,directDomain) <> 0");
         query.setParameter("directDomain", DMDomain);
 	
 	if(query.list().size() > 1) {
@@ -1416,7 +1444,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public organizationDirectDetails getDirectMessagingDetailsById(Integer organizationId) throws Exception {
-        Query query = sessionFactory.getCurrentSession().createQuery("from organizationDirectDetails where orgId= :organizationId");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from organizationDirectDetails where orgId= :organizationId");
         query.setParameter("organizationId", organizationId);
 	
 	if(query.list().size() > 1) {
@@ -1430,7 +1458,11 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = false)
     public void saveTransportDirectMessageDetails(organizationDirectDetails directDetails) throws Exception {
-	sessionFactory.getCurrentSession().saveOrUpdate(directDetails);
+        if (Objects.isNull(sessionFactory.getCurrentSession().find(organizationDirectDetails.class, directDetails.getId()))) {
+            sessionFactory.getCurrentSession().persist(directDetails);
+        } else {
+            sessionFactory.getCurrentSession().merge(directDetails);
+        }
     }
     
     @Override
@@ -1494,7 +1526,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = false)
     public void deleteConnectionMappedFields(Integer connectionId) throws Exception {
-	Query query = sessionFactory.getCurrentSession().createQuery("DELETE FROM configurationconnectionfieldmappings where connectionId = :connectionId");
+	MutationQuery query = sessionFactory.getCurrentSession().createMutationQuery("DELETE FROM configurationconnectionfieldmappings where connectionId = :connectionId");
         query.setParameter("connectionId", connectionId);
         query.executeUpdate();
     }
@@ -1502,7 +1534,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = false)
     public void saveConnectionFieldMapping(configurationconnectionfieldmappings fieldMapping) throws Exception {
-	sessionFactory.getCurrentSession().save(fieldMapping);
+	sessionFactory.getCurrentSession().persist(fieldMapping);
     }
     
     /**
@@ -1602,7 +1634,11 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = false)
     public void saveFTPConnectionError(logftpconnectionerrors ftpCconnectionError) {
-        sessionFactory.getCurrentSession().saveOrUpdate(ftpCconnectionError);
+        if (Objects.isNull(sessionFactory.getCurrentSession().find(logftpconnectionerrors.class, ftpCconnectionError.getId()))) {
+            sessionFactory.getCurrentSession().persist(ftpCconnectionError);
+        } else {
+            sessionFactory.getCurrentSession().merge(ftpCconnectionError);
+        }
     }
     
     /**

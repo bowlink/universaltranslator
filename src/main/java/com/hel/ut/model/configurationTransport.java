@@ -50,16 +50,16 @@ public class configurationTransport {
     private int id;
 
     @Column(name = "CONFIGID", nullable = false)
-    private int configId;
+    private Integer configId;
 
     @Column(name = "TRANSPORTMETHODID", nullable = false)
-    private int transportMethodId;
+    private Integer transportMethodId;
 
     @Column(name = "FILETYPE", nullable = true)
-    private int fileType = 1;
+    private Integer fileType = 1;
 
     @Column(name = "FILEDELIMITER", nullable = true)
-    private int fileDelimiter = 2;
+    private Integer fileDelimiter = 2;
 
     @Column(name = "STATUS", nullable = false)
     private boolean status = true;
@@ -72,7 +72,7 @@ public class configurationTransport {
     private boolean appendDateTime = false;
 
     @Column(name = "MAXFILESIZE", nullable = false)
-    private int maxFileSize = 10;
+    private Integer maxFileSize = 10;
 
     @Column(name = "CLEARRECORDS", nullable = false)
     private boolean clearRecords = true;
@@ -84,13 +84,13 @@ public class configurationTransport {
     private boolean autoRelease = true;
 
     @Column(name = "ERRORHANDLING", nullable = false)
-    private int errorHandling = 2;
+    private Integer errorHandling = 2;
 
     @Column(name = "MERGEBATCHES", nullable = false)
     private boolean mergeBatches = true;
 
     @Column(name = "COPIEDTRANSPORTID", nullable = false)
-    private int copiedTransportId = 0;
+    private Integer copiedTransportId = 0;
 
     @Column(name = "massTranslation", nullable = false)
     private boolean massTranslation = true;
@@ -100,7 +100,7 @@ public class configurationTransport {
     private String fileExt = null;
 
     @Column(name = "encodingId", nullable = false)
-    private int encodingId = 1;
+    private Integer encodingId = 1;
 
     @Column(name = "ccdSampleTemplate", nullable = true)
     private String ccdSampleTemplate = null;
@@ -112,7 +112,7 @@ public class configurationTransport {
     private boolean zipped = false;
     
     @Column(name = "zipType", nullable = true)
-    private int zipType = 0;
+    private Integer zipType = 0;
     
     @Column(name = "restAPIURL", nullable = true)
     private String restAPIURL = null;
@@ -124,13 +124,13 @@ public class configurationTransport {
     private String restAPIPassword = null;
     
     @Column(name = "restAPIType", nullable = true)
-    private int restAPIType = 1;
+    private Integer restAPIType = 1;
     
     @Column(name = "waitForResponse", nullable = false)
     private boolean waitForResponse = false;
     
     @Column(name = "restAPIFunctionId", nullable = true)
-    private int restAPIFunctionId = 0;
+    private Integer restAPIFunctionId = 0;
     
     @Column(name = "jsonWrapperElement", nullable = true)
     private String jsonWrapperElement = "";
@@ -170,35 +170,35 @@ public class configurationTransport {
         this.id = id;
     }
 
-    public int getconfigId() {
+    public Integer getConfigId() {
         return configId;
     }
 
-    public void setconfigId(int configId) {
+    public void setConfigId(Integer configId) {
         this.configId = configId;
     }
 
-    public int gettransportMethodId() {
+    public Integer getTransportMethodId() {
         return transportMethodId;
     }
 
-    public void settransportMethodId(int transportMethodId) {
+    public void setTransportMethodId(Integer transportMethodId) {
         this.transportMethodId = transportMethodId;
     }
 
-    public int getfileType() {
+    public Integer getFileType() {
         return fileType;
     }
 
-    public void setfileType(int fileType) {
+    public void setFileType(Integer fileType) {
         this.fileType = fileType;
     }
 
-    public int getfileDelimiter() {
+    public Integer getFileDelimiter() {
         return fileDelimiter;
     }
 
-    public void setfileDelimiter(int fileDelimiter) {
+    public void setFileDelimiter(Integer fileDelimiter) {
         this.fileDelimiter = fileDelimiter;
     }
 
@@ -218,91 +218,91 @@ public class configurationTransport {
         this.FTPfields = FTPFields;
     }
 
-    public boolean getstatus() {
+    public boolean isStatus() {
         return status;
     }
 
-    public void setstatus(boolean status) {
+    public void setStatus(boolean status) {
         this.status = status;
     }
 
-    public String gettargetFileName() {
+    public String getTargetFileName() {
         return targetFileName;
     }
 
-    public void settargetFileName(String targetFileName) {
+    public void setTargetFileName(String targetFileName) {
         this.targetFileName = targetFileName;
     }
 
-    public boolean getappendDateTime() {
+    public boolean isAppendDateTime() {
         return appendDateTime;
     }
 
-    public void setappendDateTime(boolean appendDateTime) {
+    public void setAppendDateTime(boolean appendDateTime) {
         this.appendDateTime = appendDateTime;
     }
 
-    public int getmaxFileSize() {
+    public Integer getMaxFileSize() {
         return maxFileSize;
     }
 
-    public void setmaxFileSize(int maxFileSize) {
+    public void setMaxFileSize(Integer maxFileSize) {
         this.maxFileSize = maxFileSize;
     }
 
-    public boolean getclearRecords() {
+    public boolean isClearRecords() {
         return clearRecords;
     }
 
-    public void setclearRecords(boolean clearRecords) {
+    public void setClearRecords(boolean clearRecords) {
         this.clearRecords = clearRecords;
     }
 
-    public String getfileLocation() {
+    public String getFileLocation() {
         return fileLocation;
     }
 
-    public void setfileLocation(String fileLocation) {
+    public void setFileLocation(String fileLocation) {
         this.fileLocation = fileLocation;
     }
 
-    public boolean getautoRelease() {
+    public boolean isAutoRelease() {
         return autoRelease;
     }
 
-    public void setautoRelease(boolean autoRelease) {
+    public void setAutoRelease(boolean autoRelease) {
         this.autoRelease = autoRelease;
     }
 
-    public int geterrorHandling() {
-        return errorHandling;
-    }
-
-    public void seterrorHandling(int errorHandling) {
-        this.errorHandling = errorHandling;
-    }
-
-    public boolean getmergeBatches() {
-        return mergeBatches;
-    }
-
-    public void setmergeBatches(boolean mergeBatches) {
-        this.mergeBatches = mergeBatches;
-    }
-
-    public List<Integer> getmessageTypes() {
+    public List<Integer> getMessageTypes() {
         return messageTypes;
     }
 
-    public void setmessageTypes(List<Integer> messageTypes) {
+    public void setMessageTypes(List<Integer> messageTypes) {
         this.messageTypes = messageTypes;
     }
 
-    public int getcopiedTransportId() {
+    public Integer getErrorHandling() {
+        return errorHandling;
+    }
+
+    public void setErrorHandling(Integer errorHandling) {
+        this.errorHandling = errorHandling;
+    }
+
+    public boolean isMergeBatches() {
+        return mergeBatches;
+    }
+
+    public void setMergeBatches(boolean mergeBatches) {
+        this.mergeBatches = mergeBatches;
+    }
+
+    public Integer getCopiedTransportId() {
         return copiedTransportId;
     }
 
-    public void setcopiedTransportId(int copiedTransportId) {
+    public void setCopiedTransportId(Integer copiedTransportId) {
         this.copiedTransportId = copiedTransportId;
     }
 
@@ -322,19 +322,19 @@ public class configurationTransport {
         this.containsHeaderRow = containsHeaderRow;
     }
 
-    public String getfileExt() {
+    public String getFileExt() {
         return fileExt;
     }
 
-    public void setfileExt(String fileExt) {
+    public void setFileExt(String fileExt) {
         this.fileExt = fileExt;
     }
 
-    public int getEncodingId() {
+    public Integer getEncodingId() {
         return encodingId;
     }
 
-    public void setEncodingId(int encodingId) {
+    public void setEncodingId(Integer encodingId) {
         this.encodingId = encodingId;
     }
 
@@ -403,11 +403,11 @@ public class configurationTransport {
 	this.zipped = zipped;
     }
 
-    public int getZipType() {
+    public Integer getZipType() {
 	return zipType;
     }
 
-    public void setZipType(int zipType) {
+    public void setZipType(Integer zipType) {
 	this.zipType = zipType;
     }
 
@@ -435,11 +435,11 @@ public class configurationTransport {
 	this.restAPIPassword = restAPIPassword;
     }
 
-    public int getRestAPIType() {
+    public Integer getRestAPIType() {
 	return restAPIType;
     }
 
-    public void setRestAPIType(int restAPIType) {
+    public void setRestAPIType(Integer restAPIType) {
 	this.restAPIType = restAPIType;
     }
 
@@ -451,11 +451,11 @@ public class configurationTransport {
 	this.waitForResponse = waitForResponse;
     }
 
-    public int getRestAPIFunctionId() {
+    public Integer getRestAPIFunctionId() {
 	return restAPIFunctionId;
     }
 
-    public void setRestAPIFunctionId(int restAPIFunctionId) {
+    public void setRestAPIFunctionId(Integer restAPIFunctionId) {
 	this.restAPIFunctionId = restAPIFunctionId;
     }
 
@@ -475,11 +475,11 @@ public class configurationTransport {
 	this.lineTerminator = lineTerminator;
     }
 
-    public int getThreshold() {
+    public Integer getThreshold() {
 	return threshold;
     }
 
-    public void setThreshold(int threshold) {
+    public void setThreshold(Integer threshold) {
 	this.threshold = threshold;
     }
 

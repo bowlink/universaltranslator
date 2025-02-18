@@ -7,7 +7,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import com.hel.ut.model.hisps;
 import java.util.List;
-import org.hibernate.query.Query;
+import java.util.Objects;
+import org.hibernate.query.SelectionQuery;
 
 /**
  * The userDAOImpl class will implement the DAO access layer to handle updates for organization system users
@@ -32,21 +33,19 @@ public class hispDAOImpl implements hispDAO {
     @Transactional(readOnly = true)
     public List<hisps> getAllActiveHisps() {
 	
-        Query query = sessionFactory.getCurrentSession().createQuery("from hisps where status = 1 order by hispName asc");
-	
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from hisps where status = 1 order by hispName asc");
 	List<hisps> hisps = query.list();
 
         return hisps;
-
     }
 
-    
     /**
      * The 'getHispById' function will return a single hisp object based on the hispId passed in.
      *
      * @param	hispId	This will be used to find the specifc hisp
      *
      * @return	The function will return a hisp object
+     * @throws java.lang.Exception
      */
     @Override
     @Transactional(readOnly = true)
@@ -57,6 +56,10 @@ public class hispDAOImpl implements hispDAO {
     @Override
     @Transactional(readOnly = false)
     public void saveHisp(hisps hispDetails) throws Exception {
-	sessionFactory.getCurrentSession().saveOrUpdate(hispDetails);
+        if (Objects.isNull(sessionFactory.getCurrentSession().find(hisps.class, hispDetails.getId()))) {
+            sessionFactory.getCurrentSession().persist(hispDetails);
+        } else {
+            sessionFactory.getCurrentSession().merge(hispDetails);
+        }
     }
 }

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.query.Query;
 import org.hibernate.SessionFactory;
-import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,8 +46,11 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.util.Objects;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.hibernate.query.MutationQuery;
+import org.hibernate.query.SelectionQuery;
 
 @Repository
 public class utConfigurationDAOImpl implements utConfigurationDAO {
@@ -71,11 +73,8 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public Integer createConfiguration(utConfiguration configuration) {
-        Integer lastId;
-
-        lastId = (Integer) sessionFactory.getCurrentSession().save(configuration);
-        
-        return lastId;
+        sessionFactory.getCurrentSession().persist(configuration);
+        return configuration.getId();
     }
 
     /**
@@ -89,7 +88,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateConfiguration(utConfiguration configuration) {
-        sessionFactory.getCurrentSession().update(configuration);
+        sessionFactory.getCurrentSession().merge(configuration);
     }
 
     /**
@@ -226,7 +225,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<utConfiguration> getConfigurations() {
-        Query query = sessionFactory.getCurrentSession().createQuery("from utConfiguration where deleted = 0 order by dateCreated desc");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from utConfiguration where deleted = 0 order by dateCreated desc");
 
         List<utConfiguration> configurationList = query.list();
         return configurationList;
@@ -243,7 +242,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List<configurationDataTranslations> getDataTranslations(int configId) {
-        Query query = sessionFactory.getCurrentSession().createQuery("from configurationDataTranslations where configId = :configId order by processOrder asc");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from configurationDataTranslations where configId = :configId order by processOrder asc");
         query.setParameter("configId", configId);
 
         return query.list();
@@ -259,7 +258,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public Long findTotalConfigs() {
-        Query query = sessionFactory.getCurrentSession().createQuery("select count(id) as totalConfigs from utConfiguration where deleted = 0");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("select count(id) as totalConfigs from utConfiguration where deleted = 0");
 
         Long totalConfigs = (Long) query.uniqueResult();
 
@@ -279,7 +278,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<utConfiguration> getLatestConfigurations(int maxResults) {
-        Query query = sessionFactory.getCurrentSession().createQuery("from utConfiguration where deleted = 0 order by dateCreated desc");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from utConfiguration where deleted = 0 order by dateCreated desc");
 
         //Set the max results to display
         query.setMaxResults(maxResults);
@@ -338,9 +337,11 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List getFileTypes() {
-        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, fileType FROM ref_fileTypes where active = 1 order by id asc", String.class);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, fileType FROM ref_fileTypes where active = 1 order by id asc", String.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("fileType", StandardBasicTypes.STRING);
 
-        return query.list();
+        return query.getResultList();
     }
 
     /**
@@ -392,7 +393,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void deleteDataTranslations(int configId, int categoryId) {
-        Query deleteTranslations = sessionFactory.getCurrentSession().createQuery("delete from configurationDataTranslations where configId = :configId and categoryId = :categoryId");
+        MutationQuery deleteTranslations = sessionFactory.getCurrentSession().createMutationQuery("delete from configurationDataTranslations where configId = :configId and categoryId = :categoryId");
         deleteTranslations.setParameter("configId", configId);
         deleteTranslations.setParameter("categoryId", categoryId);
         deleteTranslations.executeUpdate();
@@ -407,7 +408,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void saveDataTranslations(configurationDataTranslations translations) {
-        sessionFactory.getCurrentSession().save(translations);
+        sessionFactory.getCurrentSession().persist(translations);
     }
 
     /**
@@ -419,7 +420,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List<Macros> getMacrosByCategory(int categoryId) {
-        Query query = sessionFactory.getCurrentSession().createQuery("from Macros where categoryId = :categoryId order by macroName asc");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from Macros where categoryId = :categoryId order by macroName asc");
         query.setParameter("categoryId", categoryId);
 
         List<Macros> macros = query.list();
@@ -436,7 +437,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List<Macros> getMacros() {
-        Query query = sessionFactory.getCurrentSession().createQuery("from Macros where categoryId = 1 order by macroName asc");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from Macros where categoryId = 1 order by macroName asc");
         return query.list();
     }
 
@@ -465,7 +466,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List<configurationConnection> getAllConnections() {
-        Query query = sessionFactory.getCurrentSession().createQuery("from configurationConnection order by dateCreated desc");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from configurationConnection order by dateCreated desc");
 
         List<configurationConnection> connections = query.list();
         return connections;
@@ -484,7 +485,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List<configurationConnection> getLatestConnections(int maxResults) {
-        Query query = sessionFactory.getCurrentSession().createQuery("from configurationConnection order by dateCreated desc");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from configurationConnection order by dateCreated desc");
 
         //Set the max results to display
         query.setMaxResults(maxResults);
@@ -505,7 +506,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<configurationConnection> getConnectionsByConfiguration(int configId, int userId) {
-        Query query = sessionFactory.getCurrentSession().createQuery("from configurationConnection where sourceConfigId = :configId");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from configurationConnection where sourceConfigId = :configId");
         query.setParameter("configId", configId);
 
         List<configurationConnection> connections = query.list();
@@ -522,7 +523,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List<configurationConnection> getConnectionsByTargetConfiguration(int configId) {
-        Query query = sessionFactory.getCurrentSession().createQuery("from configurationConnection where targetConfigId = :configId");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from configurationConnection where targetConfigId = :configId");
         query.setParameter("configId", configId);
 
         List<configurationConnection> connections = query.list();
@@ -539,12 +540,8 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public Integer saveConnection(configurationConnection connection) {
-        Integer connectionId;
-
-        connectionId = (Integer) sessionFactory.getCurrentSession().save(connection);
-
-        return connectionId;
-
+        sessionFactory.getCurrentSession().persist(connection);
+        return connection.getId();
     }
 
     /**
@@ -557,7 +554,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void saveConnectionSenders(configurationConnectionSenders senders) {
-        sessionFactory.getCurrentSession().save(senders);
+        sessionFactory.getCurrentSession().persist(senders);
     }
 
     /**
@@ -570,7 +567,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void saveConnectionReceivers(configurationConnectionReceivers receivers) {
-        sessionFactory.getCurrentSession().save(receivers);
+        sessionFactory.getCurrentSession().persist(receivers);
     }
 
     /**
@@ -681,7 +678,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateConnection(configurationConnection connection) {
-        sessionFactory.getCurrentSession().update(connection);
+        sessionFactory.getCurrentSession().merge(connection);
     }
 
     /**
@@ -694,7 +691,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     @Override
     public configurationSchedules getScheduleDetails(int configId) {
-        Query query = sessionFactory.getCurrentSession().createQuery("from configurationSchedules where configId = :configId");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from configurationSchedules where configId = :configId");
         query.setParameter("configId", configId);
 
         configurationSchedules scheduleDetails;
@@ -719,7 +716,11 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = false)
     @Override
     public void saveSchedule(configurationSchedules scheduleDetails) {
-        sessionFactory.getCurrentSession().saveOrUpdate(scheduleDetails);
+        if (Objects.isNull(sessionFactory.getCurrentSession().find(configurationSchedules.class, scheduleDetails.getId()))) {
+            sessionFactory.getCurrentSession().persist(scheduleDetails);
+        } else {
+            sessionFactory.getCurrentSession().merge(scheduleDetails);
+        }
     }
 
     /**
@@ -732,7 +733,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public configurationMessageSpecs getMessageSpecs(int configId) {
-        Query query = sessionFactory.getCurrentSession().createQuery("from configurationMessageSpecs where configId = :configId");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from configurationMessageSpecs where configId = :configId");
         query.setParameter("configId", configId);
 
         return (configurationMessageSpecs) query.uniqueResult();
@@ -770,10 +771,13 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateMessageSpecs(configurationMessageSpecs messageSpecs, int transportDetailId) {
-        sessionFactory.getCurrentSession().saveOrUpdate(messageSpecs);
+        if (Objects.isNull(sessionFactory.getCurrentSession().find(configurationMessageSpecs.class, messageSpecs.getId()))) {
+            sessionFactory.getCurrentSession().persist(messageSpecs);
+        } else {
+            sessionFactory.getCurrentSession().merge(messageSpecs);
+        }
     }
 
-    
     /**
      * The 'getActiveConfigurationsByUserId' function will return a list of configurations set up the passed in userId and passed in transport method
      *
@@ -848,7 +852,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         List<configurationTransport> ergConfigs = sessionFactory.getCurrentSession().createQuery(transportCriteria).getResultList();
 
         for (configurationTransport config : ergConfigs) {
-            ergConfigList.add(config.getconfigId());
+            ergConfigList.add(config.getConfigId());
         }
 
         if (ergConfigList.isEmpty()) {
@@ -1030,7 +1034,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateHL7Details(HL7Details details) {
-        sessionFactory.getCurrentSession().update(details);
+        sessionFactory.getCurrentSession().merge(details);
 
     }
 
@@ -1042,7 +1046,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateHL7Segments(HL7Segments segment) {
-        sessionFactory.getCurrentSession().update(segment);
+        sessionFactory.getCurrentSession().merge(segment);
     }
 
     /**
@@ -1053,7 +1057,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateHL7Elements(HL7Elements element) {
-        sessionFactory.getCurrentSession().update(element);
+        sessionFactory.getCurrentSession().merge(element);
     }
 
     /**
@@ -1064,7 +1068,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateHL7ElementComponent(HL7ElementComponents component) {
-        sessionFactory.getCurrentSession().update(component);
+        sessionFactory.getCurrentSession().merge(component);
     }
 
     /**
@@ -1075,11 +1079,8 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public int saveHL7Details(HL7Details details) {
-        Integer lastId;
-
-        lastId = (Integer) sessionFactory.getCurrentSession().save(details);
-
-        return lastId;
+        sessionFactory.getCurrentSession().persist(details);
+        return details.getId();
     }
 
     /**
@@ -1090,11 +1091,8 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public int saveHL7Segment(HL7Segments newSegment) {
-        Integer lastId;
-
-        lastId = (Integer) sessionFactory.getCurrentSession().save(newSegment);
-
-        return lastId;
+        sessionFactory.getCurrentSession().persist(newSegment);
+        return newSegment.getId();
     }
 
     /**
@@ -1105,11 +1103,8 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public int saveHL7Element(HL7Elements newElement) {
-        Integer lastId;
-
-        lastId = (Integer) sessionFactory.getCurrentSession().save(newElement);
-
-        return lastId;
+        sessionFactory.getCurrentSession().persist(newElement);
+        return newElement.getId();
     }
 
     /**
@@ -1120,7 +1115,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void saveHL7Component(HL7ElementComponents newcomponent) {
-        sessionFactory.getCurrentSession().save(newcomponent);
+        sessionFactory.getCurrentSession().persist(newcomponent);
     }
 
     @Override
@@ -1165,7 +1160,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void removeHL7ElementComponent(Integer componentId) {
-        Query deleteComponent = sessionFactory.getCurrentSession().createQuery("delete from HL7ElementComponents where id = :componentId");
+        MutationQuery deleteComponent = sessionFactory.getCurrentSession().createMutationQuery("delete from HL7ElementComponents where id = :componentId");
         deleteComponent.setParameter("componentId", componentId);
         deleteComponent.executeUpdate();
     }
@@ -1173,7 +1168,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void removeHL7Element(Integer elementId) {
-        Query deleteComponents = sessionFactory.getCurrentSession().createQuery("delete from HL7ElementComponents where elementId = :elementId");
+        MutationQuery deleteComponents = sessionFactory.getCurrentSession().createMutationQuery("delete from HL7ElementComponents where elementId = :elementId");
         deleteComponents.setParameter("elementId", elementId);
         deleteComponents.executeUpdate();
 
@@ -1189,11 +1184,11 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         deleteComponents.setParameter("segmentId", segmentId);
         deleteComponents.executeUpdate();
 
-        Query deleteElement = sessionFactory.getCurrentSession().createQuery("delete from HL7Elements where segmentId = :segmentId");
+        MutationQuery deleteElement = sessionFactory.getCurrentSession().createMutationQuery("delete from HL7Elements where segmentId = :segmentId");
         deleteElement.setParameter("segmentId", segmentId);
         deleteElement.executeUpdate();
 
-        Query deleteSegment = sessionFactory.getCurrentSession().createQuery("delete from HL7Segments where id = :segmentId");
+        MutationQuery deleteSegment = sessionFactory.getCurrentSession().createMutationQuery("delete from HL7Segments where id = :segmentId");
         deleteSegment.setParameter("segmentId", segmentId);
         deleteSegment.executeUpdate();
     }
@@ -1249,7 +1244,11 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void saveCCDElement(configurationCCDElements ccdElement) throws Exception {
-        sessionFactory.getCurrentSession().saveOrUpdate(ccdElement);
+        if (Objects.isNull(sessionFactory.getCurrentSession().find(configurationCCDElements.class, ccdElement.getId()))) {
+            sessionFactory.getCurrentSession().persist(ccdElement);
+        } else {
+            sessionFactory.getCurrentSession().merge(ccdElement);
+        }
     }
 
     @Override
@@ -1976,7 +1975,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     public void updateExcelConfigDetails(Integer orgId, configurationMessageSpecs messageSpecs) throws Exception {
 	
 	//Delete existing entry
-	Query deleteTranslations = sessionFactory.getCurrentSession().createQuery("delete from configexceldetails where configId = :configId and orgId = :orgId");
+	MutationQuery deleteTranslations = sessionFactory.getCurrentSession().createMutationQuery("delete from configexceldetails where configId = :configId and orgId = :orgId");
         deleteTranslations.setParameter("configId", messageSpecs.getconfigId());
         deleteTranslations.setParameter("orgId", orgId);
         deleteTranslations.executeUpdate();
@@ -1988,7 +1987,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 	configexceldetails.setStartRow(messageSpecs.getExcelstartrow());
 	configexceldetails.setDiscardLastRows(messageSpecs.getExcelskiprows());
 	
-	sessionFactory.getCurrentSession().save(configexceldetails);
+	sessionFactory.getCurrentSession().persist(configexceldetails);
     }
     
     /**
@@ -2096,7 +2095,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         
         if(!ergConfigs.isEmpty()) {
             for (configurationTransport config : ergConfigs) {
-                ergConfigList.add(config.getconfigId());
+                ergConfigList.add(config.getConfigId());
             }
         }
 
@@ -2132,9 +2131,11 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List getZipTypes() {
-        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, zipType FROM lu_ziptypes order by id asc", String.class);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, zipType FROM lu_ziptypes order by id asc", String.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("zipType", StandardBasicTypes.STRING);        
 
-        return query.list();
+        return query.getResultList();
     }
     
     /**
@@ -2145,16 +2146,18 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List getrestAPITypes() {
-	Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, apiType FROM lu_restapitypes order by id asc", String.class);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, apiType FROM lu_restapitypes order by id asc", String.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("apiType", StandardBasicTypes.STRING);           
 
-	return query.list();
+	return query.getResultList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<configurationConnection> getConnectionsBySrcAndTargetConfigurations(int sourceConfigId, int targetConfigId) {
 	
-	Query query = sessionFactory.getCurrentSession().createQuery("from configurationConnection where sourceConfigId = :sourceConfigId and targetConfigId = :targetConfigId and status = TRUE");
+	SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from configurationConnection where sourceConfigId = :sourceConfigId and targetConfigId = :targetConfigId and status = TRUE");
 	query.setParameter("sourceConfigId", sourceConfigId);
 	query.setParameter("targetConfigId", targetConfigId);
 
@@ -2175,10 +2178,12 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 	
 	String sql = "select id, functionName from lu_availablerestapifunctions where forOrgId = 0 or forOrgId = :orgId order by id asc";
 	
-        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
-	query.setParameter("orgId", orgId);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("functionName", StandardBasicTypes.STRING)  
+	.setParameter("orgId", orgId);
 
-        return query.list();
+        return query.getResultList();
     }
     
     @Override
@@ -2223,11 +2228,8 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public Integer saveDashboardWatchListEntry(watchlist watchListEntry) {
-        Integer watchListEntryId;
-
-        watchListEntryId = (Integer) sessionFactory.getCurrentSession().save(watchListEntry);
-
-        return watchListEntryId;
+        sessionFactory.getCurrentSession().persist(watchListEntry);
+        return watchListEntry.getId();
     }
     
     /**
@@ -2240,7 +2242,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateDashboardWatchListEntry(watchlist watchListEntry) {
-        sessionFactory.getCurrentSession().update(watchListEntry);
+        sessionFactory.getCurrentSession().merge(watchListEntry);
     }
     
     @Override
@@ -2275,7 +2277,11 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void insertDashboardWatchListEntry(watchlistEntry watchListEntry) {
-        sessionFactory.getCurrentSession().saveOrUpdate(watchListEntry);
+        if (Objects.isNull(sessionFactory.getCurrentSession().find(watchlistEntry.class, watchListEntry.getId()))) {
+            sessionFactory.getCurrentSession().persist(watchListEntry);
+        } else {
+            sessionFactory.getCurrentSession().merge(watchListEntry);
+        }
     }
     
     /**
@@ -2359,14 +2365,31 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     public List<utConfiguration>  getAllActiveSourceConfigurations() throws Exception {
 	
-	String sql = "select a.id, a.configName, b.orgName "
-		+ "from configurations a inner join "
-		+ "organizations b on b.id = a.orgId "
-		+ "where a.type = 1 and a.deleted = 0 and a.status = 1";
+	String sql = "select a.id, a.configName, b.orgName, a.dateCreated, a.status, a.type, a.orgId, a.messageTypeId, a.stepsCompleted, a.threshold, a.configurationType, a.deleted "
+        + "from configurations a inner join "
+        + "organizations b on b.id = a.orgId "
+        + "where a.type = 1 and a.deleted = 0 and a.status = 1";
 	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utConfiguration.class);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utConfiguration.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("configName", StandardBasicTypes.STRING)
+        .addScalar("orgName", StandardBasicTypes.STRING)
+        .addScalar("stepsCompleted", StandardBasicTypes.INTEGER);
+        
+        List<Object[]> results = query.getResultList();
+        
+        List<utConfiguration> configs = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            utConfiguration config = new utConfiguration();
+            config.setId((Integer) record[1]);
+            config.setConfigname((String) record[2]);
+            config.setOrgName((String) record[3]);
+            config.setStepsCompleted((Integer) record[4]);
+            configs.add(config);
+        });
 	
-        return query.list();
+	return configs;
     }
     
     /**
@@ -2379,7 +2402,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public List<configurationConnection> getConnectionsBySourceConfiguration(Integer configId) {
-        Query query = sessionFactory.getCurrentSession().createQuery("from configurationConnection where sourceConfigId = :configId");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from configurationConnection where sourceConfigId = :configId");
         query.setParameter("configId", configId);
 
         List<configurationConnection> connections = query.list();
@@ -2390,12 +2413,13 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     public List<utConfiguration>  getAllSourceConfigurations() throws Exception {
 	
-	String sql = "select a.*, b.orgName, b.helRegistryId, b.cleanURL as cleanOrgURL, IFNULL(c.id ,0) as transportDetailId, IFNULL(c.transportMethodId, 0) as transportMethodId,"
-        + "(select dateCreated from configurationupdatelogs where configId = a.id order by id desc limit 1) as dateUpdated," 
+	String sql = "select a.id, a.configName, b.orgName, b.helRegistryId, b.cleanURL as cleanOrgURL, IFNULL(c.id ,0) as transportDetailId, IFNULL(c.transportMethodId, 0) as transportMethodId,"
+        + "a.dateCreated, (select dateCreated from configurationupdatelogs where configId = a.id order by id desc limit 1) as dateUpdated," 
         + "IFNULL(d.transportMethod,'N/A') as transportMethod,"
         + "IFNULL(e.type, 0) as scheduleType,"
         + "CASE WHEN f.id is null then 0 else 1 end as allowFTPLink,"
-        + "CASE WHEN g.id is null then '' else g.directory end as fileDropLocation "        
+        + "CASE WHEN g.id is null then '' else g.directory end as fileDropLocation, "   
+        + "a.status, a.type, a.orgId, a.messageTypeId, a.stepsCompleted, a.threshold, a.configurationType, a.deleted "
         + "from configurations a inner join "
         + "organizations b on b.id = a.orgId left outer join "
         + "configurationtransportdetails c on c.configId = a.id left outer join "
@@ -2404,37 +2428,57 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         + "rel_transportftpdetails f on f.transportId = c.id and f.method = 1 left outer join "
         + "rel_transportfiledropdetails g on g.transportId = c.id and g.method = 1 "
         + "where a.deleted = 0 and a.type = 1";
-	
+        
 	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utConfiguration.class)
         .addScalar("id", StandardBasicTypes.INTEGER)
-        .addScalar("type", StandardBasicTypes.INTEGER)
-        .addScalar("orgId", StandardBasicTypes.INTEGER)
-        .addScalar("messageTypeId", StandardBasicTypes.INTEGER)
         .addScalar("configName", StandardBasicTypes.STRING)
-        .addScalar("status", StandardBasicTypes.BOOLEAN)	
+        .addScalar("orgName", StandardBasicTypes.STRING)
+        .addScalar("helRegistryId", StandardBasicTypes.INTEGER)
+        .addScalar("cleanOrgURL", StandardBasicTypes.STRING)
+        .addScalar("transportDetailId", StandardBasicTypes.INTEGER)
+        .addScalar("transportMethodId", StandardBasicTypes.INTEGER)
         .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
         .addScalar("dateUpdated", StandardBasicTypes.TIMESTAMP)
-        .addScalar("orgName", StandardBasicTypes.STRING)
-        .addScalar("cleanOrgURL", StandardBasicTypes.STRING)
-        .addScalar("transportMethodId", StandardBasicTypes.INTEGER)
-        .addScalar("transportDetailId", StandardBasicTypes.INTEGER)
-        .addScalar("helRegistryId", StandardBasicTypes.INTEGER)
-        .addScalar("scheduleType", StandardBasicTypes.INTEGER)
         .addScalar("transportMethod", StandardBasicTypes.STRING)
+        .addScalar("scheduleType", StandardBasicTypes.INTEGER)
         .addScalar("allowFTPLink", StandardBasicTypes.BOOLEAN)
-        .addScalar("fileDropLocation", StandardBasicTypes.STRING);
+        .addScalar("fileDropLocation", StandardBasicTypes.STRING)
+        .addScalar("status", StandardBasicTypes.BOOLEAN)
+        .addScalar("type", StandardBasicTypes.INTEGER);
+        
+        List<Object[]> results = query.getResultList();
+        
+        List<utConfiguration> configs = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            utConfiguration config = new utConfiguration();
+            config.setId((Integer) record[1]);
+            config.setConfigname((String) record[2]);
+            config.setOrgName((String) record[3]);
+            config.setHelRegistryId((Integer) record[4]);
+            config.setCleanOrgURL((String) record[5]);
+            config.settransportDetailId((Integer) record[6]);
+            config.setTransportMethodId((Integer) record[7]);
+            config.setDateCreated((Date) record[8]);
+            config.setDateUpdated((Date) record[9]);
+            config.setTransportMethod((String) record[10]);
+            config.setStatus((Boolean) record[14]);
+            config.setType((Integer) record[15]);
+            configs.add(config);
+        });
 	
-	return query.list();
+	return configs;
     }
     
     @Override
     @Transactional(readOnly = true)
     public List<utConfiguration>  getAllTargetConfigurations() throws Exception {
 	
-	String sql = "select a.*, b.orgName, b.cleanURL as cleanOrgURL, IFNULL(c.id ,0) as transportDetailId, IFNULL(c.transportMethodId, 0) as transportMethodId,"
-        + "(select dateCreated from configurationupdatelogs where configId = a.id order by id desc limit 1) as dateUpdated," 
+	String sql = "select a.id, a.configName, b.orgName, b.cleanURL as cleanOrgURL, IFNULL(c.id ,0) as transportDetailId, IFNULL(c.transportMethodId, 0) as transportMethodId,"
+        + "a.dateCreated, (select dateCreated from configurationupdatelogs where configId = a.id order by id desc limit 1) as dateUpdated," 
         + "IFNULL(d.transportMethod,'N/A') as transportMethod,"
-        + "IFNULL(e.type, 0) as scheduleType "
+        + "IFNULL(e.type, 0) as scheduleType, "
+         + "a.status, a.type, a.orgId, a.messageTypeId, a.stepsCompleted, a.threshold, a.configurationType, a.deleted "        
         + "from configurations a inner join "
         + "organizations b on b.id = a.orgId left outer join "
         + "configurationtransportdetails c on c.configId = a.id left outer join "
@@ -2444,21 +2488,39 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 	
 	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utConfiguration.class)
         .addScalar("id", StandardBasicTypes.INTEGER)
-        .addScalar("type", StandardBasicTypes.INTEGER)
-        .addScalar("orgId", StandardBasicTypes.INTEGER)
-        .addScalar("messageTypeId", StandardBasicTypes.INTEGER)
         .addScalar("configName", StandardBasicTypes.STRING)
-        .addScalar("status", StandardBasicTypes.BOOLEAN)	
+        .addScalar("orgName", StandardBasicTypes.STRING)
+        .addScalar("cleanOrgURL", StandardBasicTypes.STRING)
+        .addScalar("transportDetailId", StandardBasicTypes.INTEGER)
+        .addScalar("transportMethodId", StandardBasicTypes.INTEGER)
         .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
         .addScalar("dateUpdated", StandardBasicTypes.TIMESTAMP)
-        .addScalar("orgName", StandardBasicTypes.STRING)
-        .addScalar("transportMethodId", StandardBasicTypes.INTEGER)
-        .addScalar("transportDetailId", StandardBasicTypes.INTEGER)
         .addScalar("transportMethod", StandardBasicTypes.STRING)
-        .addScalar("cleanOrgURL", StandardBasicTypes.STRING)
-        .addScalar("scheduleType", StandardBasicTypes.INTEGER);
+        .addScalar("scheduleType", StandardBasicTypes.INTEGER)
+        .addScalar("status", StandardBasicTypes.BOOLEAN)
+        .addScalar("type", StandardBasicTypes.INTEGER);
+        
+        List<Object[]> results = query.getResultList();
+        
+        List<utConfiguration> configs = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            utConfiguration config = new utConfiguration();
+            config.setId((Integer) record[1]);
+            config.setConfigname((String) record[2]);
+            config.setOrgName((String) record[3]);
+            config.setCleanOrgURL((String) record[4]);
+            config.settransportDetailId((Integer) record[5]);
+            config.setTransportMethodId((Integer) record[6]);
+            config.setDateCreated((Date) record[7]);
+            config.setDateUpdated((Date) record[8]);
+            config.setTransportMethod((String) record[9]);
+            config.setStatus((Boolean) record[11]);
+            config.setType((Integer) record[12]);
+            configs.add(config);
+        });
 	
-	return query.list();
+	return configs;
     }
     
     @Override
@@ -2470,7 +2532,6 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 	List dataTranslations = query.list();
 	
 	return dataTranslations;
-	
     }
     
     /**
@@ -2482,7 +2543,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = false)
     public void saveConfigurationUpdateLog(configurationUpdateLogs updateLog) {
-        sessionFactory.getCurrentSession().save(updateLog);
+        sessionFactory.getCurrentSession().persist(updateLog);
     }
     
     /**
@@ -2497,22 +2558,23 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Override
     @Transactional(readOnly = true)
     public configurationUpdateLogs getLastConfigUpdateLog(Integer configId) {
-       
-	String sql = "select * "
-		+ "from configurationUpdateLogs "
-		+ "where configId = :configId "
-		+ "order by dateCreated desc";
-	
-        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationUpdateLogs.class)
-	    .setParameter("configId", configId);
-	
-	if(query.list().size() > 0) {
-	    configurationUpdateLogs lastLog = (configurationUpdateLogs) query.list().get(0);
+        
+       CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationUpdateLogs> criteria = builder.createQuery(configurationUpdateLogs.class);
+        Root<configurationUpdateLogs> root = criteria.from(configurationUpdateLogs.class);
+
+        Predicate whereClause = builder.equal(root.get("configId"), configId);
+
+        criteria.orderBy(builder.desc(root.get("dateCreated"))).where(whereClause);
+        
+        List<configurationUpdateLogs> logs = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        
+        if (logs.isEmpty()) {
+            return null;
+        } else {
+	   configurationUpdateLogs lastLog = (configurationUpdateLogs) logs.get(0);
 	    return lastLog;
-	}
-	else {
-	    return null;
-	}
+        }
     }
     
     @Override
@@ -2520,7 +2582,10 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     public List<configurationUpdateLogs> getConfigurationUpdateLogs(Integer configId) throws Exception {
 	
 	String sql = "select a.id, a.configId, a.userId, a.dateCreated, a.updateMade, concat(b.firstName, ' ',b.lastName) as usersName " 
-	    + "from configurationupdatelogs a inner join users b on b.id = a.userId where a.configId = :configId order by a.dateCreated desc";
+        + "from configurationupdatelogs a "
+        + "inner join users b on b.id = a.userId "
+        + "where a.configId = :configId "
+        + "order by a.dateCreated desc";
 	
 	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationUpdateLogs.class)
         .addScalar("id", StandardBasicTypes.INTEGER)
@@ -2531,8 +2596,24 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         .addScalar("usersName", StandardBasicTypes.STRING);
 	
 	query.setParameter("configId", configId);
+        
+        List<Object[]> results = query.getResultList();
+        
+        List<configurationUpdateLogs> configLogs = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            configurationUpdateLogs configLog = new configurationUpdateLogs();
+            configLog.setId((Integer) record[1]);
+            configLog.setConfigId((Integer) record[2]);
+            configLog.setUserId((Integer) record[3]);
+            configLog.setDateCreated((Date) record[4]);
+            configLog.setUpdateMade((String) record[5]);
+            configLog.setUsersName((String) record[6]);
+            configLogs.add(configLog);
+        });
 	
-	return query.list();
+	return configLogs;
+	
     }
     
     @Override
@@ -2647,5 +2728,25 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
          
         List<configurationConnection> connections = query.list();
         return connections;
+    }
+    
+    @Override
+    @Transactional(readOnly = false)
+    public List getCrosswalksForExport(String sqlStatement) throws Exception {
+	
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlStatement, String.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("name", StandardBasicTypes.STRING)
+        .addScalar("fileDelimiter", StandardBasicTypes.STRING)
+        .addScalar("fileName", StandardBasicTypes.STRING)
+        .addScalar("orgId", StandardBasicTypes.INTEGER)
+        .addScalar("sourceValue", StandardBasicTypes.STRING)
+        .addScalar("targetValue", StandardBasicTypes.STRING)
+        .addScalar("descValue", StandardBasicTypes.STRING);
+        
+        List<Object[]> dataTranslations = query.getResultList();
+	
+	return dataTranslations;
+	
     }
 }

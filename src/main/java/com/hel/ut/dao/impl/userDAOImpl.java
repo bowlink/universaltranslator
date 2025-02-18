@@ -2,7 +2,6 @@ package com.hel.ut.dao.impl;
 
 import java.util.List;
 import org.hibernate.query.Query;
-import org.hibernate.transform.Transformers;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -22,6 +21,8 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.hibernate.HibernateException;
+import org.hibernate.query.SelectionQuery;
 import org.hibernate.type.StandardBasicTypes;
 
 /**
@@ -50,12 +51,9 @@ public class userDAOImpl implements userDAO {
     @Override
     @Transactional(readOnly = false)
     public Integer createUser(utUser user) {
-        Integer lastId = null;
-
-        lastId = (Integer) sessionFactory.getCurrentSession().save(user);
-
-
-        return lastId;
+        
+        sessionFactory.getCurrentSession().persist(user);
+        return user.getId();
     }
 
     /**
@@ -68,7 +66,7 @@ public class userDAOImpl implements userDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateUser(utUser user) {
-        sessionFactory.getCurrentSession().update(user);
+        sessionFactory.getCurrentSession().merge(user);
     }
 
     /**
@@ -146,13 +144,12 @@ public class userDAOImpl implements userDAO {
     @Transactional(readOnly = true)
     public Long findTotalLogins(int userId) {
 
-        Query query = sessionFactory.getCurrentSession().createQuery("select count(id) as totalLogins from utUserLogin where userId = :userId");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("select count(id) as totalLogins from utUserLogin where userId = :userId");
         query.setParameter("userId", userId);
 
         Long totalLogins = (Long) query.uniqueResult();
 
         return totalLogins;
-
     }
 
     /**
@@ -172,6 +169,8 @@ public class userDAOImpl implements userDAO {
     /**
      * The 'getOrganizationContact' function will return a user based on the organization id passed in and the mainContact parameter;
      *
+     * @param orgId
+     * @param mainContact
      * @orgId The id of the organization to search a user on
      * @mainContact The value of the contact type to return (1 = Primary, 2 = Secondary)
      *
@@ -181,12 +180,11 @@ public class userDAOImpl implements userDAO {
     @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
     public List<utUser> getOrganizationContact(int orgId, int mainContact) {
-        Query query = sessionFactory.getCurrentSession().createQuery("from utUser where orgId = :orgId and mainContact = :mainContact");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from utUser where orgId = :orgId and mainContact = :mainContact");
         query.setParameter("orgId", orgId);
         query.setParameter("mainContact", mainContact);
 
         return query.list();
-
     }
 
     /**
@@ -202,11 +200,12 @@ public class userDAOImpl implements userDAO {
 
         String sql = ("select id from users where lower(email) = '" + identifier + "' or lower(username) = '" + identifier + "' or lower(concat(concat(firstName,' '),lastName)) = '" + identifier + "'");
 
-        Query findUser = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
+        Query findUser = sessionFactory.getCurrentSession().createNativeQuery(sql, Integer.class);
 
         if (findUser.list().size() > 1) {
             return null;
-        } else {
+        } 
+        else {
             if (findUser.uniqueResult() == null) {
                 return null;
             } else {
@@ -226,7 +225,7 @@ public class userDAOImpl implements userDAO {
     @Transactional(readOnly = true)
     public utUser getUserByResetCode(String resetCode) {
 
-        Query query = sessionFactory.getCurrentSession().createQuery("from utUser where resetCode = :resetCode");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from utUser where resetCode = :resetCode");
         query.setParameter("resetCode", resetCode);
 
         if (query.list().size() > 1) {
@@ -243,17 +242,16 @@ public class userDAOImpl implements userDAO {
     /**
      * The 'insertUserLog' function will take a userActivity and insert the information into the database
      *
+     * @param userActivity
      * @userActivity An activity of the user
-     * @return no return is expected
      */
     @Override
     @Transactional(readOnly = false)
     public void insertUserLog(utUserActivity userActivity) {
         try {
-            sessionFactory.getCurrentSession().save(userActivity);
-        } catch (Exception ex) {
-            System.err.println("insertUserLog " + ex.getCause());
-            ex.printStackTrace();
+            sessionFactory.getCurrentSession().persist(userActivity);
+        } 
+        catch (HibernateException ex) {
         }
     }
 
@@ -265,12 +263,11 @@ public class userDAOImpl implements userDAO {
             Query query = sessionFactory.getCurrentSession().createNativeQuery("select * from userActivity where id = :uaId",utUserActivity.class)
             .setParameter("uaId", uaId);
             List<utUserActivity> uaList = query.list();
-            if (uaList.size() > 0) {
+            if (!uaList.isEmpty()) {
                 return uaList.get(0);
             }
-        } catch (Exception ex) {
-            System.err.println("getUAById " + ex.getCause());
-            ex.printStackTrace();
+        } 
+        catch (HibernateException ex) {
         }
         return null;
     }
@@ -280,13 +277,11 @@ public class userDAOImpl implements userDAO {
     @Transactional(readOnly = true)
     public List<utUser> getUserByTypeByOrganization(int orgId) {
         try {
-            Query query = sessionFactory.getCurrentSession().createQuery("from utUser where orgId = :orgId and status = 1 order by userType");
+            SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from utUser where orgId = :orgId and status = 1 order by userType");
             query.setParameter("orgId", orgId);
             List<utUser> users = query.list();
             return users;
-        } catch (Exception ex) {
-            System.err.println("getUserByTypeByOrganization " + ex.getCause());
-            ex.printStackTrace();
+        } catch (HibernateException ex) {
             return null;
         }
     }
@@ -307,9 +302,7 @@ public class userDAOImpl implements userDAO {
 
             return users;
 
-        } catch (Exception ex) {
-            System.err.println("getSendersForConfig  " + ex.getCause());
-            ex.printStackTrace();
+        } catch (HibernateException ex) {
             return null;
         }
     }
@@ -330,9 +323,7 @@ public class userDAOImpl implements userDAO {
 
             return users;
 
-        } catch (Exception ex) {
-            System.err.println("getOrgUsersForConfig  " + ex.getCause());
-            ex.printStackTrace();
+        } catch (HibernateException ex) {
             return null;
         }
     }
@@ -352,9 +343,7 @@ public class userDAOImpl implements userDAO {
 
             return users;
 
-        } catch (Exception ex) {
-            System.err.println("getOrgUsersForConfig  " + ex.getCause());
-            ex.printStackTrace();
+        } catch (HibernateException ex) {
             return null;
         }
     }
@@ -374,9 +363,7 @@ public class userDAOImpl implements userDAO {
 
             return users;
 
-        } catch (Exception ex) {
-            System.err.println("getOrgUsersForConfig  " + ex.getCause());
-            ex.printStackTrace();
+        } catch (HibernateException ex) {
             return null;
         }
     }
@@ -385,7 +372,7 @@ public class userDAOImpl implements userDAO {
     @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
     public List<utUser> getAllUsers() {
-        Query query = sessionFactory.getCurrentSession().createQuery("from utUser");
+        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from utUser");
 
         List<utUser> userList = query.list();
         return userList;
@@ -395,12 +382,10 @@ public class userDAOImpl implements userDAO {
     @Transactional(readOnly = true)
     public void updateUserActivity(utUserActivity userActivity) {
         try {
-            sessionFactory.getCurrentSession().update(userActivity);
-        } catch (Exception ex) {
-            System.err.println("updateUserActivity  " + ex.getCause());
-            ex.printStackTrace();
+            sessionFactory.getCurrentSession().merge(userActivity);
+        } 
+        catch (HibernateException ex) {
         }
-
     }
 
     @Override
@@ -416,9 +401,7 @@ public class userDAOImpl implements userDAO {
 
             return roles;
 
-        } catch (Exception ex) {
-            System.err.println("getUserRoles  " + ex.getCause());
-            ex.printStackTrace();
+        } catch (HibernateException ex) {
             return null;
         }
     }
@@ -426,7 +409,7 @@ public class userDAOImpl implements userDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateUserOnly(utUser user) throws Exception {
-        sessionFactory.getCurrentSession().update(user);
+        sessionFactory.getCurrentSession().merge(user);
     }
 
     @Override
@@ -465,7 +448,8 @@ public class userDAOImpl implements userDAO {
     @Override
     @Transactional(readOnly = true)
     public List<Integer> getUserAllowedTargets(int userId, List<configurationConnectionSenders> connections) throws Exception {
-        List<Integer> orgList = new ArrayList<Integer>();
+        
+        List<Integer> orgList = new ArrayList<>();
 
         if (connections == null || connections.isEmpty()) {
             orgList.add(0);
@@ -496,7 +480,7 @@ public class userDAOImpl implements userDAO {
                     
                     if(targetconfigDetails != null) {
                          /* Add the target org to the target organization list */
-                        orgList.add(targetconfigDetails.getorgId());
+                        orgList.add(targetconfigDetails.getOrgId());
                     }
                 }
             }
@@ -508,7 +492,8 @@ public class userDAOImpl implements userDAO {
     @Override
     @Transactional(readOnly = true)
     public List<Integer> getUserAllowedMessageTypes(int userId, List<configurationConnectionSenders> connections) throws Exception {
-        List<Integer> messageTypeList = new ArrayList<Integer>();
+        
+        List<Integer> messageTypeList = new ArrayList<>();
 
         if (connections == null || connections.isEmpty()) {
             messageTypeList.add(0);
@@ -567,7 +552,7 @@ public class userDAOImpl implements userDAO {
     @Transactional(readOnly = false)
     public void loguserout(int userId) throws Exception {
 	
-	Query query = sessionFactory.getCurrentSession().createQuery("from utUserLogin where userId = :userId order by id desc");
+	SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from utUserLogin where userId = :userId order by id desc");
         query.setParameter("userId", userId);
 	
 	List<utUserLogin> logins = query.list();
@@ -596,7 +581,7 @@ public class userDAOImpl implements userDAO {
     @Transactional(readOnly = true)
     public List<utUser> getUsersByOrganizationWithLogins(int orgId) {
 
-        List<Integer> OrgIds = new ArrayList<Integer>();
+        List<Integer> OrgIds = new ArrayList<>();
         OrgIds.add(orgId);
 	
 	String sql = "select a.id, a.firstName, a.lastName, a.status, b.role as roleType," 
@@ -673,7 +658,7 @@ public class userDAOImpl implements userDAO {
      * The 'getSuccessEmailSendersForConfig' function will return a list of users that are selected to receive an alert when
      * a message is sent out of the IL.
      * 
-     * @param configId
+     * @param targetConfigId
      * @return 
      */
     @Override
@@ -691,9 +676,7 @@ public class userDAOImpl implements userDAO {
 
            return users;
 
-        } catch (Exception ex) {
-            System.err.println("getSuccessEmailSendersForConfig  " + ex.getCause());
-            ex.printStackTrace();
+        } catch (HibernateException ex) {
             return null;
         }
     }
@@ -702,7 +685,7 @@ public class userDAOImpl implements userDAO {
      * The 'getSuccessEmailReceiversForConfig' function will return a list of users that are selected to receive an alert when
      * a message is sent out of the IL.
      * 
-     * @param configId
+     * @param targetConfigId
      * @return 
      */
     @Override
@@ -720,9 +703,7 @@ public class userDAOImpl implements userDAO {
 
            return users;
 
-        } catch (Exception ex) {
-            System.err.println("getSuccessEmailReceiversForConfig  " + ex.getCause());
-            ex.printStackTrace();
+        } catch (HibernateException ex) {
             return null;
         }
     }
