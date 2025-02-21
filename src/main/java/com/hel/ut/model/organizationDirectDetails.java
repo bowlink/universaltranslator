@@ -10,7 +10,6 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
 
-
 @Entity
 @Table(name = "organizationdirectdetails")
 public class organizationDirectDetails {
@@ -22,7 +21,7 @@ public class organizationDirectDetails {
     private int id;
     
     @Column(name = "orgId", nullable = false)
-    private int orgId = 0;
+    private Integer orgId = 0;
     
     @Column(name = "status", nullable = false)
     private boolean status = true;
@@ -36,97 +35,97 @@ public class organizationDirectDetails {
     private Date dateModified = new Date();
     
     @Column(name = "hispId", nullable = false)
-    private int hispId = 0;
+    private Integer hispId = 0;
     
     @Column(name = "directDomain", nullable = false)
     private String directDomain;
     
     @Column(name = "fileTypeId", nullable = false)
-    private int fileTypeId = 0;
+    private Integer fileTypeId = 0;
     
     @Column(name = "expectedFileExt", nullable = false)
     private String expectedFileExt;
     
     @Column(name = "dmFindConfig", nullable = false)
-    private int dmFindConfig = 1;
+    private Integer dmFindConfig = 1;
 
     public int getId() {
-	return id;
+        return id;
     }
 
     public void setId(int id) {
-	this.id = id;
+        this.id = id;
     }
 
-    public int getOrgId() {
-	return orgId;
+    public Integer getOrgId() {
+        return orgId;
     }
 
-    public void setOrgId(int orgId) {
-	this.orgId = orgId;
+    public void setOrgId(Integer orgId) {
+        this.orgId = orgId;
     }
 
     public boolean isStatus() {
-	return status;
+        return status;
     }
 
     public void setStatus(boolean status) {
-	this.status = status;
+        this.status = status;
     }
 
     public Date getDateCreated() {
-	return dateCreated;
+        return dateCreated;
     }
 
     public void setDateCreated(Date dateCreated) {
-	this.dateCreated = dateCreated;
+        this.dateCreated = dateCreated;
     }
 
     public Date getDateModified() {
-	return dateModified;
+        return dateModified;
     }
 
     public void setDateModified(Date dateModified) {
-	this.dateModified = dateModified;
+        this.dateModified = dateModified;
     }
 
-    public int getHispId() {
-	return hispId;
+    public Integer getHispId() {
+        return hispId;
     }
 
-    public void setHispId(int hispId) {
-	this.hispId = hispId;
+    public void setHispId(Integer hispId) {
+        this.hispId = hispId;
     }
 
     public String getDirectDomain() {
-	return directDomain;
+        return directDomain;
     }
 
     public void setDirectDomain(String directDomain) {
-	this.directDomain = directDomain;
+        this.directDomain = directDomain;
     }
 
-    public int getFileTypeId() {
-	return fileTypeId;
+    public Integer getFileTypeId() {
+        return fileTypeId;
     }
 
-    public void setFileTypeId(int fileTypeId) {
-	this.fileTypeId = fileTypeId;
+    public void setFileTypeId(Integer fileTypeId) {
+        this.fileTypeId = fileTypeId;
     }
 
     public String getExpectedFileExt() {
-	return expectedFileExt;
+        return expectedFileExt;
     }
 
     public void setExpectedFileExt(String expectedFileExt) {
-	this.expectedFileExt = expectedFileExt;
+        this.expectedFileExt = expectedFileExt;
     }
 
-    public int getDmFindConfig() {
+    public Integer getDmFindConfig() {
         return dmFindConfig;
     }
 
-    public void setDmFindConfig(int dmFindConfig) {
+    public void setDmFindConfig(Integer dmFindConfig) {
         this.dmFindConfig = dmFindConfig;
     }
 }

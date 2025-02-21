@@ -77,6 +77,38 @@ public class referralActivityExports {
     @Column(name = "runEnd", nullable = true)
     private Date runEnd = new Date();
 
+    public String getCreatedByName() {
+        return createdByName;
+    }
+
+    public void setCreatedByName(String createdByName) {
+        this.createdByName = createdByName;
+    }
+
+    public String getStatusName() {
+        return statusName;
+    }
+
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
+    }
+
+    public String getEncryptedId() {
+        return encryptedId;
+    }
+
+    public void setEncryptedId(String encryptedId) {
+        this.encryptedId = encryptedId;
+    }
+
+    public String getEncryptedSecret() {
+        return encryptedSecret;
+    }
+
+    public void setEncryptedSecret(String encryptedSecret) {
+        this.encryptedSecret = encryptedSecret;
+    }
+
     public int getId() {
         return id;
     }
@@ -115,14 +147,6 @@ public class referralActivityExports {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
-    }
-
-    public String getCreatedByName() {
-        return createdByName;
-    }
-
-    public void setCreatedByName(String createdByName) {
-        this.createdByName = createdByName;
     }
 
     public Integer getStatusId() {
@@ -164,29 +188,4 @@ public class referralActivityExports {
     public void setRunEnd(Date runEnd) {
         this.runEnd = runEnd;
     }
-
-    public String getStatusName() {
-        return statusName;
-    }
-
-    public void setStatusName(String statusName) {
-        this.statusName = statusName;
-    }
-
-    public String getEncryptedId() {
-        return encryptedId;
-    }
-
-    public void setEncryptedId(String encryptedId) {
-        this.encryptedId = encryptedId;
-    }
-
-    public String getEncryptedSecret() {
-        return encryptedSecret;
-    }
-
-    public void setEncryptedSecret(String encryptedSecret) {
-        this.encryptedSecret = encryptedSecret;
-    }
-
 }

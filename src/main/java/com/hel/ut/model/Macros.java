@@ -73,100 +73,12 @@ public class Macros {
     @Column(name = "rejectRecordFile", nullable = true)
     private String rejectRecordFile = "";
 
-    public boolean isPopulateFieldA() {
-        return populateFieldA;
-    }
-
-    public void setPopulateFieldA(boolean populateFieldA) {
-        this.populateFieldA = populateFieldA;
-    }
-
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getmacroName() {
-        return macroName;
-    }
-
-    public void setmacroName(String macroName) {
-        this.macroName = macroName;
-    }
-
-    public String getmacroShortName() {
-        return macroShortName;
-    }
-
-    public void setmacroShortName(String macroShortName) {
-        this.macroShortName = macroShortName;
-    }
-
-    public int getrefNumber() {
-        return id;
-    }
-
-    public void setrefNumber(int refNumber) {
-        this.refNumber = refNumber;
-    }
-
-    public String getdateDisplay() {
-        return dateDisplay;
-    }
-
-    public void setdateDisplay(String dateDisplay) {
-        this.dateDisplay = dateDisplay;
-    }
-
-    public String getformula() {
-        return formula;
-    }
-
-    public void setformula(String formula) {
-        this.formula = formula;
-    }
-
-    public String getinvalidWhen() {
-        return invalidWhen;
-    }
-
-    public void setinvalidWhen(String invalidWhen) {
-        this.invalidWhen = invalidWhen;
-    }
-
-    public String getfieldAQuestion() {
-        return fieldAQuestion;
-    }
-
-    public void setfieldAQuestion(String fieldAQuestion) {
-        this.fieldAQuestion = fieldAQuestion;
-    }
-
-    public String getfieldBQuestion() {
-        return fieldBQuestion;
-    }
-
-    public void setfieldBQuestion(String fieldBQuestion) {
-        this.fieldBQuestion = fieldBQuestion;
-    }
-
-    public String getcon1Question() {
-        return con1Question;
-    }
-
-    public void setcon1Question(String con1Question) {
-        this.con1Question = con1Question;
-    }
-
-    public String getcon2Question() {
-        return con2Question;
-    }
-
-    public void setcon2Question(String con2Question) {
-        this.con2Question = con2Question;
     }
 
     public String getMacroName() {
@@ -185,7 +97,7 @@ public class Macros {
         this.macroShortName = macroShortName;
     }
 
-    public int getRefNumber() {
+    public Integer getRefNumber() {
         return refNumber;
     }
 
@@ -249,6 +161,14 @@ public class Macros {
         this.con2Question = con2Question;
     }
 
+    public boolean isPopulateFieldA() {
+        return populateFieldA;
+    }
+
+    public void setPopulateFieldA(boolean populateFieldA) {
+        this.populateFieldA = populateFieldA;
+    }
+
     public int getCategoryId() {
         return categoryId;
     }
@@ -258,43 +178,42 @@ public class Macros {
     }
 
     public String getMacroDesc() {
-	return macroDesc;
+        return macroDesc;
     }
 
     public void setMacroDesc(String macroDesc) {
-	this.macroDesc = macroDesc;
+        this.macroDesc = macroDesc;
     }
 
     public String getErrorCondition() {
-	return errorCondition;
+        return errorCondition;
     }
 
     public void setErrorCondition(String errorCondition) {
-	this.errorCondition = errorCondition;
+        this.errorCondition = errorCondition;
     }
 
     public String getPassClearLogic() {
-	return passClearLogic;
+        return passClearLogic;
     }
 
     public void setPassClearLogic(String passClearLogic) {
-	this.passClearLogic = passClearLogic;
+        this.passClearLogic = passClearLogic;
     }
 
     public String getDroppedValueLogging() {
-	return droppedValueLogging;
+        return droppedValueLogging;
     }
 
     public void setDroppedValueLogging(String droppedValueLogging) {
-	this.droppedValueLogging = droppedValueLogging;
+        this.droppedValueLogging = droppedValueLogging;
     }
 
     public String getRejectRecordFile() {
-	return rejectRecordFile;
+        return rejectRecordFile;
     }
 
     public void setRejectRecordFile(String rejectRecordFile) {
-	this.rejectRecordFile = rejectRecordFile;
+        this.rejectRecordFile = rejectRecordFile;
     }
-
 }

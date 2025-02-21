@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+     <head>
+        <title>Health-e-Link UT Configuration Message Specs</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/configurations/actionBar :: actionBar}"></div>
+            <div th:insert="~{administrator/configurations/menuBar :: menuBar}"></div>
+            <div class="main clearfix" role="main">
+                <div class="row-fluid">
+                    <div class="col-md-12">
+                        <div class="alert alert-danger" role="alert" th:if="${templateError != null}">   
+                            <strong>Template Error!</strong> 
+                            <span th:text="${templateError}"></span>
+                        </div>
+                        <div class="alert alert-success" role="alert" th:if="${savedStatus != null}">  
+                            <p th:if="${savedStatus == 'transportupdated'}">The configuration transport details have been successfully updated!</p>
+                            <p th:if="${savedStatus == 'updated'}">The configuration message specs have been successfully updated!</p>
+                        </div>
+                        <div class="alert alert-danger" role="alert" th:if="${error != null}">
+                            <span>The selected file was not found.</span>
+                        </div>
+                        <section class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Configuration Summary</h3>
+                            </div>
+                            <div class="panel-body">
+                                <p th:utext="${'<strong>Organization:</strong> '+configurationDetails.orgName}"></p>
+                                <p th:utext="${'<strong>System Name:</strong> '+helSystemName}"></p>
+                                <p th:utext="${'<strong>Configuration Name:</strong> '+configurationDetails.configname+' (Id: '+configurationDetails.id+')'}"></p>
+                                <p th:utext="${'<strong>Configuration Type:</strong> ' + (configurationDetails.type == 1 ? 'Source':'Target')}" id="configType"></p>
+                                <p th:if="${lastConfigUpdate != ''}" th:utext="${'<strong>Template file last updated on:</strong> ' + #dates.format(lastConfigUpdate, 'M/dd/yyyy h:mm a')}"></p>
+                            </div>
+                        </section>  
+                    </div>
+                    <div class="col-md-12">
+                        <form id="messageSpecs" th:action="${'/administrator/configurations/messagespecs'}" th:object="${messageSpecs}" enctype="multipart/form-data" method="post" role="form">
+                            <input type="hidden" id="action" name="action" value="save" />
+                            <input type="hidden" th:field="*{id}" id="id" />
+                            <input type="hidden" th:field="*{configId}" />
+                            <input type="hidden" th:field="*{hasHeader}" value="0"/>
+                            <input type="hidden" th:field="*{fileLayout}" value="1" /> 
+                            <input type="hidden" th:field="*{excelstartrow}" />
+                            <input type="hidden" th:field="*{excelskiprows}" />
+                            
+                            <section class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Template Details</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="form-container">
+                                        <th:block th:if="${transportType == 10 or (transportType == 13 and configurationDetails.type == 2 and transportDetails.helRegistryConfigId > 0 and !transportDetails.ergFileDownload)}">
+                                            <div class="form-group">
+                                                <label class="control-label" for="templateFile">Template File</label>
+                                                <p>No need for a template file when the configuration is a eReferral message type and the transport method is Online Form (eRG), File Upload or File Drop (Going back to the eRG).</p>
+                                                <input type="hidden" th:field="*{templateFile}" />
+                                            </div>
+                                        </th:block>
+                                        <th:block th:unless="${transportType == 10 or (transportType == 13 and configurationDetails.type == 2 and transportDetails.helRegistryConfigId > 0 and !transportDetails.ergFileDownload)}">
+                                            <th:block th:if="${templateFile != ''}">
+                                                <input type="hidden" th:field="*{templateFile}" />
+                                                <div class="form-group">
+                                                    <div class="col-md-12" style="padding-left:0px;">
+                                                        <div class="col-lg-2" style="padding-left:0px;">
+                                                            <button type="button" id="toolTipBTN" class="btn btn-primary btn-action downloadNewTemplate" th:rel="${configurationDetails.id}" data-bs-toggle="tooltip" data-bs-placement="top" title="Download Latest Template">Download Current Configuration Template</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <p>
+                                                        <br /><br />
+                                                        <span style="margin-top:10px;" th:if="${lastTemplateUploadedDate != null and lastTemplateUploadedDate != ''}" th:utext="${'<strong>Last Uploaded Template File:' + lastTemplateUploadedDate + '</strong>'}"></span>
+                                                        <span style="margin-top:10px;" th:unless="${lastTemplateUploadedDate != null and lastTemplateUploadedDate != ''}" th:utext="${'<strong>Last Uploaded Template File: The template file was not found.</strong>'}"></span>
+                                                        <hr>
+                                                    </p>
+                                                </div>
+                                            </th:block>
+                                            <div id="templateFileDiv" class="form-group" th:classappend="${#fields.hasErrors('file') ? 'has-error' : ''}">
+                                                <label class="control-label" for="file" th:text="${templateFile != '' ? 'Upload New Template (XLSX file) *' : 'Upload Template (XLSX file) *'}"></label>
+                                                <input th:field="*{file}" id="file" type="file" class="form-control"  />
+                                                <span id="templateFileMsg" class="control-label"></span>
+                                            </div>
+                                        </th:block>
+                                    </div>
+                                </div>
+                            </section>
+                            <th:block th:if="${configurationDetails.type == 1}">
+                                <section class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Message Specs</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="form-container">
+                                            <th:block th:if="${transportType == 3}">
+                                                <div class="form-group" th:classappend="${#fields.hasErrors('fileNameConfigHeader') ? 'has-error' : ''}">
+                                                    <label class="control-label" for="fileNameConfigHeader">Message Type Identifier in file name</label>
+                                                    <input th:field="*{fileNameConfigHeader}" id="fileNameConfigHeader" class="form-control sm-input" type="text" maxLength="45" />
+                                                    <span id="fileNameConfigHeaderMsg" class="control-label" th:if="${#fields.hasErrors('fileNameConfigHeader')}" th:errors="*{fileNameConfigHeader}"></span>
+                                                </div>
+                                            </th:block>
+                                            <th:block th:unless="${transportType == 3}">
+                                                <input type="hidden" th:field="*{fileNameConfigHeader}" />
+                                            </th:block>
+                                            <th:block th:if="${transportType != 8}">
+                                                <th:block th:if="${transportType != 10}">
+                                                    <div class="form-group" th:classappend="${#fields.hasErrors('messageTypeCol') ? 'has-error' : ''}">
+                                                        <label class="control-label" for="messageTypeCol">Column containing the message type (Enter 0 if not provided or not in use) *</label>
+                                                        <input th:field="*{messageTypeCol}" id="messageTypeCol" class="form-control sm-input" type="text" maxLength="3" />
+                                                        <span id="messageTypeColMsg" class="control-label" th:if="${#fields.hasErrors('messageTypeCol')}" th:errors="*{messageTypeCol}"></span>
+                                                    </div>
+                                                    <div class="form-group" th:classappend="${#fields.hasErrors('messageTypeVal') ? 'has-error' : ''}">
+                                                        <label class="control-label" for="messageTypeVal">Message Type Value</label>
+                                                        <input th:field="*{messageTypeVal}" id="messageTypeVal" class="form-control" type="text" maxLength="45" />
+                                                        <span id="messageTypeValMsg" class="control-label" th:if="${#fields.hasErrors('messageTypeVal')}" th:errors="*{messageTypeVal}"></span>
+                                                    </div>
+                                                </th:block>
+                                                <div class="form-group" th:classappend="${#fields.hasErrors('sourceSubOrgCol') ? 'has-error' : ''}">
+                                                    <label class="control-label" for="sourceSubOrgCol">Column containing the sending site (Enter 0 if not provided or not in use)</label>
+                                                    <input th:field="*{sourceSubOrgCol}" id="sourceSubOrgCol" class="form-control sm-input" type="text" maxLength="3" />
+                                                    <span id="sourceSubOrgColMsg" class="control-label" th:if="${#fields.hasErrors('sourceSubOrgCol')}" th:errors="*{sourceSubOrgCol}"></span>
+                                                </div>
+                                                <div class="form-group" th:classappend="${#fields.hasErrors('targetOrgCol') ? 'has-error' : ''}">
+                                                    <label class="control-label" for="targetOrgCol">Column containing the target organization (Enter 0 if not provided or not in use) *</label>
+                                                    <input th:field="*{targetOrgCol}" id="targetOrgCol" class="form-control sm-input" type="text" maxLength="3" />
+                                                    <span id="targetOrgColMsg" class="control-label" th:if="${#fields.hasErrors('targetOrgCol')}" th:errors="*{targetOrgCol}"></span>
+                                                </div>
+                                                <th:block th:if="${transportType != 10}">
+                                                    <div class="form-group">
+                                                        <label class="control-label" for="containsHeaderRow" th:data-hasheaderrow="${messageSpecs.containsHeaderRow}">Will the submitted file have any header rows? *</label>
+                                                        <div>
+                                                            <label class="radio-inline">
+                                                                <input id="containsHeaderRow" class="containsHeaderRow" type="radio" th:field="*{containsHeaderRow}" value="1" /> Yes
+                                                            </label>
+                                                            <label class="radio-inline">
+                                                                <input id="containsHeaderRow" class="containsHeaderRow" type="radio" th:field="*{containsHeaderRow}" value="0" />No
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div id="totalHeaderRowsDiv" class="form-group" th:classappend="${#fields.hasErrors('totalHeaderRows') ? 'has-error' : ''}" th:style="'display: '+ ${containsHeaderRow == true ? 'block' : 'none'}">
+                                                        <label class="control-label" for="totalHeaderRows">How many header rows does the file have? *</label>
+                                                        <input th:field="*{totalHeaderRows}" id="totalHeaderRows" class="form-control sm-input" type="text" maxLength="2" />
+                                                        <span id="totalHeaderRowsMsg" class="control-label" th:if="${#fields.hasErrors('totalHeaderRows')}" th:errors="*{totalHeaderRows}"></span>
+                                                    </div>
+                                                    <th:block th:if="${fileType == 4 or fileType == 9 or fileType == 12 or (fileType == 2 and fileDelim == 13)}">
+                                                        <th:block th:if="${parsingTemplate  != ''}">
+                                                            <div class="form-group">
+                                                                <label class="control-label" for="parsingTemplate">Current Parsing Script (<a th:href="${'/FileDownload/downloadFile.do?fromPage=messagespec&filename='+messageSpecs.parsingTemplate+'&foldername='+cleanOrgURL+'/templates/'}" title="Download Parsing Script">Download Parsing Script</a>)</label>
+                                                                <input type="text" disabled id="parsingTemplate" class="form-control" th:value="${messageSpecs.parsingTemplate}" />
+                                                                <input type="hidden" th:field="*{parsingTemplate}" />
+                                                            </div>
+                                                        </th:block>
+                                                        <div id="parsingTemplateDiv" class="form-group" th:classappend="${#fields.hasErrors('parsingScriptFile') ? 'has-error' : ''}">
+                                                            <label class="control-label" for="file" th:text="${parsingTemplate != '' ? 'Upload New Parsing Script (JAR file)' : 'Upload Parsing Script (JAR file)'}"></label>
+                                                            <input th:field="*{parsingScriptFile}" id="parsingScriptFile" class="form-control" type="file" />
+                                                            <span id="parsingTemplateMsg" class="control-label" th:if="${#fields.hasErrors('parsingScriptFile')}" th:errors="*{parsingScriptFile}"></span>
+                                                        </div>
+                                                    </th:block>
+                                                    <th:block th:unless="${fileType == 4 or fileType == 9 or fileType == 12 or (fileType == 2 and fileDelim == 13)}">
+                                                        <input type="hidden" th:field="*{parsingTemplate}" />
+                                                        <input type="hidden" th:field="*{parsingScriptFile}" />
+                                                    </th:block>
+                                                </th:block>
+                                                <th:block th:unless="${transportType != 10}">
+                                                    <input type="hidden" th:field="*{containsHeaderRow}" />
+                                                    <input type="hidden" th:field="*{parsingTemplate}" />
+                                                    <input type="hidden" th:field="*{parsingScriptFile}" />
+                                                    <input type="hidden" th:field="*{messageTypeCol}" />
+                                                    <input type="hidden" th:field="*{messageTypeVal}" />
+                                                </th:block>
+                                            </th:block>
+                                            <th:block th:unless="${transportType != 8}">
+                                                <input type="hidden" th:field="*{messageTypeCol}" />
+                                                <input type="hidden" th:field="*{messageTypeVal}" />
+                                                <input type="hidden" th:field="*{sourceSubOrgCol}" />
+                                                <input type="hidden" th:field="*{targetOrgCol}" value="1" />
+                                                <input type="hidden" th:field="*{containsHeaderRow}" />
+                                                <input type="hidden" th:field="*{parsingTemplate}" />
+                                                <input type="hidden" th:field="*{parsingScriptFile}" />
+                                            </th:block>          
+                                        </div>
+                                    </div>
+                                </section>  
+                            </th:block>
+                            <th:block th:if="${availableFields != ''}">
+                                <section class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Audit Report Reportable Fields</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="form-container">  
+                                            <div class="row col-lg-12">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group rtpField" th:classappend="${#fields.hasErrors('rptField1') ? 'has-error' : ''}">
+                                                        <span id="rptFieldMsg" class="control-label"></span>
+                                                        <label class="control-label" for="rptField1">Field 1 *</label>
+                                                        <select th:field="*{rptField1}" id="rptField1" class="form-control">
+                                                            <option value="0">- Select -</option>
+                                                            <option th:each="field, fStatus : ${availableFields}" th:selected="${rptField1 == field.fieldNo ? 'true' : 'false'}" th:value="${field.fieldNo}" th:text="${field.fieldDesc}"></option>
+                                                         </select>
+                                                        <span id="parsingTemplateMsg" class="control-label" th:if="${#fields.hasErrors('rptField1')}" th:errors="*{rptField1}"></span>
+                                                    </div>
+                                                    <div class="form-group rtpField" th:classappend="${#fields.hasErrors('rptField2') ? 'has-error' : ''}">
+                                                        <label class="control-label" for="rptField2">Field 2 *</label>
+                                                        <select th:field="*{rptField2}" id="rptField2" class="form-control">
+                                                            <option value="0">- Select -</option>
+                                                            <option th:each="field, fStatus : ${availableFields}" th:selected="${rptField2 == field.fieldNo ? 'true' : 'false'}" th:value="${field.fieldNo}" th:text="${field.fieldDesc}"></option>
+                                                         </select>
+                                                        <span id="parsingTemplateMsg" class="control-label" th:if="${#fields.hasErrors('rptField2')}" th:errors="*{rptField2}"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="form-group rtpField" th:classappend="${#fields.hasErrors('rptField3') ? 'has-error' : ''}">
+                                                        <label class="control-label" for="rptField3">Field 3 *</label>
+                                                        <select th:field="*{rptField3}" id="rptField3" class="form-control">
+                                                            <option value="0">- Select -</option>
+                                                            <option th:each="field, fStatus : ${availableFields}" th:selected="${rptField3 == field.fieldNo ? 'true' : 'false'}" th:value="${field.fieldNo}" th:text="${field.fieldDesc}"></option>
+                                                         </select>
+                                                        <span id="parsingTemplateMsg" class="control-label" th:if="${#fields.hasErrors('rptField3')}" th:errors="*{rptField3}"></span>
+                                                    </div>
+                                                    <div class="form-group rtpField" th:classappend="${#fields.hasErrors('rptField4') ? 'has-error' : ''}">
+                                                        <label class="control-label" for="rptField4">Field 4 *</label>
+                                                        <select th:field="*{rptField4}" id="rptField4" class="form-control">
+                                                            <option value="0">- Select -</option>
+                                                            <option th:each="field, fStatus : ${availableFields}" th:selected="${rptField4 == field.fieldNo ? 'true' : 'false'}" th:value="${field.fieldNo}" th:text="${field.fieldDesc}"></option>
+                                                         </select>
+                                                        <span id="parsingTemplateMsg" class="control-label" th:if="${#fields.hasErrors('rptField4')}" th:errors="*{rptField4}"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </th:block>
+                        </form>
+                    </div>     
+                </div>
+            </div>
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
+            <script th:src="@{/dspResources/js/overlay.js}"></script>    
+            <script th:src="@{/dspResources/js/admin/configuration/mainConfigFunctions.js}"></script>
+            <script th:src="@{/dspResources/js/admin/configuration/messagespecs.js}"></script>
+        </th:block>
+    </body>
+</html>

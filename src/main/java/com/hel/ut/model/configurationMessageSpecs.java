@@ -40,45 +40,45 @@ public class configurationMessageSpecs {
     private int id;
 
     @Column(name = "CONFIGID", nullable = false)
-    private int configId;
+    private Integer configId;
 
     @NoHtml
     @Column(name = "TEMPLATEFILE", nullable = true)
     private String templateFile = null;
 
     @Column(name = "MESSAGETYPECOL", nullable = false)
-    private int messageTypeCol = 0;
+    private Integer messageTypeCol = 0;
 
     @NoHtml
     @Column(name = "MESSAGETYPEVAL", nullable = true)
     private String messageTypeVal = null;
 
     @Column(name = "TARGETORGCOL", nullable = false)
-    private int targetOrgCol = 0;
+    private Integer targetOrgCol = 0;
 
     @Column(name = "sourceSubOrgCol", nullable = false)
-    private int sourceSubOrgCol = 0;
+    private Integer sourceSubOrgCol = 0;
 
     @Column(name = "CONTAINSHEADERROW", nullable = false)
     private boolean containsHeaderRow = false;
 
     @Column(name = "RPTFIELD1", nullable = false)
-    private int rptField1 = 0;
+    private Integer rptField1 = 0;
 
     @Column(name = "RPTFIELD2", nullable = false)
-    private int rptField2 = 0;
+    private Integer rptField2 = 0;
 
     @Column(name = "RPTFIELD3", nullable = false)
-    private int rptField3 = 0;
+    private Integer rptField3 = 0;
 
     @Column(name = "RPTFIELD4", nullable = false)
-    private int rptField4 = 0;
+    private Integer rptField4 = 0;
     
     @Column(name = "EXCELSTARTROW", nullable = false)
-    private int excelstartrow = 1;
+    private Integer excelstartrow = 1;
     
     @Column(name = "EXCELSKIPROWS", nullable = false)
-    private int excelskiprows = 0;
+    private Integer excelskiprows = 0;
     
     @NoHtml
     @Column(name = "PARSINGTEMPLATE", nullable = true)
@@ -88,95 +88,7 @@ public class configurationMessageSpecs {
     private String fileNameConfigHeader;
     
     @Column(name = "totalHeaderRows", nullable = false)
-    private int totalHeaderRows = 1;
-    
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getconfigId() {
-        return configId;
-    }
-
-    public void setconfigId(int configId) {
-        this.configId = configId;
-    }
-
-    public String gettemplateFile() {
-        return templateFile;
-    }
-
-    public void settemplateFile(String templateFile) {
-        this.templateFile = templateFile;
-    }
-
-    public int getmessageTypeCol() {
-        return messageTypeCol;
-    }
-
-    public void setmessageTypeCol(int messageTypeCol) {
-        this.messageTypeCol = messageTypeCol;
-    }
-
-    public String getmessageTypeVal() {
-        return messageTypeVal;
-    }
-
-    public void setmessageTypeVal(String messageTypeVal) {
-        this.messageTypeVal = messageTypeVal;
-    }
-
-    public int gettargetOrgCol() {
-        return targetOrgCol;
-    }
-
-    public void settargetOrgCol(int targetOrgCol) {
-        this.targetOrgCol = targetOrgCol;
-    }
-
-    public boolean getcontainsHeaderRow() {
-        return containsHeaderRow;
-    }
-
-    public void setcontainsHeaderRow(boolean containsHeaderRow) {
-        this.containsHeaderRow = containsHeaderRow;
-    }
-
-    public int getrptField1() {
-        return rptField1;
-    }
-
-    public void setrptField1(int rptField1) {
-        this.rptField1 = rptField1;
-    }
-
-    public int getrptField2() {
-        return rptField2;
-    }
-
-    public void setrptField2(int rptField2) {
-        this.rptField2 = rptField2;
-    }
-
-    public int getrptField3() {
-        return rptField3;
-    }
-
-    public void setrptField3(int rptField3) {
-        this.rptField3 = rptField3;
-    }
-
-    public int getrptField4() {
-        return rptField4;
-    }
-
-    public void setrptField4(int rptField4) {
-        this.rptField4 = rptField4;
-    }
+    private Integer totalHeaderRows = 1;
 
     public MultipartFile getFile() {
         return file;
@@ -186,76 +98,163 @@ public class configurationMessageSpecs {
         this.file = file;
     }
 
-    public int getSourceSubOrgCol() {
-        return sourceSubOrgCol;
-    }
-
-    public void setSourceSubOrgCol(int sourceSubOrgCol) {
-        this.sourceSubOrgCol = sourceSubOrgCol;
-    }
-
-    public int getExcelstartrow() {
-	return excelstartrow;
-    }
-
-    public void setExcelstartrow(int excelstartrow) {
-	this.excelstartrow = excelstartrow;
-    }
-
-    public int getExcelskiprows() {
-	return excelskiprows;
-    }
-
-    public void setExcelskiprows(int excelskiprows) {
-	this.excelskiprows = excelskiprows;
-    }
-
-    public String getParsingTemplate() {
-	return parsingTemplate;
-    }
-
-    public void setParsingTemplate(String parsingTemplate) {
-	this.parsingTemplate = parsingTemplate;
-    }
-
     public MultipartFile getParsingScriptFile() {
-	return parsingScriptFile;
+        return parsingScriptFile;
     }
 
     public void setParsingScriptFile(MultipartFile parsingScriptFile) {
-	this.parsingScriptFile = parsingScriptFile;
-    }
-
-    public String getFileNameConfigHeader() {
-	return fileNameConfigHeader;
-    }
-
-    public void setFileNameConfigHeader(String fileNameConfigHeader) {
-	this.fileNameConfigHeader = fileNameConfigHeader;
+        this.parsingScriptFile = parsingScriptFile;
     }
 
     public boolean isHasHeader() {
-	return hasHeader;
+        return hasHeader;
     }
 
     public void setHasHeader(boolean hasHeader) {
-	this.hasHeader = hasHeader;
+        this.hasHeader = hasHeader;
     }
 
     public Integer getFileLayout() {
-	return fileLayout;
+        return fileLayout;
     }
 
     public void setFileLayout(Integer fileLayout) {
-	this.fileLayout = fileLayout;
+        this.fileLayout = fileLayout;
     }
 
-    public int getTotalHeaderRows() {
-	return totalHeaderRows;
+    public int getId() {
+        return id;
     }
 
-    public void setTotalHeaderRows(int totalHeaderRows) {
-	this.totalHeaderRows = totalHeaderRows;
+    public void setId(int id) {
+        this.id = id;
     }
 
+    public Integer getConfigId() {
+        return configId;
+    }
+
+    public void setConfigId(Integer configId) {
+        this.configId = configId;
+    }
+
+    public String getTemplateFile() {
+        return templateFile;
+    }
+
+    public void setTemplateFile(String templateFile) {
+        this.templateFile = templateFile;
+    }
+
+    public Integer getMessageTypeCol() {
+        return messageTypeCol;
+    }
+
+    public void setMessageTypeCol(Integer messageTypeCol) {
+        this.messageTypeCol = messageTypeCol;
+    }
+
+    public String getMessageTypeVal() {
+        return messageTypeVal;
+    }
+
+    public void setMessageTypeVal(String messageTypeVal) {
+        this.messageTypeVal = messageTypeVal;
+    }
+
+    public Integer getTargetOrgCol() {
+        return targetOrgCol;
+    }
+
+    public void setTargetOrgCol(Integer targetOrgCol) {
+        this.targetOrgCol = targetOrgCol;
+    }
+
+    public Integer getSourceSubOrgCol() {
+        return sourceSubOrgCol;
+    }
+
+    public void setSourceSubOrgCol(Integer sourceSubOrgCol) {
+        this.sourceSubOrgCol = sourceSubOrgCol;
+    }
+
+    public boolean isContainsHeaderRow() {
+        return containsHeaderRow;
+    }
+
+    public void setContainsHeaderRow(boolean containsHeaderRow) {
+        this.containsHeaderRow = containsHeaderRow;
+    }
+
+    public Integer getRptField1() {
+        return rptField1;
+    }
+
+    public void setRptField1(Integer rptField1) {
+        this.rptField1 = rptField1;
+    }
+
+    public Integer getRptField2() {
+        return rptField2;
+    }
+
+    public void setRptField2(Integer rptField2) {
+        this.rptField2 = rptField2;
+    }
+
+    public Integer getRptField3() {
+        return rptField3;
+    }
+
+    public void setRptField3(Integer rptField3) {
+        this.rptField3 = rptField3;
+    }
+
+    public Integer getRptField4() {
+        return rptField4;
+    }
+
+    public void setRptField4(Integer rptField4) {
+        this.rptField4 = rptField4;
+    }
+
+    public Integer getExcelstartrow() {
+        return excelstartrow;
+    }
+
+    public void setExcelstartrow(Integer excelstartrow) {
+        this.excelstartrow = excelstartrow;
+    }
+
+    public Integer getExcelskiprows() {
+        return excelskiprows;
+    }
+
+    public void setExcelskiprows(Integer excelskiprows) {
+        this.excelskiprows = excelskiprows;
+    }
+
+    public String getParsingTemplate() {
+        return parsingTemplate;
+    }
+
+    public void setParsingTemplate(String parsingTemplate) {
+        this.parsingTemplate = parsingTemplate;
+    }
+
+    public String getFileNameConfigHeader() {
+        return fileNameConfigHeader;
+    }
+
+    public void setFileNameConfigHeader(String fileNameConfigHeader) {
+        this.fileNameConfigHeader = fileNameConfigHeader;
+    }
+
+    public Integer getTotalHeaderRows() {
+        return totalHeaderRows;
+    }
+
+    public void setTotalHeaderRows(Integer totalHeaderRows) {
+        this.totalHeaderRows = totalHeaderRows;
+    }
 }

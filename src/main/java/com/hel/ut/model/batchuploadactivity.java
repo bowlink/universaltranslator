@@ -5,7 +5,6 @@
  */
 package com.hel.ut.model;
 
-
 import java.util.Date;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,7 +13,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
-
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
@@ -42,37 +40,34 @@ public class batchuploadactivity {
     private Date dateCreated = new Date();
 
     public int getId() {
-	return id;
+        return id;
     }
 
     public void setId(int id) {
-	this.id = id;
+        this.id = id;
     }
 
     public Integer getBatchUploadId() {
-	return batchUploadId;
+        return batchUploadId;
     }
 
     public void setBatchUploadId(Integer batchUploadId) {
-	this.batchUploadId = batchUploadId;
+        this.batchUploadId = batchUploadId;
     }
 
     public String getActivity() {
-	return activity;
+        return activity;
     }
 
     public void setActivity(String activity) {
-	this.activity = activity;
+        this.activity = activity;
     }
 
     public Date getDateCreated() {
-	return dateCreated;
+        return dateCreated;
     }
 
     public void setDateCreated(Date dateCreated) {
-	this.dateCreated = dateCreated;
+        this.dateCreated = dateCreated;
     }
-    
-    
-
 }

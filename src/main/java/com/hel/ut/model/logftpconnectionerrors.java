@@ -24,7 +24,7 @@ public class logftpconnectionerrors {
     private int id;
 
     @Column(name = "ftpConnectionId", nullable = false)
-    private int ftpConnectionId;
+    private Integer ftpConnectionId;
 
     @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "dateCreated", nullable = false)
@@ -34,34 +34,34 @@ public class logftpconnectionerrors {
     private String connectionError;
 
     public int getId() {
-	return id;
+        return id;
     }
 
     public void setId(int id) {
-	this.id = id;
+        this.id = id;
     }
 
-    public int getFtpConnectionId() {
-	return ftpConnectionId;
+    public Integer getFtpConnectionId() {
+        return ftpConnectionId;
     }
 
-    public void setFtpConnectionId(int ftpConnectionId) {
-	this.ftpConnectionId = ftpConnectionId;
+    public void setFtpConnectionId(Integer ftpConnectionId) {
+        this.ftpConnectionId = ftpConnectionId;
     }
 
     public Date getDateCreated() {
-	return dateCreated;
+        return dateCreated;
     }
 
     public void setDateCreated(Date dateCreated) {
-	this.dateCreated = dateCreated;
+        this.dateCreated = dateCreated;
     }
 
     public String getConnectionError() {
-	return connectionError;
+        return connectionError;
     }
 
     public void setConnectionError(String connectionError) {
-	this.connectionError = connectionError;
+        this.connectionError = connectionError;
     }
 }

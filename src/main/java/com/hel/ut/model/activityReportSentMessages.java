@@ -21,23 +21,13 @@ public class activityReportSentMessages {
     private Integer totalOpen;
     private Integer totalClosed;
 
-    public Integer getTotalOpen() {
-        return totalOpen;
+    public Integer getRowId() {
+        return rowId;
     }
 
-    public void setTotalOpen(Integer totalOpen) {
-        this.totalOpen = totalOpen;
+    public void setRowId(Integer rowId) {
+        this.rowId = rowId;
     }
-
-    public Integer getTotalClosed() {
-        return totalClosed;
-    }
-
-    public void setTotalClosed(Integer totalClosed) {
-        this.totalClosed = totalClosed;
-    }
-    
-    
 
     public Integer getTotalSent() {
         return totalSent;
@@ -87,12 +77,19 @@ public class activityReportSentMessages {
         this.sentBatchIds = sentBatchIds;
     }
 
-    public Integer getRowId() {
-        return rowId;
+    public Integer getTotalOpen() {
+        return totalOpen;
     }
 
-    public void setRowId(Integer rowId) {
-        this.rowId = rowId;
+    public void setTotalOpen(Integer totalOpen) {
+        this.totalOpen = totalOpen;
     }
-    
+
+    public Integer getTotalClosed() {
+        return totalClosed;
+    }
+
+    public void setTotalClosed(Integer totalClosed) {
+        this.totalClosed = totalClosed;
+    }
 }

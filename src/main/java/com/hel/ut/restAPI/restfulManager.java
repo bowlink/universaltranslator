@@ -265,7 +265,7 @@ public class restfulManager {
 
 			    if (configDetails != null) {
 				//Get the sending org utConfiguration details
-				utConfiguration sendingConfigDetails = configurationmanager.getConfigurationById(connections.get(0).getsourceConfigId());
+				utConfiguration sendingConfigDetails = configurationmanager.getConfigurationById(connections.get(0).getSourceConfigId());
 
 				String sendingOrgName = "";
 
@@ -297,9 +297,9 @@ public class restfulManager {
 
 				    mailMessage mail = new mailMessage();
 
-				    mail.setfromEmailAddress(myProps.getProperty("admin.email"));
+				    mail.setFromEmailAddress(myProps.getProperty("admin.email"));
 
-				    List<String> ccAddresses = new ArrayList<String>();
+				    List<String> ccAddresses = new ArrayList<>();
 
 				    String toEmail = receivingusers.get(0).getEmail();
 				    Integer firstUserId = receivingusers.get(0).getId();
@@ -312,17 +312,17 @@ public class restfulManager {
 					}
 				    }
 
-				    List<String> bccAddresses = new ArrayList<String>();
+				    List<String> bccAddresses = new ArrayList<>();
 				    //bccAddresses.add("monitor@health-e-link.net");
 
-				    mail.setmessageBody(message);
-				    mail.setmessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
-				    mail.settoEmailAddress(toEmail);
+				    mail.setMessageBody(message);
+				    mail.setMessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
+				    mail.setToEmailAddress(toEmail);
 
 				    if (!ccAddresses.isEmpty()) {
 					String[] ccEmailAddresses = new String[ccAddresses.size()];
 					ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
-					mail.setccEmailAddress(ccEmailAddresses);
+					mail.setCcEmailAddress(ccEmailAddresses);
 				    }
 
 				    if (!bccAddresses.isEmpty()) {
@@ -344,7 +344,7 @@ public class restfulManager {
 
 				    mailMessage mail = new mailMessage();
 
-				    mail.setfromEmailAddress(myProps.getProperty("admin.email"));
+				    mail.setFromEmailAddress(myProps.getProperty("admin.email"));
 
 				    List<String> ccAddresses = new ArrayList<String>();
 
@@ -365,14 +365,14 @@ public class restfulManager {
 					//bccAddresses.add("monitor@health-e-link.net");
 				    }
 
-				    mail.setmessageBody(message);
-				    mail.setmessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
-				    mail.settoEmailAddress(toEmail);
+				    mail.setMessageBody(message);
+				    mail.setMessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
+				    mail.setToEmailAddress(toEmail);
 
 				    if (!ccAddresses.isEmpty()) {
 					String[] ccEmailAddresses = new String[ccAddresses.size()];
 					ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
-					mail.setccEmailAddress(ccEmailAddresses);
+					mail.setCcEmailAddress(ccEmailAddresses);
 				    }
 
 				    if (!sentBcc) {
@@ -607,7 +607,7 @@ public class restfulManager {
 
 			    if (configDetails != null) {
 				//Get the sending org utConfiguration details
-				utConfiguration sendingConfigDetails = configurationmanager.getConfigurationById(connections.get(0).getsourceConfigId());
+				utConfiguration sendingConfigDetails = configurationmanager.getConfigurationById(connections.get(0).getSourceConfigId());
 
 				String sendingOrgName = "";
 
@@ -639,7 +639,7 @@ public class restfulManager {
 
 				    mailMessage mail = new mailMessage();
 
-				    mail.setfromEmailAddress(myProps.getProperty("admin.email"));
+				    mail.setFromEmailAddress(myProps.getProperty("admin.email"));
 
 				    List<String> ccAddresses = new ArrayList<String>();
 
@@ -657,14 +657,14 @@ public class restfulManager {
 				    List<String> bccAddresses = new ArrayList<String>();
 				    //bccAddresses.add("monitor@health-e-link.net");
 
-				    mail.setmessageBody(message);
-				    mail.setmessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
-				    mail.settoEmailAddress(toEmail);
+				    mail.setMessageBody(message);
+				    mail.setMessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
+				    mail.setToEmailAddress(toEmail);
 
 				    if (!ccAddresses.isEmpty()) {
 					String[] ccEmailAddresses = new String[ccAddresses.size()];
 					ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
-					mail.setccEmailAddress(ccEmailAddresses);
+					mail.setCcEmailAddress(ccEmailAddresses);
 				    }
 
 				    if (!bccAddresses.isEmpty()) {
@@ -686,7 +686,7 @@ public class restfulManager {
 
 				    mailMessage mail = new mailMessage();
 
-				    mail.setfromEmailAddress(myProps.getProperty("admin.email"));
+				    mail.setFromEmailAddress(myProps.getProperty("admin.email"));
 
 				    List<String> ccAddresses = new ArrayList<String>();
 
@@ -707,14 +707,14 @@ public class restfulManager {
 					//bccAddresses.add("monitor@health-e-link.net");
 				    }
 
-				    mail.setmessageBody(message);
-				    mail.setmessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
-				    mail.settoEmailAddress(toEmail);
+				    mail.setMessageBody(message);
+				    mail.setMessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
+				    mail.setToEmailAddress(toEmail);
 
 				    if (!ccAddresses.isEmpty()) {
 					String[] ccEmailAddresses = new String[ccAddresses.size()];
 					ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
-					mail.setccEmailAddress(ccEmailAddresses);
+					mail.setCcEmailAddress(ccEmailAddresses);
 				    }
 
 				    if (!sentBcc) {
@@ -905,7 +905,7 @@ public class restfulManager {
 
 			    if (configDetails != null) {
 				//Get the sending org utConfiguration details
-				utConfiguration sendingConfigDetails = configurationmanager.getConfigurationById(connections.get(0).getsourceConfigId());
+				utConfiguration sendingConfigDetails = configurationmanager.getConfigurationById(connections.get(0).getSourceConfigId());
 
 				String sendingOrgName = "";
 
@@ -937,7 +937,7 @@ public class restfulManager {
 
 				    mailMessage mail = new mailMessage();
 
-				    mail.setfromEmailAddress(myProps.getProperty("admin.email"));
+				    mail.setFromEmailAddress(myProps.getProperty("admin.email"));
 
 				    List<String> ccAddresses = new ArrayList<String>();
 
@@ -955,14 +955,14 @@ public class restfulManager {
 				    List<String> bccAddresses = new ArrayList<String>();
 				    //bccAddresses.add("monitor@health-e-link.net");
 
-				    mail.setmessageBody(message);
-				    mail.setmessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
-				    mail.settoEmailAddress(toEmail);
+				    mail.setMessageBody(message);
+				    mail.setMessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
+				    mail.setToEmailAddress(toEmail);
 
 				    if (!ccAddresses.isEmpty()) {
 					String[] ccEmailAddresses = new String[ccAddresses.size()];
 					ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
-					mail.setccEmailAddress(ccEmailAddresses);
+					mail.setCcEmailAddress(ccEmailAddresses);
 				    }
 
 				    if (!bccAddresses.isEmpty()) {
@@ -984,7 +984,7 @@ public class restfulManager {
 
 				    mailMessage mail = new mailMessage();
 
-				    mail.setfromEmailAddress(myProps.getProperty("admin.email"));
+				    mail.setFromEmailAddress(myProps.getProperty("admin.email"));
 
 				    List<String> ccAddresses = new ArrayList<String>();
 
@@ -1005,14 +1005,14 @@ public class restfulManager {
 					//bccAddresses.add("monitor@health-e-link.net");
 				    }
 
-				    mail.setmessageBody(message);
-				    mail.setmessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
-				    mail.settoEmailAddress(toEmail);
+				    mail.setMessageBody(message);
+				    mail.setMessageSubject(configDetails.getConfigname() + " message submitted on the " + myProps.getProperty("server.identity") + " environment");
+				    mail.setToEmailAddress(toEmail);
 
 				    if (!ccAddresses.isEmpty()) {
 					String[] ccEmailAddresses = new String[ccAddresses.size()];
 					ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
-					mail.setccEmailAddress(ccEmailAddresses);
+					mail.setCcEmailAddress(ccEmailAddresses);
 				    }
 
 				    if (!sentBcc) {

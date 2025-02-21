@@ -13,7 +13,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
-
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
@@ -41,37 +40,34 @@ public class batchdownloadactivity {
     private Date dateCreated = new Date();
 
     public int getId() {
-	return id;
+        return id;
     }
 
     public void setId(int id) {
-	this.id = id;
+        this.id = id;
     }
 
     public Integer getBatchDownloadId() {
-	return batchDownloadId;
+        return batchDownloadId;
     }
 
     public void setBatchDownloadId(Integer batchDownloadId) {
-	this.batchDownloadId = batchDownloadId;
+        this.batchDownloadId = batchDownloadId;
     }
 
     public String getActivity() {
-	return activity;
+        return activity;
     }
 
     public void setActivity(String activity) {
-	this.activity = activity;
+        this.activity = activity;
     }
 
     public Date getDateCreated() {
-	return dateCreated;
+        return dateCreated;
     }
 
     public void setDateCreated(Date dateCreated) {
-	this.dateCreated = dateCreated;
+        this.dateCreated = dateCreated;
     }
-    
-    
-
 }

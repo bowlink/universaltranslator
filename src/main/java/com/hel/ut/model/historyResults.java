@@ -15,12 +15,12 @@ import org.springframework.format.annotation.DateTimeFormat;
  */
 public class historyResults {
 
-    private int orgId;
+    private Integer orgId;
     private String orgName = null;
-    private int messageTypeId;
+    private Integer messageTypeId;
     private String messageType = null;
     private String msg = null;
-    private int type;
+    private Integer type;
     boolean showDetails = false;
     private String transportType = null;
     private Integer totalSent = 0;
@@ -28,68 +28,68 @@ public class historyResults {
     private String batchName = null;
     private String referralId = null;
     private String status = null;
-    private int statusId = 0;
-    private int transactionId;
+    private Integer statusId = 0;
+    private Integer transactionId;
     private String patientId = null;
-    private int batchId = 0;
+    private Integer batchId = 0;
 
     @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "DATECREATED", nullable = false)
     private Date dateCreated = new Date();
 
-    public int getorgId() {
+    public Integer getOrgId() {
         return orgId;
     }
 
-    public void setorgId(int orgId) {
+    public void setOrgId(Integer orgId) {
         this.orgId = orgId;
     }
 
-    public String getorgName() {
+    public String getOrgName() {
         return orgName;
     }
 
-    public void setorgName(String orgName) {
+    public void setOrgName(String orgName) {
         this.orgName = orgName;
     }
 
-    public int getmessageTypeId() {
+    public Integer getMessageTypeId() {
         return messageTypeId;
     }
 
-    public void setmessageTypeId(int messageTypeId) {
+    public void setMessageTypeId(Integer messageTypeId) {
         this.messageTypeId = messageTypeId;
     }
 
-    public String getmessageType() {
+    public String getMessageType() {
         return messageType;
     }
 
-    public void setmessageType(String messageType) {
+    public void setMessageType(String messageType) {
         this.messageType = messageType;
     }
 
-    public String getmsg() {
+    public String getMsg() {
         return msg;
     }
 
-    public void setmsg(String msg) {
+    public void setMsg(String msg) {
         this.msg = msg;
     }
 
-    public int gettype() {
+    public Integer getType() {
         return type;
     }
 
-    public void settype(int type) {
+    public void setType(Integer type) {
         this.type = type;
     }
 
-    public boolean getshowDetails() {
+    public boolean isShowDetails() {
         return showDetails;
     }
 
-    public void setshowDetails(boolean showDetails) {
+    public void setShowDetails(boolean showDetails) {
         this.showDetails = showDetails;
     }
 
@@ -109,6 +109,14 @@ public class historyResults {
         this.totalSent = totalSent;
     }
 
+    public String getPatientName() {
+        return patientName;
+    }
+
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
+
     public String getBatchName() {
         return batchName;
     }
@@ -125,12 +133,28 @@ public class historyResults {
         this.referralId = referralId;
     }
 
-    public String getpatientName() {
-        return patientName;
+    public String getStatus() {
+        return status;
     }
 
-    public void setpatientName(String patientName) {
-        this.patientName = patientName;
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Integer getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Integer statusId) {
+        this.statusId = statusId;
+    }
+
+    public Integer getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(Integer transactionId) {
+        this.transactionId = transactionId;
     }
 
     public String getPatientId() {
@@ -141,20 +165,12 @@ public class historyResults {
         this.patientId = patientId;
     }
 
-    public String getStatus() {
-        return status;
+    public Integer getBatchId() {
+        return batchId;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public int getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(int transactionId) {
-        this.transactionId = transactionId;
+    public void setBatchId(Integer batchId) {
+        this.batchId = batchId;
     }
 
     public Date getDateCreated() {
@@ -164,21 +180,4 @@ public class historyResults {
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
     }
-
-    public int getStatusId() {
-        return statusId;
-    }
-
-    public void setStatusId(int statusId) {
-        this.statusId = statusId;
-    }
-
-    public int getBatchId() {
-        return batchId;
-    }
-
-    public void setBatchId(int batchId) {
-        this.batchId = batchId;
-    }
-
 }

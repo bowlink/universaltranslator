@@ -20,7 +20,7 @@ public class configurationDataTranslations {
     String fieldName = null, crosswalkName = null, macroName = null, fieldDesc = null;
 
     @Transient
-    int fieldNo;
+    Integer fieldNo;
     
     @Transient
     boolean requiredField;
@@ -35,19 +35,19 @@ public class configurationDataTranslations {
     private int id;
 
     @Column(name = "CONFIGID", nullable = false)
-    private int configId;
+    private Integer configId;
 
     @Column(name = "FIELDID", nullable = false)
-    private int fieldId;
+    private Integer fieldId;
 
     @Column(name = "CROSSWALKID", nullable = false)
-    private int crosswalkId;
+    private Integer crosswalkId;
 
     @Column(name = "MACROID", nullable = true)
-    private int macroId;
+    private Integer macroId;
 
     @Column(name = "PASSCLEAR", nullable = true)
-    private int passClear = 1;
+    private Integer passClear = 1;
 
     @Column(name = "FIELDA", nullable = true)
     private String fieldA = null;
@@ -62,10 +62,10 @@ public class configurationDataTranslations {
     private String constant2 = null;
 
     @Column(name = "PROCESSORDER", nullable = false)
-    private int processOrder;
+    private Integer processOrder;
 
     @Column(name = "CategoryId", nullable = false)
-    private int categoryId = 1; // while processing
+    private Integer categoryId = 1; // while processing
 
     @Column(name = "DEFAULTVALUE", nullable = true)
     private String defaultValue;
@@ -77,6 +77,62 @@ public class configurationDataTranslations {
     @Column(name = "updatedByImport", nullable = true)
     private boolean updatedByImport = false;
 
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
+    }
+
+    public String getCrosswalkName() {
+        return crosswalkName;
+    }
+
+    public void setCrosswalkName(String crosswalkName) {
+        this.crosswalkName = crosswalkName;
+    }
+
+    public String getMacroName() {
+        return macroName;
+    }
+
+    public void setMacroName(String macroName) {
+        this.macroName = macroName;
+    }
+
+    public String getFieldDesc() {
+        return fieldDesc;
+    }
+
+    public void setFieldDesc(String fieldDesc) {
+        this.fieldDesc = fieldDesc;
+    }
+
+    public Integer getFieldNo() {
+        return fieldNo;
+    }
+
+    public void setFieldNo(Integer fieldNo) {
+        this.fieldNo = fieldNo;
+    }
+
+    public boolean isRequiredField() {
+        return requiredField;
+    }
+
+    public void setRequiredField(boolean requiredField) {
+        this.requiredField = requiredField;
+    }
+
+    public Map<String, String> getDefaultValues() {
+        return defaultValues;
+    }
+
+    public void setDefaultValues(Map<String, String> defaultValues) {
+        this.defaultValues = defaultValues;
+    }
+
     public int getId() {
         return id;
     }
@@ -85,43 +141,43 @@ public class configurationDataTranslations {
         this.id = id;
     }
 
-    public int getconfigId() {
+    public Integer getConfigId() {
         return configId;
     }
 
-    public void setconfigId(int configId) {
+    public void setConfigId(Integer configId) {
         this.configId = configId;
     }
 
-    public int getFieldId() {
+    public Integer getFieldId() {
         return fieldId;
     }
 
-    public void setFieldId(int fieldId) {
+    public void setFieldId(Integer fieldId) {
         this.fieldId = fieldId;
     }
 
-    public int getCrosswalkId() {
+    public Integer getCrosswalkId() {
         return crosswalkId;
     }
 
-    public void setCrosswalkId(int crosswalkId) {
+    public void setCrosswalkId(Integer crosswalkId) {
         this.crosswalkId = crosswalkId;
     }
 
-    public int getMacroId() {
+    public Integer getMacroId() {
         return macroId;
     }
 
-    public void setMacroId(int macroId) {
+    public void setMacroId(Integer macroId) {
         this.macroId = macroId;
     }
 
-    public int getPassClear() {
+    public Integer getPassClear() {
         return passClear;
     }
 
-    public void setPassClear(int passClear) {
+    public void setPassClear(Integer passClear) {
         this.passClear = passClear;
     }
 
@@ -157,60 +213,20 @@ public class configurationDataTranslations {
         this.constant2 = constant2;
     }
 
-    public int getProcessOrder() {
+    public Integer getProcessOrder() {
         return processOrder;
     }
 
-    public void setProcessOrder(int processOrder) {
+    public void setProcessOrder(Integer processOrder) {
         this.processOrder = processOrder;
     }
 
-    public void setfieldName(String fieldName) {
-        this.fieldName = fieldName;
-    }
-
-    public String getfieldName() {
-        return fieldName;
-    }
-
-    public void setcrosswalkName(String crosswalkName) {
-        this.crosswalkName = crosswalkName;
-    }
-
-    public String getcrosswalkName() {
-        return crosswalkName;
-    }
-
-    public void setMacroName(String macroName) {
-        this.macroName = macroName;
-    }
-
-    public String getMacroName() {
-        return macroName;
-    }
-
-    public int getFieldNo() {
-        return fieldNo;
-    }
-
-    public void setFieldNo(int fieldNo) {
-        this.fieldNo = fieldNo;
-    }
-
-    public int getCategoryId() {
+    public Integer getCategoryId() {
         return categoryId;
     }
 
-    public void setCategoryId(int categoryId) {
+    public void setCategoryId(Integer categoryId) {
         this.categoryId = categoryId;
-    }
-
-    public Map<String, String> getDefaultValues() {
-        return defaultValues;
-    }
-
-    public void setDefaultValues(Map<String, String> defaultValues) {
-        this.defaultValues = defaultValues;
     }
 
     public String getDefaultValue() {
@@ -221,35 +237,19 @@ public class configurationDataTranslations {
         this.defaultValue = defaultValue;
     }
 
-    public boolean isRequiredField() {
-	return requiredField;
-    }
-
-    public void setRequiredField(boolean requiredField) {
-	this.requiredField = requiredField;
-    }
-
-    public String getFieldDesc() {
-	return fieldDesc;
-    }
-
-    public void setFieldDesc(String fieldDesc) {
-	this.fieldDesc = fieldDesc;
-    }
-
     public Date getDateAdded() {
-	return dateAdded;
+        return dateAdded;
     }
 
     public void setDateAdded(Date dateAdded) {
-	this.dateAdded = dateAdded;
+        this.dateAdded = dateAdded;
     }
 
     public boolean isUpdatedByImport() {
-	return updatedByImport;
+        return updatedByImport;
     }
 
     public void setUpdatedByImport(boolean updatedByImport) {
-	this.updatedByImport = updatedByImport;
+        this.updatedByImport = updatedByImport;
     }
 }

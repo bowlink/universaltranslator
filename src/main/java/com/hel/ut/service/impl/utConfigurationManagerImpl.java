@@ -239,7 +239,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
     public void updateMessageSpecs(configurationMessageSpecs messageSpecs, int transportDetailId, int fileType, boolean hasHeader, Integer fileLayout) throws Exception {
 
 	//Need to get the selected organization clean url
-	utConfiguration configDetails = utConfigurationDAO.getConfigurationById(messageSpecs.getconfigId());
+	utConfiguration configDetails = utConfigurationDAO.getConfigurationById(messageSpecs.getConfigId());
 	Organization orgDetails = organizationDAO.getOrganizationById(configDetails.getOrgId());
 	String cleanURL = orgDetails.getcleanURL();
 	
@@ -247,7 +247,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	String fileName = null;
 	String directory = "";
 	
-	String currentTemplateFileName = messageSpecs.gettemplateFile();
+	String currentTemplateFileName = messageSpecs.getTemplateFile();
 	
 	if(messageSpecs.getFile() != null) {
 	    if(!messageSpecs.getFile().isEmpty()) {
@@ -289,7 +289,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 			inputStream.close();
 
 			//Set the filename to the file name
-			messageSpecs.settemplateFile(fileName);
+			messageSpecs.setTemplateFile(fileName);
 
 		    } catch (IOException e) {
 			e.printStackTrace();
@@ -678,24 +678,19 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	    + "(select * from configurationformfields ) cff on cff.id = fieldId) cff join (select configName, id from configurations) configurations on configurations.id = cff.configId "
 	    + "order by configName, processOrder";
 	
-	return utConfigurationDAO.getDTCWForDownload(sqlStatement);
+	return utConfigurationDAO.getDTForDownload(sqlStatement);
     }
     
     @Override
     public List getCrosswalksForDownload (Integer configId, boolean inUseOnly) throws Exception {
+        
+        String sqlStatement = "select a.id, a.name, a.fileDelimiter, a.fileName, a.orgId, b.sourceValue, b.targetValue, b.descValue " 
+	+ "from crosswalks a inner join rel_crosswalkdata b on b.crosswalkId = a.id inner join "
+	+ "configurationdatatranslations c on (c.crosswalkid = a.id or (c.macroId in (129,160,177,195,199,201) and (c.constant1 = a.id or c.constant2 = a.id))) and c.configId = " + configId + " "
+	+ "where a.orgId = 0 or a.orgId in (select orgId from configurations where id = " + configId + ") "
+	+ "order by a.name, a.id";
 	
-	String sqlStatement = "select crosswalks.name, rel_crosswalkdata.crosswalkId, rel_crosswalkdata.sourcevalue, rel_crosswalkdata.targetvalue, rel_crosswalkdata.descValue " 
-	+ "from crosswalks inner join ";
-	
-	if(inUseOnly) {
-	    sqlStatement += "configurationdatatranslations b on (b.crosswalkid = crosswalks.id or (b.macroId in (129,160,177,195,199,201) and b.constant1 = crosswalks.id)) and b.configId = "+configId+" inner join ";
-	}
-
-	sqlStatement += "rel_crosswalkdata on rel_crosswalkdata.crosswalkId = crosswalks.id " 
-	+ " where orgId = 0 or orgId in (select orgId from configurations where id = " + configId + ") " 
-	+ "order by name,crosswalks.id";
-	 
-	return utConfigurationDAO.getDTCWForDownload(sqlStatement);
+	return utConfigurationDAO.getCrosswalksForExport(sqlStatement);
     }
     
     @Override 
@@ -723,7 +718,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	    messageType = "Other Configuration";
 	}
 	
-	if(!configDetails.getStatus()) {
+	if(!configDetails.isStatus()) {
 	    status = "Inactive";
 	}
 	
@@ -760,24 +755,24 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	
 	if(scheduleDetails != null) {
 	
-	    if(scheduleDetails.gettype() == 1) {
+	    if(scheduleDetails.getType() == 1) {
 		scheduleType = "Manually";
 	    }
-	    else if(scheduleDetails.gettype() == 2) {
+	    else if(scheduleDetails.getType() == 2) {
 		scheduleType = "Daily";
 	    }
-	    else if(scheduleDetails.gettype() == 2) {
+	    else if(scheduleDetails.getType() == 2) {
 		scheduleType = "Weekly";
 	    }
-	    else if(scheduleDetails.gettype() == 2) {
+	    else if(scheduleDetails.getType() == 2) {
 		scheduleType = "Monthly";
 	    }
 	
-	    if(scheduleDetails.getprocessingType() > 0) {
-		if(scheduleDetails.getprocessingType() == 1) {
+	    if(scheduleDetails.getProcessingType() > 0) {
+		if(scheduleDetails.getProcessingType() == 1) {
 		    processingType = "Scheduled";
 		}
-		else if (scheduleDetails.getprocessingType() == 2) {
+		else if (scheduleDetails.getProcessingType() == 2) {
 		    processingType = "Continuous";
 		}
 	    }
@@ -790,35 +785,35 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Type of Processing: </strong>").append(processingType).append("</span><br /><br />");
 	}
 	if(scheduleDetails != null) {
-	    if(scheduleDetails.getnewfileCheck() > 0) {
-		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>How often to check for a new file: </strong>").append(scheduleDetails.getnewfileCheck()).append("</span><br /><br />");
+	    if(scheduleDetails.getNewfileCheck() > 0) {
+		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>How often to check for a new file: </strong>").append(scheduleDetails.getNewfileCheck()).append("</span><br /><br />");
 	    }
-	    if(scheduleDetails.getprocessingDay()> 0) {
+	    if(scheduleDetails.getProcessingDay()> 0) {
 		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Process on what Day: </strong>");
-		if(scheduleDetails.getprocessingDay() == 1) {
+		if(scheduleDetails.getProcessingDay() == 1) {
 		    reportBody.append("Sunday").append("</span><br /><br />");
 		}
-		else if(scheduleDetails.getprocessingDay() == 2) {
+		else if(scheduleDetails.getProcessingDay() == 2) {
 		    reportBody.append("Monday").append("</span><br /><br />");
 		}  
-		else if(scheduleDetails.getprocessingDay() == 3) {
+		else if(scheduleDetails.getProcessingDay() == 3) {
 		    reportBody.append("Tuesday").append("</span><br /><br />");
 		} 
-		else if(scheduleDetails.getprocessingDay() == 4) {
+		else if(scheduleDetails.getProcessingDay() == 4) {
 		    reportBody.append("Wednesday").append("</span><br /><br />");
 		} 
-		else if(scheduleDetails.getprocessingDay() == 5) {
+		else if(scheduleDetails.getProcessingDay() == 5) {
 		    reportBody.append("Thursday").append("</span><br /><br />");
 		} 
-		else if(scheduleDetails.getprocessingDay() == 6) {
+		else if(scheduleDetails.getProcessingDay() == 6) {
 		    reportBody.append("Friday").append("</span><br /><br />");
 		} 
-		else if(scheduleDetails.getprocessingDay() == 7) {
+		else if(scheduleDetails.getProcessingDay() == 7) {
 		    reportBody.append("Saturday").append("</span><br /><br />");
 		} 
 	    }
-	    if(scheduleDetails.getprocessingTime() > 0) {
-		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Time of Day to process files: </strong>").append(scheduleDetails.getprocessingTime()).append("</span><br /><br />");
+	    if(scheduleDetails.getProcessingTime() > 0) {
+		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Time of Day to process files: </strong>").append(scheduleDetails.getProcessingTime()).append("</span><br /><br />");
 	    }
 	}
 	reportBody.append("</div>");
@@ -875,7 +870,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		isZipped = "Yes";
 	    }
 
-	    if(transportDetails.getZipType() == 1) {
+	    if(transportDetails.getZipType() != null && transportDetails.getZipType() == 1) {
 		zipType = "GZIP";
 	    }
 
@@ -928,16 +923,18 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	    }
 
 	    String apiType = "";
-
-	    if(transportDetails.getRestAPIType() == 1) {
-		apiType = "Receive Payload and process";
-	    }
-	    else if(transportDetails.getRestAPIType() == 2) {
-		apiType = "Receive ACK to modify status";
-	    }
-	    else if(transportDetails.getRestAPIType() == 3) {
-		apiType = "Receive Payload and passthru";
-	    }
+            
+            if(transportDetails.getRestAPIType() != null) {
+               if(transportDetails.getRestAPIType() == 1) {
+                    apiType = "Receive Payload and process";
+                }
+                else if(transportDetails.getRestAPIType() == 2) {
+                    apiType = "Receive ACK to modify status";
+                }
+                else if(transportDetails.getRestAPIType() == 3) {
+                    apiType = "Receive Payload and passthru";
+                } 
+            } 
 
 	    String errorHandling = "";
 
@@ -1104,7 +1101,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 
 	    String submissionHeaderRow = "Yes";
 
-	    if(!messageSpecs.getcontainsHeaderRow()) {
+	    if(!messageSpecs.isContainsHeaderRow()) {
 		submissionHeaderRow = "No";
 	    }
 
@@ -1119,30 +1116,30 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	    String errorField3 = "N/A";
 	    String errorField4 = "N/A";
 
-	    if(messageSpecs.getrptField1() > 0) {
+	    if(messageSpecs.getRptField1() > 0) {
 		for(configurationFormFields field : fields) {
-		    if(field.getFieldNo()== messageSpecs.getrptField1()) {
+		    if(field.getFieldNo()== messageSpecs.getRptField1()) {
 			errorField1 = field.getFieldDesc();
 		    }
 		}
 	    }
-	    if(messageSpecs.getrptField2() > 0) {
+	    if(messageSpecs.getRptField2() > 0) {
 		for(configurationFormFields field : fields) {
-		    if(field.getFieldNo() == messageSpecs.getrptField2()) {
+		    if(field.getFieldNo() == messageSpecs.getRptField2()) {
 			errorField2 = field.getFieldDesc();
 		    }
 		}
 	    }
-	    if(messageSpecs.getrptField3() > 0) {
+	    if(messageSpecs.getRptField3() > 0) {
 		for(configurationFormFields field : fields) {
-		    if(field.getFieldNo() == messageSpecs.getrptField3()) {
+		    if(field.getFieldNo() == messageSpecs.getRptField3()) {
 			errorField3 = field.getFieldDesc();
 		    }
 		}
 	    }
-	    if(messageSpecs.getrptField4() > 0) {
+	    if(messageSpecs.getRptField4() > 0) {
 		for(configurationFormFields field : fields) {
-		    if(field.getFieldNo() == messageSpecs.getrptField4()) {
+		    if(field.getFieldNo() == messageSpecs.getRptField4()) {
 			errorField4 = field.getFieldDesc();
 		    }
 		}
@@ -1150,7 +1147,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	    reportBody.append("</div>");
 	    reportBody.append("<div>");
 	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Current Template File?</strong></span><br />");
-	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(messageSpecs.gettemplateFile()).append("</span><br /><br />");
+	    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(messageSpecs.getTemplateFile()).append("</span><br /><br />");
 	    if(configDetails.getType() == 1) {
 		
 		if(messageSpecs.getFileNameConfigHeader() != null) {
@@ -1160,21 +1157,21 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		    }
 		}
 		
-		if(messageSpecs.getmessageTypeCol() > 0) {
+		if(messageSpecs.getMessageTypeCol() > 0) {
 		    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Column containing the message type (Enter 0 if not provided)</strong></span><br />");
-		    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(messageSpecs.getmessageTypeCol()).append("</span><br /><br />");
+		    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(messageSpecs.getMessageTypeCol()).append("</span><br /><br />");
 		}
 		
-		if(messageSpecs.getmessageTypeVal() != null) {
-		    if(!"".equals(messageSpecs.getmessageTypeVal())) {
+		if(messageSpecs.getMessageTypeVal() != null) {
+		    if(!"".equals(messageSpecs.getMessageTypeVal())) {
 			reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Message Type Value</strong></span><br />");
-			reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(messageSpecs.getmessageTypeVal()).append("</span><br /><br />");
+			reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(messageSpecs.getMessageTypeVal()).append("</span><br /><br />");
 		    }
 		}
 		
-		if(messageSpecs.gettargetOrgCol() > 0) {
+		if(messageSpecs.getTargetOrgCol() > 0) {
 		    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Column containing the target organization (Enter 0 if not provided)</strong></span><br />");
-		    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(messageSpecs.gettargetOrgCol()).append("</span><br /><br />");
+		    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(messageSpecs.getTargetOrgCol()).append("</span><br /><br />");
 		}
 		
 		reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'><strong>Will the submitted file have any header rows?</strong></span><br />");
@@ -1235,13 +1232,13 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 			reportBody.append("<td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>").append(field.getSampleData()).append("</td>");
 		    }
 		    
-		    if(field.getUseField()) {
+		    if(field.isUseField()) {
 			reportBody.append("<td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Yes</td>");
 		    }
 		    else {
 			reportBody.append("<td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>No</td>");
 		    }
-		    if(field.getRequired()) {
+		    if(field.isRequired()) {
 			reportBody.append("<td style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Yes</td>");
 		    }
 		    else {
@@ -1331,7 +1328,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 			if(macro.getId() == dt.getMacroId()) { 
 			    macroName = macro.getMacroName(); 
 			    
-			    if(macro.getcon1Question().contains("crosswalk")) {
+			    if(macro.getCon1Question().contains("crosswalk")) {
 				if(dt.getConstant1() != null) {
 				    if(!"".equals(dt.getConstant1())) {
 					for(Crosswalks crosswalk : crosswalks) {
@@ -1342,7 +1339,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 				    }
 				}
 			    }
-			    else if(macro.getcon2Question().contains("crosswalk")) {
+			    else if(macro.getCon2Question().contains("crosswalk")) {
 				if(dt.getConstant2() != null) {
 				    if(!"".equals(dt.getConstant2())) {
 					for(Crosswalks crosswalk : crosswalks) {
@@ -1353,7 +1350,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 				    }
 				}
 			    }
-			    else if(macro.getfieldAQuestion().contains("crosswalk")) {
+			    else if(macro.getFieldAQuestion().contains("crosswalk")) {
 				if(dt.getFieldA() != null) {
 				    if(!"".equals(dt.getFieldA())) {
 					for(Crosswalks crosswalk : crosswalks) {
@@ -1364,7 +1361,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 				    }
 				}
 			    }
-			    else if(macro.getfieldBQuestion().contains("crosswalk")) {
+			    else if(macro.getFieldBQuestion().contains("crosswalk")) {
 				if(dt.getFieldB() != null) {
 				    if(!"".equals(dt.getFieldB())) {
 					for(Crosswalks crosswalk : crosswalks) {
@@ -1552,8 +1549,8 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	String required = "O";
 	for(configurationFormFields srcFormField : sourceconfigurationDataElements) {
             required = "O";
-	    if(srcFormField.getRequired()) {required = "R"; }
-	    if(!srcFormField.getUseField()) {
+	    if(srcFormField.isRequired()) {required = "R"; }
+	    if(!srcFormField.isUseField()) {
 		reportBody.append("<tr><td style='color:red;'>").append(srcFormField.getFieldNo()).append("</td><td style='color:red;'>").append(srcFormField.getFieldDesc()).append("</td><td style='color:red;'>").append(required).append("</td></tr>");
 	    }
 	    else {
@@ -1584,8 +1581,8 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		}
 	    }
 	    
-	    if(tgtFormField.getRequired()) {required = "R"; }
-	    if(!tgtFormField.getUseField()) {
+	    if(tgtFormField.isRequired()) {required = "R"; }
+	    if(!tgtFormField.isUseField()) {
 		reportBody.append("<tr><td style='color:red;'>").append(tgtFormField.getFieldNo()).append("</td><td style='color:red;'>").append(tgtFormField.getFieldDesc()).append("</td><td style='color:red;'>").append(required).append("</td><td style='color:red;'>").append(mappedField).append("</td></tr>");
 	    }
 	    else {
@@ -1791,8 +1788,8 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	    if(!unUsedFolders.isEmpty()) {
 		mailMessage messageDetails = new mailMessage();
 
-		messageDetails.settoEmailAddress("cmccue@health-e-link.net");
-		messageDetails.setmessageSubject("Unused Folders on UT" + myProps.getProperty("server.identity"));
+		messageDetails.setToEmailAddress("cmccue@health-e-link.net");
+		messageDetails.setMessageSubject("Unused Folders on UT" + myProps.getProperty("server.identity"));
 
 		StringBuilder sb = new StringBuilder();
 		
@@ -1800,8 +1797,8 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		    sb.append(unUsedFolder + "<br />");
 		}
 		
-		messageDetails.setmessageBody(sb.toString());
-		messageDetails.setfromEmailAddress("support@health-e-link.net");
+		messageDetails.setMessageBody(sb.toString());
+		messageDetails.setFromEmailAddress("support@health-e-link.net");
 		
 		emailMessageManager.sendEmail(messageDetails);
 	    }
@@ -1916,7 +1913,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	StringBuffer sb = new StringBuffer();
 	sb.append("[configDetails|");
 	sb.append("0|");
-	sb.append(configDetails.getStatus()).append("|");
+	sb.append(configDetails.isStatus()).append("|");
 	sb.append(configDetails.getType()).append("|");
 	sb.append(configDetails.getMessageTypeId()).append("|");
 	sb.append(configDetails.getStepsCompleted()).append("|");
@@ -2052,15 +2049,15 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	StringBuffer sb = new StringBuffer();
 	sb.append("[messageSpecDetails|");
 	sb.append("0|");
-	sb.append(messageSpecDetails.gettemplateFile()).append("|");
-	sb.append(messageSpecDetails.getmessageTypeCol()).append("|");
-	sb.append(messageSpecDetails.getmessageTypeVal()).append("|");
-	sb.append(messageSpecDetails.gettargetOrgCol()).append("|");
-	sb.append(messageSpecDetails.getcontainsHeaderRow()).append("|");
-	sb.append(messageSpecDetails.getrptField1()).append("|");
-	sb.append(messageSpecDetails.getrptField2()).append("|");
-	sb.append(messageSpecDetails.getrptField3()).append("|");
-	sb.append(messageSpecDetails.getrptField4()).append("|");
+	sb.append(messageSpecDetails.getTemplateFile()).append("|");
+	sb.append(messageSpecDetails.getMessageTypeCol()).append("|");
+	sb.append(messageSpecDetails.getMessageTypeVal()).append("|");
+	sb.append(messageSpecDetails.getTargetOrgCol()).append("|");
+	sb.append(messageSpecDetails.isContainsHeaderRow()).append("|");
+	sb.append(messageSpecDetails.getRptField1()).append("|");
+	sb.append(messageSpecDetails.getRptField2()).append("|");
+	sb.append(messageSpecDetails.getRptField3()).append("|");
+	sb.append(messageSpecDetails.getRptField4()).append("|");
 	sb.append(messageSpecDetails.getSourceSubOrgCol()).append("|");
 	sb.append(messageSpecDetails.getExcelstartrow()).append("|");
 	sb.append(messageSpecDetails.getExcelskiprows()).append("|");
@@ -2100,8 +2097,8 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	    sb.append(field.getFieldNo()).append("|");
 	    sb.append(field.getFieldDesc()).append("|");
 	    sb.append(field.getValidationType()).append("|");
-	    sb.append(field.getRequired()).append("|");
-	    sb.append(field.getUseField()).append("|");
+	    sb.append(field.isRequired()).append("|");
+	    sb.append(field.isUseField()).append("|");
 	    sb.append(field.getAssociatedFieldNo()).append("|");
 	    sb.append(field.getDefaultValue()).append("|");
 	    sb.append(field.getSampleData());
@@ -2143,11 +2140,11 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	StringBuffer sb = new StringBuffer();
 	sb.append("[scheduleDetails|");
 	sb.append("0|");
-	sb.append(scheduleDetails.gettype()).append("|");
-	sb.append(scheduleDetails.getprocessingType()).append("|");
-	sb.append(scheduleDetails.getnewfileCheck()).append("|");
-	sb.append(scheduleDetails.getprocessingDay()).append("|");
-	sb.append(scheduleDetails.getprocessingTime());
+	sb.append(scheduleDetails.getType()).append("|");
+	sb.append(scheduleDetails.getProcessingType()).append("|");
+	sb.append(scheduleDetails.getNewfileCheck()).append("|");
+	sb.append(scheduleDetails.getProcessingDay()).append("|");
+	sb.append(scheduleDetails.getProcessingTime());
 	sb.append("]");
 	
 	return sb;
@@ -2293,7 +2290,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		 
 		String tempDir = System.getProperty("java.io.tmpdir");
 		
-		File crosswalkFile = new File(tempDir+'/'+cwDetails.getfileName());
+		File crosswalkFile = new File(tempDir+'/'+cwDetails.getFileName());
 		
 		FileWriter fileWriter = new FileWriter(crosswalkFile);
 		

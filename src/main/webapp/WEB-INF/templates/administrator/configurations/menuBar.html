@@ -4,20 +4,23 @@
             <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'configDetails' ? 'active' : ''}">
                 <a class="nav-link" th:classappend="${actionPage == 'configDetails' ? 'active' : ''}" th:href="${'details?i='+configurationDetails.id}" title="Details">Details</a>
             </li>
-            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'transport' ? 'active' : ''}">
-                <a class="nav-link" th:classappend="${actionPage == 'transport' ? 'active' : ''}" th:href="@{transport}" title="Transport Method">Transport Method</a>
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'transport' ? 'active' : '')+(configurationDetails.id > 0 ? '' : 'disabled')}">
+                <a class="nav-link" th:classappend="${actionPage == 'transport' ? 'active' : ''}" th:href="${configurationDetails.id > 0 ? 'transport' : '#'}" title="Transport Method">Transport Method</a>
             </li>
-	    <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'specs' ? 'active' : '') + (configurationDetails.id > 0 and configurationDetails.configurationType == 1 and configurationDetails.stepsCompleted >= 2 ? '' : 'disabled')}">
-	       <a class="nav-link" th:classappend="${actionPage == 'specs' ? 'active' : ''}" th:href="@{specs}" title="Detail Message Specs">Message Specs</a>
+	    <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'specs' ? 'active' : '') + (configurationDetails.id > 0 ? '' : 'disabled')}">
+	       <a class="nav-link" th:classappend="${actionPage == 'specs' ? 'active' : ''}" th:href="${configurationDetails.id > 0 ? 'messagespecs' : '#'}" title="Detail Message Specs">Message Specs</a>
 	    </li>
-            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'fieldsettings' ? 'active' : ''}">
-		<a class="nav-link" th:classappend="${actionPage == 'fieldsettings' ? 'active' : ''}" th:href="@{fieldsettings}" title="Field Settings">Field Settings</a>
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'fields' ? 'active' : '')+(configurationDetails.id > 0 ? '' : 'disabled')}">
+		<a class="nav-link" th:classappend="${actionPage == 'fields' ? 'active' : ''}" th:href="${configurationDetails.id > 0 ? 'availableFields' : '#'}" title="Field Settings">Available Fields</a>
 	    </li>
-            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'translations' ? 'active' : ''}">
-                <a class="nav-link" th:classappend="${actionPage == 'translations' ? 'active' : ''}" th:href="@{translations}" title="Data Translations">Data Translations</a>
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'translations' ? 'active' : '')+(configurationDetails.id > 0 ? '' : 'disabled')}">
+                <a class="nav-link" th:classappend="${actionPage == 'translations' ? 'active' : ''}" th:href="${configurationDetails.id > 0 ? 'translations' : '#'}" title="Data Translations">Data Translations</a>
             </li>
-	    <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'notes' ? 'active' : ''}">
-                <a  class="nav-link" th:classappend="${actionPage == 'notes' ? 'active' : ''}" th:href="@{notes}" title="Configuration Notes">Configuration Notes</a>
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'schedule' ? 'active' : '')+(configurationDetails.id > 0 ? '' : 'disabled')}">
+                <a class="nav-link" th:classappend="${actionPage == 'schedule' ? 'active' : ''}" th:href="${configurationDetails.id > 0 ? 'scheduling' : '#'}" title="Data Translations">Processing Schedule</a>
+            </li>
+	    <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'notes' ? 'active' : '')+(configurationDetails.id > 0 ? '' : 'disabled')}">
+                <a  class="nav-link" th:classappend="${actionPage == 'notes' ? 'active' : ''}" th:href="${configurationDetails.id > 0 ? 'notes' : '#'}" title="Configuration Notes">Configuration Notes</a>
             </li>
         </ul>
     </nav>

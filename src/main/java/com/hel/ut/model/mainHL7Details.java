@@ -49,6 +49,14 @@ public class mainHL7Details {
     @Column(name = "ESCAPECHAR", nullable = false)
     private String EscapeChar = "";
 
+    public List<mainHL7Segments> getHL7Segments() {
+        return HL7Segments;
+    }
+
+    public void setHL7Segments(List<mainHL7Segments> HL7Segments) {
+        this.HL7Segments = HL7Segments;
+    }
+
     public int getId() {
         return id;
     }
@@ -65,12 +73,20 @@ public class mainHL7Details {
         this.name = name;
     }
 
-    public String getfieldSeparator() {
+    public String getFieldSeparator() {
         return fieldSeparator;
     }
 
-    public void setfieldSeparator(String fieldSeparator) {
+    public void setFieldSeparator(String fieldSeparator) {
         this.fieldSeparator = fieldSeparator;
+    }
+
+    public String getComponentSeparator() {
+        return componentSeparator;
+    }
+
+    public void setComponentSeparator(String componentSeparator) {
+        this.componentSeparator = componentSeparator;
     }
 
     public String getEscapeChar() {
@@ -80,21 +96,4 @@ public class mainHL7Details {
     public void setEscapeChar(String EscapeChar) {
         this.EscapeChar = EscapeChar;
     }
-
-    public String getcomponentSeparator() {
-        return componentSeparator;
-    }
-
-    public void setcomponentSeparator(String componentSeparator) {
-        this.componentSeparator = componentSeparator;
-    }
-
-    public List<mainHL7Segments> getHL7Segments() {
-        return HL7Segments;
-    }
-
-    public void setHL7Segments(List<mainHL7Segments> HL7Segments) {
-        this.HL7Segments = HL7Segments;
-    }
-
 }

@@ -14,7 +14,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Table(name = "hisps")
 public class hisps {
 
-   
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
     @GenericGenerator(name = "native",strategy = "native")

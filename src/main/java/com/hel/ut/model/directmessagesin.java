@@ -6,7 +6,6 @@
 package com.hel.ut.model;
 
 import java.util.Date;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +14,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import org.hibernate.annotations.GenericGenerator;
-
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
@@ -39,7 +37,7 @@ public class directmessagesin {
     private int id;
 
     @Column(name = "hispId", nullable = false)
-    private int hispId = 0;
+    private Integer hispId = 0;
 
     @Column(name = "fromDirectAddress", nullable = false)
     private String fromDirectAddress;
@@ -53,25 +51,21 @@ public class directmessagesin {
     @Column(name = "referralFileName", nullable = false)
     private String referralFileName;
     
-    /**
-     * 1 - not processed 2 - processed 3 - rejected
-     *
-     */
     @Column(name = "statusId", nullable = false)
-    private int statusId = 1; //set to reject
+    private Integer statusId = 1; //set to reject
 
     @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "DATECREATED", nullable = false)
     private Date dateCreated = new Date();
 
     @Column(name = "batchUploadId", nullable = true)
-    private int batchUploadId = 0;
+    private Integer batchUploadId = 0;
 
     @Column(name = "configId", nullable = true)
-    private int configId = 0;
+    private Integer configId = 0;
     
     @Column(name = "orgId", nullable = true)
-    private int orgId = 0;
+    private Integer orgId = 0;
     
     @Column(name = "sendingResponse", nullable = true)
     private String sendingResponse;
@@ -103,6 +97,14 @@ public class directmessagesin {
         this.batchName = batchName;
     }
 
+    public Integer getTotalMessages() {
+        return totalMessages;
+    }
+
+    public void setTotalMessages(Integer totalMessages) {
+        this.totalMessages = totalMessages;
+    }
+
     public int getId() {
         return id;
     }
@@ -111,11 +113,11 @@ public class directmessagesin {
         this.id = id;
     }
 
-    public int getHispId() {
+    public Integer getHispId() {
         return hispId;
     }
 
-    public void setHispId(int hispId) {
+    public void setHispId(Integer hispId) {
         this.hispId = hispId;
     }
 
@@ -151,11 +153,11 @@ public class directmessagesin {
         this.referralFileName = referralFileName;
     }
 
-    public int getStatusId() {
+    public Integer getStatusId() {
         return statusId;
     }
 
-    public void setStatusId(int statusId) {
+    public void setStatusId(Integer statusId) {
         this.statusId = statusId;
     }
 
@@ -167,52 +169,43 @@ public class directmessagesin {
         this.dateCreated = dateCreated;
     }
 
-    public int getBatchUploadId() {
+    public Integer getBatchUploadId() {
         return batchUploadId;
     }
 
-    public void setBatchUploadId(int batchUploadId) {
+    public void setBatchUploadId(Integer batchUploadId) {
         this.batchUploadId = batchUploadId;
     }
 
-    public int getConfigId() {
+    public Integer getConfigId() {
         return configId;
     }
 
-    public void setConfigId(int configId) {
+    public void setConfigId(Integer configId) {
         this.configId = configId;
     }
 
-    public int getOrgId() {
+    public Integer getOrgId() {
         return orgId;
     }
 
-    public void setOrgId(int orgId) {
+    public void setOrgId(Integer orgId) {
         this.orgId = orgId;
     }
 
     public String getSendingResponse() {
-	return sendingResponse;
+        return sendingResponse;
     }
 
     public void setSendingResponse(String sendingResponse) {
-	this.sendingResponse = sendingResponse;
+        this.sendingResponse = sendingResponse;
     }
 
     public String getOriginalDirectMessage() {
-	return originalDirectMessage;
+        return originalDirectMessage;
     }
 
     public void setOriginalDirectMessage(String originalDirectMessage) {
-	this.originalDirectMessage = originalDirectMessage;
+        this.originalDirectMessage = originalDirectMessage;
     }
-
-    public Integer getTotalMessages() {
-	return totalMessages;
-    }
-
-    public void setTotalMessages(Integer totalMessages) {
-	this.totalMessages = totalMessages;
-    }
-    
 }

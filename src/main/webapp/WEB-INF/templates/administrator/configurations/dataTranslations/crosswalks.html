@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit this template
+-->
+<html>
+    <body>
+        <table class="table table-hover table-default" th:id="${not #lists.isEmpty(availableCrosswalks) ? 'cwDataTable' : ''}">
+            <thead>
+                <tr>
+                    <th scope="col" class="center-text">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col" class="center-text">Date Created</th>
+                    <th scope="col" class="center-text">Last Updated</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <div th:if="${not #lists.isEmpty(availableCrosswalks)}">
+                    <th:block th:each="crosswalk, pStatus : ${availableCrosswalks}">
+                        <tr>
+                            <td scope="row" class="center-text" th:text="${crosswalk.id}"></td>
+                            <td th:if="${crosswalk.orgId == 0}" th:text="${crosswalk.name + ' (Generic)'}"></td>
+                            <td th:if="${crosswalk.orgId > 0}" th:text="${crosswalk.name}"></td>
+                            <td class="center-text" th:text="${#dates.format(crosswalk.dateCreated, 'M/dd/yyyy')}"></td>
+                            <td class="center-text" th:text="${#dates.format(crosswalk.lastUpdated, 'M/dd/yyyy')}"></td>
+                            <td>
+                                <div class="dropdown pull-left">
+                                    <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fa fa-cog"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="#dataTranslationsModal" data-bs-toggle="modal" class="btn btn-link viewCrosswalk" th:rel="${'?i='+crosswalk.id}" title="View this Crosswalk">
+                                                <span class="glyphicon glyphicon-edit"></span> View
+                                            </a>
+                                        </li>  
+                                        <li th:if="${crosswalk.orgId > 0}">
+                                            <a href="#!" class="btn btn-link deleteCrosswalk" th:rel2="${crosswalk.dtsId}" th:rel="${crosswalk.id}" title="Delete this Crosswalk">
+                                                <span class="glyphicon glyphicon-remove"></span> Delete
+                                            </a>
+                                        </li> 
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </th:block>
+                </div>
+                <div th:if="${#lists.isEmpty(availableCrosswalks)}">
+                    <tr><td colspan="5" class="center-text">No Crosswalks are in use for this configuration.</td></tr>
+                </div>
+            </tbody>
+        </table>
+    </body>
+</html>

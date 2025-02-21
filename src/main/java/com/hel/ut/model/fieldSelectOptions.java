@@ -11,23 +11,21 @@ package com.hel.ut.model;
  */
 public class fieldSelectOptions {
 
-    private String optionValue;
-    private String optionDesc = null;
-    private String defaultValue;
+    private String optionValue, optionDesc = null, defaultValue;
 
-    public String getoptionValue() {
+    public String getOptionValue() {
         return optionValue;
     }
 
-    public void setoptionValue(String optionValue) {
+    public void setOptionValue(String optionValue) {
         this.optionValue = optionValue;
     }
 
-    public String getoptionDesc() {
+    public String getOptionDesc() {
         return optionDesc;
     }
 
-    public void setoptionDesc(String optionDesc) {
+    public void setOptionDesc(String optionDesc) {
         this.optionDesc = optionDesc;
     }
 
@@ -38,5 +36,4 @@ public class fieldSelectOptions {
     public void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
     }
-
 }

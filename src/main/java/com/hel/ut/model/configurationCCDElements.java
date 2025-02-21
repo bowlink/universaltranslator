@@ -32,7 +32,7 @@ public class configurationCCDElements {
     private int id;
 
     @Column(name = "CONFIGID", nullable = false)
-    private int configId;
+    private Integer configId;
 
     @Column(name = "ELEMENT", nullable = false)
     private String element = "";
@@ -43,6 +43,14 @@ public class configurationCCDElements {
     @Column(name = "DEFAULTVALUE", nullable = true)
     private String defaultValue = "";
 
+    public String getFieldLabel() {
+        return fieldLabel;
+    }
+
+    public void setFieldLabel(String fieldLabel) {
+        this.fieldLabel = fieldLabel;
+    }
+
     public int getId() {
         return id;
     }
@@ -51,11 +59,11 @@ public class configurationCCDElements {
         this.id = id;
     }
 
-    public int getConfigId() {
+    public Integer getConfigId() {
         return configId;
     }
 
-    public void setConfigId(int configId) {
+    public void setConfigId(Integer configId) {
         this.configId = configId;
     }
 
@@ -82,13 +90,4 @@ public class configurationCCDElements {
     public void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
     }
-
-    public String getfieldLabel() {
-        return fieldLabel;
-    }
-
-    public void setfieldLabel(String fieldLabel) {
-        this.fieldLabel = fieldLabel;
-    }
-
 }

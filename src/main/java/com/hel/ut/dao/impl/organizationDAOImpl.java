@@ -380,7 +380,7 @@ public class organizationDAOImpl implements organizationDAO {
             
             for (configurationConnection connection : orgConnections) {
                 
-                whereClause = builder.equal(utConfigurationRoot.get("id"), connection.getsourceConfigId());
+                whereClause = builder.equal(utConfigurationRoot.get("id"), connection.getSourceConfigId());
                 
                 configDetailsCriteria.where(whereClause);
                 
@@ -392,7 +392,7 @@ public class organizationDAOImpl implements organizationDAO {
                     }
                 }
 
-                whereClause = builder.equal(utConfigurationRoot.get("id"), connection.gettargetConfigId());
+                whereClause = builder.equal(utConfigurationRoot.get("id"), connection.getTargetConfigId());
                 
                 configDetailsCriteria.where(whereClause);
                 

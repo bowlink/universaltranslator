@@ -24,49 +24,48 @@ public class generatedActivityReportAgencies {
     private int id;
     
     @Column(name = "orgId", nullable = true)
-    private int orgId = 0;
+    private Integer orgId = 0;
     
     @Column(name = "reportId", nullable = true)
-    private int reportId = 0;
-
-    public int getId() {
-	return id;
-    }
-
-    public void setId(int id) {
-	this.id = id;
-    }
-
-    public int getOrgId() {
-	return orgId;
-    }
-
-    public void setOrgId(int orgId) {
-	this.orgId = orgId;
-    }
-
-    public int getReportId() {
-	return reportId;
-    }
-
-    public void setReportId(int reportId) {
-	this.reportId = reportId;
-    }
+    private Integer reportId = 0;
 
     public String getOrgName() {
-	return orgName;
+        return orgName;
     }
 
     public void setOrgName(String orgName) {
-	this.orgName = orgName;
+        this.orgName = orgName;
     }
 
     public String getHelRegistrySchemaName() {
-	return helRegistrySchemaName;
+        return helRegistrySchemaName;
     }
 
     public void setHelRegistrySchemaName(String helRegistrySchemaName) {
-	this.helRegistrySchemaName = helRegistrySchemaName;
+        this.helRegistrySchemaName = helRegistrySchemaName;
     }
-    
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Integer getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Integer orgId) {
+        this.orgId = orgId;
+    }
+
+    public Integer getReportId() {
+        return reportId;
+    }
+
+    public void setReportId(Integer reportId) {
+        this.reportId = reportId;
+    }
 }

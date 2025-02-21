@@ -1,0 +1,37 @@
+<div class="modal-header">
+    <div class="col-md-12">
+        <div class="col-md-6" style="padding-left:0px;">
+            <h3 class="panel-title" style="margin-top:15px;margin-bottom:10px">Upload Multiple Crosswalk Files <span th:text="${success}"></h3>
+        </div>
+        <div class="col-md-6" style="padding-right:0px;">
+            <button class="btn btn-success btn-sm pull-right btnCloseCW" data-bs-dismiss="modal" title="Close Window" style="margin-top:10px;margin-bottom:10px">Close Window</button>
+        </div>
+    </div>
+</div>
+<div class="modal-body">
+    <div class="cwUploadForm">
+        <form id="multiCWForm" enctype="multipart/form-data" method="post" role="form">
+            <input type="hidden" name="orgId" th:value="${orgId}" />
+            <input type="hidden" name="cwId" th:value="${cwId}" />
+            <div class="form-container">
+                <div id="crosswalkDelimDiv" class="form-group">
+                    <label class="control-label" for="name">Select the Delimiter all the crosswalk files will have *</label>
+                    <select name="fileDelimiter" id="delimiter" class="form-control half">
+                        <option value="">- Select -</option>
+                        <option th:each="cwalk, dStatus : ${delimiters}" th:value="${delimiters[dStatus.index][1]}" th:text="${delimiters[dStatus.index][2]}"></option>
+                    </select>
+                    <span id="crosswalkDelimMsg" class="control-label"></span>
+                </div>
+                <div id="crosswalkFileDiv" class="form-group">
+                    <label class="control-label" for="crosswalkFile">Select all Crosswalk Files to upload (Must be .txt files)*</label>
+                    <input class="form-control" name="crosswalkFile" type="file" id="crosswalkFile" multiple />
+                    <span id="crosswalkFileMsg" class="control-label"></span>
+                </div>
+                <div class="form-group">
+                    <input type="button" id="submitMultiCrosswalkButton"  class="btn btn-primary" value="Upload Crosswalk Files"/>
+                </div>
+            </div>
+        </form>
+    </div>    
+    <div class="uploadResults" style="display:none; height:200px; overflow: auto;"></div>
+</div>

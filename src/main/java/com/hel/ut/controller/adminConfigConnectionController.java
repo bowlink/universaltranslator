@@ -167,7 +167,7 @@ public class adminConfigConnectionController {
 			connection.setTargetTransportMethod("File Download");
 		    } 
 		    
-		    if(connection.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+		    if(connection.isStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
 			connection.setAllowExport(true);
 			mav.addObject("allowConnectionImport", true);
 		    }
@@ -213,15 +213,15 @@ public class adminConfigConnectionController {
 	if(id != null) {
 	    configurationConnection connectionDetails = utconfigurationmanager.getConnection(id);
 	    
-	    sourceOrgId = utconfigurationmanager.getConfigurationById(connectionDetails.getsourceConfigId()).getOrgId();
-	    sourceConfigId = connectionDetails.getsourceConfigId();
+	    sourceOrgId = utconfigurationmanager.getConfigurationById(connectionDetails.getSourceConfigId()).getOrgId();
+	    sourceConfigId = connectionDetails.getSourceConfigId();
 	    
-	    utConfiguration targetConfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.gettargetConfigId());
+	    utConfiguration targetConfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.getTargetConfigId());
 	    targetOrgId = targetConfigDetails.getOrgId();
-	    targetConfigId = connectionDetails.gettargetConfigId();
+	    targetConfigId = connectionDetails.getTargetConfigId();
 	    connectionId = connectionDetails.getId();
 	    
-	    if(connectionDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+	    if(connectionDetails.isStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
 		mav.addObject("allowExport", true);
 	    }
 	}
@@ -338,13 +338,13 @@ public class adminConfigConnectionController {
 
         configurationConnection connectionDetails = utconfigurationmanager.getConnection(connectionId);
 
-        utConfiguration srcconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.getsourceConfigId());
+        utConfiguration srcconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.getSourceConfigId());
         srcconfigDetails.setOrgId(organizationmanager.getOrganizationById(srcconfigDetails.getOrgId()).getId());
-        connectionDetails.setsrcConfigDetails(srcconfigDetails);
+        connectionDetails.setSrcConfigDetails(srcconfigDetails);
 
-        utConfiguration tgtconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.gettargetConfigId());
+        utConfiguration tgtconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.getTargetConfigId());
         tgtconfigDetails.setOrgId(organizationmanager.getOrganizationById(tgtconfigDetails.getOrgId()).getId());
-        connectionDetails.settgtConfigDetails(tgtconfigDetails);
+        connectionDetails.setTgtConfigDetails(tgtconfigDetails);
 
         
         mav.addObject("connectionDetails", connectionDetails);
@@ -723,8 +723,8 @@ public class adminConfigConnectionController {
 	
 	if(connectionId == 0) {
 	    configurationConnection newConnection = new configurationConnection();
-	    newConnection.setsourceConfigId(sourceConfigId);
-	    newConnection.settargetConfigId(targetConfigId);
+	    newConnection.setSourceConfigId(sourceConfigId);
+	    newConnection.setTargetConfigId(targetConfigId);
 	    newConnection.setStatus(true);
 	    
 	    connectionId = utconfigurationmanager.saveConnection(newConnection);
@@ -805,8 +805,8 @@ public class adminConfigConnectionController {
 	
 	configurationConnection connectionDetails = utconfigurationmanager.getConnection(connectionId);
 
-        utConfiguration srcconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.getsourceConfigId());
-        utConfiguration tgtconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.gettargetConfigId());
+        utConfiguration srcconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.getSourceConfigId());
+        utConfiguration tgtconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.getTargetConfigId());
         
         String connectionDetailFile = System.getProperty("java.io.tmpdir") + "/connectionId-" + connectionId + ".txt";
 	String connectionPrintFile = System.getProperty("java.io.tmpdir") + "/UT-connection-" + connectionId + ".pdf";
@@ -889,10 +889,10 @@ public class adminConfigConnectionController {
 	
 	configurationConnection connectionDetails = utconfigurationmanager.getConnection(connectionId);
 
-        utConfiguration srcconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.getsourceConfigId());
+        utConfiguration srcconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.getSourceConfigId());
 	Organization srcorgDetails = organizationmanager.getOrganizationById(srcconfigDetails.getOrgId());
 	
-        utConfiguration tgtconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.gettargetConfigId());
+        utConfiguration tgtconfigDetails = utconfigurationmanager.getConfigurationById(connectionDetails.getTargetConfigId());
 	Organization tgtorgDetails = organizationmanager.getOrganizationById(tgtconfigDetails.getOrgId());
 
 	String connectionDetailFile = System.getProperty("java.io.tmpdir") +"/connectionExport-" + connectionDetails.getId() + ".txt";
@@ -927,10 +927,10 @@ public class adminConfigConnectionController {
 	
 	if(!"".equals(emailBodySB.toString())) {
 	    mailMessage mail = new mailMessage();
-	    mail.settoEmailAddress(myProps.getProperty("admin.email"));
-	    mail.setfromEmailAddress("support@health-e-link.net");
-	    mail.setmessageSubject("UT Connection Import Script has been Created");
-	    mail.setmessageBody(emailBodySB.toString());
+	    mail.setToEmailAddress(myProps.getProperty("admin.email"));
+	    mail.setFromEmailAddress("support@health-e-link.net");
+	    mail.setMessageSubject("UT Connection Import Script has been Created");
+	    mail.setMessageBody(emailBodySB.toString());
 	    emailMessageManager.sendEmail(mail);
 	    
 	    //Delete email body
@@ -1166,10 +1166,10 @@ public class adminConfigConnectionController {
 		    emailBody.append("<br/><br />Reason<br />The source organization was not found on the system.");
 
 		    mailMessage mail = new mailMessage();
-		    mail.settoEmailAddress(myProps.getProperty("admin.email"));
-		    mail.setfromEmailAddress("support@health-e-link.net");
-		    mail.setmessageSubject(emailSubject);
-		    mail.setmessageBody(emailBody.toString());
+		    mail.setToEmailAddress(myProps.getProperty("admin.email"));
+		    mail.setFromEmailAddress("support@health-e-link.net");
+		    mail.setMessageSubject(emailSubject);
+		    mail.setMessageBody(emailBody.toString());
 		    emailMessageManager.sendEmail(mail);
 		}
 		else if(tgtOrgDetails == null) {
@@ -1182,10 +1182,10 @@ public class adminConfigConnectionController {
 		    emailBody.append("<br/><br />Reason<br />The target organization was not found on the system.");
 
 		    mailMessage mail = new mailMessage();
-		    mail.settoEmailAddress(myProps.getProperty("admin.email"));
-		    mail.setfromEmailAddress("support@health-e-link.net");
-		    mail.setmessageSubject(emailSubject);
-		    mail.setmessageBody(emailBody.toString());
+		    mail.setToEmailAddress(myProps.getProperty("admin.email"));
+		    mail.setFromEmailAddress("support@health-e-link.net");
+		    mail.setMessageSubject(emailSubject);
+		    mail.setMessageBody(emailBody.toString());
 		    emailMessageManager.sendEmail(mail);
 		}
 		else if(srcConfigId == 0) {
@@ -1199,10 +1199,10 @@ public class adminConfigConnectionController {
 		    emailBody.append("<br/><br />Reason<br />The source configuration was not found on the system.");
 
 		    mailMessage mail = new mailMessage();
-		    mail.settoEmailAddress(myProps.getProperty("admin.email"));
-		    mail.setfromEmailAddress("support@health-e-link.net");
-		    mail.setmessageSubject(emailSubject);
-		    mail.setmessageBody(emailBody.toString());
+		    mail.setToEmailAddress(myProps.getProperty("admin.email"));
+		    mail.setFromEmailAddress("support@health-e-link.net");
+		    mail.setMessageSubject(emailSubject);
+		    mail.setMessageBody(emailBody.toString());
 		    emailMessageManager.sendEmail(mail);
 		}
 		else if(tgtConfigId == 0) {
@@ -1216,10 +1216,10 @@ public class adminConfigConnectionController {
 		    emailBody.append("<br/><br />Reason<br />The target configuration was not found on the system.");
 
 		    mailMessage mail = new mailMessage();
-		    mail.settoEmailAddress(myProps.getProperty("admin.email"));
-		    mail.setfromEmailAddress("support@health-e-link.net");
-		    mail.setmessageSubject(emailSubject);
-		    mail.setmessageBody(emailBody.toString());
+		    mail.setToEmailAddress(myProps.getProperty("admin.email"));
+		    mail.setFromEmailAddress("support@health-e-link.net");
+		    mail.setMessageSubject(emailSubject);
+		    mail.setMessageBody(emailBody.toString());
 		    emailMessageManager.sendEmail(mail);
 		}
 		else if(connectionImportSuccessful) {
@@ -1237,10 +1237,10 @@ public class adminConfigConnectionController {
 		    utconfigurationmanager.updateConnection(connectionDetails);
 
 		    mailMessage mail = new mailMessage();
-		    mail.settoEmailAddress(myProps.getProperty("admin.email"));
-		    mail.setfromEmailAddress("support@health-e-link.net");
-		    mail.setmessageSubject(emailSubject);
-		    mail.setmessageBody(emailBody.toString());
+		    mail.setToEmailAddress(myProps.getProperty("admin.email"));
+		    mail.setFromEmailAddress("support@health-e-link.net");
+		    mail.setMessageSubject(emailSubject);
+		    mail.setMessageBody(emailBody.toString());
 		    emailMessageManager.sendEmail(mail);
 		}
 	    }
@@ -1253,10 +1253,10 @@ public class adminConfigConnectionController {
 		emailBody.append("<br />Target Configuration Name: ").append(tgtConfigName);
 
 		mailMessage mail = new mailMessage();
-		mail.settoEmailAddress(myProps.getProperty("admin.email"));
-		mail.setfromEmailAddress("support@health-e-link.net");
-		mail.setmessageSubject("The imported connection already exists.");
-		mail.setmessageBody(emailBody.toString());
+		mail.setToEmailAddress(myProps.getProperty("admin.email"));
+		mail.setFromEmailAddress("support@health-e-link.net");
+		mail.setMessageSubject("The imported connection already exists.");
+		mail.setMessageBody(emailBody.toString());
 		emailMessageManager.sendEmail(mail);
 	    }
 	} catch (FileNotFoundException e) {
@@ -1288,7 +1288,7 @@ public class adminConfigConnectionController {
 	    
 	    if(!orgConfigs.isEmpty()) {
 		for(utConfiguration config : orgConfigs) {
-		    if(config.getConfigname().trim().equals(configName) && !config.isDeleted() && config.getStatus() && config.getType() == type) {
+		    if(config.getConfigname().trim().equals(configName) && !config.isDeleted() && config.isStatus() && config.getType() == type) {
 			configId = config.getId();
 			break;
 		    }
@@ -1350,8 +1350,8 @@ public class adminConfigConnectionController {
 	Integer connectionId = 0;
 	
 	configurationConnection newConnection = new configurationConnection();
-	newConnection.setsourceConfigId(srcConfigId);
-	newConnection.settargetConfigId(tgtConfigId);
+	newConnection.setSourceConfigId(srcConfigId);
+	newConnection.setTargetConfigId(tgtConfigId);
 	newConnection.setStatus(false);
 	
 	connectionId = utconfigurationmanager.saveConnection(newConnection);
@@ -1397,10 +1397,10 @@ public class adminConfigConnectionController {
 	emailBody.append("<br/><br />Reason for failure:<br />").append(ExceptionUtils.getStackTrace(ex));
 
 	mailMessage mail = new mailMessage();
-	mail.settoEmailAddress(myProps.getProperty("admin.email"));
-	mail.setfromEmailAddress("support@health-e-link.net");
-	mail.setmessageSubject(emailSubject);
-	mail.setmessageBody(emailBody.toString());
+	mail.setToEmailAddress(myProps.getProperty("admin.email"));
+	mail.setFromEmailAddress("support@health-e-link.net");
+	mail.setMessageSubject(emailSubject);
+	mail.setMessageBody(emailBody.toString());
 	emailMessageManager.sendEmail(mail);
     }
     

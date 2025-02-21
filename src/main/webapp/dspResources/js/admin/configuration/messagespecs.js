@@ -1,14 +1,38 @@
 
-require(['./main'], function () {
+jQuery(function ($) {
     
-    $(document).on('click', '.exportConfig', function() {
-            
-        var configId = $(this).attr('rel');
+    $(document).ready(function () {
+        
+        var hasHeaderRow = $('.containsHeaderRow').val();
+        if(hasHeaderRow == 1) {
+            $('#totalHeaderRowsDiv').show();
+        }
+        else {
+            $('#totalHeaderRowsDiv').hide();
+        }
+        
+        $(document).on('change', '.containsHeaderRow', function() {
+            if($(this).val() == 1) {
+                $('#totalHeaderRows').val(1);
+                $('#totalHeaderRowsDiv').show();
+            }
+            else {
+                $('#totalHeaderRows').val(0);
+                $('#totalHeaderRowsDiv').hide();
+            }
+        });
 
-        if(confirm("Are you sure you want to export this configuration?")) {
+        $(document).on('click','.downloadNewTemplate',function() {
+
+            var configId = $(this).attr('rel');
+
+            $('body').overlay({
+               glyphicon : 'floppy-disk',
+               message : 'Creating Template...'
+             });
 
             $.ajax({
-                url: 'createConfigExportFile.do',
+                url: 'createNewFieldSettingsTemplate.do',
                 data: {
                     'configId': configId
                 },
@@ -17,152 +41,40 @@ require(['./main'], function () {
                 contentType : 'application/json;charset=UTF-8',
                 success: function(data) {
                     if(data !== '') {
-                        window.location.href = '/administrator/configurations/printConfigExport/'+ data;
-                        //$('#dtDownloadModal').modal('toggle');
+                        window.location.href = '/administrator/configurations/printNewFieldSettingsTemplate/'+ data;
+                        $('.overlay').css('display','none');
                     }
                     else {
-                        $('#exportErrorMsg').show();
+                        $('.overlay').css('display','none');
+                        alert("An error occurred creating your template file. A Health-e-Link system administrator has been notified.");
                     }
                 }
             });
-        }
-    });
-    
-    $(document).on('change', '.containsHeaderRow', function() {
-        if($(this).val() == 1) {
-            $('#totalHeaderRows').val(1);
-             $('#totalHeaderRowsDiv').show();
-        }
-        else {
-            $('#totalHeaderRows').val(0);
-            $('#totalHeaderRowsDiv').hide();
-        }
-    });
-    
-    $(document).on('click','.createNewTemplate',function() {
-      
-        var configId = $(this).attr('rel');
+        });
 
-        $.ajax({
-            url: 'createNewFieldSettingsTemplate.do',
-            data: {
-                'configId': configId
-            },
-            type: "GET",
-            dataType : 'text',
-            contentType : 'application/json;charset=UTF-8',
-            success: function(data) {
-                if(data !== '') {
-                    window.location.href = '/administrator/configurations/printNewFieldSettingsTemplate/'+ data;
-                }
-                else {
-                    alert("An error occurred creating your template file. A Health-e-Link system administrator has been notified.");
-                }
+        //This function will save the messgae type field mappings
+        $('#saveDetails').click(function () {
+            $('#action').val('save');
+
+            //Need to make sure all required fields are marked if empty.
+            var hasErrors = 0;
+            hasErrors = checkFormFields();
+
+            if (hasErrors == 0) {
+                $('#messageSpecs').submit();
             }
         });
-    });
-        
-    $(document).on('click','.printConfig',function() {
-       /* $('body').overlay({
-            glyphicon : 'print',
-            message : 'Gathering Details...'
-        });*/
 
-        var configId = $(this).attr('rel');
+        $('#next').click(function (event) {
+            $('#action').val('next');
 
-        $.ajax({
-            url: 'createConfigPrintPDF.do',
-            data: {
-                'configId': configId
-            },
-            type: "GET",
-            dataType : 'text',
-            contentType : 'application/json;charset=UTF-8',
-            success: function(data) {
-                if(data !== '') {
-                    window.location.href = '/administrator/configurations/printConfig/'+ data;
-                    $('#successMsg').show();
-                    //$('#dtDownloadModal').modal('toggle');
-                }
-                else {
-                    $('#errorMsg').show();
-                }
+            var hasErrors = 0;
+            hasErrors = checkFormFields();
+
+            if (hasErrors == 0) {
+                $('#messageSpecs').submit();
             }
         });
-    });
-
-    $("input:text,form").attr("autocomplete", "off");
-
-    $(document).on('click', '.createDataTranslationDownload', function() {
-       $.ajax({
-            url: '/administrator/configurations/createDataTranslationDownload',
-            data: {
-               'configId':$(this).attr('rel')
-            },
-            type: "GET",
-            success: function(data) {
-                $("#dtDownloadModal").html(data);
-            }
-        });
-    });
-
-    $(document).on('click', '#generateDTButton', function() {
-
-        var errorFound = 0;
-
-       //Makes sure name is entered and entity is selected
-       if($('#fileName').val() === "") {
-           $('#dtnameDiv').addClass("has-error");
-           errorFound = 1;
-       }
-
-       if(errorFound == 0) {
-           $.ajax({
-                url: '/administrator/configurations/dataTranslationsDownload',
-                data: {
-                    'configId':$(this).attr('rel'),
-                    'fileName': $('#fileName').val()
-                },
-                type: "GET",
-                dataType : 'text',
-                contentType : 'application/json;charset=UTF-8',
-                success: function(data) {
-                    if(data !== '') {
-                        window.location.href = '/administrator/configurations/downloadDTCWFile/'+ data;
-                        $('#successMsg').show();
-                        //$('#dtDownloadModal').modal('toggle');
-                    }
-                    else {
-                        $('#errorMsg').show();
-                    }
-                }
-            });
-       }
-
-    });
-
-    //This function will save the messgae type field mappings
-    $('#saveDetails').click(function () {
-        $('#action').val('save');
-
-        //Need to make sure all required fields are marked if empty.
-        var hasErrors = 0;
-        hasErrors = checkFormFields();
-
-        if (hasErrors == 0) {
-            $('#messageSpecs').submit();
-        }
-    });
-
-    $('#next').click(function (event) {
-        $('#action').val('next');
-
-        var hasErrors = 0;
-        hasErrors = checkFormFields();
-
-        if (hasErrors == 0) {
-            $('#messageSpecs').submit();
-        }
     });
 });
 

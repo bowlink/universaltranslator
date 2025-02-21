@@ -42,15 +42,15 @@ public class emailMessageManagerImpl implements emailMessageManager {
         transport.connect(myProps.getProperty("mailserver.host"), myProps.getProperty("mailserver.username"), myProps.getProperty("mailserver.password"));
 
         Message message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(messageDetails.getfromEmailAddress()));
-        InternetAddress[] address = {new InternetAddress(messageDetails.gettoEmailAddress())};
+        message.setFrom(new InternetAddress(messageDetails.getFromEmailAddress()));
+        InternetAddress[] address = {new InternetAddress(messageDetails.getToEmailAddress())};
         message.setRecipients(Message.RecipientType.TO, address);
-        message.setReplyTo(InternetAddress.parse(messageDetails.getfromEmailAddress()));
+        message.setReplyTo(InternetAddress.parse(messageDetails.getFromEmailAddress()));
 
-        message.setSubject(messageDetails.getmessageSubject());
+        message.setSubject(messageDetails.getMessageSubject());
         message.setSentDate(new Date());
         
-        message.setContent(messageDetails.getmessageBody(), "text/html");
+        message.setContent(messageDetails.getMessageBody(), "text/html");
         message.saveChanges();
         transport.sendMessage(message, address);
         transport.close();

@@ -34,46 +34,14 @@ public class HL7Segments {
     private int id;
 
     @Column(name = "HL7ID", nullable = false)
-    private int hl7Id;
+    private Integer hl7Id;
 
     @NoHtml
     @Column(name = "segmentName", nullable = false)
     private String segmentName = "";
 
     @Column(name = "displayPos", nullable = false)
-    private int displayPos = 1;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int gethl7Id() {
-        return hl7Id;
-    }
-
-    public void sethl7Id(int hl7Id) {
-        this.hl7Id = hl7Id;
-    }
-
-    public String getsegmentName() {
-        return segmentName;
-    }
-
-    public void setsegmentName(String segmentName) {
-        this.segmentName = segmentName;
-    }
-
-    public int getdisplayPos() {
-        return displayPos;
-    }
-
-    public void setdisplayPos(int displayPos) {
-        this.displayPos = displayPos;
-    }
+    private Integer displayPos = 1;
 
     public List<HL7Elements> getHL7Elements() {
         return HL7Elements;
@@ -83,4 +51,35 @@ public class HL7Segments {
         this.HL7Elements = HL7Elements;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Integer getHl7Id() {
+        return hl7Id;
+    }
+
+    public void setHl7Id(Integer hl7Id) {
+        this.hl7Id = hl7Id;
+    }
+
+    public String getSegmentName() {
+        return segmentName;
+    }
+
+    public void setSegmentName(String segmentName) {
+        this.segmentName = segmentName;
+    }
+
+    public Integer getDisplayPos() {
+        return displayPos;
+    }
+
+    public void setDisplayPos(Integer displayPos) {
+        this.displayPos = displayPos;
+    }
 }

@@ -30,7 +30,6 @@ import com.hel.ut.model.configurationFormFields;
 import com.hel.ut.model.configurationFileDropFields;
 import com.hel.ut.model.configurationWebServiceSenders;
 import com.hel.ut.model.Organization;
-import com.hel.ut.model.appenedNewconfigurationFormFields;
 import com.hel.ut.model.utUser;
 import com.hel.ut.model.configurationCCDElements;
 import com.hel.ut.model.configurationFTPFields;
@@ -131,6 +130,9 @@ public class adminConfigController {
     @Value("${siteTimeZone}")
     private String siteTimeZone; 
     
+    @Value("${eahUT}")
+    private String eahUT;
+    
     @Autowired
     private utConfigurationManager utconfigurationmanager;
 
@@ -190,7 +192,7 @@ public class adminConfigController {
      *
      * @throws Exception
      */
-    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    @RequestMapping(value = {"","/","/list"}, method = RequestMethod.GET)
     public ModelAndView listConfigurations(Authentication authentication) throws Exception {
         
         ModelAndView mav = new ModelAndView();
@@ -239,15 +241,15 @@ public class adminConfigController {
 		}
 	    }
             
-            if(config.gettransportDetailId() > 0) {
+            if(config.getTransportDetailId() > 0) {
 		//Check to see if configuration has any FTP connection set up
 		if(config.isAllowFTPLink()) {
 		    config.setAllowFTPLink(true);
-		    config.settransportDetailId(config.gettransportDetailId());
+		    config.setTransportDetailId(config.getTransportDetailId());
 		}
             }
 	    
-	    if(config.getScheduleType() > 0 && config.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+	    if(config.getScheduleType() > 0 && config.isStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
 		config.setAllowExport(true);
 	    }
 	    
@@ -269,7 +271,7 @@ public class adminConfigController {
 	    }
 	    config.setDateUpdated(dft.parse(dateinTZ));
             
-	    if(config.getScheduleType() > 0 && config.getStatus()) {
+	    if(config.getScheduleType() > 0 && config.isStatus()) {
 		config.setAllowExport(true);
 	    }
 	    
@@ -299,8 +301,17 @@ public class adminConfigController {
     public ModelAndView createConfiguration(HttpSession session) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/details");
-        mav.addObject("configurationDetails", new utConfiguration());
+        mav.setViewName("administrator/configurations/details");
+        mav.addObject("pageId", "configuration-details");
+        mav.addObject("pageSection", "section-configurations");
+        mav.addObject("sect","config");
+        mav.addObject("actionPage","configDetails");
+        mav.addObject("eahUT", eahUT);
+        
+        utConfiguration configDetails = new utConfiguration();
+        configDetails.setMessageTypeId(2);
+        
+        mav.addObject("configurationDetails", configDetails);
 
         //Need to get a list of active organizations.
         List<Organization> organizations = organizationmanager.getAllActiveOrganizationsWithSystemName();
@@ -342,7 +353,12 @@ public class adminConfigController {
 
         if (existing != null) {
             ModelAndView mav = new ModelAndView();
-            mav.setViewName("/administrator/configurations/details");
+            mav.setViewName("administrator/configurations/details");
+            mav.addObject("pageId", "configuration-details");
+            mav.addObject("pageSection", "section-configurations");
+            mav.addObject("sect","config");
+            mav.addObject("actionPage","configDetails");
+            mav.addObject("eahUT", eahUT);
 
             mav.addObject("configurationDetails", configurationDetails);
 
@@ -406,6 +422,7 @@ public class adminConfigController {
         mav.addObject("pageSection", "section-configurations");
         mav.addObject("sect","config");
         mav.addObject("actionPage","configDetails");
+        mav.addObject("eahUT", eahUT);
         
 	mav.setViewName("administrator/configurations/details");
 	
@@ -428,7 +445,7 @@ public class adminConfigController {
         
         utUser userDetails = userManager.getUserByUserName(authentication.getName());
 	    
-        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.isStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
             configurationDetails.setAllowExport(true);
         }
         
@@ -599,12 +616,17 @@ public class adminConfigController {
         
         //If the "Save" button was pressed 
         if (action.equals("save")) {
-            ModelAndView mav = new ModelAndView();
-            mav.setViewName("/administrator/configurations/details");
+            ModelAndView mav = new ModelAndView(); 
+            mav.addObject("pageId", "configuration-details");
+            mav.addObject("pageSection", "section-configurations");
+            mav.addObject("sect","config");
+            mav.addObject("actionPage","configDetails");
+
+            mav.setViewName("administrator/configurations/details");
             
             configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(configurationDetails.getId());
         
-            if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+            if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.isStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
                 configurationDetails.setAllowExport(true);
             }
 
@@ -621,9 +643,9 @@ public class adminConfigController {
 	    mav.addObject("sourceConfigurations", sourceConfigurations);
 	    
             return mav;
-        } //If the "Next Step" button was pressed.
+        } 
         else {
-            redirectAttr.addFlashAttribute("savedStatus", "updated");
+            redirectAttr.addFlashAttribute("savedStatus", "detailsupdated");
             ModelAndView mav = new ModelAndView(new RedirectView("/administrator/configurations/transport"));
             return mav;
         }
@@ -664,12 +686,13 @@ public class adminConfigController {
         mav.addObject("pageSection", "section-configurations");
         mav.addObject("sect","config");
         mav.addObject("actionPage","transport");
+        mav.addObject("eahUT", eahUT);
         
         if(configurationDetails.getType() == 1) {
-            mav.setViewName("administrator/configurations/inboundTransport");
+            mav.setViewName("administrator/configurations/transport/inboundTransport");
         }
         else {
-            mav.setViewName("administrator/configurations/outboundTransport");
+            mav.setViewName("administrator/configurations/transport/outboundTransport");
         }
         
         mav.addObject("messageTypeId", configurationDetails.getMessageTypeId());
@@ -719,6 +742,8 @@ public class adminConfigController {
         
         if (transportDetails == null) {
             transportDetails = new configurationTransport();
+            transportDetails.setConfigId(configId);
+            transportDetails.setTransportMethodId(13);
 
             if (configurationDetails.getType() == 1) {
                 transportDetails.setFileLocation(orgDetails.getcleanURL() + "/input files/");
@@ -751,17 +776,17 @@ public class adminConfigController {
             pushFTPFields.setMethod(1);
             pushFTPFields.setDirectory("");
 
-            configurationFTPFields getFTPFields = new configurationFTPFields();
-            getFTPFields.setMethod(2);
-            getFTPFields.setDirectory("");
+            configurationFTPFields getFTPfields = new configurationFTPFields();
+            getFTPfields.setMethod(2);
+            getFTPfields.setDirectory("");
 
             emptyFTPFields.add(pushFTPFields);
-            emptyFTPFields.add(getFTPFields);
+            emptyFTPFields.add(getFTPfields);
 
-            transportDetails.setFTPFields(emptyFTPFields);
+            transportDetails.setFTPfields(emptyFTPFields);
         } 
         else {
-            transportDetails.setFTPFields(ftpFields);
+            transportDetails.setFTPfields(ftpFields);
         }
 
         //get file drop fields
@@ -854,7 +879,7 @@ public class adminConfigController {
         transportDetails.setConfigId(configId);
 	transportDetails.setThreshold(configurationDetails.getThreshold());
         
-	if(transportDetails.getRestAPIType() == 2) {
+	if(transportDetails.getRestAPIType() != null && transportDetails.getRestAPIType() == 2) {
 	    session.setAttribute("showAllConfigOptions",false);
 	}
 	else {
@@ -875,7 +900,7 @@ public class adminConfigController {
         
         utUser userDetails = userManager.getUserByUserName(authentication.getName());
 	    
-        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.isStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
             configurationDetails.setAllowExport(true);
         }
 
@@ -921,17 +946,10 @@ public class adminConfigController {
 	String dateinTZ = "";
 	
 	//Get latest configuration note
-	List configNotes = utconfigurationmanager.getConfigurationUpdateLogs(configId);
+	List<configurationUpdateLogs> configNotes = utconfigurationmanager.getConfigurationUpdateLogs(configId);
         
         if(!configNotes.isEmpty()) {
-            Iterator<Object[]> notesIterator = configNotes.iterator();
-            Date dateCreated = new Date();
-            while(notesIterator.hasNext()) {
-                Object[] noteData = notesIterator.next();
-                dateCreated = (Date) noteData[4];
-                break;
-            }
-	    mav.addObject("lastConfigUpdate", dft.parse(requiredFormat.format(dateCreated)));
+	    mav.addObject("lastConfigUpdate", dft.parse(requiredFormat.format(configNotes.get(0).getDateCreated())));
 	}
 	else {
 	    mav.addObject("lastConfigUpdate", dft.parse(requiredFormat.format(configurationDetails.getDateCreated())));
@@ -999,9 +1017,9 @@ public class adminConfigController {
                     }
                     catch (Exception ex) {
                         mailMessage mail = new mailMessage();
-                        mail.settoEmailAddress(myProps.getProperty("admin.email"));
-                        mail.setfromEmailAddress("support@health-e-link.net");
-                        mail.setmessageSubject("Error trying to update a family planning import type - " + " " + myProps.getProperty("server.identity"));
+                        mail.setToEmailAddress(myProps.getProperty("admin.email"));
+                        mail.setFromEmailAddress("support@health-e-link.net");
+                        mail.setMessageSubject("Error trying to update a family planning import type - " + " " + myProps.getProperty("server.identity"));
                         StringBuilder emailBody = new StringBuilder();
                         emailBody.append("There was an error trying to update a family planning import type.");
                         emailBody.append("<br/>FP Database Name: ").append(fpSchemaName);
@@ -1010,7 +1028,7 @@ public class adminConfigController {
                         emailBody.append("<br/>Updated File Delimiter: ").append(transportDetails.getFileDelimiter());
                         emailBody.append("<br/>Updated Max File Size: ").append(transportDetails.getMaxFileSize());
                         emailBody.append("<br/><br/>").append(ex.getMessage());
-                        mail.setmessageBody(emailBody.toString());
+                        mail.setMessageBody(emailBody.toString());
                         emailMessageManager.sendEmail(mail);
                     }
                 }
@@ -1047,8 +1065,10 @@ public class adminConfigController {
             session.setAttribute("configCCD", false);
         }
 	
-	if(transportDetails.getRestAPIType() == 2) {
-	     session.setAttribute("showAllConfigOptions", false);
+	if(transportDetails.getRestAPIType() != null) {
+            if(transportDetails.getRestAPIType() == 2) {
+                session.setAttribute("showAllConfigOptions", false);
+            }
 	}
 	
 	if(configurationDetails.getType() == 2) {
@@ -1057,8 +1077,8 @@ public class adminConfigController {
 		utconfigurationmanager.deleteConfigurationFTPInformation(transportId);
 	    }
 	    else {
-		if (transportDetails.getTransportMethodId() == 3 && !transportDetails.getFTPFields().isEmpty()) {
-		    for (configurationFTPFields ftpFields : transportDetails.getFTPFields()) {
+		if (transportDetails.getTransportMethodId() == 3 && !transportDetails.getFTPfields().isEmpty()) {
+		    for (configurationFTPFields ftpFields : transportDetails.getFTPfields()) {
 			if(ftpFields.getIp() != null) {
 			    if(!"".equals(ftpFields.getIp())) {
 				ftpFields.setTransportId(transportId);
@@ -1070,8 +1090,8 @@ public class adminConfigController {
 	    }
 	}
 	else {
-	    if (!transportDetails.getFTPFields().isEmpty()) {
-		for (configurationFTPFields ftpFields : transportDetails.getFTPFields()) {
+	    if (!transportDetails.getFTPfields().isEmpty()) {
+		for (configurationFTPFields ftpFields : transportDetails.getFTPfields()) {
 		    if(ftpFields.getIp() != null) {
 			if(!"".equals(ftpFields.getIp())) {
 			    ftpFields.setTransportId(transportId);
@@ -1100,7 +1120,7 @@ public class adminConfigController {
 	//Direct Message Transport
 	if(transportDetails.getDirectMessageFields() != null) {
 	    if(!transportDetails.getDirectMessageFields().isEmpty()) {
-		if(transportDetails.getDirectMessageFields().get(0).getHispId() > 0) {
+		if(transportDetails.getDirectMessageFields().get(0).getHispId() != null && transportDetails.getDirectMessageFields().get(0).getHispId() > 0) {
 		    transportDetails.getDirectMessageFields().get(0).setFileTypeId(transportDetails.getFileType());
 		    transportDetails.getDirectMessageFields().get(0).setExpectedFileExt(transportDetails.getFileExt());
 		    transportDetails.getDirectMessageFields().get(0).setStatus(true);
@@ -1118,14 +1138,12 @@ public class adminConfigController {
             configurationTransportMessageTypes messageType;
             for (Integer selconfigId : transportDetails.getMessageTypes()) {
                 messageType = new configurationTransportMessageTypes();
-                messageType.setconfigId(selconfigId);
-                messageType.setconfigTransportId(transportId);
+                messageType.setConfigId(selconfigId);
+                messageType.setConfigTransportId(transportId);
                 utconfigurationTransportManager.saveTransportMessageTypes(messageType);
             }
         }
 
-        redirectAttr.addFlashAttribute("savedStatus", "updated");
-	
 	//If transport method == 10 (From HEL Registry online form) we can prepoulate the fields from
 	//the selected configuration. No need to have a custom template uploaded. The file submitted 
 	//to UT with this transport method will always have the same fields set up.
@@ -1143,32 +1161,38 @@ public class adminConfigController {
 	}
 	
         //If the "Save" button was pressed 
-        if (action.equals("save") || transportDetails.getRestAPIType() == 2) {
+        if (action.equals("save") || (transportDetails.getRestAPIType() != null && transportDetails.getRestAPIType() == 2)) {
+            redirectAttr.addFlashAttribute("savedStatus", "updated");
             ModelAndView mav = new ModelAndView(new RedirectView("transport"));
             return mav;
-        } else {
+        } 
+        else {
             //If the type of utConfiguration is for a source then send to message specs
             if (configurationDetails.getType() == 1) {
 		if(configurationDetails.getConfigurationType() == 2) {
+                    redirectAttr.addFlashAttribute("savedStatus", "transportupdated");
 		    ModelAndView mav = new ModelAndView(new RedirectView("scheduling"));
 		    return mav;
 		}
 		else {
+                    redirectAttr.addFlashAttribute("savedStatus", "transportupdated");
 		    ModelAndView mav = new ModelAndView(new RedirectView("messagespecs"));
 		    return mav;
 		}
                
-            } else {
+            } 
+            else {
 		if(transportDetails.getTransportMethodId() == 8) {
 		    ModelAndView mav = new ModelAndView(new RedirectView("mappings"));
 		    return mav;
 		}
-		//Check if passthru
 		else if(configurationDetails.getConfigurationType() == 2) {
+                    redirectAttr.addFlashAttribute("savedStatus", "transportupdated");
 		    ModelAndView mav = new ModelAndView(new RedirectView("scheduling"));
 		    return mav;
 		}
 		else {
+                    redirectAttr.addFlashAttribute("savedStatus", "transportupdated");
 		    ModelAndView mav = new ModelAndView(new RedirectView("messagespecs"));
 		    return mav;
 		}
@@ -1211,60 +1235,83 @@ public class adminConfigController {
         
         utUser userDetails = userManager.getUserByUserName(authentication.getName());
 	    
-        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.isStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
             configurationDetails.setAllowExport(true);
         }
 	
 	// Get organization directory name
         Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getOrgId());
+        String helSystemName = "";
+        if(orgDetails.getHelRegistryOrgId() > 0 || (orgDetails.getHelRegistryOrgId() == 0 && orgDetails.getHelRegistryId() > 0)) {
+            List<helRegistry> helRegistries = helregistrymanager.getAllActiveRegistries();
+
+            if(!helRegistries.isEmpty()) {
+                for(helRegistry registry : helRegistries) {
+                    if(registry.getId() == orgDetails.getHelRegistryId()) {
+                        helSystemName = registry.getRegistryName();
+                    }
+                }
+            }
+        }
+        mav.addObject("helSystemName", helSystemName);
 	
-        mav.setViewName("/administrator/configurations/messagespecs");
+        mav.addObject("pageId", "configuration-messagespecs");
+        mav.addObject("pageSection", "section-configurations");
+        mav.addObject("sect","config");
+        mav.addObject("actionPage","specs");
+        mav.addObject("eahUT", eahUT);
+        
+	mav.setViewName("administrator/configurations/messageSpecs/messageSpecs");
 
         configurationMessageSpecs messageSpecs = utconfigurationmanager.getMessageSpecs(configId);
+        
+        String lastUploadedDate = "";
 	
         if (messageSpecs == null) {
             messageSpecs = new configurationMessageSpecs();
-            messageSpecs.setconfigId(configId);
+            messageSpecs.setConfigId(configId);
         }
 	else {
 	    DateFormat finalDateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
 	    
-	    if(messageSpecs.gettemplateFile() == null) {
+	    if(messageSpecs.getTemplateFile() == null) {
 		mav.addObject("lastUploadedDate", finalDateFormat.format(configurationDetails.getDateCreated()));
 	    }
 	    else {
-		File templateFile = new File( myProps.getProperty("ut.directory.utRootDir") + orgDetails.getCleanURL() + "/templates/"+messageSpecs.gettemplateFile());
+		File templateFile = new File( myProps.getProperty("ut.directory.utRootDir") + orgDetails.getCleanURL() + "/templates/"+messageSpecs.getTemplateFile());
 		
 		if(templateFile.exists()) {
-		    if(messageSpecs.gettemplateFile().contains("-")) {
+		    if(messageSpecs.getTemplateFile().contains("-")) {
 			DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
 			try {
-			    String dateUploaded = messageSpecs.gettemplateFile().split("-")[0];
-			    mav.addObject("lastUploadedDate", finalDateFormat.format(dateFormat.parse(dateUploaded)));
+			    String dateUploaded = messageSpecs.getTemplateFile().split("-")[0];
+			    lastUploadedDate = finalDateFormat.format(dateFormat.parse(dateUploaded));
 			}
 			catch (Exception ex) {
 			    try {
-				mav.addObject("lastUploadedDate", finalDateFormat.format(new Date(templateFile.lastModified())));
+				lastUploadedDate = finalDateFormat.format(new Date(templateFile.lastModified()));
 			    }
 			    catch (Exception ex2) {
-				mav.addObject("lastUploadedDate", finalDateFormat.format(configurationDetails.getDateCreated()));
+				lastUploadedDate = finalDateFormat.format(configurationDetails.getDateCreated());
 			    }
 			}
 		    }
 		    else {
 			try {
-			    mav.addObject("lastUploadedDate", finalDateFormat.format(new Date(templateFile.lastModified())));
+			    lastUploadedDate = finalDateFormat.format(new Date(templateFile.lastModified()));
 			}
 			catch (Exception ex) {
-			    mav.addObject("lastUploadedDate", finalDateFormat.format(configurationDetails.getDateCreated()));
+			    lastUploadedDate = finalDateFormat.format(configurationDetails.getDateCreated());
 			}
 		    }
 		}
 		else {
-		    mav.addObject("lastUploadedDate", finalDateFormat.format(configurationDetails.getDateCreated()));
+		    lastUploadedDate = finalDateFormat.format(configurationDetails.getDateCreated());
 		}
 	    }
 	}
+        mav.addObject("lastTemplateUploadedDate", lastUploadedDate);
+        
         mav.addObject("messageSpecs", messageSpecs);
 
         //Need to pass the selected transport Type
@@ -1334,36 +1381,36 @@ public class adminConfigController {
 	BindingResult result, RedirectAttributes redirectAttr, @RequestParam String action, Authentication authentication) throws Exception {
 
 	//Need to pass the selected transport Type
-        configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(messageSpecs.getconfigId());
+        configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(messageSpecs.getConfigId());
 	
-	utConfiguration configDetails = utconfigurationmanager.getConfigurationById(messageSpecs.getconfigId());
+	utConfiguration configDetails = utconfigurationmanager.getConfigurationById(messageSpecs.getConfigId());
         
         //Get the current transport details
-        configurationMessageSpecs currMessageSpecs = utconfigurationmanager.getMessageSpecs(messageSpecs.getconfigId());
+        configurationMessageSpecs currMessageSpecs = utconfigurationmanager.getMessageSpecs(messageSpecs.getConfigId());
         
         //Check to see if the configuration is for family planning and the file type changed
         //If so need to modify the associated FP system import type file type setting
         if(currMessageSpecs != null) {
-            if(configDetails.getMessageTypeId() == 2 && configDetails.getType() == 1 && messageSpecs.getcontainsHeaderRow() != currMessageSpecs.getcontainsHeaderRow()) {
+            if(configDetails.getMessageTypeId() == 2 && configDetails.getType() == 1 && messageSpecs.isContainsHeaderRow() != currMessageSpecs.isContainsHeaderRow()) {
                 //Need to get the FP system database 
                 String fpSchemaName = "";
                 fpSchemaName = organizationmanager.getOrganizationById(configDetails.getOrgId()).getHelRegistrySchemaName();
                 if(!"".equals(fpSchemaName)) {
                     try {
-                        utconfigurationTransportManager.updateFamilyPlanningAssociatedImportHeaderRow(fpSchemaName,messageSpecs.getconfigId(),messageSpecs.getcontainsHeaderRow());
+                        utconfigurationTransportManager.updateFamilyPlanningAssociatedImportHeaderRow(fpSchemaName,messageSpecs.getConfigId(),messageSpecs.isContainsHeaderRow());
                     }
                     catch (Exception ex) {
                         mailMessage mail = new mailMessage();
-                        mail.settoEmailAddress(myProps.getProperty("admin.email"));
-                        mail.setfromEmailAddress("support@health-e-link.net");
-                        mail.setmessageSubject("Error trying to update a family planning import type header row setting - " + " " + myProps.getProperty("server.identity"));
+                        mail.setToEmailAddress(myProps.getProperty("admin.email"));
+                        mail.setFromEmailAddress("support@health-e-link.net");
+                        mail.setMessageSubject("Error trying to update a family planning import type header row setting - " + " " + myProps.getProperty("server.identity"));
                         StringBuilder emailBody = new StringBuilder();
                         emailBody.append("There was an error trying to update a family planning import type header row setting.");
                         emailBody.append("<br/>FP Database Name: ").append(fpSchemaName);
-                        emailBody.append("<br/>Configuration Id: ").append(messageSpecs.getconfigId());
-                        emailBody.append("<br/>Updated Header Row: ").append(currMessageSpecs.getcontainsHeaderRow());
+                        emailBody.append("<br/>Configuration Id: ").append(messageSpecs.getConfigId());
+                        emailBody.append("<br/>Updated Header Row: ").append(currMessageSpecs.isContainsHeaderRow());
                         emailBody.append("<br/><br/>").append(ex.getMessage());
-                        mail.setmessageBody(emailBody.toString());
+                        mail.setMessageBody(emailBody.toString());
                         emailMessageManager.sendEmail(mail);
                     }
                 }
@@ -1382,8 +1429,6 @@ public class adminConfigController {
 	    }
 	}
 	
-        redirectAttr.addFlashAttribute("savedStatus", "updated");
-	
 	if(configDetails.getStepsCompleted() < 3) {
 	    configDetails.setStepsCompleted(3);
 	    utconfigurationmanager.updateConfiguration(configDetails);
@@ -1401,27 +1446,29 @@ public class adminConfigController {
 	updateLog.setUserId(userDetails.getId());
 	updateLog.setUpdateMade("Configuration Message Specs Updated");
 	utconfigurationmanager.saveConfigurationUpdateLog(updateLog);
-
+        
         //If the "Save" button was pressed
         if (action.equals("save")) {
+            redirectAttr.addFlashAttribute("savedStatus", "updated");
             ModelAndView mav = new ModelAndView(new RedirectView("messagespecs"));
             return mav;
         } else {
-	   ModelAndView mav = new ModelAndView(new RedirectView("mappings"));
+           redirectAttr.addFlashAttribute("savedStatus", "specsupdated"); 
+	   ModelAndView mav = new ModelAndView(new RedirectView("availableFields"));
 	   return mav;
         }
     }
 
     /**
-     * The '/mappings' GET request will determine based on the selected transport method what page to display.Either the choose fields page if 'online form' is selected or 'mappings' if a custom file is being uploaded.
+     * The '/availableFields' GET request will determine based on the selected transport method what page to display.Either the choose fields page if 'online form' is selected or 'mappings' if a custom file is being uploaded.
      * @param session
      * @param authentication
      * @return 
      * @throws java.lang.Exception 
      */
     @SuppressWarnings("rawtypes")
-    @RequestMapping(value = "/mappings", method = RequestMethod.GET)
-    public ModelAndView getConfigurationMappings(HttpSession session, Authentication authentication) throws Exception {
+    @RequestMapping(value = "/availableFields", method = RequestMethod.GET)
+    public ModelAndView getConfigurationFields(HttpSession session, Authentication authentication) throws Exception {
 	
 	Integer configId = 0;
 	
@@ -1435,12 +1482,17 @@ public class adminConfigController {
 	    configId = (Integer) session.getAttribute("manageconfigId");
 	}
 	
-        mav.setViewName("/administrator/configurations/mappings");
+        mav.setViewName("/administrator/configurations/fields/availableFields");
+        mav.addObject("pageId", "configuration-mappings");
+        mav.addObject("pageSection", "section-configurations");
+        mav.addObject("sect","config");
+        mav.addObject("actionPage","fields");
         mav.addObject("id", configId);
         mav.addObject("mappings", session.getAttribute("configmappings"));
         mav.addObject("HL7", session.getAttribute("configHL7"));
         mav.addObject("CCD", session.getAttribute("configCCD"));
 	mav.addObject("showAllConfigOptions",session.getAttribute("showAllConfigOptions"));
+        mav.addObject("eahUT", eahUT);
 
         //Get the completed steps for the selected utConfiguration;
         utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
@@ -1450,6 +1502,19 @@ public class adminConfigController {
 
 	Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getOrgId());
         configurationDetails.setOrgName(orgDetails.getOrgName());
+        String helSystemName = "";
+        if(orgDetails.getHelRegistryOrgId() > 0 || (orgDetails.getHelRegistryOrgId() == 0 && orgDetails.getHelRegistryId() > 0)) {
+            List<helRegistry> helRegistries = helregistrymanager.getAllActiveRegistries();
+
+            if(!helRegistries.isEmpty()) {
+                for(helRegistry registry : helRegistries) {
+                    if(registry.getId() == orgDetails.getHelRegistryId()) {
+                        helSystemName = registry.getRegistryName();
+                    }
+                }
+            }
+        }
+        mav.addObject("helSystemName", helSystemName);
        
         configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
         
@@ -1457,7 +1522,7 @@ public class adminConfigController {
         
         utUser userDetails = userManager.getUserByUserName(authentication.getName());
 	    
-        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.isStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
             configurationDetails.setAllowExport(true);
         }
         
@@ -1541,11 +1606,11 @@ public class adminConfigController {
 			    formField.setUseField(false);
 			}
 			else {
-			    formField.setUseField(formField.getUseField());
+			    formField.setUseField(formField.isUseField());
 			}
 		    }
 		    else {
-			formField.setUseField(formField.getUseField());
+			formField.setUseField(formField.isUseField());
 		    }
 		    
 		    return formField;		    
@@ -1624,16 +1689,6 @@ public class adminConfigController {
     @RequestMapping(value = "/translations", method = RequestMethod.GET)
     public ModelAndView getConfigurationTranslations(HttpSession session, Authentication authentication) throws Exception {
 
-        //Set the data translations array to get ready to hold data=
-        /*List<configurationDataTranslations> translations = new CopyOnWriteArrayList<>();
-	session.setAttribute("confgirationDataTranslastions", translations);
-	
-	List<configurationDataTranslations> preProcessingTranslations = new CopyOnWriteArrayList<>();
-	session.setAttribute("confgirationDataPreProcessingTranslastions", preProcessingTranslations);
-	
-	List<configurationDataTranslations> postProcessingTranslations = new CopyOnWriteArrayList<>();
-	session.setAttribute("confgirationDataPostProcessingTranslastions", postProcessingTranslations);*/
-	
 	Integer configId = 0;
 	
 	ModelAndView mav = new ModelAndView();
@@ -1645,8 +1700,12 @@ public class adminConfigController {
 	else {
 	    configId = (Integer) session.getAttribute("manageconfigId");
 	}
-	
-        mav.setViewName("/administrator/configurations/translations");
+        
+        mav.setViewName("administrator/configurations/dataTranslations/dataTranslations");
+        mav.addObject("pageId", "configuration-translations");
+        mav.addObject("pageSection", "section-configurations");
+        mav.addObject("sect","translations");
+        mav.addObject("actionPage","translations");
         mav.addObject("id", configId);
         mav.addObject("mappings", session.getAttribute("configmappings"));
         mav.addObject("HL7", session.getAttribute("configHL7"));
@@ -1660,24 +1719,52 @@ public class adminConfigController {
         
         utUser userDetails = userManager.getUserByUserName(authentication.getName());
 	    
-        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.isStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
             configurationDetails.setAllowExport(true);
         }
 
         //Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
+        
+        Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getOrgId());
 
-        configurationDetails.setOrgName(organizationmanager.getOrganizationById(configurationDetails.getOrgId()).getOrgName());
+        configurationDetails.setOrgName(orgDetails.getOrgName());
 	configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
 
         //pass the utConfiguration detail object back to the page.
         mav.addObject("configurationDetails", configurationDetails);
+        
+        String helSystemName = "";
+	
+        if(orgDetails.getHelRegistryOrgId() > 0 || (orgDetails.getHelRegistryOrgId() == 0 && orgDetails.getHelRegistryId() > 0)) {
+            List<helRegistry> helRegistries = helregistrymanager.getAllActiveRegistries();
+
+            if(!helRegistries.isEmpty()) {
+                for(helRegistry registry : helRegistries) {
+                    if(registry.getId() == orgDetails.getHelRegistryId()) {
+                        helSystemName = registry.getRegistryName();
+                    }
+                }
+            }
+        }
+        mav.addObject("helSystemName", helSystemName);
 
         //Get the transport fields
         List<configurationFormFields> fields = utconfigurationTransportManager.getConfigurationFields(configId, transportDetails.getId());
-        transportDetails.setFields(fields);
+        
+        //Only want to show the fields set to use
+        List<configurationFormFields> fieldsInUse = new ArrayList<>();
+        
+        if(!fields.isEmpty()) {
+            for(configurationFormFields field : fields) {
+                if(field.isUseField()) {
+                    fieldsInUse.add(field);
+                }
+            }
+        }
+        transportDetails.setFields(fieldsInUse);
 
-        mav.addObject("fields", fields);
+        mav.addObject("fields", fieldsInUse);
 
         //Return a list of available crosswalks
         List<Crosswalks> crosswalks = messagetypemanager.getCrosswalksForConfig(1, 0, configurationDetails.getOrgId(),configurationDetails.getId(), false);
@@ -1692,7 +1779,7 @@ public class adminConfigController {
                         if(cId > 0) {
                             utConfiguration cDetails = utconfigurationmanager.getConfigurationById(cId);
                             if(cDetails != null) {
-                               if(cDetails.getStatus()) {
+                               if(cDetails.isStatus()) {
                                     crosswalksToUse.add(crosswalk);
                                 } 
                             }
@@ -1719,7 +1806,7 @@ public class adminConfigController {
         //fields filled in
         List<Integer> macroLookUpList = new ArrayList<>();
         for (Macros macro : macros) {
-            if (macro.getfieldAQuestion() != null || macro.getfieldBQuestion() != null || macro.getcon1Question() != null || macro.getcon2Question() != null) {
+            if (macro.getFieldAQuestion() != null || macro.getFieldBQuestion() != null || macro.getCon1Question() != null || macro.getCon2Question() != null) {
                 macroLookUpList.add(macro.getId());
             }
         }
@@ -1756,7 +1843,7 @@ public class adminConfigController {
     public @ResponseBody ModelAndView getMacroDetails(@RequestParam(value = "macroId", required = true) Integer macroId, HttpSession session) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/macroDetails");
+        mav.setViewName("/administrator/configurations/dataTranslations/macroDetails");
 
         Macros macroDetails = utconfigurationmanager.getMacroById(macroId);
 
@@ -1766,42 +1853,42 @@ public class adminConfigController {
 	boolean fieldAContainsCW = false;
 	boolean fieldBContainsCW = false;
 	
-	if(macroDetails.getcon1Question() != null) {
-	    if(macroDetails.getcon1Question().contains("crosswalk")) {
+	if(macroDetails.getCon1Question() != null) {
+	    if(macroDetails.getCon1Question().contains("crosswalk")) {
 		questionContainsCW = true;
 		con1ContainsCW = true;
 		macroDetails.setCon1Question("Please select the crosswalk");
 	    }
 	}
 	
-	if(macroDetails.getcon2Question() != null) {
-	    if(macroDetails.getcon2Question().contains("crosswalk")) {
+	if(macroDetails.getCon2Question() != null) {
+	    if(macroDetails.getCon2Question().contains("crosswalk")) {
 		questionContainsCW = true;
 		con2ContainsCW = true;
 		macroDetails.setCon2Question("Please select the crosswalk");
 	    }
 	}
 	
-	if(macroDetails.getfieldAQuestion() != null) {
-	    if(macroDetails.getfieldAQuestion().contains("crosswalk")) {
+	if(macroDetails.getFieldAQuestion() != null) {
+	    if(macroDetails.getFieldAQuestion().contains("crosswalk")) {
 		questionContainsCW = true;
 		fieldAContainsCW = true;
-		macroDetails.setfieldAQuestion("Please select the crosswalk");
+		macroDetails.setFieldAQuestion("Please select the crosswalk");
 	    }
 	}
 	
-	if(macroDetails.getfieldBQuestion() != null) {
-	    if(macroDetails.getfieldBQuestion().contains("crosswalk")) {
+	if(macroDetails.getFieldBQuestion() != null) {
+	    if(macroDetails.getFieldBQuestion().contains("crosswalk")) {
 		questionContainsCW = true;
 		fieldBContainsCW = true;
-		macroDetails.setfieldBQuestion("Please select the crosswalk");
+		macroDetails.setFieldBQuestion("Please select the crosswalk");
 	    }
 	}
 	
-	mav.addObject("fieldA_Question", macroDetails.getfieldAQuestion().trim());
-        mav.addObject("fieldB_Question", macroDetails.getfieldBQuestion().trim());
-        mav.addObject("Con1_Question", macroDetails.getcon1Question().trim());
-        mav.addObject("Con2_Question", macroDetails.getcon2Question().trim());
+	mav.addObject("fieldA_Question", macroDetails.getFieldAQuestion().trim());
+        mav.addObject("fieldB_Question", macroDetails.getFieldBQuestion().trim());
+        mav.addObject("Con1_Question", macroDetails.getCon1Question().trim());
+        mav.addObject("Con2_Question", macroDetails.getCon2Question().trim());
         mav.addObject("populateFieldA", macroDetails.isPopulateFieldA());
 	mav.addObject("con1ContainsCW", con1ContainsCW);
 	mav.addObject("con2ContainsCW", con2ContainsCW);
@@ -1882,7 +1969,6 @@ public class adminConfigController {
      * The '/getTranslations.do' function will return the list of existing translations set up for the selected utConfiguration/transportMethod.
      *
      * @param session
-     * @param categoryId
      * @return 
      * @throws java.lang.Exception 
      * @Return list of translations
@@ -1894,7 +1980,7 @@ public class adminConfigController {
         ModelAndView mav = new ModelAndView();
 	
 	Integer configId = (Integer) session.getAttribute("manageconfigId");
-        mav.setViewName("/administrator/configurations/existingTranslations");
+        mav.setViewName("/administrator/configurations/dataTranslations/existingTranslations");
 	
 	List<configurationDataTranslations> translations = new ArrayList<>();
 	
@@ -1914,7 +2000,7 @@ public class adminConfigController {
 
             //Get the field name by id
             fieldName = utconfigurationmanager.getFieldName(translation.getFieldId());
-            translation.setfieldName(fieldName);
+            translation.setFieldName(fieldName);
 
             if (translation.getCrosswalkId() != 0) {
                 cwId = translation.getCrosswalkId();
@@ -1925,12 +2011,12 @@ public class adminConfigController {
                 Macros macroDetails = utconfigurationmanager.getMacroById(translation.getMacroId());
                 macroName = macroDetails.getMacroName();
                 if (macroName.contains("DATE")) {
-                    macroName = macroDetails.getMacroName()+ " " + macroDetails.getdateDisplay();
+                    macroName = macroDetails.getMacroName()+ " " + macroDetails.getDateDisplay();
                 }
                 translation.setMacroName(macroName);
 
-                if(macroDetails.getcon1Question() != null) {
-                    if(macroDetails.getcon1Question().contains("crosswalk")) {
+                if(macroDetails.getCon1Question() != null) {
+                    if(macroDetails.getCon1Question().contains("crosswalk")) {
                         if(translation.getConstant1() != null) {
                             if(!"".equals(translation.getConstant1())) {
                                 cwId = Integer.parseInt(translation.getConstant1());
@@ -1939,8 +2025,8 @@ public class adminConfigController {
                     }
                 }
 
-                if(macroDetails.getcon2Question() != null) {
-                    if(macroDetails.getcon2Question().contains("crosswalk")) {
+                if(macroDetails.getCon2Question() != null) {
+                    if(macroDetails.getCon2Question().contains("crosswalk")) {
                         if(translation.getConstant2() != null) {
                             if(!"".equals(translation.getConstant2())) {
                                 cwId = Integer.parseInt(translation.getConstant2());
@@ -1949,8 +2035,8 @@ public class adminConfigController {
                     }
                 }
 
-                if(macroDetails.getfieldAQuestion() != null) {
-                    if(macroDetails.getfieldAQuestion().contains("crosswalk")) {
+                if(macroDetails.getFieldAQuestion() != null) {
+                    if(macroDetails.getFieldAQuestion().contains("crosswalk")) {
                         if(translation.getFieldA() != null) {
                             if(!"".equals(translation.getFieldA())) {
                                 cwId = Integer.parseInt(translation.getFieldA());
@@ -1959,8 +2045,8 @@ public class adminConfigController {
                     }
                 }
 
-                if(macroDetails.getfieldBQuestion() != null) {
-                    if(macroDetails.getfieldBQuestion().contains("crosswalk")) {
+                if(macroDetails.getFieldBQuestion() != null) {
+                    if(macroDetails.getFieldBQuestion().contains("crosswalk")) {
                         if(translation.getFieldB() != null) {
                             if(!"".equals(translation.getFieldB())) {
                                 cwId = Integer.parseInt(translation.getFieldB());
@@ -1974,16 +2060,16 @@ public class adminConfigController {
             if (cwId > 0) {
                 defaultValues = new HashMap<>();
                 crosswalkName = messagetypemanager.getCrosswalkName(cwId);
-                translation.setcrosswalkName(crosswalkName);
+                translation.setCrosswalkName(crosswalkName);
 
                 /* Get values of crosswalk */
-                List crosswalkdata = messagetypemanager.getCrosswalkData(cwId);
+                List<CrosswalkData> crosswalkdata = messagetypemanager.getCrosswalkData(cwId);
 
                 Iterator cwDataIt = crosswalkdata.iterator();
                 while (cwDataIt.hasNext()) {
-                    Object cwDatarow[] = (Object[]) cwDataIt.next();
-                    optionDesc = (String) cwDatarow[2];
-                    optionValue = (String) cwDatarow[0];
+                    CrosswalkData cwDatarow = (CrosswalkData) cwDataIt.next();
+                    optionDesc = cwDatarow.getDescValue();
+                    optionValue = cwDatarow.getSourceValue();
 
                     defaultValues.put(optionValue, optionDesc);
 
@@ -2049,7 +2135,7 @@ public class adminConfigController {
         }
 	
         configurationDataTranslations translation = new configurationDataTranslations();
-        translation.setconfigId(configId);
+        translation.setConfigId(configId);
         translation.setFieldId(field);
         translation.setMacroId(macroId);
         translation.setCrosswalkId(cwId);
@@ -2065,14 +2151,14 @@ public class adminConfigController {
             Map<String, String> defaultValues = new HashMap<>();
             String optionDesc;
             String optionValue;
-
-            List crosswalkdata = messagetypemanager.getCrosswalkData(cwId);
+            
+            List<CrosswalkData> crosswalkdata = messagetypemanager.getCrosswalkData(cwId);
 
             Iterator cwDataIt = crosswalkdata.iterator();
             while (cwDataIt.hasNext()) {
-                Object cwDatarow[] = (Object[]) cwDataIt.next();
-                optionDesc = (String) cwDatarow[2];
-                optionValue = (String) cwDatarow[0];
+                CrosswalkData cwDatarow = (CrosswalkData) cwDataIt.next();
+                optionDesc = cwDatarow.getDescValue();
+                optionValue = cwDatarow.getSourceValue();
 
                 defaultValues.put(optionValue, optionDesc);
 
@@ -2102,7 +2188,7 @@ public class adminConfigController {
         configurationDataTranslations translationDetails = utconfigurationmanager.getDataTranslationById(translationId);
         
         if(translationDetails != null) {
-            List<configurationDataTranslations> existingTranslations = utconfigurationmanager.getDataTranslationsWithFieldNo(translationDetails.getconfigId(), 1);
+            List<configurationDataTranslations> existingTranslations = utconfigurationmanager.getDataTranslationsWithFieldNo(translationDetails.getConfigId(), 1);
             
             if(!existingTranslations.isEmpty()) {
                 String sqlStatement = "";
@@ -2145,7 +2231,7 @@ public class adminConfigController {
         configurationDataTranslations translationDetails = utconfigurationmanager.getDataTranslationById(translationId);
         
         if(translationDetails != null) {
-            List<configurationDataTranslations> existingTranslations = utconfigurationmanager.getDataTranslationsWithFieldNo(translationDetails.getconfigId(), 1);
+            List<configurationDataTranslations> existingTranslations = utconfigurationmanager.getDataTranslationsWithFieldNo(translationDetails.getConfigId(), 1);
             
             if(!existingTranslations.isEmpty()) {
                 String sqlStatement = "";
@@ -2197,8 +2283,14 @@ public class adminConfigController {
 	else {
 	    configId = (Integer) session.getAttribute("manageconfigId");
 	}
-	
-        mav.setViewName("/administrator/configurations/schedule");
+        
+        mav.setViewName("administrator/configurations/schedule/schedule");
+        mav.addObject("pageId", "configuration-schedule");
+        mav.addObject("pageSection", "section-configurations");
+        mav.addObject("sect","schedule");
+        mav.addObject("actionPage","schedule");
+        mav.addObject("eahUT", eahUT);
+        
         mav.addObject("id", configId);
         mav.addObject("mappings", session.getAttribute("configmappings"));
         mav.addObject("HL7", session.getAttribute("configHL7"));
@@ -2212,14 +2304,31 @@ public class adminConfigController {
         
         utUser userDetails = userManager.getUserByUserName(authentication.getName());
 	    
-        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.getStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
+        if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.isStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
             configurationDetails.setAllowExport(true);
         }
 
         //Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
+        
+        Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getOrgId());
+        
+        String helSystemName = "";
+	
+        if(orgDetails.getHelRegistryOrgId() > 0 || (orgDetails.getHelRegistryOrgId() == 0 && orgDetails.getHelRegistryId() > 0)) {
+            List<helRegistry> helRegistries = helregistrymanager.getAllActiveRegistries();
 
-        configurationDetails.setOrgName(organizationmanager.getOrganizationById(configurationDetails.getOrgId()).getOrgName());
+            if(!helRegistries.isEmpty()) {
+                for(helRegistry registry : helRegistries) {
+                    if(registry.getId() == orgDetails.getHelRegistryId()) {
+                        helSystemName = registry.getRegistryName();
+                    }
+                }
+            }
+        }
+        mav.addObject("helSystemName", helSystemName);
+
+        configurationDetails.setOrgName(orgDetails.getOrgName());
 	configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
 
         //pass the utConfiguration detail object back to the page.
@@ -2227,7 +2336,7 @@ public class adminConfigController {
 
         if (scheduleDetails == null) {
             scheduleDetails = new configurationSchedules();
-            scheduleDetails.setconfigId(configId);
+            scheduleDetails.setConfigId(configId);
         }
         mav.addObject("scheduleDetails", scheduleDetails);
 	
@@ -2275,31 +2384,31 @@ public class adminConfigController {
         //This will help in case the user was switching around selecting
         //values before they saved
         //Manually
-        if (scheduleDetails.gettype() == 1 || scheduleDetails.gettype() == 5) {
-            scheduleDetails.setprocessingType(0);
-            scheduleDetails.setnewfileCheck(0);
-            scheduleDetails.setprocessingDay(0);
-            scheduleDetails.setprocessingTime(0);
+        if (scheduleDetails.getType() == 1 || scheduleDetails.getType() == 5) {
+            scheduleDetails.setProcessingType(0);
+            scheduleDetails.setNewfileCheck(0);
+            scheduleDetails.setProcessingDay(0);
+            scheduleDetails.setProcessingTime(0);
         } 
 	//Daily
-        else if (scheduleDetails.gettype() == 2) {
-            scheduleDetails.setprocessingDay(0);
-            if (scheduleDetails.getprocessingType() == 1) {
-                scheduleDetails.setnewfileCheck(0);
+        else if (scheduleDetails.getType() == 2) {
+            scheduleDetails.setProcessingDay(0);
+            if (scheduleDetails.getProcessingType() == 1) {
+                scheduleDetails.setNewfileCheck(0);
             } else {
-                scheduleDetails.setprocessingTime(0);
+                scheduleDetails.setProcessingTime(0);
             }
         } 
 	//Weekly
-        else if (scheduleDetails.gettype() == 3) {
-            scheduleDetails.setprocessingType(0);
-            scheduleDetails.setnewfileCheck(0);
+        else if (scheduleDetails.getType() == 3) {
+            scheduleDetails.setProcessingType(0);
+            scheduleDetails.setNewfileCheck(0);
         } 
 	//Monthly
-        else if (scheduleDetails.gettype() == 4) {
-            scheduleDetails.setprocessingType(0);
-            scheduleDetails.setnewfileCheck(0);
-            scheduleDetails.setprocessingDay(0);
+        else if (scheduleDetails.getType() == 4) {
+            scheduleDetails.setProcessingType(0);
+            scheduleDetails.setNewfileCheck(0);
+            scheduleDetails.setProcessingDay(0);
         }
 
         utconfigurationmanager.saveSchedule(scheduleDetails);
@@ -2312,8 +2421,6 @@ public class adminConfigController {
 	updateLog.setUpdateMade("Configuration Schedule Updated");
 	utconfigurationmanager.saveConfigurationUpdateLog(updateLog);
 
-        redirectAttr.addFlashAttribute("savedStatus", "updated");
-	
 	boolean HL7Val = false;
 	boolean CCDVal = false;
 	
@@ -2332,7 +2439,8 @@ public class adminConfigController {
 		return mav;
 	    }
 	    else {
-		 ModelAndView mav = new ModelAndView(new RedirectView("scheduling"));
+                redirectAttr.addFlashAttribute("savedStatus", "updated");
+		ModelAndView mav = new ModelAndView(new RedirectView("scheduling"));
 		return mav;
 	    }
            
@@ -2346,7 +2454,8 @@ public class adminConfigController {
             return mav;
         } 
 	else {
-	    ModelAndView mav = new ModelAndView(new RedirectView("/administrator/configurations/list?msg=updated"));
+            redirectAttr.addFlashAttribute("savedStatus", "scheduleupdated");
+	    ModelAndView mav = new ModelAndView(new RedirectView("/administrator/configurations/notes"));
             return mav;
         }
     }
@@ -2415,7 +2524,7 @@ public class adminConfigController {
 
                         for (HL7Elements element : HL7Elments) {
                             List<HL7ElementComponents> components = utconfigurationmanager.getHL7ElementComponents(element.getId());
-                            element.setelementComponents(components);
+                            element.setElementComponents(components);
                         }
 
                         segment.setHL7Elements(HL7Elments);
@@ -2452,9 +2561,9 @@ public class adminConfigController {
         mainHL7Details hl7Specs = sysAdminManager.getHL7Details(hl7SpecId);
 
         HL7Details newHL7 = new HL7Details();
-        newHL7.setconfigId(configId);
-        newHL7.setfieldSeparator(hl7Specs.getfieldSeparator());
-        newHL7.setcomponentSeparator(hl7Specs.getcomponentSeparator());
+        newHL7.setConfigId(configId);
+        newHL7.setFieldSeparator(hl7Specs.getFieldSeparator());
+        newHL7.setComponentSeparator(hl7Specs.getComponentSeparator());
         newHL7.setEscapeChar(hl7Specs.getEscapeChar());
 
         int hl7Id = utconfigurationmanager.saveHL7Details(newHL7);
@@ -2464,9 +2573,9 @@ public class adminConfigController {
         for (mainHL7Segments segment : segments) {
 
             HL7Segments newHL7Segment = new HL7Segments();
-            newHL7Segment.sethl7Id(hl7Id);
-            newHL7Segment.setsegmentName(segment.getsegmentName());
-            newHL7Segment.setdisplayPos(segment.getdisplayPos());
+            newHL7Segment.setHl7Id(hl7Id);
+            newHL7Segment.setSegmentName(segment.getSegmentName());
+            newHL7Segment.setDisplayPos(segment.getDisplayPos());
 
             int segmentId = utconfigurationmanager.saveHL7Segment(newHL7Segment);
 
@@ -2475,11 +2584,11 @@ public class adminConfigController {
             for (mainHL7Elements element : elements) {
 
                 HL7Elements newHL7Element = new HL7Elements();
-                newHL7Element.sethl7Id(hl7Id);
-                newHL7Element.setsegmentId(segmentId);
-                newHL7Element.setelementName(element.getelementName());
-                newHL7Element.setdefaultValue(element.getdefaultValue());
-                newHL7Element.setdisplayPos(element.getdisplayPos());
+                newHL7Element.setHl7Id(hl7Id);
+                newHL7Element.setSegmentId(segmentId);
+                newHL7Element.setElementName(element.getElementName());
+                newHL7Element.setDefaultValue(element.getDefaultValue());
+                newHL7Element.setDisplayPos(element.getDisplayPos());
 
                 utconfigurationmanager.saveHL7Element(newHL7Element);
             }
@@ -2521,7 +2630,7 @@ public class adminConfigController {
 
 
                             /* Get the list of segment element components */
-                            List<HL7ElementComponents> components = element.getelementComponents();
+                            List<HL7ElementComponents> components = element.getElementComponents();
 
                             if (null != components && components.size() > 0) {
                                 for (HL7ElementComponents component : components) {
@@ -2537,7 +2646,7 @@ public class adminConfigController {
 	//Log the update
 	utUser userDetails = userManager.getUserByUserName(authentication.getName());
 	configurationUpdateLogs updateLog = new configurationUpdateLogs();
-	updateLog.setConfigId(HL7Details.getconfigId());
+	updateLog.setConfigId(HL7Details.getConfigId());
 	updateLog.setUserId(userDetails.getId());
 	updateLog.setUpdateMade("Configuration HL7 section Updated");
 	utconfigurationmanager.saveConfigurationUpdateLog(updateLog);
@@ -2567,8 +2676,8 @@ public class adminConfigController {
         mav.setViewName("/administrator/configurations/HL7Segment");
 
         HL7Segments segmentDetails = new HL7Segments();
-        segmentDetails.sethl7Id(hl7Id);
-        segmentDetails.setdisplayPos(nextPos);
+        segmentDetails.setHl7Id(hl7Id);
+        segmentDetails.setDisplayPos(nextPos);
 
         mav.addObject("HL7SegmentDetails", segmentDetails);
 
@@ -2616,9 +2725,9 @@ public class adminConfigController {
         mav.setViewName("/administrator/configurations/HL7Element");
 
         HL7Elements elementDetails = new HL7Elements();
-        elementDetails.sethl7Id(hl7Id);
-        elementDetails.setsegmentId(segmentId);
-        elementDetails.setdisplayPos(nextPos);
+        elementDetails.setHl7Id(hl7Id);
+        elementDetails.setSegmentId(segmentId);
+        elementDetails.setDisplayPos(nextPos);
 
         mav.addObject("HL7ElementDetails", elementDetails);
 
@@ -2668,8 +2777,8 @@ public class adminConfigController {
         mav.setViewName("/administrator/configurations/HL7Component");
 
         HL7ElementComponents componentDetails = new HL7ElementComponents();
-        componentDetails.setelementId(elementId);
-        componentDetails.setdisplayPos(nextPos);
+        componentDetails.setElementId(elementId);
+        componentDetails.setDisplayPos(nextPos);
 
         mav.addObject("HL7ComponentDetails", componentDetails);
 
@@ -2758,7 +2867,7 @@ public class adminConfigController {
         //Loop through list of macros to mark the ones that need
         //fields filled in
         List<Integer> macroLookUpList = new ArrayList<>();
-	macros.stream().filter((macro) -> (macro.getfieldAQuestion() != null || macro.getfieldBQuestion() != null || macro.getcon1Question() != null || macro.getcon2Question() != null)).forEachOrdered((macro) -> {
+	macros.stream().filter((macro) -> (macro.getFieldAQuestion() != null || macro.getFieldBQuestion() != null || macro.getCon1Question() != null || macro.getCon2Question() != null)).forEachOrdered((macro) -> {
 	    macroLookUpList.add(macro.getId());
 	});
         mav.addObject("macroLookUpList", macroLookUpList);
@@ -2828,7 +2937,7 @@ public class adminConfigController {
         //Loop through list of macros to mark the ones that need
         //fields filled in
         List<Integer> macroLookUpList = new ArrayList<>();
-	macros.stream().filter((macro) -> (macro.getfieldAQuestion() != null || macro.getfieldBQuestion() != null || macro.getcon1Question() != null || macro.getcon2Question() != null)).forEachOrdered((macro) -> {
+	macros.stream().filter((macro) -> (macro.getFieldAQuestion() != null || macro.getFieldBQuestion() != null || macro.getCon1Question() != null || macro.getCon2Question() != null)).forEachOrdered((macro) -> {
 	    macroLookUpList.add(macro.getId());
 	});
         mav.addObject("macroLookUpList", macroLookUpList);
@@ -3148,8 +3257,8 @@ public class adminConfigController {
 	Integer transportDetailId = utconfigurationTransportManager.updateTransportDetails(newconfigDetails,newTransportDetails);
 	
 	configurationTransportMessageTypes newConfigTransportMessageType = new configurationTransportMessageTypes();
-	newConfigTransportMessageType.setconfigId(id);
-	newConfigTransportMessageType.setconfigTransportId(transportDetailId);
+	newConfigTransportMessageType.setConfigId(id);
+	newConfigTransportMessageType.setConfigTransportId(transportDetailId);
 	
 	utconfigurationTransportManager.saveTransportMessageTypes(newConfigTransportMessageType);
 		
@@ -3157,16 +3266,16 @@ public class adminConfigController {
 	configurationMessageSpecs messageSpecs = utconfigurationmanager.getMessageSpecs(configId);
 	
 	configurationMessageSpecs newMessageSpecs = new configurationMessageSpecs();
-	newMessageSpecs.setconfigId(id);
-	newMessageSpecs.settemplateFile(messageSpecs.gettemplateFile());
-	newMessageSpecs.setmessageTypeCol(messageSpecs.getmessageTypeCol());
-	newMessageSpecs.setmessageTypeVal(messageSpecs.getmessageTypeVal());
-	newMessageSpecs.settargetOrgCol(messageSpecs.gettargetOrgCol());
-	newMessageSpecs.setcontainsHeaderRow(messageSpecs.getcontainsHeaderRow());
-	newMessageSpecs.setrptField1(messageSpecs.getrptField1());
-	newMessageSpecs.setrptField2(messageSpecs.getrptField2());
-	newMessageSpecs.setrptField3(messageSpecs.getrptField3());
-	newMessageSpecs.setrptField4(messageSpecs.getrptField4());
+	newMessageSpecs.setConfigId(id);
+	newMessageSpecs.setTemplateFile(messageSpecs.getTemplateFile());
+	newMessageSpecs.setMessageTypeCol(messageSpecs.getMessageTypeCol());
+	newMessageSpecs.setMessageTypeVal(messageSpecs.getMessageTypeVal());
+	newMessageSpecs.setTargetOrgCol(messageSpecs.getTargetOrgCol());
+	newMessageSpecs.setContainsHeaderRow(messageSpecs.isContainsHeaderRow());
+	newMessageSpecs.setRptField1(messageSpecs.getRptField1());
+	newMessageSpecs.setRptField2(messageSpecs.getRptField2());
+	newMessageSpecs.setRptField3(messageSpecs.getRptField3());
+	newMessageSpecs.setRptField4(messageSpecs.getRptField4());
 	newMessageSpecs.setSourceSubOrgCol(messageSpecs.getSourceSubOrgCol());
 	newMessageSpecs.setExcelstartrow(messageSpecs.getExcelstartrow());
 	newMessageSpecs.setExcelskiprows(messageSpecs.getExcelskiprows());
@@ -3187,14 +3296,14 @@ public class adminConfigController {
 		    Integer currFormFieldId = field.getId();
 		    
 		    configurationFormFields newFormField = new configurationFormFields();
-		    newFormField.setconfigId(id);
+		    newFormField.setConfigId(id);
 		    newFormField.setAssociatedFieldId(field.getAssociatedFieldId());
-		    newFormField.settransportDetailId(transportDetailId);
+		    newFormField.setTransportDetailId(transportDetailId);
 		    newFormField.setFieldNo(field.getFieldNo());
 		    newFormField.setFieldDesc(field.getFieldDesc());
 		    newFormField.setValidationType(field.getValidationType());
-		    newFormField.setRequired(field.getRequired());
-		    newFormField.setUseField(field.getUseField());
+		    newFormField.setRequired(field.isRequired());
+		    newFormField.setUseField(field.isUseField());
 		    
 		    Integer formFieldId = utconfigurationTransportManager.saveConfigurationFormFields(newFormField);
 		    
@@ -3203,7 +3312,7 @@ public class adminConfigController {
 			    for(configurationDataTranslations translation : existingTranslations) {
 				if(currFormFieldId.equals(translation.getFieldId())) {
 				    configurationDataTranslations newTranslation = new configurationDataTranslations();
-				    newTranslation.setconfigId(id);
+				    newTranslation.setConfigId(id);
 				    newTranslation.setFieldId(formFieldId);
 				    newTranslation.setCrosswalkId(translation.getCrosswalkId());
 				    newTranslation.setMacroId(translation.getMacroId());
@@ -3227,8 +3336,8 @@ public class adminConfigController {
 	
 	//Save new schedule
 	configurationSchedules newSchedule = new configurationSchedules();
-	newSchedule.setconfigId(id);
-	newSchedule.settype(5);
+	newSchedule.setConfigId(id);
+	newSchedule.setType(5);
 	
 	utconfigurationmanager.saveSchedule(newSchedule);
 
@@ -3328,7 +3437,7 @@ public class adminConfigController {
         double maxCrosswalkVal = maxCrosswalks;
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/crosswalks");
+        mav.setViewName("/administrator/configurations/dataTranslations/crosswalks");
         mav.addObject("orgId", orgId);
 
         //Need to return a list of crosswalks
@@ -3374,7 +3483,7 @@ public class adminConfigController {
         }
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/crosswalkDetails");
+        mav.setViewName("/administrator/configurations/dataTranslations/crosswalkDetails");
 
         Crosswalks crosswalkDetails = new Crosswalks();
         mav.addObject("crosswalkDetails", crosswalkDetails);
@@ -3468,7 +3577,7 @@ public class adminConfigController {
     ModelAndView viewCrosswalk(@RequestParam(value = "i", required = true) Integer cwId) throws Exception {
 	
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/crosswalkDetails");
+        mav.setViewName("administrator/configurations/dataTranslations/crosswalkDetails");
 
         //Get the details of the selected crosswalk
         Crosswalks crosswalkDetails = messagetypemanager.getCrosswalk(cwId);
@@ -3482,7 +3591,7 @@ public class adminConfigController {
 
         //Get the data associated with the selected crosswalk
         @SuppressWarnings("rawtypes")
-        List crosswalkData = messagetypemanager.getCrosswalkData(cwId);
+        List<CrosswalkData> crosswalkData = messagetypemanager.getCrosswalkData(cwId);
         mav.addObject("crosswalkData", crosswalkData);
 
         //Get the list of available file delimiters
@@ -3529,7 +3638,7 @@ public class adminConfigController {
     @ResponseBody public ModelAndView createDataTranslationDownload(@RequestParam(value = "configId", required = false) Integer configId,HttpSession session) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/dtDownloadForm");
+        mav.setViewName("/administrator/configurations/dataTranslations/dtDownloadForm");
         mav.addObject("configId", configId);
 
         utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
@@ -3556,7 +3665,7 @@ public class adminConfigController {
     @ResponseBody public String dataTranslationsDownload(@RequestParam(value = "configId", required = true) Integer configId, @RequestParam(value = "fileName", required = true) String fileName, HttpSession session,HttpServletResponse response) throws Exception {
 	
 	utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
-	
+        
 	if(configurationDetails != null) {
 	   
 	    File dtFile = new File (System.getProperty("java.io.tmpdir") + "/" + fileName.replaceAll("\\s+","") + ".csv");
@@ -3564,7 +3673,7 @@ public class adminConfigController {
 	    try (BufferedWriter writer = new BufferedWriter(new FileWriter(dtFile))) {
 		
 		List dataTranslations = utconfigurationmanager.getDataTranslationsForDownload(configId);
-		
+                
 		if(!dataTranslations.isEmpty()) {
 		    StringBuilder sb;
 		
@@ -3596,18 +3705,18 @@ public class adminConfigController {
 			Object dtDatarow[] = (Object[]) dtDataIt.next();
 
 			sb.append(dtDatarow[0]).append(",")
-			.append(dtDatarow[12]).append(",")
-			.append(dtDatarow[2]).append(",")
+			.append(dtDatarow[13]).append(",")
 			.append(dtDatarow[3]).append(",")
-			.append("\"").append(dtDatarow[4]).append("\"").append(",")
-			.append(dtDatarow[5]).append(",")
+			.append(dtDatarow[4]).append(",")
+			.append("\"").append(dtDatarow[5]).append("\"").append(",")
 			.append(dtDatarow[6]).append(",")
 			.append(dtDatarow[7]).append(",")
-			.append("\"").append(dtDatarow[8]).append("\"").append(",")
+			.append(dtDatarow[8]).append(",")
 			.append("\"").append(dtDatarow[9]).append("\"").append(",")
 			.append("\"").append(dtDatarow[10]).append("\"").append(",")
 			.append("\"").append(dtDatarow[11]).append("\"").append(",")
-			.append(dtDatarow[1]);
+			.append("\"").append(dtDatarow[12]).append("\"").append(",")
+			.append(dtDatarow[2]);
 
 			writer.write(sb.toString());
 			if(dtDataIt.hasNext()) {
@@ -3644,7 +3753,7 @@ public class adminConfigController {
     public ModelAndView createCrosswalkDownload(@RequestParam(value = "configId", required = false) Integer configId,HttpSession session) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/cwDownloadForm");
+        mav.setViewName("/administrator/configurations/dataTranslations/cwDownloadForm");
         mav.addObject("configId", configId);
 
         utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
@@ -3802,7 +3911,7 @@ public class adminConfigController {
     public @ResponseBody ModelAndView macroDefinitions(@RequestParam(value = "macroCategory", required = true) Integer macroCategory) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/macroDefinitions");
+        mav.setViewName("/administrator/configurations/dataTranslations/macroDefinitions");
 	
         List<Macros> macros = utconfigurationmanager.getMacrosByCategory(macroCategory);
         mav.addObject("macros", macros);
@@ -3810,96 +3919,6 @@ public class adminConfigController {
         return mav;
     }
     
-    /**
-     * The 'appendConfigurationFields' GET request will return modal for appending new fields to the existing configuration field list.
-     *
-     * @param configId The id of the clicked configuration
-     * @param configTransportId
-     * @param session
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/appendConfigurationFields", method = RequestMethod.GET)
-    @ResponseBody public ModelAndView appendConfigurationFields(
-	@RequestParam(value = "configId", required = true) Integer configId,
-	@RequestParam(value = "configTransportId", required = true) Integer configTransportId,HttpSession session) throws Exception {
-
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/appendNewFields");
-	
-	configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
-	
-	List<configurationFormFields> currentFields = utconfigurationTransportManager.getConfigurationFields(configId, configTransportId);
-	
-	Integer nextFieldNo = 1;
-	
-	if(currentFields != null) {
-	    if(!currentFields.isEmpty()) {
-		configurationFormFields lastField = currentFields.get(currentFields.size()-1);
-		nextFieldNo = lastField.getFieldNo()+1;
-		
-	    }
-	}
-	
-	List<appenedNewconfigurationFormFields> newFields = new ArrayList<>();
-	
-	for(int i = 0; i<10;i++) {
-	    appenedNewconfigurationFormFields newFormField = new appenedNewconfigurationFormFields();
-	    newFormField.setFieldNo(nextFieldNo);
-	    newFormField.setConfigId(configId);
-	    newFormField.setTransportDetailId(configTransportId);
-	    newFields.add(newFormField);
-	    
-	    nextFieldNo++;
-	}
-	
-	transportDetails.setNewfields(newFields);
-        
-	mav.addObject("transportDetails", transportDetails);
-	
-	List validationTypes = messagetypemanager.getValidationTypes();
-        mav.addObject("validationTypes", validationTypes);
-
-        return mav;
-    }
-    
-    /**
-     *
-     * @param transportDetails
-     * @return 
-     * @throws java.lang.Exception
-     */
-    @RequestMapping(value = "/saveNewConfigurationFields", method = RequestMethod.POST)
-    public ModelAndView saveNewConfigurationFields(@ModelAttribute(value = "transportDetails") configurationTransport transportDetails) throws Exception {
-	
-	//Get the list of fields
-        List<appenedNewconfigurationFormFields> fields = transportDetails.getNewfields();
-	
-	if(fields != null) {
-	    if(!fields.isEmpty()) {
-		for(appenedNewconfigurationFormFields field : fields) {
-		    if(field.isUseField() && !"".equals(field.getFieldDesc())) {
-			configurationFormFields newFormField = new configurationFormFields();
-			newFormField.setAssociatedFieldId(0);
-			newFormField.setconfigId(field.getConfigId());
-			newFormField.settransportDetailId(field.getTransportDetailId());
-			newFormField.setFieldNo(field.getFieldNo());
-			newFormField.setFieldDesc(field.getFieldDesc());
-			newFormField.setValidationType(field.getValidationType());
-			newFormField.setRequired(field.isRequired());
-			newFormField.setSampleData(field.getSampleData());
-			newFormField.setUseField(true);
-			
-			utconfigurationTransportManager.saveConfigurationFormFields(newFormField);
-		    }
-		    
-		}
-	    }
-	}
-
-        ModelAndView mav = new ModelAndView(new RedirectView("mappings"));
-        return mav;
-    }
     
     /**
      * The 'createConfigPrintPDF.do' method will copy the selected utConfiguration.
@@ -3987,87 +4006,6 @@ public class adminConfigController {
         }
     } 
     
-    /**
-     * The 'configFileUpload' GET request will return modal for downloading the crosswalks.
-     *
-     * @param configId
-     * @param fileDropLocation 
-     * @param session
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/configFileUpload", method = RequestMethod.GET)
-    @ResponseBody
-    public ModelAndView configFileUpload(@RequestParam(value = "configId", required = true) Integer configId,
-	@RequestParam(value = "fileDropLocation", required = true) String fileDropLocation,HttpSession session) throws Exception {
-	
-	configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
-
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/configUploadFile");
-        mav.addObject("fileDropLocation", fileDropLocation);
-	mav.addObject("expectedExt", transportDetails.getFileExt());
-        return mav;
-    }
-    
-    /**
-     * The '/submitConfigFileForProcessing' function will be used to upload a new file for an existing crosswalk.
-     *
-     * @param configFile
-     * @param fileDropLocation
-     * @return 
-     * @throws java.lang.Exception 
-     * @Return The function will either return the crosswalk form on error or redirect to the data translation page.
-     */
-    @RequestMapping(value = "/submitConfigFileForProcessing", method = RequestMethod.POST)
-    public @ResponseBody 
-    int submitConfigFileForProcessing(@RequestParam(value = "fileDropLocation", required = true) String fileDropLocation, 
-	@RequestParam(value = "configFile", required = true)  MultipartFile configFile) throws Exception {
-
-	Integer returnVal = 1;
-	
-	if(fileDropLocation != null) {
-	    if(!"".equals(fileDropLocation)) {
-		MultipartFile file = configFile;
-		String fileName = file.getOriginalFilename();
-
-		InputStream inputStream = null;
-		OutputStream outputStream = null;
-
-		try {
-		    inputStream = file.getInputStream();
-		    File newFile = null;
-		    
-		    newFile = new File(myProps.getProperty("ut.directory.utRootDir") + fileDropLocation + fileName);
-		    newFile.createNewFile();
-
-		    outputStream = new FileOutputStream(newFile);
-		    int read = 0;
-		    byte[] bytes = new byte[1024];
-
-		    while ((read = inputStream.read(bytes)) != -1) {
-			outputStream.write(bytes, 0, read);
-		    }
-		    outputStream.close();
-		    
-		    //Call the method to start processing
-		    transactioninmanager.moveFileDroppedFiles();
-			    
-		} catch (IOException e) {
-		    returnVal = 0;
-		    e.printStackTrace();
-		}
-	    }
-	    else {
-		returnVal = 0;
-	    }
-	}
-	else {
-	    returnVal = 0;
-	}
-	
-	return returnVal;
-    }
     
     /**
      * The 'createNewFieldSettingsTemplateVertical.do' method will create a new template file from fields that are saved (Vertical column format).
@@ -4141,7 +4079,7 @@ public class adminConfigController {
 			}
 
 			if(!required.equals("D")) {
-			    if(field.getRequired()) {
+			    if(field.isRequired()) {
 				required = "R";
 			    }
 			    else {
@@ -4149,7 +4087,7 @@ public class adminConfigController {
 			    }
 			}
 
-			if(field.getUseField()) {
+			if(field.isUseField()) {
 			    usefield = "Y";
 			}
 			else {
@@ -4185,15 +4123,15 @@ public class adminConfigController {
 	}
 	catch (Exception ex) {
 	    mailMessage mail = new mailMessage();
-	    mail.settoEmailAddress(myProps.getProperty("admin.email"));
-	    mail.setfromEmailAddress("support@health-e-link.net");
-	    mail.setmessageSubject("Error creating template from config field settings - " + " " + myProps.getProperty("server.identity"));
+	    mail.setToEmailAddress(myProps.getProperty("admin.email"));
+	    mail.setFromEmailAddress("support@health-e-link.net");
+	    mail.setMessageSubject("Error creating template from config field settings - " + " " + myProps.getProperty("server.identity"));
 	    StringBuilder emailBody = new StringBuilder();
 	    emailBody.append("There was an error creating a template from the configuration field settings page.");
 	    emailBody.append("<br/>Configuration Id: ").append(configId);
 	    emailBody.append("<br/><br/>").append(ex.getMessage());
 	    emailBody.append("<br/><br/>").append(ex.getStackTrace());
-	    mail.setmessageBody(emailBody.toString());
+	    mail.setMessageBody(emailBody.toString());
 	    emailMessageManager.sendEmail(mail);
 	    fileName = "";
 	}
@@ -4299,7 +4237,7 @@ public class adminConfigController {
 			}
 
 			if(!required.equals("D")) {
-			    if(field.getRequired()) {
+			    if(field.isRequired()) {
 				required = "R";
 			    }
 			    else {
@@ -4314,7 +4252,7 @@ public class adminConfigController {
 		    currentRow = sheet.createRow(rowNum);
 		    cellNum = 0;
 		    for(configurationFormFields field : fields) {
-			if(field.getUseField()) {
+			if(field.isUseField()) {
 			    usefield = "Y";
 			}
 			else {
@@ -4370,15 +4308,15 @@ public class adminConfigController {
 	}
 	catch (Exception ex) {
 	    mailMessage mail = new mailMessage();
-	    mail.settoEmailAddress(myProps.getProperty("admin.email"));
-	    mail.setfromEmailAddress("support@health-e-link.net");
-	    mail.setmessageSubject("Error creating template from config field settings - " + " " + myProps.getProperty("server.identity"));
+	    mail.setToEmailAddress(myProps.getProperty("admin.email"));
+	    mail.setFromEmailAddress("support@health-e-link.net");
+	    mail.setMessageSubject("Error creating template from config field settings - " + " " + myProps.getProperty("server.identity"));
 	    StringBuilder emailBody = new StringBuilder();
 	    emailBody.append("There was an error creating a template from the configuration field settings page.");
 	    emailBody.append("<br/>Configuration Id: ").append(configId);
 	    emailBody.append("<br/><br/>").append(ex.getMessage());
 	    emailBody.append("<br/><br/>").append(ex.getStackTrace());
-	    mail.setmessageBody(emailBody.toString());
+	    mail.setMessageBody(emailBody.toString());
 	    emailMessageManager.sendEmail(mail);
 	    fileName = "";
 	}
@@ -4424,7 +4362,11 @@ public class adminConfigController {
 	    configId = (Integer) session.getAttribute("manageconfigId");
 	}
 	
-        mav.setViewName("/administrator/configurations/notes");
+        mav.setViewName("administrator/configurations/notes/list");
+        mav.addObject("pageId", "configuration-notes");
+        mav.addObject("pageSection", "section-configurations");
+        mav.addObject("sect","notes");
+        mav.addObject("actionPage","notes");
 
         //Get the utConfiguration details for the selected config
         utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
@@ -4435,11 +4377,25 @@ public class adminConfigController {
 	
 	configurationDetails.setOrgName(orgDetails.getOrgName());
 	
+        String helSystemName = "";
+	
+        if(orgDetails.getHelRegistryOrgId() > 0 || (orgDetails.getHelRegistryOrgId() == 0 && orgDetails.getHelRegistryId() > 0)) {
+            List<helRegistry> helRegistries = helregistrymanager.getAllActiveRegistries();
+
+            if(!helRegistries.isEmpty()) {
+                for(helRegistry registry : helRegistries) {
+                    if(registry.getId() == orgDetails.getHelRegistryId()) {
+                        helSystemName = registry.getRegistryName();
+                    }
+                }
+            }
+        }
+        mav.addObject("helSystemName", helSystemName);
+	
 	//Get the transport details by configid and selected transport method
         configurationTransport transportDetails = utconfigurationTransportManager.getTransportDetails(configId);
 	configurationDetails.setTransportMethod(utconfigurationTransportManager.getTransportMethodById(transportDetails.getTransportMethodId()));
 
-	
 	mav.addObject("configurationDetails", configurationDetails);
 	mav.addObject("id", configId);
 	
@@ -4485,7 +4441,7 @@ public class adminConfigController {
     public @ResponseBody ModelAndView newConfigurationNote(Authentication authentication, @RequestParam(value = "configId", required = true) Integer configId) throws Exception {
 	
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/notes/noteDetails");
+        mav.setViewName("administrator/configurations/notes/details");
 	
 	utUser userDetails = userManager.getUserByUserName(authentication.getName());
 	
@@ -4510,7 +4466,7 @@ public class adminConfigController {
     public @ResponseBody ModelAndView editConfigurationNote(@RequestParam(value = "noteId", required = true) Integer noteId) throws Exception {
 	
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/notes/noteDetails");
+        mav.setViewName("administrator/configurations/notes/details");
 	
         //Get the details of the selected configuration note
         configurationUpdateLogs configurationNote = utconfigurationmanager.getConfigurationUpdateLog(noteId);
@@ -4586,9 +4542,9 @@ public class adminConfigController {
 	@RequestParam(value = "fileType", required = true) Integer fileType, 
 	@RequestParam(value = "inUseOnly", required = false) boolean inUseOnly, 
 	HttpSession session,HttpServletResponse response) throws Exception {
-	
+        
 	utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
-	
+        
 	if(configurationDetails != null) {
 	    
 	    String fileExt = "xlsx";
@@ -4617,14 +4573,14 @@ public class adminConfigController {
 
 			    Object cwDatarow[] = (Object[]) cwDataIt.next();
 
-			    if("".equals(cwName) || !cwName.equals(cwDatarow[0].toString())) {
+			    if("".equals(cwName) || !cwName.equals(cwDatarow[2].toString())) {
 				
 				if(!"".equals(cwName)) {
 				    writer.write("\r\n");
 				    writer.write("\r\n");
 				}
 				
-				sb.append("Crosswalk Name: ").append(cwDatarow[0].toString());
+				sb.append("Crosswalk Name: ").append(cwDatarow[2].toString());
 				writer.write(sb.toString());
 				writer.write("\r\n");
 				
@@ -4637,13 +4593,13 @@ public class adminConfigController {
 				sb = new StringBuilder();
 				sb.append("Source Value").append(",").append("Target Value").append(",").append("Desc Value");
 				writer.write(sb.toString());
-				cwName = cwDatarow[0].toString();
+				cwName = cwDatarow[2].toString();
 			    }
 			    
 			    sb = new StringBuilder();
-			    sb.append(cwDatarow[2].toString().trim()).append("|")
-			    .append(cwDatarow[3].toString().trim()).append("|")
-			    .append(StringEscapeUtils.unescapeCsv(cwDatarow[4].toString().trim()));
+			    sb.append(cwDatarow[6].toString().trim()).append("|")
+			    .append(cwDatarow[7].toString().trim()).append("|")
+			    .append(StringEscapeUtils.unescapeCsv(cwDatarow[8].toString().trim()));
 			    writer.write("\r\n");
 
 			    writer.write(sb.toString());
@@ -4733,11 +4689,11 @@ public class adminConfigController {
 			    
 			    Object cwDatarow[] = (Object[]) cwDataIt.next();
 
-			    if("".equals(crosswalkName.trim()) || !cwDatarow[0].toString().equals(crosswalkName.trim())) {
+			    if("".equals(crosswalkName.trim()) || !cwDatarow[2].toString().equals(crosswalkName.trim())) {
 				rowCount = 0;
 				cellCount = 0;
-				sheetName = cwDatarow[0].toString();
-				crosswalkName = cwDatarow[0].toString();
+				sheetName = cwDatarow[2].toString();
+				crosswalkName = cwDatarow[2].toString();
 				sheet = workbook.createSheet(sheetName);
 				row = sheet.createRow(rowCount);
 				cell = row.createCell(cellCount);
@@ -4775,13 +4731,13 @@ public class adminConfigController {
 			    cellCount = 0;
 			    row = sheet.createRow(rowCount);
 			    cell = row.createCell(cellCount);
-			    cell.setCellValue(cwDatarow[2].toString());
+			    cell.setCellValue(cwDatarow[6].toString());
 			    cellCount++;
 			    cell = row.createCell(cellCount);
-			    cell.setCellValue(cwDatarow[3].toString());
+			    cell.setCellValue(cwDatarow[7].toString());
 			    cellCount++;
 			    cell = row.createCell(cellCount);
-			    cell.setCellValue(cwDatarow[4].toString());
+			    cell.setCellValue(cwDatarow[8].toString());
 			}
 
 			FileOutputStream fileOut = new FileOutputStream(dtFile);
@@ -4925,10 +4881,10 @@ public class adminConfigController {
 	
 	if(!"".equals(emailBodySB.toString())) {
 	    mailMessage mail = new mailMessage();
-	    mail.settoEmailAddress(myProps.getProperty("admin.email"));
-	    mail.setfromEmailAddress("support@health-e-link.net");
-	    mail.setmessageSubject("UT Configuration Import Script has been Created");
-	    mail.setmessageBody(emailBodySB.toString());
+	    mail.setToEmailAddress(myProps.getProperty("admin.email"));
+	    mail.setFromEmailAddress("support@health-e-link.net");
+	    mail.setMessageSubject("UT Configuration Import Script has been Created");
+	    mail.setMessageBody(emailBodySB.toString());
 	    emailMessageManager.sendEmail(mail);
 	    
 	    //Delete email body
@@ -5179,10 +5135,10 @@ public class adminConfigController {
 		emailBody.append("<br/><br />Reason<br />The configuration was already found on the system.");
 		
 		mailMessage mail = new mailMessage();
-		mail.settoEmailAddress(myProps.getProperty("admin.email"));
-		mail.setfromEmailAddress("support@health-e-link.net");
-		mail.setmessageSubject(emailSubject);
-		mail.setmessageBody(emailBody.toString());
+		mail.setToEmailAddress(myProps.getProperty("admin.email"));
+		mail.setFromEmailAddress("support@health-e-link.net");
+		mail.setMessageSubject(emailSubject);
+		mail.setMessageBody(emailBody.toString());
 		emailMessageManager.sendEmail(mail);
 	    }
 	    else if(configImportSuccessful) {
@@ -5209,10 +5165,10 @@ public class adminConfigController {
 		utconfigurationmanager.updateConfiguration(configDetails);
 		
 		mailMessage mail = new mailMessage();
-		mail.settoEmailAddress(myProps.getProperty("admin.email"));
-		mail.setfromEmailAddress("support@health-e-link.net");
-		mail.setmessageSubject(emailSubject);
-		mail.setmessageBody(emailBody.toString());
+		mail.setToEmailAddress(myProps.getProperty("admin.email"));
+		mail.setFromEmailAddress("support@health-e-link.net");
+		mail.setMessageSubject(emailSubject);
+		mail.setMessageBody(emailBody.toString());
 		emailMessageManager.sendEmail(mail);
 	    }
 	    
@@ -5542,25 +5498,25 @@ public class adminConfigController {
     public void processImportConfigMessageSpecs(String[] strArrayValues, Integer configId) {
 	
 	configurationMessageSpecs messageSpecs = new configurationMessageSpecs();
-	messageSpecs.setconfigId(configId);
+	messageSpecs.setConfigId(configId);
 	if(!"null".equals(strArrayValues[2])) {
-	    messageSpecs.settemplateFile(strArrayValues[2]);
+	    messageSpecs.setTemplateFile(strArrayValues[2]);
 	}
-	messageSpecs.setmessageTypeCol(Integer.parseInt(strArrayValues[3]));
+	messageSpecs.setMessageTypeCol(Integer.parseInt(strArrayValues[3]));
 	if(!"null".equals(strArrayValues[4])) {
-	    messageSpecs.setmessageTypeVal(strArrayValues[4]);
+	    messageSpecs.setMessageTypeVal(strArrayValues[4]);
 	}
-	messageSpecs.settargetOrgCol(Integer.parseInt(strArrayValues[5]));
+	messageSpecs.setTargetOrgCol(Integer.parseInt(strArrayValues[5]));
 	if(strArrayValues[6].equals("true")) {
-	    messageSpecs.setcontainsHeaderRow(true);
+	    messageSpecs.setContainsHeaderRow(true);
 	}
 	else {
-	    messageSpecs.setcontainsHeaderRow(false);
+	    messageSpecs.setContainsHeaderRow(false);
 	}
-	messageSpecs.setrptField1(Integer.parseInt(strArrayValues[7]));
-	messageSpecs.setrptField2(Integer.parseInt(strArrayValues[8]));
-	messageSpecs.setrptField3(Integer.parseInt(strArrayValues[9]));
-	messageSpecs.setrptField4(Integer.parseInt(strArrayValues[10]));
+	messageSpecs.setRptField1(Integer.parseInt(strArrayValues[7]));
+	messageSpecs.setRptField2(Integer.parseInt(strArrayValues[8]));
+	messageSpecs.setRptField3(Integer.parseInt(strArrayValues[9]));
+	messageSpecs.setRptField4(Integer.parseInt(strArrayValues[10]));
 	messageSpecs.setSourceSubOrgCol(Integer.parseInt(strArrayValues[11]));
 	messageSpecs.setExcelstartrow(Integer.parseInt(strArrayValues[12]));
 	messageSpecs.setExcelskiprows(Integer.parseInt(strArrayValues[13]));
@@ -5593,8 +5549,8 @@ public class adminConfigController {
 	
 	configurationFormFields field = new configurationFormFields();
 	field.setAssociatedFieldId(Integer.parseInt(strArrayValues[1]));
-	field.setconfigId(configId);
-	field.settransportDetailId(transportId);
+	field.setConfigId(configId);
+	field.setTransportDetailId(transportId);
 	field.setFieldNo(Integer.parseInt(strArrayValues[4]));
 	field.setFieldDesc(strArrayValues[5]);
 	field.setValidationType(Integer.parseInt(strArrayValues[6]));
@@ -5641,7 +5597,7 @@ public class adminConfigController {
      */
     public void processImportConfigFieldDTS(String[] strArrayValues, Integer configId, Integer fieldId) {
 	configurationDataTranslations dts = new configurationDataTranslations();
-	dts.setconfigId(configId);
+	dts.setConfigId(configId);
 	dts.setFieldId(fieldId);
 	dts.setCrosswalkId(Integer.parseInt(strArrayValues[3]));
 	dts.setMacroId(Integer.parseInt(strArrayValues[4]));
@@ -5670,12 +5626,12 @@ public class adminConfigController {
      */
     public void processImportConfigSchedule(String[] strArrayValues, Integer configId) {
 	configurationSchedules configSchedule = new configurationSchedules();
-	configSchedule.setconfigId(configId);
-	configSchedule.settype(Integer.parseInt(strArrayValues[2]));
-	configSchedule.setprocessingType(Integer.parseInt(strArrayValues[3]));
-	configSchedule.setnewfileCheck(Integer.parseInt(strArrayValues[4]));
-	configSchedule.setprocessingDay(Integer.parseInt(strArrayValues[5]));
-	configSchedule.setprocessingTime(Integer.parseInt(strArrayValues[6]));
+	configSchedule.setConfigId(configId);
+	configSchedule.setType(Integer.parseInt(strArrayValues[2]));
+	configSchedule.setProcessingType(Integer.parseInt(strArrayValues[3]));
+	configSchedule.setNewfileCheck(Integer.parseInt(strArrayValues[4]));
+	configSchedule.setProcessingDay(Integer.parseInt(strArrayValues[5]));
+	configSchedule.setProcessingTime(Integer.parseInt(strArrayValues[6]));
 	
 	utconfigurationmanager.saveSchedule(configSchedule);
     }
@@ -5727,7 +5683,7 @@ public class adminConfigController {
             boolean checkForExistingCW = true;
 	    
 	    cw.setFileDelimiter(Integer.parseInt(strArrayValues[3]));
-	    cw.setfileName(strArrayValues[4]);
+	    cw.setFileName(strArrayValues[4]);
 	    
 	    if(Integer.parseInt(strArrayValues[5]) > 0) {
 		if(cwName.contains("_")) {
@@ -5857,10 +5813,10 @@ public class adminConfigController {
 	emailBody.append("<br/><br />Reason for failure:<br />").append(ExceptionUtils.getStackTrace(ex));
 
 	mailMessage mail = new mailMessage();
-	mail.settoEmailAddress(myProps.getProperty("admin.email"));
-	mail.setfromEmailAddress("support@health-e-link.net");
-	mail.setmessageSubject(emailSubject);
-	mail.setmessageBody(emailBody.toString());
+	mail.setToEmailAddress(myProps.getProperty("admin.email"));
+	mail.setFromEmailAddress("support@health-e-link.net");
+	mail.setMessageSubject(emailSubject);
+	mail.setMessageBody(emailBody.toString());
 	emailMessageManager.sendEmail(mail);
     }
     
@@ -5924,7 +5880,7 @@ public class adminConfigController {
         }
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/multipleCrosswalkUpload");
+        mav.setViewName("/administrator/configurations/dataTranslations/multipleCrosswalkUpload");
 
         mav.addObject("orgId", orgId);
         mav.addObject("cwId", cwId);
@@ -5975,7 +5931,7 @@ public class adminConfigController {
                         cwDetails.setOrgId(orgId);
                         cwDetails.setFileDelimiter(fileDelimiter);
                         cwDetails.setName(cwName);
-                        cwDetails.setfileName(originalFileName);
+                        cwDetails.setFileName(originalFileName);
                         cwDetails.setFile(cwfile);
 
                         newCWId = messagetypemanager.createCrosswalk(cwDetails);

@@ -20,14 +20,14 @@ public class configurationFileDropFields {
     private int id;
 
     @Column(name = "TRANSPORTID", nullable = false)
-    private int transportId = 0;
+    private Integer transportId = 0;
 
     @NoHtml
     @Column(name = "DIRECTORY", nullable = true)
     private String directory = null;
 
     @Column(name = "Method", nullable = true)
-    private int method = 0;
+    private Integer method = 0;
 
     public int getId() {
         return id;
@@ -37,11 +37,11 @@ public class configurationFileDropFields {
         this.id = id;
     }
 
-    public int getTransportId() {
+    public Integer getTransportId() {
         return transportId;
     }
 
-    public void setTransportId(int transportId) {
+    public void setTransportId(Integer transportId) {
         this.transportId = transportId;
     }
 
@@ -53,11 +53,11 @@ public class configurationFileDropFields {
         this.directory = directory;
     }
 
-    public int getMethod() {
+    public Integer getMethod() {
         return method;
     }
 
-    public void setMethod(int method) {
+    public void setMethod(Integer method) {
         this.method = method;
     }
 }

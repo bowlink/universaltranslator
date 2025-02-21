@@ -63,19 +63,24 @@ jQuery(function ($) {
             else {
 
                 var transportId = $('#id').val();
+                
+                if($('.ftpDetailId').val() > 0) {
+                    if(confirm("Are you sure you want to Remove the FTP information for this configuration?")) {
 
-                if(confirm("Are you sure you want to Remove the FTP information for this configuration?")) {
-
-                    $.ajax({
-                        url: 'deleteConfigurationFTPInformation.do',
-                        data: {
-                            'transportId': transportId
-                        },
-                        type: 'POST',
-                        success: function(data) {
-                            $('.ftpDetails').addClass('collapse');
-                        }
-                    });
+                        $.ajax({
+                            url: 'deleteConfigurationFTPInformation.do',
+                            data: {
+                                'transportId': transportId
+                            },
+                            type: 'POST',
+                            success: function(data) {
+                                $('.ftpDetails').addClass('collapse');
+                            }
+                        });
+                    }
+                }
+                else {
+                    $('.ftpDetails').addClass('collapse');
                 }
             }
         });
@@ -220,6 +225,7 @@ function showCorrectFileDetails(fileType,fileTypeChanged) {
 }
 
 function showCorrectFieldsByTransportMethod(transportMethod) {
+    
     $('#fileDetailsDiv').show();
    
     if(transportMethod == 13) {

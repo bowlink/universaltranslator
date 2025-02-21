@@ -32,14 +32,11 @@ public class configurationConnection {
     private String targetOrgName = null, sourceConfigName = "", targetConfigName = "", sourceOrgName = "", sourceTransportMethod = "", targetTransportMethod = "";
 
     @Transient
-    private int targetOrgId = 0, messageTypeId = 0, sourceConfigType = 0, targetConfigType = 0;
+    private Integer targetOrgId = 0, messageTypeId = 0, sourceConfigType = 0, targetConfigType = 0, targetOrgCol = 0, sourceSubOrgCol = 0, transportMethodId = 0;
 
     @Transient
     private List<utUser> connectionSenders = null, connectionReceivers = null;
 
-    @Transient
-    private Integer targetOrgCol = 0, sourceSubOrgCol = 0, transportMethodId = 0;
-    
     @Transient
     private boolean allowExport = false;
 
@@ -50,10 +47,10 @@ public class configurationConnection {
     private int id;
 
     @Column(name = "SOURCECONFIGID", nullable = false)
-    private int sourceConfigId;
+    private Integer sourceConfigId;
 
     @Column(name = "TARGETCONFIGID", nullable = false)
-    private int targetConfigId;
+    private Integer targetConfigId;
 
     @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "DATECREATED", nullable = true)
@@ -62,132 +59,28 @@ public class configurationConnection {
     @Column(name = "STATUS", nullable = false)
     private boolean status = true;
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getsourceConfigId() {
-        return sourceConfigId;
-    }
-
-    public void setsourceConfigId(int sourceConfigId) {
-        this.sourceConfigId = sourceConfigId;
-    }
-
-    public int gettargetConfigId() {
-        return targetConfigId;
-    }
-
-    public void settargetConfigId(int targetConfigId) {
-        this.targetConfigId = targetConfigId;
-    }
-
-    public Date getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(Date dateCreated) {
-        this.dateCreated = dateCreated;
-    }
-
-    public boolean getStatus() {
-        return status;
-    }
-
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
-
-    public utConfiguration getsrcConfigDetails() {
+    public utConfiguration getSrcConfigDetails() {
         return srcConfigDetails;
     }
 
-    public void setsrcConfigDetails(utConfiguration srcConfigDetails) {
+    public void setSrcConfigDetails(utConfiguration srcConfigDetails) {
         this.srcConfigDetails = srcConfigDetails;
     }
 
-    public utConfiguration gettgtConfigDetails() {
+    public utConfiguration getTgtConfigDetails() {
         return tgtConfigDetails;
     }
 
-    public void settgtConfigDetails(utConfiguration tgtConfigDetails) {
+    public void setTgtConfigDetails(utConfiguration tgtConfigDetails) {
         this.tgtConfigDetails = tgtConfigDetails;
     }
 
-    public String gettargetOrgName() {
+    public String getTargetOrgName() {
         return targetOrgName;
     }
 
-    public void settargetOrgName(String targetOrgName) {
+    public void setTargetOrgName(String targetOrgName) {
         this.targetOrgName = targetOrgName;
-    }
-
-    public int gettargetOrgId() {
-        return targetOrgId;
-    }
-
-    public void settargetOrgId(int targetOrgId) {
-        this.targetOrgId = targetOrgId;
-    }
-
-    public List<utUser> getconnectionSenders() {
-        return connectionSenders;
-    }
-
-    public void setconnectionSenders(List<utUser> senders) {
-        this.connectionSenders = senders;
-    }
-
-    public List<utUser> getconnectionReceivers() {
-        return connectionReceivers;
-    }
-
-    public void setconnectionReceivers(List<utUser> receivers) {
-        this.connectionReceivers = receivers;
-    }
-
-    public Integer getTargetOrgCol() {
-        return targetOrgCol;
-    }
-
-    public void setTargetOrgCol(Integer targetOrgCol) {
-        this.targetOrgCol = targetOrgCol;
-    }
-
-    public int getMessageTypeId() {
-        return messageTypeId;
-    }
-
-    public void setMessageTypeId(int messageTypeId) {
-        this.messageTypeId = messageTypeId;
-    }
-
-    public Integer getSourceSubOrgCol() {
-        return sourceSubOrgCol;
-    }
-
-    public void setSourceSubOrgCol(Integer sourceSubOrgCol) {
-        this.sourceSubOrgCol = sourceSubOrgCol;
-    }
-
-    public Integer getTransportMethodId() {
-	return transportMethodId;
-    }
-
-    public void setTransportMethodId(Integer transportMethodId) {
-	this.transportMethodId = transportMethodId;
-    }
-
-    public boolean isAllowExport() {
-	return allowExport;
-    }
-
-    public void setAllowExport(boolean allowExport) {
-	this.allowExport = allowExport;
     }
 
     public String getSourceConfigName() {
@@ -206,36 +99,12 @@ public class configurationConnection {
         this.targetConfigName = targetConfigName;
     }
 
-    public String getTargetOrgName() {
-        return targetOrgName;
-    }
-
-    public void setTargetOrgName(String targetOrgName) {
-        this.targetOrgName = targetOrgName;
-    }
-
     public String getSourceOrgName() {
         return sourceOrgName;
     }
 
     public void setSourceOrgName(String sourceOrgName) {
         this.sourceOrgName = sourceOrgName;
-    }
-
-    public int getSourceConfigType() {
-        return sourceConfigType;
-    }
-
-    public void setSourceConfigType(int sourceConfigType) {
-        this.sourceConfigType = sourceConfigType;
-    }
-
-    public int getTargetConfigType() {
-        return targetConfigType;
-    }
-
-    public void setTargetConfigType(int targetConfigType) {
-        this.targetConfigType = targetConfigType;
     }
 
     public String getSourceTransportMethod() {
@@ -253,6 +122,124 @@ public class configurationConnection {
     public void setTargetTransportMethod(String targetTransportMethod) {
         this.targetTransportMethod = targetTransportMethod;
     }
-    
-    
+
+    public Integer getTargetOrgId() {
+        return targetOrgId;
+    }
+
+    public void setTargetOrgId(Integer targetOrgId) {
+        this.targetOrgId = targetOrgId;
+    }
+
+    public Integer getMessageTypeId() {
+        return messageTypeId;
+    }
+
+    public void setMessageTypeId(Integer messageTypeId) {
+        this.messageTypeId = messageTypeId;
+    }
+
+    public Integer getSourceConfigType() {
+        return sourceConfigType;
+    }
+
+    public void setSourceConfigType(Integer sourceConfigType) {
+        this.sourceConfigType = sourceConfigType;
+    }
+
+    public Integer getTargetConfigType() {
+        return targetConfigType;
+    }
+
+    public void setTargetConfigType(Integer targetConfigType) {
+        this.targetConfigType = targetConfigType;
+    }
+
+    public Integer getTargetOrgCol() {
+        return targetOrgCol;
+    }
+
+    public void setTargetOrgCol(Integer targetOrgCol) {
+        this.targetOrgCol = targetOrgCol;
+    }
+
+    public Integer getSourceSubOrgCol() {
+        return sourceSubOrgCol;
+    }
+
+    public void setSourceSubOrgCol(Integer sourceSubOrgCol) {
+        this.sourceSubOrgCol = sourceSubOrgCol;
+    }
+
+    public Integer getTransportMethodId() {
+        return transportMethodId;
+    }
+
+    public void setTransportMethodId(Integer transportMethodId) {
+        this.transportMethodId = transportMethodId;
+    }
+
+    public List<utUser> getConnectionSenders() {
+        return connectionSenders;
+    }
+
+    public void setConnectionSenders(List<utUser> connectionSenders) {
+        this.connectionSenders = connectionSenders;
+    }
+
+    public List<utUser> getConnectionReceivers() {
+        return connectionReceivers;
+    }
+
+    public void setConnectionReceivers(List<utUser> connectionReceivers) {
+        this.connectionReceivers = connectionReceivers;
+    }
+
+    public boolean isAllowExport() {
+        return allowExport;
+    }
+
+    public void setAllowExport(boolean allowExport) {
+        this.allowExport = allowExport;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Integer getSourceConfigId() {
+        return sourceConfigId;
+    }
+
+    public void setSourceConfigId(Integer sourceConfigId) {
+        this.sourceConfigId = sourceConfigId;
+    }
+
+    public Integer getTargetConfigId() {
+        return targetConfigId;
+    }
+
+    public void setTargetConfigId(Integer targetConfigId) {
+        this.targetConfigId = targetConfigId;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
 }

@@ -39,7 +39,7 @@ public class utUser {
     private boolean status = false;
 
     @Column(name = "ORGID", nullable = false)
-    private int orgId;
+    private Integer orgId;
 
     @NotEmpty
     @NoHtml
@@ -62,10 +62,10 @@ public class utUser {
     private String username;
 
     @Column(name = "ROLEID", nullable = false)
-    private int roleId = 2;
+    private Integer roleId = 2;
 
     @Column(name = "MAINCONTACT", nullable = false)
-    private int mainContact = 0;
+    private Integer mainContact = 0;
 
     @Column(name = "SENDEMAILALERT", nullable = true)
     private boolean sendEmailAlert = false;
@@ -83,7 +83,7 @@ public class utUser {
     private Date dateCreated = new Date();
 
     @Column(name = "USERTYPE", nullable = false)
-    private int userType = 1;
+    private Integer userType = 1;
 
     @Column(name = "DELIVERAUTHORITY", nullable = false)
     private boolean deliverAuthority = false;
@@ -107,6 +107,126 @@ public class utUser {
     @Column(name = "encryptedPw", nullable = true)
     private byte[] encryptedPw;
 
+    public String getOrgName() {
+        return orgName;
+    }
+
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getRoleType() {
+        return roleType;
+    }
+
+    public void setRoleType(String roleType) {
+        this.roleType = roleType;
+    }
+
+    public String getLastLogInDate() {
+        return lastLogInDate;
+    }
+
+    public void setLastLogInDate(String lastLogInDate) {
+        this.lastLogInDate = lastLogInDate;
+    }
+
+    public Date getDateOrgWasCreated() {
+        return dateOrgWasCreated;
+    }
+
+    public void setDateOrgWasCreated(Date dateOrgWasCreated) {
+        this.dateOrgWasCreated = dateOrgWasCreated;
+    }
+
+    public Date getDateLastLoggedIn() {
+        return dateLastLoggedIn;
+    }
+
+    public void setDateLastLoggedIn(Date dateLastLoggedIn) {
+        this.dateLastLoggedIn = dateLastLoggedIn;
+    }
+
+    public Integer getOrgType() {
+        return orgType;
+    }
+
+    public void setOrgType(Integer orgType) {
+        this.orgType = orgType;
+    }
+
+    public Integer getTimesloggedIn() {
+        return timesloggedIn;
+    }
+
+    public void setTimesloggedIn(Integer timesloggedIn) {
+        this.timesloggedIn = timesloggedIn;
+    }
+
+    public Integer getTotalTimeLoggedIn() {
+        return totalTimeLoggedIn;
+    }
+
+    public void setTotalTimeLoggedIn(Integer totalTimeLoggedIn) {
+        this.totalTimeLoggedIn = totalTimeLoggedIn;
+    }
+
+    public Integer getTotalLogins() {
+        return totalLogins;
+    }
+
+    public void setTotalLogins(Integer totalLogins) {
+        this.totalLogins = totalLogins;
+    }
+
+    public boolean isConnectionAssociated() {
+        return connectionAssociated;
+    }
+
+    public void setConnectionAssociated(boolean connectionAssociated) {
+        this.connectionAssociated = connectionAssociated;
+    }
+
+    public boolean isSendSentEmail() {
+        return sendSentEmail;
+    }
+
+    public void setSendSentEmail(boolean sendSentEmail) {
+        this.sendSentEmail = sendSentEmail;
+    }
+
+    public boolean isSendReceivedEmail() {
+        return sendReceivedEmail;
+    }
+
+    public void setSendReceivedEmail(boolean sendReceivedEmail) {
+        this.sendReceivedEmail = sendReceivedEmail;
+    }
+
+    public boolean isUploadFiles() {
+        return uploadFiles;
+    }
+
+    public void setUploadFiles(boolean uploadFiles) {
+        this.uploadFiles = uploadFiles;
+    }
+
+    public boolean isDownloadFiles() {
+        return downloadFiles;
+    }
+
+    public void setDownloadFiles(boolean downloadFiles) {
+        this.downloadFiles = downloadFiles;
+    }
+
     public int getId() {
         return id;
     }
@@ -115,11 +235,19 @@ public class utUser {
         this.id = id;
     }
 
-    public int getOrgId() {
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public Integer getOrgId() {
         return orgId;
     }
 
-    public void setOrgId(int orgId) {
+    public void setOrgId(Integer orgId) {
         this.orgId = orgId;
     }
 
@@ -147,172 +275,20 @@ public class utUser {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public int getRoleId() {
+    public Integer getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(int roleId) {
+    public void setRoleId(Integer roleId) {
         this.roleId = roleId;
     }
 
-    public int getMainContact() {
+    public Integer getMainContact() {
         return mainContact;
     }
 
-    public void setMainContact(int mainContact) {
+    public void setMainContact(Integer mainContact) {
         this.mainContact = mainContact;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Date getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(Date dateCreated) {
-        this.dateCreated = dateCreated;
-    }
-
-    public boolean getStatus() {
-        return status;
-    }
-
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
-
-    public int getuserType() {
-        return userType;
-    }
-
-    public void setuserType(int userType) {
-        this.userType = userType;
-    }
-
-    public boolean getdeliverAuthority() {
-        return deliverAuthority;
-    }
-
-    public void setdeliverAuthority(boolean deliverAuthority) {
-        this.deliverAuthority = deliverAuthority;
-    }
-
-    public boolean geteditAuthority() {
-        return editAuthority;
-    }
-
-    public void seteditAuthority(boolean editAuthority) {
-        this.editAuthority = editAuthority;
-    }
-
-    public boolean getcreateAuthority() {
-        return createAuthority;
-    }
-
-    public void setcreateAuthority(boolean createAuthority) {
-        this.createAuthority = createAuthority;
-    }
-
-    public boolean getcancelAuthority() {
-        return cancelAuthority;
-    }
-
-    public void setcancelAuthority(boolean cancelAuthority) {
-        this.cancelAuthority = cancelAuthority;
-    }
-
-    public Date getdateOrgWasCreated() {
-        return dateOrgWasCreated;
-    }
-
-    public void setdateOrgWasCreated(Date dateOrgWasCreated) {
-        this.dateOrgWasCreated = dateOrgWasCreated;
-    }
-
-    public String getresetCode() {
-        return resetCode;
-    }
-
-    public void setresetCode(String resetCode) {
-        this.resetCode = resetCode;
-    }
-
-    public String getOrgName() {
-        return orgName;
-    }
-
-    public void setOrgName(String orgName) {
-        this.orgName = orgName;
-    }
-
-    public byte[] getRandomSalt() {
-        return randomSalt;
-    }
-
-    public void setRandomSalt(byte[] randomSalt) {
-        this.randomSalt = randomSalt;
-    }
-
-    public byte[] getEncryptedPw() {
-        return encryptedPw;
-    }
-
-    public void setEncryptedPw(byte[] encryptedPw) {
-        this.encryptedPw = encryptedPw;
-    }
-
-    public Integer getOrgType() {
-        return orgType;
-    }
-
-    public void setOrgType(Integer orgType) {
-        this.orgType = orgType;
-    }
-
-    public boolean isConnectionAssociated() {
-        return connectionAssociated;
-    }
-
-    public void setConnectionAssociated(boolean connectionAssociated) {
-        this.connectionAssociated = connectionAssociated;
-    }
-
-    public boolean isSendSentEmail() {
-        return sendSentEmail;
-    }
-
-    public void setSendSentEmail(boolean sendSentEmail) {
-        this.sendSentEmail = sendSentEmail;
-    }
-
-    public boolean isSendReceivedEmail() {
-        return sendReceivedEmail;
-    }
-
-    public void setSendReceivedEmail(boolean sendReceivedEmail) {
-        this.sendReceivedEmail = sendReceivedEmail;
-    }
-
-    public Date getDateOrgWasCreated() {
-        return dateOrgWasCreated;
-    }
-
-    public void setDateOrgWasCreated(Date dateOrgWasCreated) {
-        this.dateOrgWasCreated = dateOrgWasCreated;
     }
 
     public boolean isSendEmailAlert() {
@@ -331,11 +307,27 @@ public class utUser {
         this.receiveEmailAlert = receiveEmailAlert;
     }
 
-    public int getUserType() {
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Integer getUserType() {
         return userType;
     }
 
-    public void setUserType(int userType) {
+    public void setUserType(Integer userType) {
         this.userType = userType;
     }
 
@@ -379,69 +371,19 @@ public class utUser {
         this.resetCode = resetCode;
     }
 
-    public boolean isUploadFiles() {
-	return uploadFiles;
+    public byte[] getRandomSalt() {
+        return randomSalt;
     }
 
-    public void setUploadFiles(boolean uploadFiles) {
-	this.uploadFiles = uploadFiles;
+    public void setRandomSalt(byte[] randomSalt) {
+        this.randomSalt = randomSalt;
     }
 
-    public boolean isDownloadFiles() {
-	return downloadFiles;
+    public byte[] getEncryptedPw() {
+        return encryptedPw;
     }
 
-    public void setDownloadFiles(boolean downloadFiles) {
-	this.downloadFiles = downloadFiles;
+    public void setEncryptedPw(byte[] encryptedPw) {
+        this.encryptedPw = encryptedPw;
     }
-
-    public Integer getTimesloggedIn() {
-	return timesloggedIn;
-    }
-
-    public void setTimesloggedIn(Integer timesloggedIn) {
-	this.timesloggedIn = timesloggedIn;
-    }
-
-    public Integer getTotalTimeLoggedIn() {
-	return totalTimeLoggedIn;
-    }
-
-    public void setTotalTimeLoggedIn(Integer totalTimeLoggedIn) {
-	this.totalTimeLoggedIn = totalTimeLoggedIn;
-    }
-
-    public Integer getTotalLogins() {
-	return totalLogins;
-    }
-
-    public void setTotalLogins(Integer totalLogins) {
-	this.totalLogins = totalLogins;
-    }
-
-    public String getRoleType() {
-	return roleType;
-    }
-
-    public void setRoleType(String roleType) {
-	this.roleType = roleType;
-    }
-
-    public String getLastLogInDate() {
-	return lastLogInDate;
-    }
-
-    public void setLastLogInDate(String lastLogInDate) {
-	this.lastLogInDate = lastLogInDate;
-    }
-
-    public Date getDateLastLoggedIn() {
-	return dateLastLoggedIn;
-    }
-
-    public void setDateLastLoggedIn(Date dateLastLoggedIn) {
-	this.dateLastLoggedIn = dateLastLoggedIn;
-    }
-    
-    
 }

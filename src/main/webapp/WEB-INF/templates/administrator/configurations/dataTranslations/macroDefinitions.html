@@ -1,0 +1,68 @@
+<div class="modal-header">
+    <div class="col-md-12">
+        <div class="col-md-6" style="padding-left:0px;">
+            <h3 class="panel-title" style="margin-top:15px;margin-bottom:10px">Macro Definitions</h3>
+        </div>
+        <div class="col-md-6" style="padding-right:0px;">
+            <button class="btn btn-success btn-sm pull-right" data-bs-dismiss="modal" title="Close Window" style="margin-top:10px;margin-bottom:10px">Close Window</button>
+        </div>
+    </div>
+</div>
+<div class="modal-body" style="max-height:800px; overflow: auto">
+    <table th:cellpadding="15px">
+        <thead>
+            <tr>
+                <th scope="col" style="width:30%">Macro Name</th>
+                <th scope="col" style="width:55%">Macro Details</th>
+                <th scope="col" style="width:15%"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <div th:if="${not #lists.isEmpty(macros)}">
+                <th:block th:each="macro : ${macros}">
+                    <tr style="border-top: 1px solid #dddddd; border-right: 1px solid #dddddd; border-left: 1px solid #dddddd; border-bottom: 1px solid #dddddd;">
+                       <td scope="row" style="vertical-align:top;" th:utext="${'<strong>'+macro.macroName+'</strong>'}"></td>
+                       <td>
+                           <span th:text="${macro.macroDesc}"></span>
+                           <p style="padding-top:10px;">
+                               <button type="button" class="btn btn-info btn-xs showMore" th:rel="${macro.id}" title="Show More Details">Show More Details</button>
+                           </p>
+                       </td>
+                       <td style="vertical-align: middle;" class="text-center">
+                            <button type="button" class="btn btn-primary btn-xs useMacro"  th:rel="${macro.id}" title="Use This Macros">Use This Macro</button>
+                        </td>
+                    </tr>
+                    <tr th:id="${'macro-'+macro.id}" style="display:none;">
+                        <td colspan="3" style="background-color:#f5f5f5; border: 1px solid black;">
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <p style="height:75px; max-height:750px;"><strong>Error Condition: </strong><br />
+                                        <span th:if="${macro.errorCondition == ''}">N/A</span>
+                                        <span th:unless="${macro.errorCondition == ''}" th:text="${macro.errorCondition}"></span>
+                                    </p>
+                                    <p style="padding-top:10px;"><strong>Pass/Clear Logic: </strong><br />
+                                        <span th:if="${macro.passClearLogic == ''}">N/A</span>
+                                        <span th:unless="${macro.passClearLogic == ''}" th:text="${macro.passClearLogic}"></span>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p style="height:75px; max-height:750px;"><strong>Dropped Value Logging: </strong><br />
+                                        <span th:if="${macro.droppedValueLogging == ''}">N/A</span>
+                                        <span th:unless="${macro.droppedValueLogging == ''}" th:text="${macro.droppedValueLogging}"></span>
+                                    </p>
+                                    <p style="padding-top:10px;"><strong>Reject File/ Reject Record: </strong><br />
+                                        <span th:if="${macro.rejectRecordFile == ''}">N/A</span>
+                                        <span th:unless="${macro.rejectRecordFile == ''}" th:text="${macro.rejectRecordFile}"></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </th:block>
+            </div>
+            <div th:if="${#lists.isEmpty(macros)}">
+                <tr><td colspan="2" class="center-text">There are currently no macros found for this section.</td></tr>
+            </div>
+        </tbody>
+    </table>
+</div>

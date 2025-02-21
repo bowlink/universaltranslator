@@ -473,7 +473,7 @@ public class userDAOImpl implements userDAO {
                 configurationConnection connectionInfo = (configurationConnection) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
                 
                 if(connectionInfo != null) {
-                    whereClause = builder.equal(targetRoot.get("id"), connectionInfo.gettargetConfigId());
+                    whereClause = builder.equal(targetRoot.get("id"), connectionInfo.getTargetConfigId());
                     targetconfigurationQuery.where(whereClause);
                     
                     utConfiguration targetconfigDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(targetconfigurationQuery).uniqueResult();
@@ -517,7 +517,7 @@ public class userDAOImpl implements userDAO {
                 configurationConnection connectionInfo = (configurationConnection) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
                 
                 if(connectionInfo != null) {
-                    whereClause = builder.equal(sourceRoot.get("id"), connectionInfo.getsourceConfigId());
+                    whereClause = builder.equal(sourceRoot.get("id"), connectionInfo.getSourceConfigId());
                     sourceconfigurationQuery.where(whereClause);
                     
                     utConfiguration configDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(sourceconfigurationQuery).uniqueResult();

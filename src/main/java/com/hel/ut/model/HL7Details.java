@@ -34,7 +34,7 @@ public class HL7Details {
     private int id;
 
     @Column(name = "CONFIGID", nullable = false)
-    private int configId;
+    private Integer configId;
 
     @NoHtml
     @Column(name = "fieldSeparator", nullable = false)
@@ -48,6 +48,14 @@ public class HL7Details {
     @Column(name = "EscapeChar", nullable = false)
     private String EscapeChar = "";
 
+    public List<HL7Segments> getHL7Segments() {
+        return HL7Segments;
+    }
+
+    public void setHL7Segments(List<HL7Segments> HL7Segments) {
+        this.HL7Segments = HL7Segments;
+    }
+
     public int getId() {
         return id;
     }
@@ -56,20 +64,28 @@ public class HL7Details {
         this.id = id;
     }
 
-    public int getconfigId() {
+    public Integer getConfigId() {
         return configId;
     }
 
-    public void setconfigId(int configId) {
+    public void setConfigId(Integer configId) {
         this.configId = configId;
     }
 
-    public String getfieldSeparator() {
+    public String getFieldSeparator() {
         return fieldSeparator;
     }
 
-    public void setfieldSeparator(String fieldSeparator) {
+    public void setFieldSeparator(String fieldSeparator) {
         this.fieldSeparator = fieldSeparator;
+    }
+
+    public String getComponentSeparator() {
+        return componentSeparator;
+    }
+
+    public void setComponentSeparator(String componentSeparator) {
+        this.componentSeparator = componentSeparator;
     }
 
     public String getEscapeChar() {
@@ -79,21 +95,4 @@ public class HL7Details {
     public void setEscapeChar(String EscapeChar) {
         this.EscapeChar = EscapeChar;
     }
-
-    public String getcomponentSeparator() {
-        return componentSeparator;
-    }
-
-    public void setcomponentSeparator(String componentSeparator) {
-        this.componentSeparator = componentSeparator;
-    }
-
-    public List<HL7Segments> getHL7Segments() {
-        return HL7Segments;
-    }
-
-    public void setHL7Segments(List<HL7Segments> HL7Segments) {
-        this.HL7Segments = HL7Segments;
-    }
-
 }

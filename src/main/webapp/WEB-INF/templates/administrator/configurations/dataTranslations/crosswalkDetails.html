@@ -1,0 +1,90 @@
+<div class="modal-header">
+    <div class="col-md-12">
+        <div class="col-md-6" style="padding-left:0px;">
+            <h3 class="panel-title" style="margin-top:15px;margin-bottom:10px" th:if="${btnValue == 'Create'}">Add Crosswalk</h3>
+            <h3 class="panel-title" style="margin-top:15px;margin-bottom:10px" th:unless="${btnValue == 'Create'}">View Crosswalk</h3>
+        </div>
+        <div class="col-md-6" style="padding-right:0px;">
+            <button class="btn btn-success btn-sm pull-right btnCloseCW" data-bs-dismiss="modal" title="Close Window" style="margin-top:10px;margin-bottom:10px">Close Window</button>
+        </div>
+    </div>
+</div>
+<div class="modal-body">
+    <div class="alert alert-danger uploadError" role="alert" style="display:none;">
+        The uploaded file did not have the delimiter you selected.
+    </div>
+    <div class="alert alert-danger uploadDupError" role="alert" style="display:none;">
+        The uploaded file contained duplicate source values.
+    </div>
+    <div class="alert alert-success uploadSuccess" role="alert" style="display:none;">
+        The crosswalk file was successfully uploaded.
+    </div>
+
+    <form id="crosswalkdetailsform" th:object="${crosswalkDetails}" enctype="multipart/form-data" method="post" role="form">
+        <input type="hidden" id="id" th:field="*{id}"/>
+        <input type="hidden" th:field="*{dateCreated}"/>
+        <input type="hidden" name="orgId" id="orgId" th:value="${orgId}"/>
+        <div class="form-container">
+            <div id="crosswalkNameDiv" class="form-group" th:classappend="${#fields.hasErrors('name') ? 'has-error' : ''}">
+                <label class="control-label" for="name">Crosswalk Name *</label>
+                <th:block th:if="${crosswalkDetails.id > 0}">
+                     <input type="hidden" th:field="*{name}" />
+                     <p th:text="${crosswalkDetails.name}"></p>
+                </th:block>
+                <th:block th:unless="${crosswalkDetails.id > 0}">
+                    <input th:field="*{name}" id="name" class="form-control" type="text" maxLength="45" />
+                    <span id="crosswalkNameMsg" class="control-label"></span>
+                </th:block>
+            </div>
+            <div id="crosswalkDelimDiv" class="form-group" th:classappend="${#fields.hasErrors('fileDelimiter') ? 'has-error' : ''}">
+                <label class="control-label" for="name">Delimiter *</label>
+                <select th:field="*{fileDelimiter}" id="delimiter" class="form-control half" th:data-delim="${fileDelimiter}">
+                    <option value="">- Select -</option>
+                    <option th:each="cwalk, dStatus : ${delimiters}" th:selected="${fileDelimiter == delimiters[dStatus.index][1] ? 'true' : 'false'}"  th:value="${delimiters[dStatus.index][1]}" th:text="${delimiters[dStatus.index][2]}"></option>
+                </select>
+                <span id="crosswalkDelimMsg" class="control-label"></span>
+            </div>
+            <th:block th:if="${crosswalkDetails.id > 0}">
+                <div class="form-group">
+                    <label class="control-label" >Existing Crosswalk File</label>
+                    <p th:text="${crosswalkDetails.fileName}"></p>
+                    <p><a id="cwFileLink" th:href="${'/FileDownload/downloadFile.do?fromPage=crosswalk&filename=&foldername=&cwId='+crosswalkDetails.id+'&delim='+crosswalkDetails.fileDelimiter}" title="Download Crosswalk File">Click here to download the file.</a></p>
+                </div>
+            </th:block>
+            <div id="crosswalkFileDiv" class="form-group" th:classappend="${#fields.hasErrors('file') ? 'has-error' : ''}">
+                <label class="control-label" for="crosswalkFile"><c:if test="${crosswalkDetails.id > 0 }">New </c:if>Crosswalk File *</label>
+                <input th:field="*{file}" id="crosswalkFile" type="file"  />
+                <span id="crosswalkFileMsg" class="control-label"></span>
+            </div>
+            <div class="form-group">
+                <input type="button" id="submitCrosswalkButton" th:rel="${actionValue}" class="btn btn-primary" th:value="${btnValue}"/>
+            </div>
+            <th:block th:if="${crosswalkDetails.id > 0}">
+                <div id="crosswalkNameDiv" class="form-group">
+                    <label class="control-label" for="data" style="padding:10px; background-color: #cccccc; width:100%">Existing Crosswalk Data</label>
+                    <br />
+                    <table class="table table-hover table-default" style="border-bottom:1px solid;margin: 0px; padding:0px;">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="width: 250px;position: sticky;">Source Value</th>
+                                <th scope="col" style="width: 150px;position: sticky;">Target Value</th>
+                                <th scope="col" style="width: 150px;position: sticky;">Description Value</th>
+                            </tr>
+                        </thead>
+                    </table>
+                    <div style="height:350px; overflow-y: scroll">
+                        <table class="table table-hover" style="border-collapse: collapse; width:100%">
+                        <tbody>
+                            <tr th:each="cwalkData, dStatus : ${crosswalkData}">
+                                <td valign="top" scope="row" style="width: 250px;border-bottom:1px dashed; border-right:1px dashed;" th:text="${cwalkData.sourceValue}"></td>
+                                <td valign="top" style="width: 150px;border-bottom:1px dashed; border-right:1px dashed;" th:text="${cwalkData.targetValue}"></td>
+                                <td valign="top" style="width: 150px;border-bottom:1px dashed;"  th:text="${cwalkData.descValue}"></td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+            </th:block>
+        </div>
+    </form>
+</div>

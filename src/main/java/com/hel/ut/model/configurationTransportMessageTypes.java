@@ -28,10 +28,10 @@ public class configurationTransportMessageTypes {
     private int id;
 
     @Column(name = "CONFIGTRANSPORTID", nullable = false)
-    private int configTransportId;
+    private Integer configTransportId;
 
     @Column(name = "CONFIGID", nullable = false)
-    private int configId;
+    private Integer configId;
 
     public int getId() {
         return id;
@@ -41,20 +41,19 @@ public class configurationTransportMessageTypes {
         this.id = id;
     }
 
-    public int getconfigId() {
-        return configId;
-    }
-
-    public void setconfigId(int configId) {
-        this.configId = configId;
-    }
-
-    public int getconfigTransportId() {
+    public Integer getConfigTransportId() {
         return configTransportId;
     }
 
-    public void setconfigTransportId(int configTransportId) {
+    public void setConfigTransportId(Integer configTransportId) {
         this.configTransportId = configTransportId;
     }
 
+    public Integer getConfigId() {
+        return configId;
+    }
+
+    public void setConfigId(Integer configId) {
+        this.configId = configId;
+    }
 }

@@ -221,4 +221,6 @@ public interface utConfigurationDAO {
     List<configurationConnection> getAllConnectionsSingleQuery();
     
     List getCrosswalksForExport(String sqlStatement) throws Exception;
+    
+    List getDTForDownload(String sqlStatement) throws Exception;
 }

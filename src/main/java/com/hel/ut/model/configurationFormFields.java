@@ -60,6 +60,46 @@ public class configurationFormFields {
     @Column(name = "sampleData", nullable = true)
     private String sampleData;
 
+    public String getFieldValue() {
+        return fieldValue;
+    }
+
+    public void setFieldValue(String fieldValue) {
+        this.fieldValue = fieldValue;
+    }
+
+    public String getAssociatedFieldDetails() {
+        return associatedFieldDetails;
+    }
+
+    public void setAssociatedFieldDetails(String associatedFieldDetails) {
+        this.associatedFieldDetails = associatedFieldDetails;
+    }
+
+    public Integer getCopiedId() {
+        return copiedId;
+    }
+
+    public void setCopiedId(Integer copiedId) {
+        this.copiedId = copiedId;
+    }
+
+    public Integer getMappedToField() {
+        return mappedToField;
+    }
+
+    public void setMappedToField(Integer mappedToField) {
+        this.mappedToField = mappedToField;
+    }
+
+    public Integer getMappedErrorField() {
+        return mappedErrorField;
+    }
+
+    public void setMappedErrorField(Integer mappedErrorField) {
+        this.mappedErrorField = mappedErrorField;
+    }
+
     public int getId() {
         return id;
     }
@@ -69,26 +109,26 @@ public class configurationFormFields {
     }
 
     public int getAssociatedFieldId() {
-	return associatedFieldId;
+        return associatedFieldId;
     }
 
     public void setAssociatedFieldId(int associatedFieldId) {
-	this.associatedFieldId = associatedFieldId;
+        this.associatedFieldId = associatedFieldId;
     }
 
-    public int getconfigId() {
+    public int getConfigId() {
         return configId;
     }
 
-    public void setconfigId(int configId) {
+    public void setConfigId(int configId) {
         this.configId = configId;
     }
 
-    public int gettransportDetailId() {
+    public int getTransportDetailId() {
         return transportDetailId;
     }
 
-    public void settransportDetailId(int transportDetailId) {
+    public void setTransportDetailId(int transportDetailId) {
         this.transportDetailId = transportDetailId;
     }
 
@@ -116,7 +156,7 @@ public class configurationFormFields {
         this.validationType = validationType;
     }
 
-    public boolean getRequired() {
+    public boolean isRequired() {
         return required;
     }
 
@@ -124,7 +164,7 @@ public class configurationFormFields {
         this.required = required;
     }
 
-    public boolean getUseField() {
+    public boolean isUseField() {
         return useField;
     }
 
@@ -132,69 +172,27 @@ public class configurationFormFields {
         this.useField = useField;
     }
 
-    public String getfieldValue() {
-        return fieldValue;
-    }
-
-    public void setfieldValue(String fieldValue) {
-        this.fieldValue = fieldValue;
-    }
-
-    public int getCopiedId() {
-	return copiedId;
-    }
-
-    public void setCopiedId(int copiedId) {
-	this.copiedId = copiedId;
-    }
-
-    public int getMappedToField() {
-	return mappedToField;
-    }
-
-    public void setMappedToField(int mappedToField) {
-	this.mappedToField = mappedToField;
-    }
-
     public Integer getAssociatedFieldNo() {
-	return associatedFieldNo;
+        return associatedFieldNo;
     }
 
     public void setAssociatedFieldNo(Integer associatedFieldNo) {
-	this.associatedFieldNo = associatedFieldNo;
-    }
-
-    public String getAssociatedFieldDetails() {
-	return associatedFieldDetails;
-    }
-
-    public void setAssociatedFieldDetails(String associatedFieldDetails) {
-	this.associatedFieldDetails = associatedFieldDetails;
-    }
-
-    public Integer getMappedErrorField() {
-	return mappedErrorField;
-    }
-
-    public void setMappedErrorField(Integer mappedErrorField) {
-	this.mappedErrorField = mappedErrorField;
+        this.associatedFieldNo = associatedFieldNo;
     }
 
     public String getDefaultValue() {
-	return defaultValue;
+        return defaultValue;
     }
 
     public void setDefaultValue(String defaultValue) {
-	this.defaultValue = defaultValue;
+        this.defaultValue = defaultValue;
     }
 
     public String getSampleData() {
-	return sampleData;
+        return sampleData;
     }
 
     public void setSampleData(String sampleData) {
-	this.sampleData = sampleData;
+        this.sampleData = sampleData;
     }
-
-    
 }

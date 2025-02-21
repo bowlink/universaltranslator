@@ -12,32 +12,23 @@ import java.util.List;
  * @author chadmccue
  */
 public class transactionRecords {
+    
+    List<fieldSelectOptions> fieldSelectOptions = null;
 
     private String fieldValue = null;
     private String fieldHelp = null;
     private String saveToTable = null;
     private String saveToTableCol = null;
-    private int fieldNo;
+    private Integer fieldNo;
     private boolean required = true;
     private String validation = null;
     private String fieldLabel = null;
-    private int transactionId;
+    private Integer transactionId;
     private boolean readOnly = false;
     private Integer fieldType = 1;
-
     private String errorDesc = null;
     private String errorData = null;
     private boolean useField = true;
-
-    public int getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(int transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    private List<fieldSelectOptions> fieldSelectOptions = null;
 
     public String getFieldValue() {
         return fieldValue;
@@ -47,76 +38,84 @@ public class transactionRecords {
         this.fieldValue = fieldValue;
     }
 
-    public String getfieldValue() {
-        return fieldValue;
+    public String getFieldHelp() {
+        return fieldHelp;
     }
 
-    public void setfieldValue(String fieldValue) {
-        this.fieldValue = fieldValue;
+    public void setFieldHelp(String fieldHelp) {
+        this.fieldHelp = fieldHelp;
     }
 
-    public String getsaveToTable() {
+    public String getSaveToTable() {
         return saveToTable;
     }
 
-    public void setsaveToTable(String saveToTable) {
+    public void setSaveToTable(String saveToTable) {
         this.saveToTable = saveToTable;
     }
 
-    public String getsaveToTableCol() {
+    public String getSaveToTableCol() {
         return saveToTableCol;
     }
 
-    public void setsaveToTableCol(String saveToTableCol) {
+    public void setSaveToTableCol(String saveToTableCol) {
         this.saveToTableCol = saveToTableCol;
     }
 
-    public int getfieldNo() {
+    public Integer getFieldNo() {
         return fieldNo;
     }
 
-    public void setfieldNo(int fieldNo) {
+    public void setFieldNo(Integer fieldNo) {
         this.fieldNo = fieldNo;
     }
 
-    public boolean getrequired() {
+    public boolean isRequired() {
         return required;
     }
 
-    public void setrequired(boolean required) {
+    public void setRequired(boolean required) {
         this.required = required;
     }
 
-    public void setvalidation(String validation) {
-        this.validation = validation;
-    }
-
-    public String getvalidation() {
+    public String getValidation() {
         return validation;
     }
 
-    public void setfieldSelectOptions(List<fieldSelectOptions> fieldSelectOptions) {
-        this.fieldSelectOptions = fieldSelectOptions;
+    public void setValidation(String validation) {
+        this.validation = validation;
     }
 
-    public List<fieldSelectOptions> getfieldSelectOptions() {
-        return fieldSelectOptions;
-    }
-
-    public void setfieldLabel(String fieldLabel) {
-        this.fieldLabel = fieldLabel;
-    }
-
-    public String getfieldLabel() {
+    public String getFieldLabel() {
         return fieldLabel;
     }
 
-    public void setreadOnly(boolean readOnly) {
+    public void setFieldLabel(String fieldLabel) {
+        this.fieldLabel = fieldLabel;
+    }
+
+    public Integer getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(Integer transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
     }
 
-    public boolean getreadOnly() {
-        return readOnly;
+    public Integer getFieldType() {
+        return fieldType;
+    }
+
+    public void setFieldType(Integer fieldType) {
+        this.fieldType = fieldType;
     }
 
     public String getErrorDesc() {
@@ -135,22 +134,6 @@ public class transactionRecords {
         this.errorData = errorData;
     }
 
-    public Integer getFieldType() {
-        return fieldType;
-    }
-
-    public void setFieldType(Integer fieldType) {
-        this.fieldType = fieldType;
-    }
-
-    public String getFieldHelp() {
-        return fieldHelp;
-    }
-
-    public void setFieldHelp(String fieldHelp) {
-        this.fieldHelp = fieldHelp;
-    }
-
     public boolean isUseField() {
         return useField;
     }
@@ -159,4 +142,11 @@ public class transactionRecords {
         this.useField = useField;
     }
 
+    public List<fieldSelectOptions> getFieldSelectOptions() {
+        return fieldSelectOptions;
+    }
+
+    public void setFieldSelectOptions(List<fieldSelectOptions> fieldSelectOptions) {
+        this.fieldSelectOptions = fieldSelectOptions;
+    }
 }

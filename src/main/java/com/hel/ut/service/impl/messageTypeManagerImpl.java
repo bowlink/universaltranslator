@@ -154,7 +154,7 @@ public class messageTypeManagerImpl implements messageTypeManager {
 		outputStream.close();
 
 		//Set the filename to the original file name
-		crosswalkDetails.setfileName(fileName);
+		crosswalkDetails.setFileName(fileName);
 
 	    } catch (IOException e) {
 		e.printStackTrace();
@@ -251,7 +251,7 @@ public class messageTypeManagerImpl implements messageTypeManager {
             outputStream.close();
 
             //Set the filename to the original file name
-            crosswalkDetails.setfileName(fileName);
+            crosswalkDetails.setFileName(fileName);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -371,7 +371,7 @@ public class messageTypeManagerImpl implements messageTypeManager {
         }
 
         File newFile = null;
-        newFile = new File(directory + crosswalkDetails.getfileName());
+        newFile = new File(directory + crosswalkDetails.getFileName());
 
         try {
             if (newFile.exists()) {
@@ -430,7 +430,7 @@ public class messageTypeManagerImpl implements messageTypeManager {
 			newCW.setName(newCWName);
 			newCW.setOrgId(newOrgId);
 			newCW.setFileDelimiter(cw.getFileDelimiter());
-			newCW.setfileName(cw.getfileName());
+			newCW.setFileName(cw.getFileName());
 			
 			newCWID = messageTypeDAO.createCrosswalk(newCW);
 			
@@ -450,11 +450,11 @@ public class messageTypeManagerImpl implements messageTypeManager {
 			}
 			
 			//Check if file exists if so copy to the new org folder
-			File cwFile = new File(myProps.getProperty("ut.directory.utRootDir") + oldOrgCleanURL + "/crosswalks/" + cw.getfileName());
-			File newOrgCWFile = new File(myProps.getProperty("ut.directory.utRootDir") + newOrgCleanURL + "/crosswalks/" + cw.getfileName());
+			File cwFile = new File(myProps.getProperty("ut.directory.utRootDir") + oldOrgCleanURL + "/crosswalks/" + cw.getFileName());
+			File newOrgCWFile = new File(myProps.getProperty("ut.directory.utRootDir") + newOrgCleanURL + "/crosswalks/" + cw.getFileName());
 
 			if(cwFile.exists() && !newOrgCWFile.exists()) {
-			    FileUtils.copyFile(new File(myProps.getProperty("ut.directory.utRootDir") + oldOrgCleanURL + "/crosswalks/" + cw.getfileName()), new File(myProps.getProperty("ut.directory.utRootDir") + newOrgCleanURL + "/crosswalks/" + cw.getfileName()));
+			    FileUtils.copyFile(new File(myProps.getProperty("ut.directory.utRootDir") + oldOrgCleanURL + "/crosswalks/" + cw.getFileName()), new File(myProps.getProperty("ut.directory.utRootDir") + newOrgCleanURL + "/crosswalks/" + cw.getFileName()));
 			}
 			
 			//Update the data transation CW id to the new id

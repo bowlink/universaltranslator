@@ -195,7 +195,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         
         if(orgId > 0) {
             Predicate[] predicates = new Predicate[3];
-            predicates[0] = builder.like(root.get("configName"), configName);
+            predicates[0] = builder.like(root.get("configname"), configName);
             predicates[1] = builder.equal(root.get("orgId"), orgId);
             predicates[2] = builder.equal(root.get("deleted"), false);
 
@@ -203,7 +203,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         }
         else {
             Predicate[] predicates = new Predicate[2];
-            predicates[0] = builder.like(root.get("configName"), configName);
+            predicates[0] = builder.like(root.get("configname"), configName);
             predicates[1] = builder.equal(root.get("deleted"), false);
 
             whereClause = builder.and(predicates);
@@ -695,17 +695,24 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         query.setParameter("configId", configId);
 
         configurationSchedules scheduleDetails;
+        
+        if(query.list().size() > 0) {
+            if (query.list().size() > 1) {
+                scheduleDetails = (configurationSchedules) query.list().get(0);
 
-        if (query.list().size() > 1) {
-            scheduleDetails = (configurationSchedules) query.list().get(0);
+                return scheduleDetails;
+            } else {
+                scheduleDetails = (configurationSchedules) query.uniqueResult();
 
-            return scheduleDetails;
-        } else {
-            scheduleDetails = (configurationSchedules) query.uniqueResult();
-
+                return scheduleDetails;
+            }
+        }
+        else {
+            scheduleDetails = new configurationSchedules();
+            scheduleDetails.setConfigId(configId);
+            scheduleDetails.setType(5);
             return scheduleDetails;
         }
-
     }
 
     /**
@@ -716,6 +723,14 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = false)
     @Override
     public void saveSchedule(configurationSchedules scheduleDetails) {
+        /*configurationSchedules currScheduleDetails = getScheduleDetails(scheduleDetails.getConfigId());
+        
+        if(currScheduleDetails != null) {
+            sessionFactory.getCurrentSession().merge(scheduleDetails);
+        }
+        else {
+             sessionFactory.getCurrentSession().persist(scheduleDetails);
+        }*/
         if (Objects.isNull(sessionFactory.getCurrentSession().find(configurationSchedules.class, scheduleDetails.getId()))) {
             sessionFactory.getCurrentSession().persist(scheduleDetails);
         } else {
@@ -751,12 +766,12 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 
 	//Delete the existing data translactions
 	Query deleteTranslations = sessionFactory.getCurrentSession().createNativeQuery("DELETE from configurationDataTranslations where configId = :configId", String.class);
-	deleteTranslations.setParameter("configId", messageSpecs.getconfigId());
+	deleteTranslations.setParameter("configId", messageSpecs.getConfigId());
 	deleteTranslations.executeUpdate();
 
 	//Delete the existing form fields
 	Query deleteFields = sessionFactory.getCurrentSession().createNativeQuery("DELETE from configurationFormFields where configId = :configId and transportDetailId = :transportDetailId", String.class);
-	deleteFields.setParameter("configId", messageSpecs.getconfigId());
+	deleteFields.setParameter("configId", messageSpecs.getConfigId());
 	deleteFields.setParameter("transportDetailId", transportDetailId);
 	deleteFields.executeUpdate();
     }
@@ -825,7 +840,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
                 connectionDetails = (configurationConnection) sessionFactory.getCurrentSession().createQuery(connectionCriteria).uniqueResult();
                 
                 if(connectionDetails != null) {
-                    senderConfigList.add(connectionDetails.getsourceConfigId());
+                    senderConfigList.add(connectionDetails.getSourceConfigId());
                 }
                 
                 connectionDetails = null;
@@ -883,19 +898,64 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<configurationDataTranslations> getDataTranslationsWithFieldNo(int configId, int categoryId) {
-	
-        Query query = sessionFactory
-	    .getCurrentSession()
-	    .createNativeQuery(
-		    "select configurationDataTranslations.*, configurationFormFields.fieldNo, configurationFormFields.required as requiredField, configurationFormFields.fieldDesc "
-		    + "from configurationDataTranslations inner join "
-		    + "configurationFormFields on configurationFormFields.id = configurationDataTranslations.fieldId " 
-		    + "where configurationDataTranslations.configId = :configId "
-		    + "and configurationDataTranslations.categoryId = :categoryId "
-		    + "order by configurationDataTranslations.processorder asc;",configurationDataTranslations.class)
-	    .setParameter("categoryId", categoryId).setParameter("configId", configId);
+        
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("select configurationDataTranslations.id, configurationDataTranslations.configId, configurationDataTranslations.fieldId, configurationDataTranslations.crosswalkId,"
+        + "configurationDataTranslations.macroid, configurationDataTranslations.passClear,configurationDataTranslations.fieldA,configurationDataTranslations.fieldB,"
+        + "configurationDataTranslations.constant1,configurationDataTranslations.constant2,configurationDataTranslations.processOrder,configurationDataTranslations.categoryId,"
+        + "configurationDataTranslations.defaultValue,configurationDataTranslations.dateAdded,configurationDataTranslations.updatedByImport, "
+        + "configurationFormFields.fieldNo, configurationFormFields.required as requiredField, configurationFormFields.fieldDesc "
+        + "from configurationDataTranslations inner join "
+        + "configurationFormFields on configurationFormFields.id = configurationDataTranslations.fieldId " 
+        + "where configurationDataTranslations.configId = :configId "
+        + "and configurationDataTranslations.categoryId = :categoryId "
+        + "order by configurationDataTranslations.processorder asc;",configurationDataTranslations.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("configId", StandardBasicTypes.INTEGER)
+        .addScalar("fieldId", StandardBasicTypes.INTEGER)
+        .addScalar("crosswalkId", StandardBasicTypes.INTEGER)
+        .addScalar("macroid", StandardBasicTypes.INTEGER)
+        .addScalar("passClear", StandardBasicTypes.INTEGER)
+        .addScalar("fieldA", StandardBasicTypes.STRING)
+        .addScalar("fieldB", StandardBasicTypes.STRING)
+        .addScalar("constant1", StandardBasicTypes.STRING)
+        .addScalar("constant2", StandardBasicTypes.STRING)
+        .addScalar("processOrder", StandardBasicTypes.INTEGER)
+        .addScalar("categoryId", StandardBasicTypes.INTEGER)
+        .addScalar("defaultValue", StandardBasicTypes.STRING)
+        .addScalar("dateAdded", StandardBasicTypes.TIMESTAMP)
+        .addScalar("updatedByImport", StandardBasicTypes.BOOLEAN)
+        .addScalar("fieldNo", StandardBasicTypes.INTEGER)
+        .addScalar("requiredField", StandardBasicTypes.BOOLEAN)
+        .addScalar("fieldDesc", StandardBasicTypes.STRING)     
+        .setParameter("categoryId", categoryId)
+        .setParameter("configId", configId);
 
-        List<configurationDataTranslations> cdtList = query.list();
+        List<Object[]> results = query.getResultList();
+        
+        List<configurationDataTranslations> cdtList = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            configurationDataTranslations cdt = new configurationDataTranslations();
+            cdt.setId((Integer) record[1]);
+            cdt.setConfigId((Integer) record[2]);
+            cdt.setFieldId((Integer) record[3]);
+            cdt.setCrosswalkId((Integer) record[4]);
+            cdt.setMacroId((Integer) record[5]);
+            cdt.setPassClear((Integer) record[6]);
+            cdt.setFieldA((String) record[7]);
+            cdt.setFieldB((String) record[8]);
+            cdt.setConstant1((String) record[9]);
+            cdt.setConstant2((String) record[10]);
+            cdt.setProcessOrder((Integer) record[11]);
+            cdt.setCategoryId((Integer) record[12]); 
+            cdt.setDefaultValue((String) record[13]);
+            cdt.setDateAdded((Date) record[14]);
+            cdt.setUpdatedByImport((boolean) record[15]);
+            cdt.setFieldNo((Integer) record[16]);
+            cdt.setRequiredField((boolean) record[17]);
+            cdt.setFieldDesc((String) record[18]);
+            cdtList.add(cdt);
+        });
 
         return cdtList;
     }
@@ -1298,7 +1358,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 	    boolean configHasFields = false;
 	    
 	    //Check to see if form fields already exist
-	    List<configurationFormFields> existingFormFields = configurationTransportDAO.getConfigurationFields(messageSpecs.getconfigId(),transportDetailId);
+	    List<configurationFormFields> existingFormFields = configurationTransportDAO.getConfigurationFields(messageSpecs.getConfigId(),transportDetailId);
 	    
 	    if(existingFormFields != null) {
 		if(!existingFormFields.isEmpty()) {
@@ -1306,7 +1366,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 		}
 	    }
 	    
-	    utConfiguration configDetails = getConfigurationById(messageSpecs.getconfigId());
+	    utConfiguration configDetails = getConfigurationById(messageSpecs.getConfigId());
            
             //Set the initial value of the field number (0);
             Integer fieldNo = new Integer(0);
@@ -1358,13 +1418,13 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 		Row row = sheet.getRow(startRow);
 		
 		if(row.getLastCellNum() > 5) {
-		    messageSpecs.settemplateFile(currentTemplateFileName);
+		    messageSpecs.setTemplateFile(currentTemplateFileName);
 		    updateMessageSpecs(messageSpecs, transportDetailId);
                     workbook.close();
 		    throw new Exception("The uploaded template file had more than 5 columns, please choose horizontal layout or check your uploaded template file.");
 		}
 		else if(row.getLastCellNum() < 2) {
-		    messageSpecs.settemplateFile(currentTemplateFileName);
+		    messageSpecs.setTemplateFile(currentTemplateFileName);
 		    updateMessageSpecs(messageSpecs, transportDetailId);
                     workbook.close();
 		    throw new Exception("The uploaded template file had only 1 column, please check your uploaded template file.");
@@ -1453,7 +1513,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 					    }
 					}
 					catch (Exception e) {
-					    messageSpecs.settemplateFile(currentTemplateFileName);
+					    messageSpecs.setTemplateFile(currentTemplateFileName);
 					    updateMessageSpecs(messageSpecs, transportDetailId);
                                             workbook.close();
 					    if(e.getMessage() != null && e.getMessage().contains("uploaded template")) {
@@ -1503,7 +1563,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 					 }
 				    }
 				    catch (Exception ex) {
-					 messageSpecs.settemplateFile(currentTemplateFileName);
+					 messageSpecs.setTemplateFile(currentTemplateFileName);
 					 updateMessageSpecs(messageSpecs, transportDetailId);
                                          workbook.close();
 					 if(ex.getMessage() != null && ex.getMessage().contains("uploaded template")) {
@@ -1542,7 +1602,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 					 }
 				    }
 				    catch (Exception ex) {
-					messageSpecs.settemplateFile(currentTemplateFileName);
+					messageSpecs.setTemplateFile(currentTemplateFileName);
 					updateMessageSpecs(messageSpecs, transportDetailId);
 					workbook.close();
 					if(ex.getMessage() != null && ex.getMessage().contains("uploaded template")) {
@@ -1590,7 +1650,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
                             + " VALUES (:configId, :transportDetailId, :fieldNo, :fieldDesc, :validationId, :required, :useField, :defaultValue, :sampleData)";
 			    
 			    query = sessionFactory.getCurrentSession().createNativeQuery(sqlStatement, String.class)
-                            .setParameter("configId", messageSpecs.getconfigId())
+                            .setParameter("configId", messageSpecs.getConfigId())
                             .setParameter("transportDetailId", transportDetailId)
                             .setParameter("fieldNo", fieldNo)
                             .setParameter("fieldDesc", fieldDesc)
@@ -1608,13 +1668,13 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 	    else if(fileLayout == 1) {
                 
 		if(sheet.getLastRowNum() > 5) {
-		    messageSpecs.settemplateFile(currentTemplateFileName);
+		    messageSpecs.setTemplateFile(currentTemplateFileName);
 		    updateMessageSpecs(messageSpecs, transportDetailId);
                     workbook.close();
 		    throw new Exception("The uploaded template file had more than 5 rows, please choose vertical layout or check your uploaded template file.");
 		}
 		else if(sheet.getLastRowNum() < 2) {
-		    messageSpecs.settemplateFile(currentTemplateFileName);
+		    messageSpecs.setTemplateFile(currentTemplateFileName);
 		    updateMessageSpecs(messageSpecs, transportDetailId);
                     workbook.close();
 		    throw new Exception("The uploaded template file had less than 3 rows, please choose horizontal layout or check your uploaded template file.");
@@ -1784,7 +1844,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 				}
 			    }
 			    catch (Exception e) {
-				messageSpecs.settemplateFile(currentTemplateFileName);
+				messageSpecs.setTemplateFile(currentTemplateFileName);
 				updateMessageSpecs(messageSpecs, transportDetailId);
                                 workbook.close();
 				if(e.getMessage() != null && e.getMessage().contains("uploaded template")) {
@@ -1820,7 +1880,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 			    }
 			}
 			catch (Exception ex) {
-			    messageSpecs.settemplateFile(currentTemplateFileName);
+			    messageSpecs.setTemplateFile(currentTemplateFileName);
 			    updateMessageSpecs(messageSpecs, transportDetailId);
                             workbook.close();
 			    if(ex.getMessage() != null && ex.getMessage().contains("uploaded template")) {
@@ -1863,7 +1923,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
                             }
 		       }
 		       catch (Exception ex) {
-			   messageSpecs.settemplateFile(currentTemplateFileName);
+			   messageSpecs.setTemplateFile(currentTemplateFileName);
 			   updateMessageSpecs(messageSpecs, transportDetailId);
                            workbook.close();
 			   if(ex.getMessage() != null && ex.getMessage().contains("uploaded template")) {
@@ -1906,7 +1966,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
                             + " VALUES (:configId, :transportDetailId, :fieldNo, :fieldDesc, :validationId, :required, :useField, :defaultValue, :sampleData)";
 			    
 			    query = sessionFactory.getCurrentSession().createNativeQuery(sqlStatement, String.class)
-                            .setParameter("configId", messageSpecs.getconfigId())
+                            .setParameter("configId", messageSpecs.getConfigId())
                             .setParameter("transportDetailId", transportDetailId)
                             .setParameter("fieldNo", fieldNo)
                             .setParameter("fieldDesc", fieldDesc)
@@ -1940,7 +2000,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         }
 	
 	//Clear out fields that were not found in the file.
-	List<configurationFormFields> formFields = configurationTransportDAO.getConfigurationFields(messageSpecs.getconfigId(),transportDetailId);
+	List<configurationFormFields> formFields = configurationTransportDAO.getConfigurationFields(messageSpecs.getConfigId(),transportDetailId);
 	
 	if(!formFields.isEmpty() && !templateFields.isEmpty()) {
 	    String formFieldDesc = "";
@@ -1976,13 +2036,13 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 	
 	//Delete existing entry
 	MutationQuery deleteTranslations = sessionFactory.getCurrentSession().createMutationQuery("delete from configexceldetails where configId = :configId and orgId = :orgId");
-        deleteTranslations.setParameter("configId", messageSpecs.getconfigId());
+        deleteTranslations.setParameter("configId", messageSpecs.getConfigId());
         deleteTranslations.setParameter("orgId", orgId);
         deleteTranslations.executeUpdate();
 	
 	//Insert new entry
 	configexceldetails configexceldetails = new configexceldetails();
-	configexceldetails.setConfigId(messageSpecs.getconfigId());
+	configexceldetails.setConfigId(messageSpecs.getConfigId());
 	configexceldetails.setOrgId(orgId);
 	configexceldetails.setStartRow(messageSpecs.getExcelstartrow());
 	configexceldetails.setDiscardLastRows(messageSpecs.getExcelskiprows());
@@ -2067,7 +2127,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
                 
                 if(connectionDetails != null) {
                     // Add the sourceConfigId to the array
-                    senderConfigList.add(connectionDetails.getsourceConfigId());
+                    senderConfigList.add(connectionDetails.getSourceConfigId());
                 }
                 
                 connectionDetails = null;
@@ -2457,7 +2517,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
             config.setOrgName((String) record[3]);
             config.setHelRegistryId((Integer) record[4]);
             config.setCleanOrgURL((String) record[5]);
-            config.settransportDetailId((Integer) record[6]);
+            config.setTransportDetailId((Integer) record[6]);
             config.setTransportMethodId((Integer) record[7]);
             config.setDateCreated((Date) record[8]);
             config.setDateUpdated((Date) record[9]);
@@ -2510,7 +2570,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
             config.setConfigname((String) record[2]);
             config.setOrgName((String) record[3]);
             config.setCleanOrgURL((String) record[4]);
-            config.settransportDetailId((Integer) record[5]);
+            config.setTransportDetailId((Integer) record[5]);
             config.setTransportMethodId((Integer) record[6]);
             config.setDateCreated((Date) record[7]);
             config.setDateUpdated((Date) record[8]);
@@ -2613,7 +2673,6 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         });
 	
 	return configLogs;
-	
     }
     
     @Override
@@ -2747,6 +2806,29 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         List<Object[]> dataTranslations = query.getResultList();
 	
 	return dataTranslations;
+    }
+    
+    @Override
+    @Transactional(readOnly = false)
+    public List getDTForDownload(String sqlStatement) throws Exception {
+        
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlStatement, String.class)
+        .addScalar("configName", StandardBasicTypes.STRING)        
+        .addScalar("processOrder", StandardBasicTypes.INTEGER)
+        .addScalar("fieldDesc", StandardBasicTypes.STRING)
+        .addScalar("macroId", StandardBasicTypes.INTEGER)
+        .addScalar("macroName", StandardBasicTypes.STRING)
+        .addScalar("crosswalkId", StandardBasicTypes.INTEGER)
+        .addScalar("crosswalkname", StandardBasicTypes.STRING)
+        .addScalar("passClear", StandardBasicTypes.STRING)
+        .addScalar("fieldA", StandardBasicTypes.STRING)
+        .addScalar("fieldB", StandardBasicTypes.STRING)
+        .addScalar("constant1", StandardBasicTypes.STRING)
+        .addScalar("constant2", StandardBasicTypes.STRING)
+        .addScalar("fieldNo", StandardBasicTypes.INTEGER);
+        
+        List<Object[]> dataTranslations = query.getResultList();
 	
+	return dataTranslations;
     }
 }

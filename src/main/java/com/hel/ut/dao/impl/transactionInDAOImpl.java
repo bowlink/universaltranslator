@@ -146,8 +146,8 @@ public class transactionInDAOImpl implements transactionInDAO {
 		optionValue = (String) cwDatarow[0];
 
 		fieldOptions = new fieldSelectOptions();
-		fieldOptions.setoptionDesc(optionDesc);
-		fieldOptions.setoptionValue(optionValue);
+		fieldOptions.setOptionDesc(optionDesc);
+		fieldOptions.setOptionValue(optionValue);
 		fieldOptions.setDefaultValue(defaultValue);
 		fieldSelectOptions.add(fieldOptions);
 	    }
@@ -275,7 +275,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 		configurationConnection connectionInfo = (configurationConnection) sessionFactory.getCurrentSession().createQuery(connectionCriteria).uniqueResult();
 
 		/* Get the message type for the utConfiguration */
-		whereClause = builder.equal(configRoot.get("id"), connectionInfo.getsourceConfigId());
+		whereClause = builder.equal(configRoot.get("id"), connectionInfo.getSourceConfigId());
 		configCriteria.where(whereClause);
 
 		utConfiguration configDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
@@ -289,7 +289,7 @@ public class transactionInDAOImpl implements transactionInDAO {
                     }
                 }
 
-		whereClause = builder.equal(configRoot.get("id"), connectionInfo.gettargetConfigId());
+		whereClause = builder.equal(configRoot.get("id"), connectionInfo.getTargetConfigId());
                 configCriteria.where(whereClause);
                 
                 utConfiguration targetconfigDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
@@ -459,8 +459,8 @@ public class transactionInDAOImpl implements transactionInDAO {
                 configurationConnection connectionInfo = (configurationConnection) sessionFactory.getCurrentSession().createQuery(connectionCriteria).uniqueResult();
                 
                 if(connectionInfo != null) {
-                    if (!configIdList.contains(connectionInfo.getsourceConfigId())) {
-                        configIdList.add(connectionInfo.getsourceConfigId());
+                    if (!configIdList.contains(connectionInfo.getSourceConfigId())) {
+                        configIdList.add(connectionInfo.getSourceConfigId());
                     }
                 }
 	    }
@@ -800,7 +800,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    
 	    String sql = "insert into transactioninerrors_"+batchUploadId
 		+ " (batchUploadId, configId, transactionInRecordsId, fieldNo, errorid, required) "
-		+ "select " + batchUploadId + ", " + cff.getconfigId() + ", transactionInRecordsId, " + cff.getFieldNo()
+		+ "select " + batchUploadId + ", " + cff.getConfigId() + ", transactionInRecordsId, " + cff.getFieldNo()
 		+ ",1,1 from transactiontranslatedin_"+batchUploadId + " where configId = :configId "
 		+ "and (F" + cff.getFieldNo()+" is null "
 		+ "or length(trim(F" + cff.getFieldNo() + ")) = 0 "
@@ -808,7 +808,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 		+ "and configId = :configId and (statusId is null or statusId not in (:transRELId));";
 	    
 	    Query insertData = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
-            .setParameter("configId", cff.getconfigId())
+            .setParameter("configId", cff.getConfigId())
             .setParameterList("transRELId", transRELId);
 	    
 	    insertData.executeUpdate();
@@ -836,9 +836,9 @@ public class transactionInDAOImpl implements transactionInDAO {
 	insertError.setParameter("vtType", cff.getValidationType());
 	insertError.setParameter("fieldNo", cff.getFieldNo());
 	insertError.setParameter("batchUploadId", batchUploadId);
-	insertError.setParameter("configId", cff.getconfigId());
+	insertError.setParameter("configId", cff.getConfigId());
 	insertError.setParameter("transactionId", 0);
-	insertError.setParameter("isFieldRequired", cff.getRequired());
+	insertError.setParameter("isFieldRequired", cff.isRequired());
 
 	try {
 	    insertError.executeUpdate();
@@ -851,7 +851,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 	} catch (Exception ex) {
 	    System.err.println("genericValidation " + ex.getCause());
 	    ex.printStackTrace();
-	    insertProcessingError(processingSysErrorId, cff.getconfigId(), batchUploadId, cff.getFieldNo(),null, null, validationTypeId, false, false, ("-" + ex.getCause().toString()));
+	    insertProcessingError(processingSysErrorId, cff.getConfigId(), batchUploadId, cff.getFieldNo(),null, null, validationTypeId, false, false, ("-" + ex.getCause().toString()));
 	    return 0; //we return error count of 1 when error
 	}
     }
@@ -884,7 +884,7 @@ public class transactionInDAOImpl implements transactionInDAO {
             Root<utConfiguration> configRoot = configCriteria.from(utConfiguration.class);
 
 	    for (configurationConnection connection : connections) {
-		whereClause = builder.equal(configRoot.get("id"), connection.gettargetConfigId());
+		whereClause = builder.equal(configRoot.get("id"), connection.getTargetConfigId());
                 configCriteria.where(whereClause);
 
 		utConfiguration configDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
@@ -1494,7 +1494,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 	try {
 	    //error Id 9 - invalid target org
 	    String sql = ("insert into transactioninerrors_"+batchId+" (batchUploadId, configId, transactionInRecordsId, errorId, fieldNo) "
-		    + "select " + batchId + ", " + bt.getsourceConfigId() + ", transactionInRecordsId, 9,  " + bt.getTargetOrgCol()+" "
+		    + "select " + batchId + ", " + bt.getSourceConfigId() + ", transactionInRecordsId, 9,  " + bt.getTargetOrgCol()+" "
 		    + "from transactiontranslatedin_"+batchId+" where configId = :sourceConfigId "
 		    + "and transactionInRecordsId in (select id from transactioninrecords_"+batchId+") "
 		    + "and f" + bt.getTargetOrgCol() + " not in (select orgId from configurationConnections cc,"
@@ -1503,7 +1503,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 		    + "and transactionInRecordsId not in (select transactionInRecordsId from transactioninerrors_"+batchId+" where errorId = 9);");
 	    
 	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
-	    query.setParameter("sourceConfigId", bt.getsourceConfigId());
+	    query.setParameter("sourceConfigId", bt.getSourceConfigId());
 
 	    query.executeUpdate();
 	    return 0;
@@ -1828,7 +1828,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 	StringBuilder tableFields = new StringBuilder();
 	
 	configFormFields.forEach(field -> {
-	    if(field.getUseField()) {
+	    if(field.isUseField()) {
                 tableFields.append(" F").append(field.getFieldNo())
                 .append(" = case ")
                 .append("when lcase(F").append(field.getFieldNo()).append(") = 'null' then '' ")
@@ -2043,7 +2043,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    //error Id 23 - invalid SourceSubOrg
 	    String sql = "insert into transactioninerrors_"+batch.getId() + " "
 		+ "(batchUploadId,configId,transactionInRecordsId,errorId,fieldNo) "
-		+ "select " + batch.getId() + "," + bt.getsourceConfigId() + ",transactionInRecordsId,23," + bt.getSourceSubOrgCol() + " "
+		+ "select " + batch.getId() + "," + bt.getSourceConfigId() + ",transactionInRecordsId,23," + bt.getSourceSubOrgCol() + " "
 		+ "from transactiontranslatedin_"+batch.getId()+" where configId = :sourceConfigId ";
 	    
 	    if (nofinalStatus) {
@@ -2057,7 +2057,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 
 	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	    query.setParameter("parentOrg", batch.getOrgId());
-	    query.setParameter("sourceConfigId", bt.getsourceConfigId());
+	    query.setParameter("sourceConfigId", bt.getSourceConfigId());
 	    
 	    if (nofinalStatus) {
 		query.setParameterList("transRELId", transRELId);
@@ -2414,17 +2414,17 @@ public class transactionInDAOImpl implements transactionInDAO {
 	String sql = "UPDATE  transactionIndetailauditerrors_"+batchUploadId + " "
 		+ " JOIN (select f" + fieldNo + " as errorData,";
 	
-	if (cms.getrptField1() != 0) {
-	    sql += "f" + cms.getrptField1() + " as reportField1Data,";
+	if (cms.getRptField1() != 0) {
+	    sql += "f" + cms.getRptField1() + " as reportField1Data,";
 	}
-	if (cms.getrptField2() != 0) {
-	    sql += "f" + cms.getrptField2() + " as reportField2Data,";
+	if (cms.getRptField2() != 0) {
+	    sql += "f" + cms.getRptField2() + " as reportField2Data,";
 	}
-	if (cms.getrptField3() != 0) {
-	    sql += "f" + cms.getrptField3() + " as reportField3Data,";
+	if (cms.getRptField3() != 0) {
+	    sql += "f" + cms.getRptField3() + " as reportField3Data,";
 	}
-	if (cms.getrptField4() != 0) {
-	    sql += "f" + cms.getrptField4() + " as reportField4Data,";
+	if (cms.getRptField4() != 0) {
+	    sql += "f" + cms.getRptField4() + " as reportField4Data,";
 	}
 	sql = sql + "id as matchId from transactioninrecords_"+batchUploadId+" tir "
 	    + " join (select transactionInRecordsId from "
@@ -2434,23 +2434,23 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    + "ON transactionIndetailauditerrors_"+batchUploadId +".transactionInRecordsId = tbl_concat.matchid"
 	    + " SET transactionIndetailauditerrors_"+batchUploadId+".errorData = tbl_concat.errorData ";
 	
-	if (cms.getrptField1() != 0) {
+	if (cms.getRptField1() != 0) {
 	    sql = sql + ", transactionIndetailauditerrors_"+batchUploadId+".reportField1Data = tbl_concat.reportField1Data";
 	}
-	if (cms.getrptField2() != 0) {
+	if (cms.getRptField2() != 0) {
 	    sql = sql + ", transactionIndetailauditerrors_"+batchUploadId+".reportField2Data = tbl_concat.reportField2Data";
 	}
-	if (cms.getrptField3() != 0) {
+	if (cms.getRptField3() != 0) {
 	    sql = sql + ", transactionIndetailauditerrors_"+batchUploadId+".reportField3Data = tbl_concat.reportField3Data";
 	}
-	if (cms.getrptField4() != 0) {
+	if (cms.getRptField4() != 0) {
 	    sql = sql + ", transactionIndetailauditerrors_"+batchUploadId+".reportField4Data = tbl_concat.reportField4Data";
 	}
 	sql = sql + " WHERE transactionIndetailauditerrors_"+batchUploadId+".fieldNo = :fieldNo"
 		+ "  and transactionIndetailauditerrors_"+batchUploadId+".configId = :configId";
 
 	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
-	query.setParameter("configId", cms.getconfigId());
+	query.setParameter("configId", cms.getConfigId());
 	query.setParameter("fieldNo", fieldNo);
 	query.executeUpdate();
 
@@ -4012,7 +4012,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 	} 
 	
 	sql = "insert into " + droppedTableName + " ("+batchIdType+"," + transactionRecordCol + ",fieldNo,configId,fieldName,fieldValue) ";
-	sql += "select " + batchId + "," + transactionRecordCol + "," + cdt.getFieldNo() + "," + cdt.getconfigId() + ", '" + cdt.getFieldDesc().trim() + "', F"+cdt.getFieldNo();
+	sql += "select " + batchId + "," + transactionRecordCol + "," + cdt.getFieldNo() + "," + cdt.getConfigId() + ", '" + cdt.getFieldDesc().trim() + "', F"+cdt.getFieldNo();
 	sql += " from " + translatedTable + " where forCW = 'MACRO_ERROR'";
 	
 	Query updateData = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
@@ -4060,7 +4060,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 	} 
 	
 	sql = "insert into " + droppedTableName + " ("+batchIdType+"," + transactionRecordCol + ",fieldNo,configId,fieldName,fieldValue) ";
-	sql += "select " + batchId + "," + transactionRecordCol + "," + cff.getFieldNo() + "," + cff.getconfigId() + ", '" + cff.getFieldDesc().trim() + "', F"+cff.getFieldNo();
+	sql += "select " + batchId + "," + transactionRecordCol + "," + cff.getFieldNo() + "," + cff.getConfigId() + ", '" + cff.getFieldDesc().trim() + "', F"+cff.getFieldNo();
 	sql += " from " + translatedTable + " where " + transactionRecordCol 
 	    + " in (select " + transactionRecordCol + " from " + errorsTable + " where errorId = 2 and fieldNo = " + cff.getFieldNo() + ")";
 	

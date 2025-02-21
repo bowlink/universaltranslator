@@ -411,7 +411,7 @@ public class directManager {
                         oAuthClient.destroy();
 
                         mailMessage mail = new mailMessage();
-                        mail.setfromEmailAddress("notifications@health-e-link.net");
+                        mail.setFromEmailAddress("notifications@health-e-link.net");
 
                         List<String> ccAddresses = new ArrayList<>();
 
@@ -419,7 +419,7 @@ public class directManager {
                         List<String> emailAddressList = Arrays.asList(emails);
 
                         if(!emailAddressList.isEmpty()) {
-                            mail.settoEmailAddress(emailAddressList.get(0).trim());
+                            mail.setToEmailAddress(emailAddressList.get(0).trim());
                             if(emailAddressList.size() > 1) {
                                 for(Integer i = 1; i < emailAddressList.size(); i++) {
                                     if(!"".equals(emailAddressList.get(i).trim())) {
@@ -434,13 +434,13 @@ public class directManager {
 
                         //build message
                         String message = "The following error occurred while authenticating with MedAllies. <br /><br />"+ ex.getMessage();
-                        mail.setmessageBody(message);
-                        mail.setmessageSubject("MedAllies Authentication Error");
+                        mail.setMessageBody(message);
+                        mail.setMessageSubject("MedAllies Authentication Error");
 
                         if (!ccAddresses.isEmpty()) {
                             String[] ccEmailAddresses = new String[ccAddresses.size()];
                             ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
-                            mail.setccEmailAddress(ccEmailAddresses);
+                            mail.setCcEmailAddress(ccEmailAddresses);
                         }
 
                         if (!bccAddresses.isEmpty()) {
@@ -592,7 +592,7 @@ public class directManager {
                     if(transportDetails.getErrorEmailAddresses() != null) {
                         if(!"".equals(transportDetails.getErrorEmailAddresses().trim())) {
                             mailMessage mail = new mailMessage();
-                            mail.setfromEmailAddress("notifications@health-e-link.net");
+                            mail.setFromEmailAddress("notifications@health-e-link.net");
 
                             List<String> ccAddresses = new ArrayList<>();
 
@@ -600,7 +600,7 @@ public class directManager {
                             List<String> emailAddressList = Arrays.asList(emails);
 
                             if(!emailAddressList.isEmpty()) {
-                                mail.settoEmailAddress(emailAddressList.get(0).trim());
+                                mail.setToEmailAddress(emailAddressList.get(0).trim());
                                 if(emailAddressList.size() > 1) {
                                     for(Integer i = 1; i < emailAddressList.size(); i++) {
                                         if(!"".equals(emailAddressList.get(i).trim())) {
@@ -620,13 +620,13 @@ public class directManager {
 
                             //build message
                             String message = "A Community eConnect feedback report was sent to your organization on " + dateFormat.format(date) + " via direct messaging for feedback report configuration " + configDetails.getConfigname().trim() + ".";
-                            mail.setmessageBody(message);
-                            mail.setmessageSubject("New Community eConnect feedback report");
+                            mail.setMessageBody(message);
+                            mail.setMessageSubject("New Community eConnect feedback report");
 
                             if (!ccAddresses.isEmpty()) {
                                 String[] ccEmailAddresses = new String[ccAddresses.size()];
                                 ccEmailAddresses = ccAddresses.toArray(ccEmailAddresses);
-                                mail.setccEmailAddress(ccEmailAddresses);
+                                mail.setCcEmailAddress(ccEmailAddresses);
                             }
 
                             if (!bccAddresses.isEmpty()) {

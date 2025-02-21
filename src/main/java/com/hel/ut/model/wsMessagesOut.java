@@ -29,13 +29,7 @@ import org.hibernate.annotations.GenericGenerator;
 public class wsMessagesOut {
 
     @Transient
-    private String orgName = null;
-
-    @Transient
-    private String batchName = null;
-
-    @Transient
-    private String mimeType = "";
+    private String orgName = null, batchName = null,mimeType = "";
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
@@ -44,7 +38,7 @@ public class wsMessagesOut {
     private int id;
 
     @Column(name = "orgId", nullable = false)
-    private int orgId = 0;
+    private Integer orgId = 0;
 
     @NoHtml
     @Column(name = "fromEmail", nullable = false)
@@ -59,7 +53,7 @@ public class wsMessagesOut {
     private String endPoint;
 
     @Column(name = "batchDownloadId", nullable = false)
-    private int batchDownloadId = 0;
+    private Integer batchDownloadId = 0;
 
     @Column(name = "soapMessage", nullable = true)
     private String soapMessage;
@@ -90,6 +84,14 @@ public class wsMessagesOut {
         this.batchName = batchName;
     }
 
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
     public int getId() {
         return id;
     }
@@ -98,11 +100,11 @@ public class wsMessagesOut {
         this.id = id;
     }
 
-    public int getOrgId() {
+    public Integer getOrgId() {
         return orgId;
     }
 
-    public void setOrgId(int orgId) {
+    public void setOrgId(Integer orgId) {
         this.orgId = orgId;
     }
 
@@ -130,11 +132,11 @@ public class wsMessagesOut {
         this.endPoint = endPoint;
     }
 
-    public int getBatchDownloadId() {
+    public Integer getBatchDownloadId() {
         return batchDownloadId;
     }
 
-    public void setBatchDownloadId(int batchDownloadId) {
+    public void setBatchDownloadId(Integer batchDownloadId) {
         this.batchDownloadId = batchDownloadId;
     }
 
@@ -168,13 +170,5 @@ public class wsMessagesOut {
 
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
-    }
-
-    public String getMimeType() {
-        return mimeType;
-    }
-
-    public void setMimeType(String mimeType) {
-        this.mimeType = mimeType;
     }
 }

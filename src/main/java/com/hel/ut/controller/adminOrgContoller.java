@@ -45,6 +45,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 
 /**
@@ -58,6 +59,9 @@ import org.springframework.security.core.Authentication;
 @Controller
 @RequestMapping("/administrator/organizations")
 public class adminOrgContoller {
+    
+    @Value("${eahUT}")
+    private String eahUT;
 
     @Autowired
     private organizationManager organizationManager;
@@ -174,6 +178,7 @@ public class adminOrgContoller {
         mav.addObject("sect","org");
         mav.addObject("actionPage","orgDetails");
         mav.addObject("cleanURL","create");
+        mav.addObject("eahUT", eahUT);
         
 	mav.setViewName("administrator/organizations/details");
         
@@ -228,6 +233,7 @@ public class adminOrgContoller {
             mav.addObject("actionPage","orgDetails");
             mav.addObject("allowOrgDelete",false);
             mav.addObject("cleanURL","create");
+            mav.addObject("eahUT", eahUT);
             
             return mav;
         }
@@ -247,6 +253,7 @@ public class adminOrgContoller {
             mav.addObject("actionPage","orgDetails");
             mav.addObject("allowOrgDelete",false);
             mav.addObject("cleanURL","create");
+            mav.addObject("eahUT", eahUT);
             return mav;
         }
 	
@@ -288,6 +295,7 @@ public class adminOrgContoller {
         mav.addObject("sect","org");
         mav.addObject("actionPage","orgDetails");
         mav.addObject("cleanURL",cleanURL);
+        mav.addObject("eahUT", eahUT);
         
 	mav.setViewName("administrator/organizations/details");
 
@@ -387,6 +395,7 @@ public class adminOrgContoller {
             mav.addObject("sect","org");
             mav.addObject("actionPage","orgDetails");
             mav.addObject("allowOrgDelete",false);
+            mav.addObject("eahUT", eahUT);
             return mav;
         }
 
@@ -418,6 +427,7 @@ public class adminOrgContoller {
                 mav.addObject("sect","org");
                 mav.addObject("actionPage","orgDetails");
                 mav.addObject("allowOrgDelete",false);
+                mav.addObject("eahUT", eahUT);
                 return mav;
             }
         }

@@ -29,7 +29,7 @@ public class HL7ElementComponents {
     private int id;
 
     @Column(name = "ELEMENTID", nullable = false)
-    private int elementId;
+    private Integer elementId;
 
     @NoHtml
     @Column(name = "fieldDescriptor", nullable = true)
@@ -44,7 +44,7 @@ public class HL7ElementComponents {
     private String fieldValue = "";
 
     @Column(name = "displayPos", nullable = true)
-    private int displayPos = 1;
+    private Integer displayPos = 1;
 
     @NoHtml
     @Column(name = "defaultValue", nullable = true)
@@ -58,19 +58,19 @@ public class HL7ElementComponents {
         this.id = id;
     }
 
-    public int getelementId() {
+    public Integer getElementId() {
         return elementId;
     }
 
-    public void setelementId(int elementId) {
+    public void setElementId(Integer elementId) {
         this.elementId = elementId;
     }
 
-    public String getfieldDescriptor() {
+    public String getFieldDescriptor() {
         return fieldDescriptor;
     }
 
-    public void setfieldDescriptor(String fieldDescriptor) {
+    public void setFieldDescriptor(String fieldDescriptor) {
         this.fieldDescriptor = fieldDescriptor;
     }
 
@@ -82,19 +82,19 @@ public class HL7ElementComponents {
         this.fieldAppendText = fieldAppendText;
     }
 
-    public String getfieldValue() {
+    public String getFieldValue() {
         return fieldValue;
     }
 
-    public void setfieldValue(String fieldValue) {
+    public void setFieldValue(String fieldValue) {
         this.fieldValue = fieldValue;
     }
 
-    public int getdisplayPos() {
+    public Integer getDisplayPos() {
         return displayPos;
     }
 
-    public void setdisplayPos(int displayPos) {
+    public void setDisplayPos(Integer displayPos) {
         this.displayPos = displayPos;
     }
 
@@ -105,5 +105,4 @@ public class HL7ElementComponents {
     public void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
     }
-
 }

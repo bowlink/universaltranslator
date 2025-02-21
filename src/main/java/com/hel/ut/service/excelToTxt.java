@@ -153,13 +153,13 @@ public class excelToTxt {
                     text = "";
                     
                     try {
-                        useField = configFormFields.get(cn).getUseField();
+                        useField = configFormFields.get(cn).isUseField();
                     }
                     catch (Exception ex) {
                         useField = false;
                     }
                     
-                    if(row.getRowNum() == 0 && messageSpecs.getcontainsHeaderRow()) {
+                    if(row.getRowNum() == 0 && messageSpecs.isContainsHeaderRow()) {
                         useField = true;
                     }
                     

@@ -30,7 +30,7 @@ public class targetOutputRunLogs {
     private int id;
 
     @Column(name = "CONFIGID", nullable = false)
-    private int configId;
+    private Integer configId;
 
     @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "LASTRUNTIME", nullable = true)
@@ -44,20 +44,19 @@ public class targetOutputRunLogs {
         this.id = id;
     }
 
-    public int getconfigId() {
+    public Integer getConfigId() {
         return configId;
     }
 
-    public void setconfigId(int configId) {
+    public void setConfigId(Integer configId) {
         this.configId = configId;
     }
 
-    public Date getlastRunTime() {
+    public Date getLastRunTime() {
         return lastRunTime;
     }
 
-    public void setlastRunTimed(Date lastRunTime) {
+    public void setLastRunTime(Date lastRunTime) {
         this.lastRunTime = lastRunTime;
     }
-
 }

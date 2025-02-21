@@ -28,7 +28,7 @@ public class CrosswalkData {
     private int id;
 
     @Column(name = "crosswalkId", nullable = false)
-    private int crosswalkId;
+    private Integer crosswalkId;
 
     @Column(name = "sourceValue", nullable = false)
     private String sourceValue;
@@ -47,11 +47,11 @@ public class CrosswalkData {
         this.id = id;
     }
 
-    public int getCrosswalkId() {
+    public Integer getCrosswalkId() {
         return crosswalkId;
     }
 
-    public void setCrosswalkId(int crosswalkId) {
+    public void setCrosswalkId(Integer crosswalkId) {
         this.crosswalkId = crosswalkId;
     }
 
@@ -78,5 +78,4 @@ public class CrosswalkData {
     public void setDescValue(String descValue) {
         this.descValue = descValue;
     }
-
 }

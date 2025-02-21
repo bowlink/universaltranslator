@@ -16,7 +16,7 @@ import org.hibernate.annotations.GenericGenerator;
 public class utUserLogin {
     
     @Transient
-    private int totalTimeLoggedIn;
+    private Integer totalTimeLoggedIn;
     
     @Transient
     private String dateLastLoggedIn = "", logInDate = "";
@@ -28,13 +28,37 @@ public class utUserLogin {
     private int id;
 
     @Column(name = "USERID", nullable = false)
-    private int userId;
+    private Integer userId;
 
     @Column(name = "DATECREATED", nullable = true)
     private Date dateCreated = new Date();
     
     @Column(name = "dateLoggedOut", nullable = true)
     private Date dateLoggedOut = null;
+
+    public Integer getTotalTimeLoggedIn() {
+        return totalTimeLoggedIn;
+    }
+
+    public void setTotalTimeLoggedIn(Integer totalTimeLoggedIn) {
+        this.totalTimeLoggedIn = totalTimeLoggedIn;
+    }
+
+    public String getDateLastLoggedIn() {
+        return dateLastLoggedIn;
+    }
+
+    public void setDateLastLoggedIn(String dateLastLoggedIn) {
+        this.dateLastLoggedIn = dateLastLoggedIn;
+    }
+
+    public String getLogInDate() {
+        return logInDate;
+    }
+
+    public void setLogInDate(String logInDate) {
+        this.logInDate = logInDate;
+    }
 
     public int getId() {
         return id;
@@ -44,11 +68,11 @@ public class utUserLogin {
         this.id = id;
     }
 
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 
@@ -56,37 +80,15 @@ public class utUserLogin {
         return dateCreated;
     }
 
-    public void setDateLoggedOut(Date dateLoggedOut) {
-	this.dateLoggedOut = dateLoggedOut;
-    }
-
-    public int getTotalTimeLoggedIn() {
-	return totalTimeLoggedIn;
-    }
-
-    public void setTotalTimeLoggedIn(int totalTimeLoggedIn) {
-	this.totalTimeLoggedIn = totalTimeLoggedIn;
-    }
-
-    public String getDateLastLoggedIn() {
-	return dateLastLoggedIn;
-    }
-
-    public void setDateLastLoggedIn(String dateLastLoggedIn) {
-	this.dateLastLoggedIn = dateLastLoggedIn;
-    }
-
-    public String getLogInDate() {
-	return logInDate;
-    }
-
-    public void setLogInDate(String logInDate) {
-	this.logInDate = logInDate;
-    }
-
     public void setDateCreated(Date dateCreated) {
-	this.dateCreated = dateCreated;
+        this.dateCreated = dateCreated;
     }
 
-    
+    public Date getDateLoggedOut() {
+        return dateLoggedOut;
+    }
+
+    public void setDateLoggedOut(Date dateLoggedOut) {
+        this.dateLoggedOut = dateLoggedOut;
+    }
 }

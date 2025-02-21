@@ -469,12 +469,12 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
 			    if (!hl7Elements.isEmpty()) {
 
-				hl7recordRow.append(segment.getsegmentName()).append(hl7Details.getfieldSeparator());
+				hl7recordRow.append(segment.getSegmentName()).append(hl7Details.getFieldSeparator());
 
 				int elementCounter = 1;
 				for (HL7Elements element : hl7Elements) {
 
-				    if ("pdfattachment".equals(element.getelementName().toLowerCase()) && transportDetails.getHL7PDFSampleTemplate() != null && !"".equals(transportDetails.getHL7PDFSampleTemplate())) {
+				    if ("pdfattachment".equals(element.getElementName().toLowerCase()) && transportDetails.getHL7PDFSampleTemplate() != null && !"".equals(transportDetails.getHL7PDFSampleTemplate())) {
 
 					Organization orgDetails = organizationManager.getOrganizationById(batchDetails.getOrgId());
 					
@@ -644,7 +644,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 				    /* If the HL7 requires attachments then we need to look for the "attachments" keyword
                                     in order to loop through and retrieve all attachments to the batch.
 				     */
-				    if ("attachments".equals(element.getelementName().toLowerCase())) {
+				    if ("attachments".equals(element.getElementName().toLowerCase())) {
 					/*transactionTarget targetDetails = transactionOutDAO.getTransactionDetails(transactionTargetId);
 					List<transactionAttachment> attachments = transactionInManager.getAttachmentsByTransactionId(targetDetails.gettransactionInId());
 
@@ -658,16 +658,16 @@ public class transactionOutManagerImpl implements transactionOutManager {
 						byte[] encoded = Base64.encode(bytes);
 						String encodedString = new String(encoded);
 						if (!"".equals(attachment.gettitle()) && attachment.gettitle() != null) {
-						    hl7recordRow.append(attachmentCounter).append(hl7Details.getfieldSeparator()).append(attachment.gettitle()).append(hl7Details.getfieldSeparator());
+						    hl7recordRow.append(attachmentCounter).append(hl7Details.getFieldSeparator()).append(attachment.gettitle()).append(hl7Details.getFieldSeparator());
 						} else {
-						    hl7recordRow.append(attachmentCounter).append(hl7Details.getfieldSeparator()).append(attachment.getfileName()).append(hl7Details.getfieldSeparator());
+						    hl7recordRow.append(attachmentCounter).append(hl7Details.getFieldSeparator()).append(attachment.getfileName()).append(hl7Details.getFieldSeparator());
 						}
 
 						hl7recordRow.append(encodedString);
 
 						if (attachmentCounter < attachments.size()) {
 						    hl7recordRow.append(System.getProperty("line.separator"));
-						    hl7recordRow.append(segment.getsegmentName()).append(hl7Details.getfieldSeparator());
+						    hl7recordRow.append(segment.getSegmentName()).append(hl7Details.getFieldSeparator());
 						    attachmentCounter += 1;
 						}
 					    }
@@ -675,13 +675,13 @@ public class transactionOutManagerImpl implements transactionOutManager {
 					}*/
 				    } else {
 
-					if (!"".equals(element.getdefaultValue()) && element.getdefaultValue() != null) {
-					    if ("~currDate~".equals(element.getdefaultValue())) {
+					if (!"".equals(element.getDefaultValue()) && element.getDefaultValue() != null) {
+					    if ("~currDate~".equals(element.getDefaultValue())) {
 						SimpleDateFormat date_format = new SimpleDateFormat("yyyyMMdd");
 						String date = date_format.format(batchDetails.getDateCreated());
 						hl7recordRow.append(date);
 					    } else {
-						hl7recordRow.append(element.getdefaultValue());
+						hl7recordRow.append(element.getDefaultValue());
 					    }
 
 					} else {
@@ -720,7 +720,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 							}
 
 						    } else {
-							String colName = new StringBuilder().append("f").append(component.getfieldValue()).toString();
+							String colName = new StringBuilder().append("f").append(component.getFieldValue()).toString();
 
 							fieldValue = BeanUtils.getProperty(records.get(0), colName);
 
@@ -735,8 +735,8 @@ public class transactionOutManagerImpl implements transactionOutManager {
 							}
 						    }
 
-						    if (!"".equals(component.getfieldDescriptor()) && component.getfieldDescriptor() != null) {
-							hl7recordRow.append(component.getfieldDescriptor()).append(" ").append(fieldValue);
+						    if (!"".equals(component.getFieldDescriptor()) && component.getFieldDescriptor() != null) {
+							hl7recordRow.append(component.getFieldDescriptor()).append(" ").append(fieldValue);
 						    } else {
 							hl7recordRow.append(fieldValue);
 						    }
@@ -746,7 +746,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 						    }
 
 						    if (counter < hl7Components.size()) {
-							hl7recordRow.append(hl7Details.getcomponentSeparator());
+							hl7recordRow.append(hl7Details.getComponentSeparator());
 							counter += 1;
 						    }
 
@@ -760,7 +760,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 				    }
 
 				    if (elementCounter < hl7Elements.size()) {
-					hl7recordRow.append(hl7Details.getfieldSeparator());
+					hl7recordRow.append(hl7Details.getFieldSeparator());
 					elementCounter += 1;
 				    }
 
@@ -860,7 +860,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
 		if(addHeader) {
 		    for (configurationFormFields field : formFields) {
-			if (field.getUseField() == true) {
+			if (field.isUseField() == true) {
 			    if (field.getFieldNo() == maxFieldNo) {
 				sb.append(field.getFieldDesc().trim()).append(System.getProperty("line.separator"));
 			    } 
@@ -874,7 +874,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		for(transactionOutRecords record : records) {
 
 		    for (configurationFormFields field : formFields) {
-			if (field.getUseField() == true) {
+			if (field.isUseField() == true) {
 			    String colName = new StringBuilder().append("f").append(field.getFieldNo()).toString();
 
 			    try {
@@ -1038,27 +1038,27 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
 	String lcaseSearchTerm = searchTerm.toLowerCase();
 
-	if (transaction.getmessageTypeName() != null && transaction.getmessageTypeName().toLowerCase().matches(".*" + lcaseSearchTerm + ".*")) {
+	if (transaction.getMessageTypeName() != null && transaction.getMessageTypeName().toLowerCase().matches(".*" + lcaseSearchTerm + ".*")) {
 	    matchFound = true;
 	}
 
-	if (transaction.getstatusValue() != null && transaction.getstatusValue().toLowerCase().matches(".*" + lcaseSearchTerm + ".*")) {
+	if (transaction.getStatusValue() != null && transaction.getStatusValue().toLowerCase().matches(".*" + lcaseSearchTerm + ".*")) {
 	    matchFound = true;
 	}
 
-	if (transaction.getsourceOrgFields().size() > 0) {
+	if (transaction.getSourceOrgFields().size() > 0) {
 
-	    for (int i = 0; i < transaction.getsourceOrgFields().size(); i++) {
-		if (transaction.getsourceOrgFields().get(i).getFieldValue() != null && transaction.getsourceOrgFields().get(i).getFieldValue().toLowerCase().matches(".*" + lcaseSearchTerm + ".*")) {
+	    for (int i = 0; i < transaction.getSourceOrgFields().size(); i++) {
+		if (transaction.getSourceOrgFields().get(i).getFieldValue() != null && transaction.getSourceOrgFields().get(i).getFieldValue().toLowerCase().matches(".*" + lcaseSearchTerm + ".*")) {
 		    matchFound = true;
 		}
 	    }
 	}
 
-	if (transaction.gettargetOrgFields().size() > 0) {
+	if (transaction.getTargetOrgFields().size() > 0) {
 
-	    for (int i = 0; i < transaction.gettargetOrgFields().size(); i++) {
-		if (transaction.gettargetOrgFields().get(i).getFieldValue() != null && transaction.gettargetOrgFields().get(i).getFieldValue().toLowerCase().matches(".*" + lcaseSearchTerm + ".*")) {
+	    for (int i = 0; i < transaction.getTargetOrgFields().size(); i++) {
+		if (transaction.getTargetOrgFields().get(i).getFieldValue() != null && transaction.getTargetOrgFields().get(i).getFieldValue().toLowerCase().matches(".*" + lcaseSearchTerm + ".*")) {
 		    matchFound = true;
 		}
 	    }
@@ -1091,23 +1091,23 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
 	String lcaseSearchTerm = searchTerm.toLowerCase();
 
-	if (transaction.getbatchName() != null && transaction.getbatchName().toLowerCase().matches(".*" + lcaseSearchTerm + ".*")) {
+	if (transaction.getBatchName() != null && transaction.getBatchName().toLowerCase().matches(".*" + lcaseSearchTerm + ".*")) {
 	    matchFound = true;
 	}
 
-	if (transaction.getsourceOrgFields().size() > 0) {
+	if (transaction.getSourceOrgFields().size() > 0) {
 
-	    for (int i = 0; i < transaction.getsourceOrgFields().size(); i++) {
-		if (transaction.getsourceOrgFields().get(i).getFieldValue() != null && transaction.getsourceOrgFields().get(i).getFieldValue().toLowerCase().matches(".*" + lcaseSearchTerm + ".*")) {
+	    for (int i = 0; i < transaction.getSourceOrgFields().size(); i++) {
+		if (transaction.getSourceOrgFields().get(i).getFieldValue() != null && transaction.getSourceOrgFields().get(i).getFieldValue().toLowerCase().matches(".*" + lcaseSearchTerm + ".*")) {
 		    matchFound = true;
 		}
 	    }
 	}
 
-	if (transaction.getpatientFields().size() > 0) {
+	if (transaction.getPatientFields().size() > 0) {
 
-	    for (int i = 0; i < transaction.getpatientFields().size(); i++) {
-		if (transaction.getpatientFields().get(i).getFieldValue() != null && transaction.getpatientFields().get(i).getFieldValue().toLowerCase().matches(".*" + lcaseSearchTerm + ".*")) {
+	    for (int i = 0; i < transaction.getPatientFields().size(); i++) {
+		if (transaction.getPatientFields().get(i).getFieldValue() != null && transaction.getPatientFields().get(i).getFieldValue().toLowerCase().matches(".*" + lcaseSearchTerm + ".*")) {
 		    matchFound = true;
 		}
 	    }
@@ -1357,14 +1357,14 @@ public class transactionOutManagerImpl implements transactionOutManager {
 		    //we notify admin
 		    //we also notify admin
 		    mailMessage mail = new mailMessage();
-		    mail.settoEmailAddress(myProps.getProperty("admin.email"));
-		    mail.setfromEmailAddress("support@health-e-link.net");
-		    mail.setmessageSubject(subject + " " + myProps.getProperty("server.identity"));
+		    mail.setToEmailAddress(myProps.getProperty("admin.email"));
+		    mail.setFromEmailAddress("support@health-e-link.net");
+		    mail.setMessageSubject(subject + " " + myProps.getProperty("server.identity"));
 		    StringBuilder emailBody = new StringBuilder();
 		    emailBody.append("<br/>Current Time " + d2.toString());
 		    emailBody.append("<br/><br/>" + msgBody);
 		    emailBody.append("<br/><br/>" + batchInProcess.size() + " download batch(es) with status " + batchInProcess.get(0).getStatusId() + " in queue.<br/>");
-		    mail.setmessageBody(emailBody.toString());
+		    mail.setMessageBody(emailBody.toString());
 		    emailMessageManager.sendEmail(mail);
 		}
 	    }
@@ -1499,7 +1499,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			 
 			 //log batch activity
 			 ba = new batchdownloadactivity();
-			 ba.setActivity("Required Field Error. Field No:" + cff.getFieldNo() + " Field Desc:" + cff.getFieldDesc() + " for configId:" + cff.getconfigId());
+			 ba.setActivity("Required Field Error. Field No:" + cff.getFieldNo() + " Field Desc:" + cff.getFieldDesc() + " for configId:" + cff.getConfigId());
 			 ba.setBatchDownloadId(batchDownload.getId());
 			 transactionOutDAO.submitBatchActivityLog(ba);
 		     }
@@ -2118,9 +2118,9 @@ public class transactionOutManagerImpl implements transactionOutManager {
 				}
 				
 				if(targetOrdId == 0) {
-				    if(sourceConfigMessageSpecs.gettargetOrgCol() > 0) {
+				    if(sourceConfigMessageSpecs.getTargetOrgCol() > 0) {
 					//Pull the first record for the batch
-					String recordVal = transactionInDAO.getFieldValue("transactiontranslatedin_"+batchUploadDetails.getId(),"F"+sourceConfigMessageSpecs.gettargetOrgCol(), "batchUploadId", batchUploadDetails.getId());
+					String recordVal = transactionInDAO.getFieldValue("transactiontranslatedin_"+batchUploadDetails.getId(),"F"+sourceConfigMessageSpecs.getTargetOrgCol(), "batchUploadId", batchUploadDetails.getId());
 
 					try {
 					    if(Integer.parseInt(recordVal.trim().toLowerCase()) > 0) {
@@ -2364,10 +2364,10 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
 			    String emailBody = "IP: " + FTPPushDetails.getIp() + "<br/> Port:" + FTPPushDetails.getPort() + "<br />Folder: " + FTPPushDetails.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
 			    mailMessage mail = new mailMessage();
-			    mail.setfromEmailAddress("support@health-e-link.net");
-			    mail.setmessageBody(emailBody);
-			    mail.setmessageSubject("Error Remote FTP PUSH file " + myProps.getProperty("server.identity"));
-			    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+			    mail.setFromEmailAddress("support@health-e-link.net");
+			    mail.setMessageBody(emailBody);
+			    mail.setMessageSubject("Error Remote FTP PUSH file " + myProps.getProperty("server.identity"));
+			    mail.setToEmailAddress(myProps.getProperty("admin.email"));
 			    emailMessageManager.sendEmail(mail);
 		       }
 		    }
@@ -2390,10 +2390,10 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
 			String emailBody = "IP: " + FTPPushDetails.getIp() + "<br/> Port:" + FTPPushDetails.getPort() + "<br />Folder: " + FTPPushDetails.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
 			mailMessage mail = new mailMessage();
-			mail.setfromEmailAddress("support@health-e-link.net");
-			mail.setmessageBody(emailBody);
-			mail.setmessageSubject("Error Remote FTP PUSH file " + myProps.getProperty("server.identity"));
-			mail.settoEmailAddress(myProps.getProperty("admin.email"));
+			mail.setFromEmailAddress("support@health-e-link.net");
+			mail.setMessageBody(emailBody);
+			mail.setMessageSubject("Error Remote FTP PUSH file " + myProps.getProperty("server.identity"));
+			mail.setToEmailAddress(myProps.getProperty("admin.email"));
 			emailMessageManager.sendEmail(mail);
 		    }
 		    catch (IOException e) {
@@ -2415,10 +2415,10 @@ public class transactionOutManagerImpl implements transactionOutManager {
 
 			String emailBody = "IP: " + FTPPushDetails.getIp() + "<br/> Port:" + FTPPushDetails.getPort() + "<br />Folder: " + FTPPushDetails.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error:<br />"+errors.toString();
 			mailMessage mail = new mailMessage();
-			mail.setfromEmailAddress("support@health-e-link.net");
-			mail.setmessageBody(emailBody);
-			mail.setmessageSubject("Error Remote FTP PUSH file " + myProps.getProperty("server.identity"));
-			mail.settoEmailAddress(myProps.getProperty("admin.email"));
+			mail.setFromEmailAddress("support@health-e-link.net");
+			mail.setMessageBody(emailBody);
+			mail.setMessageSubject("Error Remote FTP PUSH file " + myProps.getProperty("server.identity"));
+			mail.setToEmailAddress(myProps.getProperty("admin.email"));
 			emailMessageManager.sendEmail(mail);
 		    }
 		    finally{
@@ -2444,10 +2444,10 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			    try {
 				String emailBody = "IP: " + FTPPushDetails.getIp() + "<br/> Port:" + FTPPushDetails.getPort() + "<br />Folder: " + FTPPushDetails.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Connection Failed<br />";
 				mailMessage mail = new mailMessage();
-				mail.setfromEmailAddress("support@health-e-link.net");
-				mail.setmessageBody(emailBody);
-				mail.setmessageSubject("FTP Connection Failed " + " " + myProps.getProperty("server.identity"));
-				mail.settoEmailAddress(myProps.getProperty("admin.email"));
+				mail.setFromEmailAddress("support@health-e-link.net");
+				mail.setMessageBody(emailBody);
+				mail.setMessageSubject("FTP Connection Failed " + " " + myProps.getProperty("server.identity"));
+				mail.setToEmailAddress(myProps.getProperty("admin.email"));
 				emailMessageManager.sendEmail(mail);
 			    } catch (Exception ex) {
 				ex.printStackTrace();
@@ -2473,10 +2473,10 @@ public class transactionOutManagerImpl implements transactionOutManager {
 				try {
 				    String emailBody = "IP: " + FTPPushDetails.getIp() + "<br/> Port:" + FTPPushDetails.getPort() + "<br />Folder: " + FTPPushDetails.getDirectory() + "<br />Config Id:" + configDetails.getId() + "<br /><br />Error: FTP Credentials Failed<br />";
 				    mailMessage mail = new mailMessage();
-				    mail.setfromEmailAddress("support@health-e-link.net");
-				    mail.setmessageBody(emailBody);
-				    mail.setmessageSubject("FTP Credentials Failed " + " " + myProps.getProperty("server.identity"));
-				    mail.settoEmailAddress(myProps.getProperty("admin.email"));
+				    mail.setFromEmailAddress("support@health-e-link.net");
+				    mail.setMessageBody(emailBody);
+				    mail.setMessageSubject("FTP Credentials Failed " + " " + myProps.getProperty("server.identity"));
+				    mail.setToEmailAddress(myProps.getProperty("admin.email"));
 				    emailMessageManager.sendEmail(mail);
 				} catch (Exception ex) {
 				    ex.printStackTrace();
@@ -2656,7 +2656,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			String fromEmail = "";
 			mailMessage msg = new mailMessage();
 			ArrayList<String> fromCCAddressArray = new ArrayList<String>();
-			msg.setfromEmailAddress("support@health-e-link.net");
+			msg.setFromEmailAddress("support@health-e-link.net");
 			
 			for(configurationConnectionSenders sender : connectionSenders) {
 			    if(sender.getSendEmailNotifications() && !"".equals(sender.getEmailAddress())) {
@@ -2669,20 +2669,20 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			}
 			
 			if (!"".equals(fromEmail)) {
-			    msg.settoEmailAddress(fromEmail);
+			    msg.setToEmailAddress(fromEmail);
 
 			    if (fromCCAddressArray.size() > 0) {
 				String[] fromCCAddressList = new String[fromCCAddressArray.size()];
 				fromCCAddressList = fromCCAddressArray.toArray(fromCCAddressList);
-				msg.setccEmailAddress(fromCCAddressList);
+				msg.setCcEmailAddress(fromCCAddressList);
 			    }
 
-			    msg.setmessageSubject("Your " + uploadConfigDetails.getConfigname() + " message has been successfully delivered (" + myProps.getProperty("server.identity") + ")");
+			    msg.setMessageSubject("Your " + uploadConfigDetails.getConfigname() + " message has been successfully delivered (" + myProps.getProperty("server.identity") + ")");
 
 			    /* Build the body of the email */
 			    StringBuilder sb = new StringBuilder();
 			    sb.append("The ").append(uploadConfigDetails.getConfigname()).append(" sent to ").append(targetOrgDetails.getOrgName()).append(" has been successfully delivered.");
-			    msg.setmessageBody(sb.toString());
+			    msg.setMessageBody(sb.toString());
 
 			    /* Send the email */
 			    try {
@@ -2699,7 +2699,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			String fromEmail = "";
 			mailMessage msg = new mailMessage();
 			ArrayList<String> fromCCAddressArray = new ArrayList<String>();
-			msg.setfromEmailAddress("support@health-e-link.net");
+			msg.setFromEmailAddress("support@health-e-link.net");
 			
 			for(configurationConnectionReceivers receiver : connectionReceivers) {
 			    if(receiver.getSendEmailNotifications() && !"".equals(receiver.getEmailAddress())) {
@@ -2712,15 +2712,15 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			}
 			
 			if (!"".equals(fromEmail)) {
-			    msg.settoEmailAddress(fromEmail);
+			    msg.setToEmailAddress(fromEmail);
 
 			    if (fromCCAddressArray.size() > 0) {
 				String[] fromCCAddressList = new String[fromCCAddressArray.size()];
 				fromCCAddressList = fromCCAddressArray.toArray(fromCCAddressList);
-				msg.setccEmailAddress(fromCCAddressList);
+				msg.setCcEmailAddress(fromCCAddressList);
 			    }
 
-			    msg.setmessageSubject("You have received a new message from " + sourceOrgDetails.getOrgName() + " (" + myProps.getProperty("server.identity") + ")");
+			    msg.setMessageSubject("You have received a new message from " + sourceOrgDetails.getOrgName() + " (" + myProps.getProperty("server.identity") + ")");
 
 			    /* Build the body of the email */
 			    StringBuilder sb = new StringBuilder();
@@ -2729,7 +2729,7 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			    sb.append("Configuration: ").append(configDetails.getConfigname());
 			    sb.append("<br />");
 			    sb.append("Total Records: ").append(batchDownload.getTotalRecordCount());
-			    msg.setmessageBody(sb.toString());
+			    msg.setMessageBody(sb.toString());
 
 			    /* Send the email */
 			    try {
@@ -2910,23 +2910,23 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			configurationSchedules scheduleDetails = configurationManager.getScheduleDetails(batchDownload.getConfigId());
 			
 			//Automatically
-			if(scheduleDetails.gettype() == 5) {
+			if(scheduleDetails.getType() == 5) {
 			    transactionOutDAO.updateBatchStatus(batchDownload.getId(),61);
 			}
 			
 			//Daily
-			else if(scheduleDetails.gettype() == 2) {
+			else if(scheduleDetails.getType() == 2) {
 			    
 			    //Scheduled
-			    if(scheduleDetails.getprocessingType() == 1) {
-				if(scheduleDetails.getprocessingTime() > 0) {
+			    if(scheduleDetails.getProcessingType() == 1) {
+				if(scheduleDetails.getProcessingTime() > 0) {
 				    
 				    Calendar processDate = Calendar.getInstance();
 
 				    processDate.set(Calendar.YEAR, today.get(Calendar.YEAR));
 				    processDate.set(Calendar.MONTH, today.get(Calendar.MONTH));
 				    processDate.set(Calendar.DAY_OF_MONTH, today.get(Calendar.DAY_OF_MONTH));
-				    processDate.set(Calendar.HOUR_OF_DAY,scheduleDetails.getprocessingTime());
+				    processDate.set(Calendar.HOUR_OF_DAY,scheduleDetails.getProcessingTime());
 				    processDate.set(Calendar.MINUTE,0);
 				    processDate.set(Calendar.SECOND,0);
 				    processDate.set(Calendar.MILLISECOND, 0);
@@ -2949,15 +2949,15 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			}
 			
 			//Weekly
-			else if(scheduleDetails.gettype() == 3) {
+			else if(scheduleDetails.getType() == 3) {
 			    
-			    if(scheduleDetails.getprocessingTime() > 0 && scheduleDetails.getprocessingDay() > 0) {
+			    if(scheduleDetails.getProcessingTime() > 0 && scheduleDetails.getProcessingDay() > 0) {
 				Calendar processDate = Calendar.getInstance();
 				
 				processDate.set(Calendar.YEAR, today.get(Calendar.YEAR));
 				processDate.set(Calendar.MONTH, today.get(Calendar.MONTH));
-				processDate.set(Calendar.DAY_OF_WEEK, scheduleDetails.getprocessingDay());
-				processDate.set(Calendar.HOUR_OF_DAY,scheduleDetails.getprocessingTime());
+				processDate.set(Calendar.DAY_OF_WEEK, scheduleDetails.getProcessingDay());
+				processDate.set(Calendar.HOUR_OF_DAY,scheduleDetails.getProcessingTime());
 				processDate.set(Calendar.MINUTE,0);
 				processDate.set(Calendar.SECOND,0);
 				processDate.set(Calendar.MILLISECOND, 0);
@@ -2972,15 +2972,15 @@ public class transactionOutManagerImpl implements transactionOutManager {
 			}
 			
 			//Monthly (Always check on the first)
-			else if(scheduleDetails.gettype() == 4) {
+			else if(scheduleDetails.getType() == 4) {
 			    
-			    if(scheduleDetails.getprocessingTime() > 0) {
+			    if(scheduleDetails.getProcessingTime() > 0) {
 				Calendar processDate = Calendar.getInstance();
 				
 				processDate.set(Calendar.YEAR, today.get(Calendar.YEAR));
 				processDate.set(Calendar.MONTH, today.get(Calendar.MONTH));
 				processDate.set(Calendar.DAY_OF_MONTH, 1);
-				processDate.set(Calendar.HOUR_OF_DAY,scheduleDetails.getprocessingTime());
+				processDate.set(Calendar.HOUR_OF_DAY,scheduleDetails.getProcessingTime());
 				processDate.set(Calendar.MINUTE,0);
 				processDate.set(Calendar.SECOND,0);
 				processDate.set(Calendar.MILLISECOND, 0);

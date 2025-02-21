@@ -6,7 +6,6 @@
 package com.hel.ut.model;
 
 import java.util.Date;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +14,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import org.hibernate.annotations.GenericGenerator;
-
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
@@ -27,16 +25,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class WSMessagesIn {
 
     @Transient
-    private String orgName = null;
-
-    @Transient
-    private String statusName = null;
-
-    @Transient
-    private String errorDisplayText = null;
-
-    @Transient
-    private String batchName = null;
+    private String orgName = null, statusName = null, errorDisplayText = null, batchName = null;
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
@@ -45,7 +34,7 @@ public class WSMessagesIn {
     private int id;
 
     @Column(name = "orgId", nullable = true)
-    private int orgId = 0;
+    private Integer orgId = 0;
 
     @Column(name = "fromAddress", nullable = true)
     private String fromAddress;
@@ -58,7 +47,7 @@ public class WSMessagesIn {
      *
      */
     @Column(name = "statusId", nullable = false)
-    private int statusId = 3; //set to reject
+    private Integer statusId = 3; //set to reject
 
     @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "DATECREATED", nullable = false)
@@ -71,101 +60,13 @@ public class WSMessagesIn {
     private String domain;
 
     @Column(name = "batchUploadId", nullable = true)
-    private int batchUploadId = 0;
+    private Integer batchUploadId = 0;
 
     @Column(name = "foundPosition", nullable = true)
-    private int foundPosition = 0;
+    private Integer foundPosition = 0;
 
     @Column(name = "positionMatched", nullable = true)
     private boolean positionMatched = false;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getOrgId() {
-        return orgId;
-    }
-
-    public void setOrgId(int orgId) {
-        this.orgId = orgId;
-    }
-
-    public String getFromAddress() {
-        return fromAddress;
-    }
-
-    public void setFromAddress(String fromAddress) {
-        this.fromAddress = fromAddress;
-    }
-
-    public int getStatusId() {
-        return statusId;
-    }
-
-    public void setStatusId(int statusId) {
-        this.statusId = statusId;
-    }
-
-    public Date getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(Date dateCreated) {
-        this.dateCreated = dateCreated;
-    }
-
-    public String getPayload() {
-        return payload;
-    }
-
-    public void setPayload(String payload) {
-        this.payload = payload;
-    }
-
-    public Integer getErrorId() {
-        return errorId;
-    }
-
-    public void setErrorId(Integer errorId) {
-        this.errorId = errorId;
-    }
-
-    public String getDomain() {
-        return domain;
-    }
-
-    public void setDomain(String domain) {
-        this.domain = domain;
-    }
-
-    public int getBatchUploadId() {
-        return batchUploadId;
-    }
-
-    public void setBatchUploadId(int batchUploadId) {
-        this.batchUploadId = batchUploadId;
-    }
-
-    public int getFoundPosition() {
-        return foundPosition;
-    }
-
-    public void setFoundPosition(int foundPosition) {
-        this.foundPosition = foundPosition;
-    }
-
-    public boolean isPositionMatched() {
-        return positionMatched;
-    }
-
-    public void setPositionMatched(boolean positionMatched) {
-        this.positionMatched = positionMatched;
-    }
 
     public String getOrgName() {
         return orgName;
@@ -199,4 +100,91 @@ public class WSMessagesIn {
         this.batchName = batchName;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Integer getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Integer orgId) {
+        this.orgId = orgId;
+    }
+
+    public String getFromAddress() {
+        return fromAddress;
+    }
+
+    public void setFromAddress(String fromAddress) {
+        this.fromAddress = fromAddress;
+    }
+
+    public String getPayload() {
+        return payload;
+    }
+
+    public void setPayload(String payload) {
+        this.payload = payload;
+    }
+
+    public Integer getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Integer statusId) {
+        this.statusId = statusId;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Integer getErrorId() {
+        return errorId;
+    }
+
+    public void setErrorId(Integer errorId) {
+        this.errorId = errorId;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public Integer getBatchUploadId() {
+        return batchUploadId;
+    }
+
+    public void setBatchUploadId(Integer batchUploadId) {
+        this.batchUploadId = batchUploadId;
+    }
+
+    public Integer getFoundPosition() {
+        return foundPosition;
+    }
+
+    public void setFoundPosition(Integer foundPosition) {
+        this.foundPosition = foundPosition;
+    }
+
+    public boolean isPositionMatched() {
+        return positionMatched;
+    }
+
+    public void setPositionMatched(boolean positionMatched) {
+        this.positionMatched = positionMatched;
+    }
 }

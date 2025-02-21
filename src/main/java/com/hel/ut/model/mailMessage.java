@@ -11,61 +11,54 @@ package com.hel.ut.model;
  */
 public class mailMessage {
 
-    String messageSubject = null;
-    String toEmailAddress = null;
-    String[] ccEmailAddress = null;
-    String[] bccEmailAddress = null;
-    String fromEmailAddress = null;
-    String messageBody = null;
+    String messageSubject = null, toEmailAddress = null, fromEmailAddress = null,  messageBody = null;
+    String[] ccEmailAddress = null, bccEmailAddress = null;
 
-    public void setmessageSubject(String messageSubject) {
-        this.messageSubject = messageSubject;
-    }
-
-    public String getmessageSubject() {
+    public String getMessageSubject() {
         return messageSubject;
     }
 
-    public void settoEmailAddress(String toEmailAddress) {
-        this.toEmailAddress = toEmailAddress;
+    public void setMessageSubject(String messageSubject) {
+        this.messageSubject = messageSubject;
     }
 
-    public String gettoEmailAddress() {
+    public String getToEmailAddress() {
         return toEmailAddress;
     }
 
-    public void setfromEmailAddress(String fromEmailAddress) {
-        this.fromEmailAddress = fromEmailAddress;
+    public void setToEmailAddress(String toEmailAddress) {
+        this.toEmailAddress = toEmailAddress;
     }
 
-    public String getfromEmailAddress() {
-        return fromEmailAddress;
-    }
-
-    public void setmessageBody(String messageBody) {
-        this.messageBody = messageBody;
-    }
-
-    public String getmessageBody() {
-        return messageBody;
-    }
-
-    public void setccEmailAddress(String[] ccEmailAddress) {
-        this.ccEmailAddress = ccEmailAddress;
-    }
-
-    public String[] getccEmailAddress() {
+    public String[] getCcEmailAddress() {
         return ccEmailAddress;
     }
 
+    public void setCcEmailAddress(String[] ccEmailAddress) {
+        this.ccEmailAddress = ccEmailAddress;
+    }
+
     public String[] getBccEmailAddress() {
-	return bccEmailAddress;
+        return bccEmailAddress;
     }
 
     public void setBccEmailAddress(String[] bccEmailAddress) {
-	this.bccEmailAddress = bccEmailAddress;
+        this.bccEmailAddress = bccEmailAddress;
     }
-    
-    
 
+    public String getFromEmailAddress() {
+        return fromEmailAddress;
+    }
+
+    public void setFromEmailAddress(String fromEmailAddress) {
+        this.fromEmailAddress = fromEmailAddress;
+    }
+
+    public String getMessageBody() {
+        return messageBody;
+    }
+
+    public void setMessageBody(String messageBody) {
+        this.messageBody = messageBody;
+    }
 }

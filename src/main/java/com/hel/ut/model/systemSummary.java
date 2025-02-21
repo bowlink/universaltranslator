@@ -11,58 +11,53 @@ package com.hel.ut.model;
  */
 public class systemSummary {
 
-    int batchesPastHour = 0;
-    int batchesToday = 0;
-    int batchesThisWeek = 0;
-    int batchesThisMonth = 0;
-    int batchesInError = 0;
-    int batchesToProcess = 0;
+    Integer batchesPastHour = 0, batchesToday = 0, batchesThisWeek = 0, batchesThisMonth = 0, batchesInError = 0, batchesToProcess = 0;
 
-    public int getBatchesPastHour() {
+    public Integer getBatchesPastHour() {
         return batchesPastHour;
     }
 
-    public void setBatchesPastHour(int batchesPastHour) {
+    public void setBatchesPastHour(Integer batchesPastHour) {
         this.batchesPastHour = batchesPastHour;
     }
 
-    public int getBatchesToday() {
+    public Integer getBatchesToday() {
         return batchesToday;
     }
 
-    public void setBatchesToday(int batchesToday) {
+    public void setBatchesToday(Integer batchesToday) {
         this.batchesToday = batchesToday;
     }
 
-    public int getBatchesThisWeek() {
+    public Integer getBatchesThisWeek() {
         return batchesThisWeek;
     }
 
-    public void setBatchesThisWeek(int batchesThisWeek) {
+    public void setBatchesThisWeek(Integer batchesThisWeek) {
         this.batchesThisWeek = batchesThisWeek;
     }
 
-    public int getBatchesThisMonth() {
+    public Integer getBatchesThisMonth() {
         return batchesThisMonth;
     }
 
-    public void setBatchesThisMonth(int batchesThisMonth) {
+    public void setBatchesThisMonth(Integer batchesThisMonth) {
         this.batchesThisMonth = batchesThisMonth;
     }
 
-    public int getBatchesInError() {
+    public Integer getBatchesInError() {
         return batchesInError;
     }
 
-    public void setBatchesInError(int batchesInError) {
+    public void setBatchesInError(Integer batchesInError) {
         this.batchesInError = batchesInError;
     }
 
-    public int getbatchesToProcess() {
+    public Integer getBatchesToProcess() {
         return batchesToProcess;
     }
 
-    public void setbatchesToProcess(int batchesToProcess) {
+    public void setBatchesToProcess(Integer batchesToProcess) {
         this.batchesToProcess = batchesToProcess;
     }
 }

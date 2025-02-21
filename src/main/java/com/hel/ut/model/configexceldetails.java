@@ -31,43 +31,42 @@ public class configexceldetails {
     private Integer discardLastRows = 0;
 
     public int getId() {
-	return id;
+        return id;
     }
 
     public void setId(int id) {
-	this.id = id;
+        this.id = id;
     }
 
     public Integer getOrgId() {
-	return orgId;
+        return orgId;
     }
 
     public void setOrgId(Integer orgId) {
-	this.orgId = orgId;
+        this.orgId = orgId;
     }
 
     public Integer getConfigId() {
-	return configId;
+        return configId;
     }
 
     public void setConfigId(Integer configId) {
-	this.configId = configId;
+        this.configId = configId;
     }
 
     public Integer getStartRow() {
-	return startRow;
+        return startRow;
     }
 
     public void setStartRow(Integer startRow) {
-	this.startRow = startRow;
+        this.startRow = startRow;
     }
 
     public Integer getDiscardLastRows() {
-	return discardLastRows;
+        return discardLastRows;
     }
 
     public void setDiscardLastRows(Integer discardLastRows) {
-	this.discardLastRows = discardLastRows;
+        this.discardLastRows = discardLastRows;
     }
-    
 }

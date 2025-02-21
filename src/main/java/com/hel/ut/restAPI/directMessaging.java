@@ -520,11 +520,10 @@ public class directMessaging {
 
     }
     
-    
     private void sendErrorEmail(String errorDesc, Integer messageId) throws Exception {
         mailMessage mail = new mailMessage();
-        mail.setfromEmailAddress("notifications@health-e-link.net");
-        mail.settoEmailAddress("cmccue@health-e-link.net");
+        mail.setFromEmailAddress("notifications@health-e-link.net");
+        mail.setToEmailAddress("cmccue@health-e-link.net");
 
         DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
         Date date = new Date();
@@ -537,8 +536,8 @@ public class directMessaging {
             message += "<br /><br />Message Id: " + messageId;
         }
         
-        mail.setmessageBody(message);
-        mail.setmessageSubject("Rejected UT Direct Message");
+        mail.setMessageBody(message);
+        mail.setMessageSubject("Rejected UT Direct Message");
 
         emailManager.sendEmail(mail);
     }

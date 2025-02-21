@@ -11,18 +11,31 @@ package com.hel.ut.model;
  */
 public class pendingDeliveryTargets {
 
-    int orgId = 0;
-    String orgDetails = null;
-    int totalPending = 0;
-    String messageType = null;
-    int messageTypeId = 0;
+    Integer orgId = 0, messageTypeId = 0, totalPending = 0;
+    String orgDetails = null, messageType = null;
 
-    public int getOrgId() {
+    public Integer getOrgId() {
         return orgId;
     }
 
-    public void setOrgId(int orgId) {
+    public void setOrgId(Integer orgId) {
         this.orgId = orgId;
+    }
+
+    public Integer getMessageTypeId() {
+        return messageTypeId;
+    }
+
+    public void setMessageTypeId(Integer messageTypeId) {
+        this.messageTypeId = messageTypeId;
+    }
+
+    public Integer getTotalPending() {
+        return totalPending;
+    }
+
+    public void setTotalPending(Integer totalPending) {
+        this.totalPending = totalPending;
     }
 
     public String getOrgDetails() {
@@ -33,14 +46,6 @@ public class pendingDeliveryTargets {
         this.orgDetails = orgDetails;
     }
 
-    public int getTotalPending() {
-        return totalPending;
-    }
-
-    public void setTotalPending(int totalPending) {
-        this.totalPending = totalPending;
-    }
-
     public String getMessageType() {
         return messageType;
     }
@@ -48,13 +53,4 @@ public class pendingDeliveryTargets {
     public void setMessageType(String messageType) {
         this.messageType = messageType;
     }
-
-    public int getMessageTypeId() {
-        return messageTypeId;
-    }
-
-    public void setMessageTypeId(int messageTypeId) {
-        this.messageTypeId = messageTypeId;
-    }
-
 }

@@ -8,13 +8,12 @@
             <div th:insert="~{administrator/configurations/actionBar :: actionBar}"></div>
             <div th:insert="~{administrator/configurations/menuBar :: menuBar}"></div>
             <div class="main clearfix" role="main">
-
                 <div class="row-fluid">
                     <div class="col-md-12">
                         <div class="alert alert-success" role="alert"  th:if="${savedStatus != null}">
                             <strong>Success!</strong> 
+                            <p th:if="${savedStatus == 'detailsupdated'}">The configuration details has been successfully updated!</p>
                             <p th:if="${savedStatus == 'updated'}">The configuration transport details has been successfully updated!</p>
-                            <p th:if="${savedStatus != 'created'}">The configuration initial setup has been saved!</p>
                         </div>
                         <section class="panel panel-default">
                             <div class="panel-heading">
@@ -114,7 +113,7 @@
                                                     <input type="hidden" th:field="*{zipped}" />
                                                 </div>
                                             </div>
-                                            <div id="zipTypeTopDiv" th:style="${'display:'+transportDetails.zipped == true ? 'block' : 'none'}">
+                                            <div id="zipTypeTopDiv" th:style="'display:'+${transportDetails.zipped == true ? 'block' : 'none'}">
                                                 <div id="zipTypeDiv" class="form-group" th:classappend="${#fields.hasErrors('zipType') ? 'has-error' : ''}">
                                                     <label class="control-label" for="zipType">Zip Type *</label>
                                                     <select th:field="*{zipType}" id="zipType" class="form-control" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}">
@@ -206,134 +205,136 @@
                                     </div>
                                 </div>
                             </section>
-                            <section id="directMessageDetailsDiv" class="panel panel-default" style="display:none">
-                                <div class="panel-heading">
-                                    <h3 class="panel-title">
-                                        <input type="checkbox" id="enableDirect" value="1" th:checked="${transportDetails.directMessageFields[0].id > 0 && transportDetails.transportMethodId == 13 ? true : false}"> Enable HISP
-                                    </h3>
-                                </div>
-                                <div class="panel-body directDetails" th:classappend="${transportDetails.directMessageFields[0].id > 0 ? '' : 'collapse'}">
-                                    <div class="form-container">
-                                        <th:block th:each="directMessageFields, field : ${transportDetails.directMessageFields}">
-                                            <div class="form-group">
-                                               <input th:name="${'directMessageFields['+field.index+'].id'}" type="hidden" th:value="${directMessageFields.id}"  />
-                                               <input th:name="${'directMessageFields['+field.index+'].orgId'}" type="hidden" th:value="${directMessageFields.orgId}"  />
-                                               <input th:name="${'directMessageFields['+field.index+'].dateCreated'}" type="hidden" th:value="${directMessageFields.dateCreated}"  />
-                                               <label class="control-label" for="hispId">Select the HISP *</label>
-                                               <select th:name="${'directMessageFields['+field.index+'].hispId'}" id="hispId" class="form-control sm-input">
-                                                   <option value="">- Select -</option>
-                                                   <option th:each="hisp : ${hisps}" th:selected="${directMessageFields.hispId == hisp.id ? 'true' : 'false'}" th:value="${hisp.id}" th:text="${hisp.hispName}"></option>
-                                                </select>
-                                               <span id="encodingMsg" class="control-label"></span>
-                                           </div>
-                                           <th:block th:if="${configurationDetails.type == 1}">
-                                                <div class="form-group directDomainDiv">
-                                                    <label class="control-label" for="directDomain">Direct Address Domain *</label>
-                                                    <input th:name="${'directMessageFields['+field.index+'].directDomain'}" id="directDomain" class="form-control" type="text" maxLength="75" th:value="${directMessageFields.directDomain}"  />
-                                                    <span id="directDomainMsg" class="control-label"></span>
-                                                </div>  
-                                                <div class="form-group dmFindConfigDiv">
-                                                    <label class="control-label" for="dmFindConfig">How will you determine the configuration? *</label>
-                                                    <select th:name="${'directMessageFields['+field.index+'].dmFindConfig'}" id="dmFindConfig" class="form-control sm-input">
-                                                        <option value="">- Select </option>
-                                                        <option value="1" th:selected="${directMessageFields.dmFindConfig == 1 ? 'true' : 'false'}">From the direct message to address</option>
-                                                        <option value="2" th:selected="${directMessageFields.dmFindConfig == 2 ? 'true' : 'false'}">From within the referral file</option>
+                            <th:block th:if="${!eahUT}">
+                                <section id="directMessageDetailsDiv" class="panel panel-default" style="display:none">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">
+                                            <input type="checkbox" id="enableDirect" value="1" th:checked="${transportDetails.directMessageFields[0].id > 0 && transportDetails.transportMethodId == 13 ? true : false}"> Enable HISP
+                                        </h3>
+                                    </div>
+                                    <div class="panel-body directDetails" th:classappend="${transportDetails.directMessageFields[0].id > 0 ? '' : 'collapse'}">
+                                        <div class="form-container">
+                                            <th:block th:each="directMessageFields, field : ${transportDetails.directMessageFields}">
+                                                <div class="form-group">
+                                                   <input th:name="${'directMessageFields['+field.index+'].id'}" type="hidden" th:value="${directMessageFields.id}"  />
+                                                   <input th:name="${'directMessageFields['+field.index+'].orgId'}" type="hidden" th:value="${directMessageFields.orgId}"  />
+                                                   <input th:name="${'directMessageFields['+field.index+'].dateCreated'}" type="hidden" th:value="${directMessageFields.dateCreated}"  />
+                                                   <label class="control-label" for="hispId">Select the HISP *</label>
+                                                   <select th:name="${'directMessageFields['+field.index+'].hispId'}" id="hispId" class="form-control sm-input">
+                                                       <option value="">- Select -</option>
+                                                       <option th:each="hisp : ${hisps}" th:selected="${directMessageFields.hispId == hisp.id ? 'true' : 'false'}" th:value="${hisp.id}" th:text="${hisp.hispName}"></option>
                                                     </select>
-                                                    <span id="dmFindConfigMsg" class="control-label"></span>
-                                                </div> 
-                                                <div class="form-group dmConfigKeywordDiv" th:style="${'display:'+directMessageFields.dmFindConfig == 1 ? 'block' : 'none'}">
-                                                    <label class="control-label" for="dmConfigKeyword">Direct Address Configuration Keyword *</label>
-                                                    <input name="dmConfigKeyword" id="dmConfigKeyword" class="form-control" type="text" maxLength="45" th:value="${transportDetails.dmConfigKeyword}"  />
-                                                    <span id="dmConfigKeywordMsg" class="control-label"></span>
-                                                 </div>  
-                                            </th:block>
-                                        </th:block>    
+                                                   <span id="encodingMsg" class="control-label"></span>
+                                               </div>
+                                               <th:block th:if="${configurationDetails.type == 1}">
+                                                    <div class="form-group directDomainDiv">
+                                                        <label class="control-label" for="directDomain">Direct Address Domain *</label>
+                                                        <input th:name="${'directMessageFields['+field.index+'].directDomain'}" id="directDomain" class="form-control" type="text" maxLength="75" th:value="${directMessageFields.directDomain}"  />
+                                                        <span id="directDomainMsg" class="control-label"></span>
+                                                    </div>  
+                                                    <div class="form-group dmFindConfigDiv">
+                                                        <label class="control-label" for="dmFindConfig">How will you determine the configuration? *</label>
+                                                        <select th:name="${'directMessageFields['+field.index+'].dmFindConfig'}" id="dmFindConfig" class="form-control sm-input">
+                                                            <option value="">- Select </option>
+                                                            <option value="1" th:selected="${directMessageFields.dmFindConfig == 1 ? 'true' : 'false'}">From the direct message to address</option>
+                                                            <option value="2" th:selected="${directMessageFields.dmFindConfig == 2 ? 'true' : 'false'}">From within the referral file</option>
+                                                        </select>
+                                                        <span id="dmFindConfigMsg" class="control-label"></span>
+                                                    </div> 
+                                                    <div class="form-group dmConfigKeywordDiv" th:style="'display:'+ ${directMessageFields.dmFindConfig == 1 ? 'block' : 'none'}">
+                                                        <label class="control-label" for="dmConfigKeyword">Direct Address Configuration Keyword *</label>
+                                                        <input name="dmConfigKeyword" id="dmConfigKeyword" class="form-control" type="text" maxLength="45" th:value="${transportDetails.dmConfigKeyword}"  />
+                                                        <span id="dmConfigKeywordMsg" class="control-label"></span>
+                                                     </div>  
+                                                </th:block>
+                                            </th:block>    
+                                        </div>
                                     </div>
-                                </div>
-                            </section>
-                            <section id="restDetailsDiv" class="panel panel-default" style="display:none">
-                                <div class="panel-heading">
-                                    <h3 class="panel-title">
-                                        <input type="checkbox" id="enableRest" value="1" <th:checked="${transportDetails.restAPIURL != '' ? true : false}"> Enable API
-                                    </h3>
-                                </div>
-                                <div class="panel-body restDetails" th:classappend="${transportDetails.restAPIURL != '' ? '' : 'collapse'}">
-                                    <div class="form-container">
-                                        <div id="apiURLDiv" class="form-group" th:classappend="${#fields.hasErrors('restAPIURL') ? 'has-error' : ''}">
-                                            <label class="control-label" for="restAPIURL">API URL *</label>
-                                            <input th:field="*{restAPIURL}" id="restAPIURL" class="form-control" type="text" maxLength="255" />
-                                            <span class="control-label" th:if="${#fields.hasErrors('restAPIURL')}" th:errors="*{restAPIURL}"></span>
-                                            <span id="apiURLMsg" class="control-label"></span>
-                                        </div>
-                                        <div id="apiUsernameDiv" class="form-group" th:classappend="${#fields.hasErrors('restAPIUsername') ? 'has-error' : ''}">
-                                            <label class="control-label" for="restAPIUsername">API Username *</label>
-                                            <input th:field="*{restAPIUsername}" id="restAPIUsername" class="form-control half" type="text" maxLength="45" />
-                                            <span class="control-label" th:if="${#fields.hasErrors('restAPIUsername')}" th:errors="*{restAPIUsername}"></span>
-                                            <span id="apiUsernameMsg" class="control-label"></span>
-                                        </div>
-                                        <div id="apiPasswordDiv" class="form-group" th:classappend="${#fields.hasErrors('restAPIPassword') ? 'has-error' : ''}">
-                                            <label class="control-label" for="restAPIPassword">API Password *</label>
-                                            <input th:field="*{restAPIPassword}" id="restAPIPassword" class="form-control half" type="text" maxLength="45" />
-                                            <span class="control-label" th:if="${#fields.hasErrors('restAPIPassword')}" th:errors="*{restAPIPassword}"></span>
-                                            <span id="apiPasswordMsg" class="control-label"></span>
-                                        </div>
-                                        <th:block th:if="${configurationDetails.type == 1}">
-                                            <div id="restAPITypeDiv" class="form-group" th:classappend="${#fields.hasErrors('restAPIType') ? 'has-error' : ''}">
-                                                <label class="control-label" for="restAPIType">API Type *</label>
-                                                <select th:field="*{restAPIType}" id="restAPIType" class="form-control half">
-                                                    <option value="">- Select -</option>
-                                                    <option th:each="function, tStatus : ${restAPITypes}" th:selected="${transportDetails.restAPIType == restAPITypes[tStatus.index][1] ? 'true' : 'false'}" th:value="${restAPITypes[tStatus.index][1]}" th:text="${restAPITypes[tStatus.index][2]}"></option>
-                                                </select>
-                                                <span id="restAPITypeMsg" class="control-label"></span>
+                                </section>
+                                <section id="restDetailsDiv" class="panel panel-default" style="display:none">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">
+                                            <input type="checkbox" id="enableRest" value="1" <th:checked="${transportDetails.restAPIURL != '' ? true : false}"> Enable API
+                                        </h3>
+                                    </div>
+                                    <div class="panel-body restDetails" th:classappend="${transportDetails.restAPIURL != '' and transportDetails.restAPIURL != null ? '' : 'collapse'}">
+                                        <div class="form-container">
+                                            <div id="apiURLDiv" class="form-group" th:classappend="${#fields.hasErrors('restAPIURL') ? 'has-error' : ''}">
+                                                <label class="control-label" for="restAPIURL">API URL *</label>
+                                                <input th:field="*{restAPIURL}" id="restAPIURL" class="form-control" type="text" maxLength="255" />
+                                                <span class="control-label" th:if="${#fields.hasErrors('restAPIURL')}" th:errors="*{restAPIURL}"></span>
+                                                <span id="apiURLMsg" class="control-label"></span>
                                             </div>
-                                        </th:block>
-                                        <th:block th:if="${configurationDetails.type != 1}">
-                                            <input type="hidden" th:field="*{restAPIType}" value="0" />
-                                        </th:block>
-                                        <th:block th:if="${configurationDetails.type == 2}">
-                                            <div id="restAPIFunctionIdDiv"  class="form-group" th:classappend="${#fields.hasErrors('restAPIFunctionId') ? 'has-error' : ''}">
-                                                <label class="control-label" for="restAPIFunctionId">IL Rest API Function to Call *</label>
-                                                <select th:field="*{restAPIFunctionId}" id="restAPIFunctionId" class="form-control half">
-                                                    <option value="">- Select -</option>
-                                                    <optgroup<option th:each="function, tStatus : ${restAPIFunctions}" th:selected="${transportDetails.restAPIFunctionId == restAPIFunctions[tStatus.index][1] ? 'true' : 'false'}" th:value="${restAPIFunctions[tStatus.index][1]}" th:text="${restAPIFunctions[tStatus.index][2]}"></option>
-                                                </select>
-                                                <span id="restAPIFunctionIdMsg" class="control-label"></span>
+                                            <div id="apiUsernameDiv" class="form-group" th:classappend="${#fields.hasErrors('restAPIUsername') ? 'has-error' : ''}">
+                                                <label class="control-label" for="restAPIUsername">API Username *</label>
+                                                <input th:field="*{restAPIUsername}" id="restAPIUsername" class="form-control half" type="text" maxLength="45" />
+                                                <span class="control-label" th:if="${#fields.hasErrors('restAPIUsername')}" th:errors="*{restAPIUsername}"></span>
+                                                <span id="apiUsernameMsg" class="control-label"></span>
                                             </div>
-                                            <div class="form-group">
-                                                <label class="control-label" for="waitForResponse">Wait for SAVED ACK from target before finalizing batch status? <span class="badge badge-help" data-placement="top" title="" data-original-title="If set to NO, the inbound and outbound batch will be set to a final success status, if 200 is received with the initial API ACK. If YES, the inbound and outbound batch will be set to SDP until the target sends a message to the IL with an updated status.">?</span> *</label>
-                                                <div>
-                                                    <label class="radio-inline">
-                                                        <input id="waitForResponse" type="radio" th:field="*{waitForResponse}" value="1" /> Yes, wait for target SAVED ACK
-                                                    </label>
-                                                    <label class="radio-inline">
-                                                        <input id="waitForResponse" type="radio" th:field="*{waitForResponse}" value="0" /> No, finalize on initial 200 ACK
-                                                    </label>
+                                            <div id="apiPasswordDiv" class="form-group" th:classappend="${#fields.hasErrors('restAPIPassword') ? 'has-error' : ''}">
+                                                <label class="control-label" for="restAPIPassword">API Password *</label>
+                                                <input th:field="*{restAPIPassword}" id="restAPIPassword" class="form-control half" type="text" maxLength="45" />
+                                                <span class="control-label" th:if="${#fields.hasErrors('restAPIPassword')}" th:errors="*{restAPIPassword}"></span>
+                                                <span id="apiPasswordMsg" class="control-label"></span>
+                                            </div>
+                                            <th:block th:if="${configurationDetails.type == 1}">
+                                                <div id="restAPITypeDiv" class="form-group" th:classappend="${#fields.hasErrors('restAPIType') ? 'has-error' : ''}">
+                                                    <label class="control-label" for="restAPIType">API Type *</label>
+                                                    <select th:field="*{restAPIType}" id="restAPIType" class="form-control half">
+                                                        <option value="">- Select -</option>
+                                                        <option th:each="function, tStatus : ${restAPITypes}" th:selected="${transportDetails.restAPIType == restAPITypes[tStatus.index][1] ? 'true' : 'false'}" th:value="${restAPITypes[tStatus.index][1]}" th:text="${restAPITypes[tStatus.index][2]}"></option>
+                                                    </select>
+                                                    <span id="restAPITypeMsg" class="control-label"></span>
                                                 </div>
-                                            </div>
-                                        </th:block>
-                                        <th:block th:if="${configurationDetails.type != 2}">
-                                            <input type="hidden" th:field="*{restAPIFunctionId}" value="0" />
-                                        </th:block>  
+                                            </th:block>
+                                            <th:block th:if="${configurationDetails.type != 1}">
+                                                <input type="hidden" th:field="*{restAPIType}" value="0" />
+                                            </th:block>
+                                            <th:block th:if="${configurationDetails.type == 2}">
+                                                <div id="restAPIFunctionIdDiv"  class="form-group" th:classappend="${#fields.hasErrors('restAPIFunctionId') ? 'has-error' : ''}">
+                                                    <label class="control-label" for="restAPIFunctionId">IL Rest API Function to Call *</label>
+                                                    <select th:field="*{restAPIFunctionId}" id="restAPIFunctionId" class="form-control half">
+                                                        <option value="">- Select -</option>
+                                                        <optgroup<option th:each="function, tStatus : ${restAPIFunctions}" th:selected="${transportDetails.restAPIFunctionId == restAPIFunctions[tStatus.index][1] ? 'true' : 'false'}" th:value="${restAPIFunctions[tStatus.index][1]}" th:text="${restAPIFunctions[tStatus.index][2]}"></option>
+                                                    </select>
+                                                    <span id="restAPIFunctionIdMsg" class="control-label"></span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label" for="waitForResponse">Wait for SAVED ACK from target before finalizing batch status? <span class="badge badge-help" data-placement="top" title="" data-original-title="If set to NO, the inbound and outbound batch will be set to a final success status, if 200 is received with the initial API ACK. If YES, the inbound and outbound batch will be set to SDP until the target sends a message to the IL with an updated status.">?</span> *</label>
+                                                    <div>
+                                                        <label class="radio-inline">
+                                                            <input id="waitForResponse" type="radio" th:field="*{waitForResponse}" value="1" /> Yes, wait for target SAVED ACK
+                                                        </label>
+                                                        <label class="radio-inline">
+                                                            <input id="waitForResponse" type="radio" th:field="*{waitForResponse}" value="0" /> No, finalize on initial 200 ACK
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </th:block>
+                                            <th:block th:if="${configurationDetails.type != 2}">
+                                                <input type="hidden" th:field="*{restAPIFunctionId}" value="0" />
+                                            </th:block>  
+                                        </div>
                                     </div>
-                                </div>
-                            </section>
+                                </section>
+                            </th:block>
                             <section id="ftpDetailsDiv" class="panel panel-default" style="display:none">
                                 <div class="panel-heading">
                                     <h3 class="panel-title">
                                         <input type="checkbox" id="enableFTP" value="1" <th:checked="${transportDetails.FTPFields[0].id > 0 ? true : false}"> Enable FTP
                                     </h3>
                                 </div>
-                                <div class="panel-body ftpDetails" th:classappend="${transportDetails.FTPFields[0].id > 0 ? '' : 'collapse'}">
+                                <div class="panel-body ftpDetails" th:classappend="${transportDetails.FTPfields[0].id > 0 ? '' : 'collapse'}">
                                     <div class="form-container">
                                         <div class="row">
-                                            <th:block th:each="ftpDetails, field : ${transportDetails.FTPFields}">
+                                            <th:block th:each="ftpDetails, field : ${transportDetails.FTPfields}">
                                                 <th:block th:if="${ftpDetails.method == 1}">
-                                                    <input th:name="${'FTPFields['+field.index+'].method'}" class="form-control" type="hidden" th:value="${ftpDetails.method}" />
-                                                    <input th:name="${'FTPFields['+field.index+'].id'}" th:id="${'id'+ftpDetails.method}" class="form-control" type="hidden" th:value="${ftpDetails.id}" />
+                                                    <input th:name="${'FTPfields['+field.index+'].method'}" class="form-control" type="hidden" th:value="${ftpDetails.method}" />
+                                                    <input th:name="${'FTPfields['+field.index+'].id'}" th:id="${'id'+ftpDetails.method}" class="form-control ftpDetailId" type="text" th:value="${ftpDetails.id}" />
                                                     <div class="form-group col-md-6">
                                                         <div th:id="${'protocol'+ftpDetails.method+'Div'}" class="form-group">
                                                             <label class="control-label" th:for="${'protocol'+ftpDetails.method}">Protocol *</label>
-                                                            <select th:name="${'FTPFields['+field.index+'].protocol'}" th:id="${'protocol'+ftpDetails.method}" th:rel="${ftpDetails.method}" class="form-control ftpProtocol">
+                                                            <select th:name="${'FTPfields['+field.index+'].protocol'}" th:id="${'protocol'+ftpDetails.method}" th:rel="${ftpDetails.method}" class="form-control ftpProtocol">
                                                                 <option value="">- Select -</option>
                                                                 <option value="FTP" th:selected="${ftpDetails.protocol == 'FTP' ? 'true' : 'false'}">FTP</option>
                                                                 <option value="SFTP" th:selected="${ftpDetails.protocol == 'SFTP' ? 'true' : 'false'}">SFTP</option>
@@ -342,12 +343,12 @@
                                                         </div>
                                                         <div th:id="${'ip'+ftpDetails.method+'Div'}" class="form-group">
                                                             <label class="control-label" th:for="${'ip'+ftpDetails.method}">Host *</label>
-                                                            <input th:name="${'FTPFields['+field.index+'].ip'}" th:id="${'ip'+ftpDetails.method}" class="form-control" type="text" maxLength="45" th:value="${ftpDetails.ip}"  />
+                                                            <input th:name="${'FTPfields['+field.index+'].ip'}" th:id="${'ip'+ftpDetails.method}" class="form-control" type="text" maxLength="45" th:value="${ftpDetails.ip}"  />
                                                             <span th:id="${'ip'+ftpDetails.method+'Msg'}" class="control-label"></span>
                                                         </div>
                                                         <div th:id="${'username'+ftpDetails.method+'Div'}" class="form-group">
                                                             <label th:class="control-label" th:for="${'username'+ftpDetails.method}">Username *</label>
-                                                            <input th:name="${'FTPFields['+field.index+'].username'}" th:id="${'username'+ftpDetails.method}" class="form-control" type="text" maxLength="45" th:value="${ftpDetails.username}"  />
+                                                            <input th:name="${'FTPfields['+field.index+'].username'}" th:id="${'username'+ftpDetails.method}" class="form-control" type="text" maxLength="45" th:value="${ftpDetails.username}"  />
                                                             <span th:id="${'username'+ftpDetails.method+'Msg'}" class="control-label"></span>
                                                         </div>
                                                         <div th:id="${'password'+ftpDetails.method+'Div'}" class="form-group">
@@ -357,28 +358,28 @@
                                                             <th:block th:if="${ftpDetails.password != ''}">
                                                                 <span><br /><small>(The current password is encrypted. To change the current password enter in the new password below.)</small></span>
                                                             </th:block>
-                                                            <input type="hidden" th:id="${'currPassword'+ftpDetails.method}" th:name="${'FTPFields['+field.index+'].password'}" th:value="${ftpDetails.password}" />
-                                                            <input th:name="${'FTPFields['+field.index+'].FTPPassword'}" th:id="${'password'+ftpDetails.method}" class="form-control" type="text" maxLength="45" value=""  />
+                                                            <input type="hidden" th:id="${'currPassword'+ftpDetails.method}" th:name="${'FTPfields['+field.index+'].password'}" th:value="${ftpDetails.password}" />
+                                                            <input th:name="${'FTPfields['+field.index+'].FTPPassword'}" th:id="${'password'+ftpDetails.method}" class="form-control" type="text" maxLength="45" value=""  />
                                                             <span th:id="${'password'+ftpDetails.method+'Msg'}" class="control-label"></span>
                                                         </div>
                                                         <div th:id="${'directory'+ftpDetails.method+'Div'}" class="form-group">
                                                             <label class="control-label" th:for="${'directory'+ftpDetails.method}">Remote FTP Directory * <small>(Remote file will be moved to the File Drop location above.)</small></label>
-                                                            <input th:name="${'FTPFields['+field.index+'].directory'}" th:id="${'ftpdirectory'+ftpDetails.method}" class="form-control" type="text" maxLength="255" th:value="${ftpDetails.directory}"  />
+                                                            <input th:name="${'FTPfields['+field.index+'].directory'}" th:id="${'ftpdirectory'+ftpDetails.method}" class="form-control" type="text" maxLength="255" th:value="${ftpDetails.directory}"  />
                                                             <span th:id="${'directory'+ftpDetails.method+'Msg'}" class="control-label"></span>
                                                         </div>
                                                         <div th:id="${'port'+ftpDetails.method+'Div'}" class="form-group">
                                                             <label class="control-label" th:for="${'port'+ftpDetails.method}">Port *</label>
-                                                            <input th:name="${'FTPFields['+field.index+'].port'}" th:id="${'port'+ftpDetails.method}" class="form-control" type="text" maxLength="45" th:value="${ftpDetails.port}"  />
+                                                            <input th:name="${'FTPfields['+field.index+'].port'}" th:id="${'port'+ftpDetails.method}" class="form-control" type="text" maxLength="45" th:value="${ftpDetails.port}"  />
                                                             <span th:id="${'port'+ftpDetails.method+'Msg'}" class="control-label"></span>
                                                         </div>
                                                         <div class="form-group" th:style="'display:'+${ftpDetails.certification == null || ftpDetails.certification == '' ? 'none' : 'block'}">
                                                             <label class="control-label">Existing Certification:</label>
                                                             <input type="text" disabled th:value="${ftpDetails.certification}" class="form-control" />
-                                                            <input type="hidden" th:id="${'certification'+ftpDetails.method}" th:name="${'FTPFields['+field.index+'].certification'}" th:value="${ftpDetails.certification}" />
+                                                            <input type="hidden" th:id="${'certification'+ftpDetails.method}" th:name="${'FTPfields['+field.index+'].certification'}" th:value="${ftpDetails.certification}" />
                                                         </div>
                                                         <div th:id="${'certificationfileDiv'+ftpDetails.method}" class="form-group" style="display:none;">
                                                             <label class="control-label" for="certification"><span th:if="${ftpDetails.certification != null}" th:text="New "></span>Certification File </label>
-                                                            <input type="file" th:id="${'file'+ftpDetails.method}" th:name="${'FTPFields['+field.index+'].file'}" class="form-control"  />
+                                                            <input type="file" th:id="${'file'+ftpDetails.method}" th:name="${'FTPfields['+field.index+'].file'}" class="form-control"  />
                                                             <span id="certificationfileMsg" class="control-label"></span>
                                                         </div>
                                                     </div>
@@ -411,7 +412,7 @@
                                                 <input type="hidden" th:field="*{errorHandling}" />
                                             </div>
                                         </div>
-                                        <div id="errorEmailAddressesDiv" class="form-group" th:style="${'display:' + transportDetails.errorHandling != 3 ? 'none' : 'block'}">
+                                        <div id="errorEmailAddressesDiv" class="form-group" th:style="'display:'+${transportDetails.errorHandling != 3 ? 'none' : 'block'}">
                                             <label class="control-label" for="errorEmailAddresses">Enter email address(es) to receive rejection email</label>
                                             <p>Separate multiple emails with a comma.</p>
                                             <input th:field="*{errorEmailAddresses}" id="errorEmailAddresses" class="form-control" type="text" maxLength="750" />

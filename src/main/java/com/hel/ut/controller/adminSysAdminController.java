@@ -1065,14 +1065,14 @@ public class adminSysAdminController {
 	catch (Exception ex) {
 	    //we notify admin
 	    mailMessage mail = new mailMessage();
-	    mail.settoEmailAddress(myProps.getProperty("admin.email"));
-	    mail.setfromEmailAddress("support@health-e-link.net");
-	    mail.setmessageSubject("Error creating the macro list excel file - " + " " + myProps.getProperty("server.identity"));
+	    mail.setToEmailAddress(myProps.getProperty("admin.email"));
+	    mail.setFromEmailAddress("support@health-e-link.net");
+	    mail.setMessageSubject("Error creating the macro list excel file - " + " " + myProps.getProperty("server.identity"));
 	    StringBuilder emailBody = new StringBuilder();
 	    emailBody.append("There was an error creating the macro list excel file.");
 	    emailBody.append("<br/><br/>" + ex.getMessage());
 	    emailBody.append("<br/><br/>" + ex.getStackTrace());
-	    mail.setmessageBody(emailBody.toString());
+	    mail.setMessageBody(emailBody.toString());
 	    emailMessageManager.sendEmail(mail);
 	    fileName = "";
 	}

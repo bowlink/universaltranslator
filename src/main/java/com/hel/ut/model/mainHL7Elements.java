@@ -29,10 +29,10 @@ public class mainHL7Elements {
     private int id;
 
     @Column(name = "HL7ID", nullable = false)
-    private int hl7Id;
+    private Integer hl7Id;
 
     @Column(name = "SEGMENTID", nullable = false)
-    private int segmentId;
+    private Integer segmentId;
 
     @NoHtml
     @Column(name = "ELEMENTNAME", nullable = false)
@@ -43,7 +43,7 @@ public class mainHL7Elements {
     private String defaultValue = "";
 
     @Column(name = "DISPLAYPOS", nullable = true)
-    private int displayPos = 1;
+    private Integer displayPos = 1;
 
     public int getId() {
         return id;
@@ -53,44 +53,43 @@ public class mainHL7Elements {
         this.id = id;
     }
 
-    public int gethl7Id() {
+    public Integer getHl7Id() {
         return hl7Id;
     }
 
-    public void sethl7Id(int hl7Id) {
+    public void setHl7Id(Integer hl7Id) {
         this.hl7Id = hl7Id;
     }
 
-    public int getsegmentId() {
+    public Integer getSegmentId() {
         return segmentId;
     }
 
-    public void setsegmentId(int segmentId) {
+    public void setSegmentId(Integer segmentId) {
         this.segmentId = segmentId;
     }
 
-    public String getelementName() {
+    public String getElementName() {
         return elementName;
     }
 
-    public void setelementName(String elementName) {
+    public void setElementName(String elementName) {
         this.elementName = elementName;
     }
 
-    public String getdefaultValue() {
+    public String getDefaultValue() {
         return defaultValue;
     }
 
-    public void setdefaultValue(String defaultValue) {
+    public void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
     }
 
-    public int getdisplayPos() {
+    public Integer getDisplayPos() {
         return displayPos;
     }
 
-    public void setdisplayPos(int displayPos) {
+    public void setDisplayPos(Integer displayPos) {
         this.displayPos = displayPos;
     }
-
 }

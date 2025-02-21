@@ -39,13 +39,13 @@ public class RestAPIMessagesOut {
     private int id;
 
     @Column(name = "orgId", nullable = true)
-    private int orgId = 0;
+    private Integer orgId = 0;
 
     @Column(name = "payload", nullable = true)
     private String payload;
 
     @Column(name = "statusId", nullable = false)
-    private int statusId = 3; //set to reject
+    private Integer statusId = 3; //set to reject
 
     @Column(name = "errorId", nullable = true)
     private Integer errorId = 0;
@@ -55,16 +55,56 @@ public class RestAPIMessagesOut {
     private Date dateCreated = new Date();
 
     @Column(name = "batchDownloadId", nullable = true)
-    private int batchDownloadId = 0;
+    private Integer batchDownloadId = 0;
 
     @Column(name = "configId", nullable = true)
-    private int configId = 0;
+    private Integer configId = 0;
     
     @Column(name = "responseStatus", nullable = true)
-    private int responseStatus = 0;
+    private Integer responseStatus = 0;
 
     @Column(name = "responseMessage", nullable = true)
     private String responseMessage;
+
+    public Integer getTotalMessages() {
+        return totalMessages;
+    }
+
+    public void setTotalMessages(Integer totalMessages) {
+        this.totalMessages = totalMessages;
+    }
+
+    public String getErrorDisplayText() {
+        return errorDisplayText;
+    }
+
+    public void setErrorDisplayText(String errorDisplayText) {
+        this.errorDisplayText = errorDisplayText;
+    }
+
+    public String getBatchName() {
+        return batchName;
+    }
+
+    public void setBatchName(String batchName) {
+        this.batchName = batchName;
+    }
+
+    public String getStatusName() {
+        return statusName;
+    }
+
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
+    }
+
+    public String getOrgName() {
+        return orgName;
+    }
+
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
+    }
 
     public int getId() {
         return id;
@@ -74,28 +114,12 @@ public class RestAPIMessagesOut {
         this.id = id;
     }
 
-    public int getOrgId() {
+    public Integer getOrgId() {
         return orgId;
     }
 
-    public void setOrgId(int orgId) {
+    public void setOrgId(Integer orgId) {
         this.orgId = orgId;
-    }
-
-    public int getStatusId() {
-        return statusId;
-    }
-
-    public void setStatusId(int statusId) {
-        this.statusId = statusId;
-    }
-
-    public Date getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(Date dateCreated) {
-        this.dateCreated = dateCreated;
     }
 
     public String getPayload() {
@@ -106,6 +130,14 @@ public class RestAPIMessagesOut {
         this.payload = payload;
     }
 
+    public Integer getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Integer statusId) {
+        this.statusId = statusId;
+    }
+
     public Integer getErrorId() {
         return errorId;
     }
@@ -114,77 +146,43 @@ public class RestAPIMessagesOut {
         this.errorId = errorId;
     }
 
+    public Date getDateCreated() {
+        return dateCreated;
+    }
 
-    public int getBatchDownloadId() {
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Integer getBatchDownloadId() {
         return batchDownloadId;
     }
 
-    public void setBatchDownloadId(int batchDownloadId) {
+    public void setBatchDownloadId(Integer batchDownloadId) {
         this.batchDownloadId = batchDownloadId;
     }
 
-    public int getConfigId() {
-	return configId;
+    public Integer getConfigId() {
+        return configId;
     }
 
-    public void setConfigId(int configId) {
-	this.configId = configId;
+    public void setConfigId(Integer configId) {
+        this.configId = configId;
     }
 
-    public String getOrgName() {
-	return orgName;
+    public Integer getResponseStatus() {
+        return responseStatus;
     }
 
-    public void setOrgName(String orgName) {
-	this.orgName = orgName;
-    }
-
-    public String getStatusName() {
-	return statusName;
-    }
-
-    public void setStatusName(String statusName) {
-	this.statusName = statusName;
-    }
-
-    public String getErrorDisplayText() {
-	return errorDisplayText;
-    }
-
-    public void setErrorDisplayText(String errorDisplayText) {
-	this.errorDisplayText = errorDisplayText;
-    }
-
-    public String getBatchName() {
-	return batchName;
-    }
-
-    public void setBatchName(String batchName) {
-	this.batchName = batchName;
-    }
-
-    public int getResponseStatus() {
-	return responseStatus;
-    }
-
-    public void setResponseStatus(int responseStatus) {
-	this.responseStatus = responseStatus;
+    public void setResponseStatus(Integer responseStatus) {
+        this.responseStatus = responseStatus;
     }
 
     public String getResponseMessage() {
-	return responseMessage;
+        return responseMessage;
     }
 
     public void setResponseMessage(String responseMessage) {
-	this.responseMessage = responseMessage;
+        this.responseMessage = responseMessage;
     }
-
-    public Integer getTotalMessages() {
-	return totalMessages;
-    }
-
-    public void setTotalMessages(Integer totalMessages) {
-	this.totalMessages = totalMessages;
-    }
-
 }

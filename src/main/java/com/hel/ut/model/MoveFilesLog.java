@@ -25,16 +25,16 @@ public class MoveFilesLog {
     private int id;
 
     @Column(name = "transportMethodId", nullable = true)
-    private int transportMethodId;
+    private Integer transportMethodId;
 
     @Column(name = "transportId", nullable = true)
-    private int transportId;
+    private Integer transportId;
 
     @Column(name = "statusId", nullable = false)
-    private int statusId;
+    private Integer statusId;
 
     @Column(name = "method", nullable = false)
-    private int method;
+    private Integer method;
 
     @NoHtml
     @Column(name = "folderPath", nullable = true)
@@ -60,20 +60,44 @@ public class MoveFilesLog {
         this.id = id;
     }
 
-    public int getTransportId() {
+    public Integer getTransportMethodId() {
+        return transportMethodId;
+    }
+
+    public void setTransportMethodId(Integer transportMethodId) {
+        this.transportMethodId = transportMethodId;
+    }
+
+    public Integer getTransportId() {
         return transportId;
     }
 
-    public void setTransportId(int transportId) {
+    public void setTransportId(Integer transportId) {
         this.transportId = transportId;
     }
 
-    public int getStatusId() {
+    public Integer getStatusId() {
         return statusId;
     }
 
-    public void setStatusId(int statusId) {
+    public void setStatusId(Integer statusId) {
         this.statusId = statusId;
+    }
+
+    public Integer getMethod() {
+        return method;
+    }
+
+    public void setMethod(Integer method) {
+        this.method = method;
+    }
+
+    public String getFolderPath() {
+        return folderPath;
+    }
+
+    public void setFolderPath(String folderPath) {
+        this.folderPath = folderPath;
     }
 
     public Date getStartDateTime() {
@@ -92,36 +116,11 @@ public class MoveFilesLog {
         this.endDateTime = endDateTime;
     }
 
-    public int getMethod() {
-        return method;
-    }
-
-    public void setMethod(int method) {
-        this.method = method;
-    }
-
-    public String getFolderPath() {
-        return folderPath;
-    }
-
-    public void setFolderPath(String folderPath) {
-        this.folderPath = folderPath;
-    }
-
-    public int getTransportMethodId() {
-        return transportMethodId;
-    }
-
-    public void setTransportMethodId(int transportMethodId) {
-        this.transportMethodId = transportMethodId;
-    }
-
     public String getNotes() {
         return notes;
     }
 
     public void setNotes(String notes) {
         this.notes = notes;
-    }
-
+    }  
 }

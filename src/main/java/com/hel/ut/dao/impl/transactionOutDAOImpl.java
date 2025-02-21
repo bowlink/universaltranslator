@@ -165,7 +165,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
                 
                 if(connectionInfo != null) {
                     // Get the message type for the utConfiguration 
-                    whereClause = builder.equal(configRoot.get("id"), connectionInfo.gettargetConfigId());
+                    whereClause = builder.equal(configRoot.get("id"), connectionInfo.getTargetConfigId());
                     configCriteria.where(whereClause);
                     
                     utConfiguration configDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
@@ -181,7 +181,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
                         }
                     }
                     
-                    whereClause = builder.equal(configRoot.get("id"), connectionInfo.getsourceConfigId());
+                    whereClause = builder.equal(configRoot.get("id"), connectionInfo.getSourceConfigId());
                     configCriteria.where(whereClause);
                     
                     utConfiguration sourceconfigDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
@@ -515,7 +515,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
                 
                 if(connectionInfo != null) {
                     
-                    whereClause = builder.equal(configRoot.get("id"), connectionInfo.gettargetConfigId());
+                    whereClause = builder.equal(configRoot.get("id"), connectionInfo.getTargetConfigId());
                     configCriteria.where(whereClause);
                     
                     utConfiguration configDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
@@ -539,7 +539,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
                         }
                     }
                     
-                    whereClause = builder.equal(configRoot.get("id"), connectionInfo.getsourceConfigId());
+                    whereClause = builder.equal(configRoot.get("id"), connectionInfo.getSourceConfigId());
                     configCriteria.where(whereClause);
                     
                     utConfiguration sourceconfigDetails = (utConfiguration) sessionFactory.getCurrentSession().createQuery(configCriteria).uniqueResult();
@@ -1653,7 +1653,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	try {
 	    String sql = "insert into transactionouterrors_"+batchDownloadId
 	    + " (batchDownloadId, configId, transactionOutRecordsId, fieldNo, errorid, required) "
-	    + "select " + batchDownloadId + ", " + cff.getconfigId() + ", transactionOutRecordsId, " + cff.getFieldNo()
+	    + "select " + batchDownloadId + ", " + cff.getConfigId() + ", transactionOutRecordsId, " + cff.getFieldNo()
 	    + ",1,1 from transactiontranslatedout_"+batchDownloadId + " where configId = :configId "
 	    + "and (F" + cff.getFieldNo()+" is null "
 	    + "or length(trim(F" + cff.getFieldNo() + ")) = 0 "
@@ -1661,7 +1661,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    + "and configId = :configId and (statusId is null or statusId not in (:transRELId));";
 	    
 	    Query insertData = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
-	    .setParameter("configId", cff.getconfigId())
+	    .setParameter("configId", cff.getConfigId())
 	    .setParameterList("transRELId", transRELId);
 	    
 	    insertData.executeUpdate();
@@ -1884,9 +1884,9 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	insertError.setParameter("vtType", cff.getValidationType());
 	insertError.setParameter("fieldNo", cff.getFieldNo());
 	insertError.setParameter("batchDownloadId", batchDownloadId);
-	insertError.setParameter("configId", cff.getconfigId());
+	insertError.setParameter("configId", cff.getConfigId());
 	insertError.setParameter("transactionId", 0);
-	insertError.setParameter("isFieldRequired", cff.getRequired());
+	insertError.setParameter("isFieldRequired", cff.isRequired());
 
 	try {
 	    insertError.executeUpdate();
@@ -1900,7 +1900,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	} catch (Exception ex) {
 	    System.err.println("genericValidation " + ex.getCause());
 	    ex.printStackTrace();
-	    transactionInManager.insertProcessingError(processingSysErrorId, cff.getconfigId(), batchDownloadId, cff.getFieldNo(),
+	    transactionInManager.insertProcessingError(processingSysErrorId, cff.getConfigId(), batchDownloadId, cff.getFieldNo(),
 		    null, null, validationTypeId, false, true, ("-" + ex.getCause().toString()));
 	    return 0; //we return error count of 1 when error
 	}

@@ -6,9 +6,7 @@
 package com.hel.ut.model;
 
 import com.hel.ut.validator.NoHtml;
-
 import java.util.Date;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +15,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import org.hibernate.annotations.GenericGenerator;
-
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
@@ -29,16 +26,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class utUserActivity {
 
     @Transient
-    String userFirstName = null;
-
-    @Transient
-    String userLastName = null;
+    String userFirstName = null, userLastName = null, orgName = null;
 
     @Transient
     Integer orgId = null;
-
-    @Transient
-    String orgName = null;
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
@@ -47,7 +38,7 @@ public class utUserActivity {
     private int id;
 
     @Column(name = "userId", nullable = false)
-    private int userId = 0;
+    private Integer userId = 0;
 
     @Column(name = "batchUploadId", nullable = true)
     private Integer batchUploadId = 0;
@@ -60,7 +51,7 @@ public class utUserActivity {
     private String accessMethod;
 
     @Column(name = "featureId", nullable = false)
-    private int featureId = 0;
+    private Integer featureId = 0;
 
     @NoHtml
     @Column(name = "pageAccess", nullable = true)
@@ -86,6 +77,38 @@ public class utUserActivity {
     @Column(name = "DATECREATED", nullable = false)
     private Date dateCreated = new Date();
 
+    public String getUserFirstName() {
+        return userFirstName;
+    }
+
+    public void setUserFirstName(String userFirstName) {
+        this.userFirstName = userFirstName;
+    }
+
+    public String getUserLastName() {
+        return userLastName;
+    }
+
+    public void setUserLastName(String userLastName) {
+        this.userLastName = userLastName;
+    }
+
+    public String getOrgName() {
+        return orgName;
+    }
+
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
+    }
+
+    public Integer getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Integer orgId) {
+        this.orgId = orgId;
+    }
+
     public int getId() {
         return id;
     }
@@ -94,12 +117,28 @@ public class utUserActivity {
         this.id = id;
     }
 
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public Integer getBatchUploadId() {
+        return batchUploadId;
+    }
+
+    public void setBatchUploadId(Integer batchUploadId) {
+        this.batchUploadId = batchUploadId;
+    }
+
+    public Integer getBatchDownloadId() {
+        return batchDownloadId;
+    }
+
+    public void setBatchDownloadId(Integer batchDownloadId) {
+        this.batchDownloadId = batchDownloadId;
     }
 
     public String getAccessMethod() {
@@ -108,6 +147,14 @@ public class utUserActivity {
 
     public void setAccessMethod(String accessMethod) {
         this.accessMethod = accessMethod;
+    }
+
+    public Integer getFeatureId() {
+        return featureId;
+    }
+
+    public void setFeatureId(Integer featureId) {
+        this.featureId = featureId;
     }
 
     public String getPageAccess() {
@@ -157,61 +204,4 @@ public class utUserActivity {
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
     }
-
-    public Integer getBatchUploadId() {
-        return batchUploadId;
-    }
-
-    public void setBatchUploadId(Integer batchUploadId) {
-        this.batchUploadId = batchUploadId;
-    }
-
-    public Integer getBatchDownloadId() {
-        return batchDownloadId;
-    }
-
-    public void setBatchDownloadId(Integer batchDownloadId) {
-        this.batchDownloadId = batchDownloadId;
-    }
-
-    public String getUserFirstName() {
-        return userFirstName;
-    }
-
-    public void setUserFirstName(String userFirstName) {
-        this.userFirstName = userFirstName;
-    }
-
-    public String getUserLastName() {
-        return userLastName;
-    }
-
-    public void setUserLastName(String userLastName) {
-        this.userLastName = userLastName;
-    }
-
-    public Integer getOrgId() {
-        return orgId;
-    }
-
-    public void setOrgId(Integer orgId) {
-        this.orgId = orgId;
-    }
-
-    public String getOrgName() {
-        return orgName;
-    }
-
-    public void setOrgName(String orgName) {
-        this.orgName = orgName;
-    }
-
-    public int getFeatureId() {
-        return featureId;
-    }
-
-    public void setFeatureId(int featureId) {
-        this.featureId = featureId;
-    }
-
 }

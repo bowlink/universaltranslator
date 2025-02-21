@@ -49,9 +49,9 @@ public class ExceptionControllerAdvice {
         try {
             mailMessage messageDetails = new mailMessage();
 
-            messageDetails.settoEmailAddress(myProps.getProperty("admin.email"));
-            messageDetails.setfromEmailAddress("support@health-e-link.net");
-            messageDetails.setmessageSubject("Exception Error " + " " + myProps.getProperty("server.identity"));
+            messageDetails.setToEmailAddress(myProps.getProperty("admin.email"));
+            messageDetails.setFromEmailAddress("support@health-e-link.net");
+            messageDetails.setMessageSubject("Exception Error " + " " + myProps.getProperty("server.identity"));
 
             StringBuilder sb = new StringBuilder();
 
@@ -90,7 +90,7 @@ public class ExceptionControllerAdvice {
             sb.append("<br /><br />");
             sb.append("Stack Trace: " + Arrays.toString(e.getStackTrace()));
 
-            messageDetails.setmessageBody(sb.toString());
+            messageDetails.setMessageBody(sb.toString());
             emailMessageManager.sendEmail(messageDetails);
             /*mav.addObject("messageBody",sb.toString());*/
         } catch (Exception ex) {

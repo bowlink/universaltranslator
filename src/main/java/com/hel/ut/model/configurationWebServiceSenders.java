@@ -1,9 +1,7 @@
 package com.hel.ut.model;
 
 import java.util.Date;
-
 import com.hel.ut.validator.NoHtml;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
-
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
@@ -25,7 +22,7 @@ public class configurationWebServiceSenders {
     private int id;
 
     @Column(name = "TRANSPORTID", nullable = false)
-    private int transportId = 0;
+    private Integer transportId = 0;
 
     @NoHtml
     @Column(name = "domain", nullable = false)
@@ -43,11 +40,11 @@ public class configurationWebServiceSenders {
         this.id = id;
     }
 
-    public int getTransportId() {
+    public Integer getTransportId() {
         return transportId;
     }
 
-    public void setTransportId(int transportId) {
+    public void setTransportId(Integer transportId) {
         this.transportId = transportId;
     }
 

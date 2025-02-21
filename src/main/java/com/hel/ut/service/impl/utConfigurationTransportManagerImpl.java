@@ -505,8 +505,8 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
 				if(!found) {
 				    configurationFormFields newFormField = new configurationFormFields();
 				    newFormField.setAssociatedFieldId(0);
-				    newFormField.setconfigId(configId);
-				    newFormField.settransportDetailId(transportId);
+				    newFormField.setConfigId(configId);
+				    newFormField.setTransportDetailId(transportId);
 				    newFormField.setFieldNo(dspPos);
 				    newFormField.setValidationType(validationId);
 				    newFormField.setFieldDesc(elementName);
@@ -552,8 +552,8 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
 
 				configurationFormFields newFormField = new configurationFormFields();
 				newFormField.setAssociatedFieldId(0);
-				newFormField.setconfigId(configId);
-				newFormField.settransportDetailId(transportId);
+				newFormField.setConfigId(configId);
+				newFormField.setTransportDetailId(transportId);
 				newFormField.setFieldNo(dspPos);
 				newFormField.setValidationType(validationId);
 				newFormField.setFieldDesc(elementName);
@@ -581,8 +581,8 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
 
 			configurationFormFields newFormField = new configurationFormFields();
 			newFormField.setAssociatedFieldId(0);
-			newFormField.setconfigId(configId);
-			newFormField.settransportDetailId(transportId);
+			newFormField.setConfigId(configId);
+			newFormField.setTransportDetailId(transportId);
 			newFormField.setFieldNo(dspPos);
 			newFormField.setValidationType(validationId);
 			newFormField.setFieldDesc(elementName);

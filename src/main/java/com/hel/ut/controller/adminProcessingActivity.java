@@ -113,7 +113,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.ParseException;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -794,21 +793,21 @@ public class adminProcessingActivity {
 
         for (configurationFormFields formfield : formfields) {
             transactionRecords field = new transactionRecords();
-            field.setfieldNo(formfield.getFieldNo());
-            field.setrequired(formfield.getRequired());
-            field.setfieldLabel(formfield.getFieldDesc());
-            field.setreadOnly(readOnly);
-            field.setfieldValue(null);
+            field.setFieldNo(formfield.getFieldNo());
+            field.setRequired(formfield.isRequired());
+            field.setFieldLabel(formfield.getFieldDesc());
+            field.setReadOnly(readOnly);
+            field.setFieldValue(null);
 
             /* Get the validation */
             if (formfield.getValidationType() > 1) {
-                field.setvalidation(messagetypemanager.getValidationById(formfield.getValidationType()));
+                field.setValidation(messagetypemanager.getValidationById(formfield.getValidationType()));
             }
 
             if (records != null) {
                 String colName = new StringBuilder().append("f").append(formfield.getFieldNo()).toString();
                 try {
-                    field.setfieldValue(BeanUtils.getProperty(records, colName));
+                    field.setFieldValue(BeanUtils.getProperty(records, colName));
                 } catch (IllegalAccessException ex) {
                     Logger.getLogger(adminProcessingActivity.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (InvocationTargetException ex) {
@@ -818,7 +817,7 @@ public class adminProcessingActivity {
 
             if (configId > 0) {
                 List<fieldSelectOptions> fieldSelectOptions = transactionInManager.getFieldSelectOptions(formfield.getId(), configId);
-                field.setfieldSelectOptions(fieldSelectOptions);
+                field.setFieldSelectOptions(fieldSelectOptions);
             }
 
             fields.add(field);
@@ -4543,15 +4542,15 @@ public class adminProcessingActivity {
 	catch (Exception ex) {
 	    //we notify admin
 	    mailMessage mail = new mailMessage();
-	    mail.settoEmailAddress(myProps.getProperty("admin.email"));
-	    mail.setfromEmailAddress("support@health-e-link.net");
-	    mail.setmessageSubject("Error printing out the excel audit report for a batch - " + " " + myProps.getProperty("server.identity"));
+	    mail.setToEmailAddress(myProps.getProperty("admin.email"));
+	    mail.setFromEmailAddress("support@health-e-link.net");
+	    mail.setMessageSubject("Error printing out the excel audit report for a batch - " + " " + myProps.getProperty("server.identity"));
 	    StringBuilder emailBody = new StringBuilder();
 	    emailBody.append("There was an error creating a the excel audit report for a batch.");
 	    emailBody.append("<br/>Batch Name: ").append(batchName);
 	    emailBody.append("<br/>Type: ").append(type);
 	    emailBody.append("<br/><br/>: ").append(ex.getMessage());
-	    mail.setmessageBody(emailBody.toString());
+	    mail.setMessageBody(emailBody.toString());
 	    emailMessageManager.sendEmail(mail);
 	    fileName = "";
 	}

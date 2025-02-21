@@ -32,5 +32,4 @@ public class restMessageInfo {
     public String getTransitTime() {
         return transitTime;
     }
-    
 }

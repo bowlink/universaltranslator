@@ -2,7 +2,6 @@ package com.hel.ut.security;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.security.core.userdetails.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -46,7 +45,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             throw new BadCredentialsException(strErrorMessage);
         }
         //check status
-        if (!user.getStatus()) {
+        if (!user.isStatus()) {
             throw new BadCredentialsException(strErrorMessage);
         }
 
@@ -66,7 +65,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                             loginUserInfo = usermanager.getUserByUserName(loginUser);
 			    
                             //check status
-                            if (!loginUserInfo.getStatus()) {
+                            if (!loginUserInfo.isStatus()) {
                                 throw new BadCredentialsException(strErrorMessage1);
                             }
                         }

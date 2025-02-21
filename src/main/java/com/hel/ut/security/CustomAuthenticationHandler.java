@@ -122,7 +122,7 @@ public class CustomAuthenticationHandler extends SimpleUrlAuthenticationSuccessH
             
             searchParameters searchParameters = new searchParameters();
             
-            userDetails.setdateOrgWasCreated(orgDetails.getDateCreated());
+            userDetails.setDateOrgWasCreated(orgDetails.getDateCreated());
             userDetails.setOrgType(orgDetails.getOrgType());
 	    
 	    /*Check to see if the user has access to download files or upload files*/

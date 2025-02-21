@@ -10,6 +10,13 @@ jQuery(function ($) {
         if ($('.alert').length > 0) {
             $('.alert').delay(2000).fadeOut(1000);
         }
+        
+        var toolTipEl = document.getElementById('toolTipBTN');
+        if(toolTipEl != null) {
+            var tooltip = new bootstrap.Tooltip(toolTipEl, {
+              boundary: document.body // or document.querySelector('#boundary')
+            });
+        }
     });
    
     

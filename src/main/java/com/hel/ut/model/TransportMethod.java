@@ -24,7 +24,7 @@ public class TransportMethod {
     private String transportMethod;
 
     @Column(name = "active", nullable = true)
-    private int active = 1;
+    private Integer active = 1;
 
     public int getId() {
         return id;
@@ -42,12 +42,11 @@ public class TransportMethod {
         this.transportMethod = transportMethod;
     }
 
-    public int getActive() {
+    public Integer getActive() {
         return active;
     }
 
-    public void setActive(int active) {
+    public void setActive(Integer active) {
         this.active = active;
     }
-
 }

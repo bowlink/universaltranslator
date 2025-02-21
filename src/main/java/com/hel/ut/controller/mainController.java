@@ -188,14 +188,14 @@ public class mainController {
 	String randomCode = generateRandomCode();
 
 	utUser userDetails = usermanager.getUserById(userId);
-	userDetails.setresetCode(randomCode);
+	userDetails.setResetCode(randomCode);
 
 	usermanager.updateUser(userDetails);
 
 	mailMessage messageDetails = new mailMessage();
 
-	messageDetails.settoEmailAddress(userDetails.getEmail());
-	messageDetails.setmessageSubject("Health-e-Link HDR Reset Password");
+	messageDetails.setToEmailAddress(userDetails.getEmail());
+	messageDetails.setMessageSubject("Health-e-Link HDR Reset Password");
 
 	String resetURL = request.getRequestURL().toString().replace("sendPassword.do", "resetPassword?b=");
 
@@ -205,8 +205,8 @@ public class mainController {
 	sb.append("You have recently asked to reset your Health-e-Link HDR password.<br /><br />");
 	sb.append("<a href='").append(resetURL).append(randomCode).append("'>Click here to reset your password.</a>");
 
-	messageDetails.setmessageBody(sb.toString());
-	messageDetails.setfromEmailAddress("support@health-e-link.net");
+	messageDetails.setMessageBody(sb.toString());
+	messageDetails.setFromEmailAddress("support@health-e-link.net");
 
 	emailMessageManager.sendEmail(messageDetails);
         
@@ -258,7 +258,7 @@ public class mainController {
 	    return mav;
 	} 
         else {
-	    userDetails.setresetCode(null);
+	    userDetails.setResetCode(null);
 	    userDetails.setPassword(newPassword);
 	    userDetails = usermanager.encryptPW(userDetails);
 

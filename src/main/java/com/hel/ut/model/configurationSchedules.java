@@ -23,22 +23,22 @@ public class configurationSchedules {
     private int id;
 
     @Column(name = "CONFIGID", nullable = false)
-    private int configId;
+    private Integer configId;
 
     @Column(name = "TYPE", nullable = false)
-    private int type = 5;
+    private Integer type = 5;
 
     @Column(name = "PROCESSINGTYPE", nullable = false)
-    private int processingType = 0;
+    private Integer processingType = 0;
 
     @Column(name = "NEWFILECHECK", nullable = false)
-    private int newfileCheck = 0;
+    private Integer newfileCheck = 0;
 
     @Column(name = "PROCESSINGDAY", nullable = false)
-    private int processingDay = 0;
+    private Integer processingDay = 0;
 
     @Column(name = "PROCESSINGTIME", nullable = false)
-    private int processingTime = 0;
+    private Integer processingTime = 0;
 
     public int getId() {
         return id;
@@ -48,52 +48,51 @@ public class configurationSchedules {
         this.id = id;
     }
 
-    public int getconfigId() {
+    public Integer getConfigId() {
         return configId;
     }
 
-    public void setconfigId(int configId) {
+    public void setConfigId(Integer configId) {
         this.configId = configId;
     }
 
-    public int gettype() {
+    public Integer getType() {
         return type;
     }
 
-    public void settype(int type) {
+    public void setType(Integer type) {
         this.type = type;
     }
 
-    public int getprocessingType() {
+    public Integer getProcessingType() {
         return processingType;
     }
 
-    public void setprocessingType(int processingType) {
+    public void setProcessingType(Integer processingType) {
         this.processingType = processingType;
     }
 
-    public int getnewfileCheck() {
+    public Integer getNewfileCheck() {
         return newfileCheck;
     }
 
-    public void setnewfileCheck(int newfileCheck) {
+    public void setNewfileCheck(Integer newfileCheck) {
         this.newfileCheck = newfileCheck;
     }
 
-    public int getprocessingDay() {
+    public Integer getProcessingDay() {
         return processingDay;
     }
 
-    public void setprocessingDay(int processingDay) {
+    public void setProcessingDay(Integer processingDay) {
         this.processingDay = processingDay;
     }
 
-    public int getprocessingTime() {
+    public Integer getProcessingTime() {
         return processingTime;
     }
 
-    public void setprocessingTime(int processingTime) {
+    public void setProcessingTime(Integer processingTime) {
         this.processingTime = processingTime;
     }
-
 }

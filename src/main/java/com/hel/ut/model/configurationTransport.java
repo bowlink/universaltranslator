@@ -38,7 +38,7 @@ public class configurationTransport {
     private List<Integer> messageTypes = null;
     
     @Transient
-    private int threshold = 100;
+    private Integer threshold = 100;
 
     @Transient
     private MultipartFile ccdTemplatefile = null, hl7PDFTemplatefile = null;
@@ -161,7 +161,103 @@ public class configurationTransport {
     
     @Column(name = "errorEmailAddresses", nullable = true)
     private String errorEmailAddresses = "";
-    
+
+    public List<configurationFormFields> getFields() {
+        return fields;
+    }
+
+    public void setFields(List<configurationFormFields> fields) {
+        this.fields = fields;
+    }
+
+    public List<appenedNewconfigurationFormFields> getNewfields() {
+        return newfields;
+    }
+
+    public void setNewfields(List<appenedNewconfigurationFormFields> newfields) {
+        this.newfields = newfields;
+    }
+
+    public List<configurationFTPFields> getFTPfields() {
+        return FTPfields;
+    }
+
+    public void setFTPfields(List<configurationFTPFields> FTPfields) {
+        this.FTPfields = FTPfields;
+    }
+
+    public List<configurationFileDropFields> getFileDropFields() {
+        return fileDropFields;
+    }
+
+    public void setFileDropFields(List<configurationFileDropFields> fileDropFields) {
+        this.fileDropFields = fileDropFields;
+    }
+
+    public List<configurationWebServiceFields> getWebServiceFields() {
+        return webServiceFields;
+    }
+
+    public void setWebServiceFields(List<configurationWebServiceFields> webServiceFields) {
+        this.webServiceFields = webServiceFields;
+    }
+
+    public List<organizationDirectDetails> getDirectMessageFields() {
+        return directMessageFields;
+    }
+
+    public void setDirectMessageFields(List<organizationDirectDetails> directMessageFields) {
+        this.directMessageFields = directMessageFields;
+    }
+
+    public String getDelimChar() {
+        return delimChar;
+    }
+
+    public void setDelimChar(String delimChar) {
+        this.delimChar = delimChar;
+    }
+
+    public boolean isContainsHeaderRow() {
+        return containsHeaderRow;
+    }
+
+    public void setContainsHeaderRow(boolean containsHeaderRow) {
+        this.containsHeaderRow = containsHeaderRow;
+    }
+
+    public List<Integer> getMessageTypes() {
+        return messageTypes;
+    }
+
+    public void setMessageTypes(List<Integer> messageTypes) {
+        this.messageTypes = messageTypes;
+    }
+
+    public Integer getThreshold() {
+        return threshold;
+    }
+
+    public void setThreshold(Integer threshold) {
+        this.threshold = threshold;
+    }
+
+    public MultipartFile getCcdTemplatefile() {
+        return ccdTemplatefile;
+    }
+
+    public void setCcdTemplatefile(MultipartFile ccdTemplatefile) {
+        this.ccdTemplatefile = ccdTemplatefile;
+    }
+
+    public MultipartFile getHl7PDFTemplatefile() {
+        return hl7PDFTemplatefile;
+    }
+
+    public void setHl7PDFTemplatefile(MultipartFile hl7PDFTemplatefile) {
+        this.hl7PDFTemplatefile = hl7PDFTemplatefile;
+    }
+
     public int getId() {
         return id;
     }
@@ -200,22 +296,6 @@ public class configurationTransport {
 
     public void setFileDelimiter(Integer fileDelimiter) {
         this.fileDelimiter = fileDelimiter;
-    }
-
-    public List<configurationFormFields> getFields() {
-        return fields;
-    }
-
-    public void setFields(List<configurationFormFields> fields) {
-        this.fields = fields;
-    }
-
-    public List<configurationFTPFields> getFTPFields() {
-        return FTPfields;
-    }
-
-    public void setFTPFields(List<configurationFTPFields> FTPFields) {
-        this.FTPfields = FTPFields;
     }
 
     public boolean isStatus() {
@@ -274,14 +354,6 @@ public class configurationTransport {
         this.autoRelease = autoRelease;
     }
 
-    public List<Integer> getMessageTypes() {
-        return messageTypes;
-    }
-
-    public void setMessageTypes(List<Integer> messageTypes) {
-        this.messageTypes = messageTypes;
-    }
-
     public Integer getErrorHandling() {
         return errorHandling;
     }
@@ -306,20 +378,12 @@ public class configurationTransport {
         this.copiedTransportId = copiedTransportId;
     }
 
-    public String getDelimChar() {
-        return delimChar;
+    public boolean isMassTranslation() {
+        return massTranslation;
     }
 
-    public void setDelimChar(String delimChar) {
-        this.delimChar = delimChar;
-    }
-
-    public boolean getContainsHeaderRow() {
-        return containsHeaderRow;
-    }
-
-    public void setContainsHeaderRow(boolean containsHeaderRow) {
-        this.containsHeaderRow = containsHeaderRow;
+    public void setMassTranslation(boolean massTranslation) {
+        this.massTranslation = massTranslation;
     }
 
     public String getFileExt() {
@@ -338,37 +402,12 @@ public class configurationTransport {
         this.encodingId = encodingId;
     }
 
-    public List<configurationFileDropFields> getFileDropFields() {
-        return fileDropFields;
-    }
-
-    public void setFileDropFields(List<configurationFileDropFields> fileDropFields) {
-        this.fileDropFields = fileDropFields;
-    }
-
-    public List<configurationWebServiceFields> getWebServiceFields() {
-        return webServiceFields;
-    }
-
-    public void setWebServiceFields(
-            List<configurationWebServiceFields> webServiceFields) {
-        this.webServiceFields = webServiceFields;
-    }
-
     public String getCcdSampleTemplate() {
         return ccdSampleTemplate;
     }
 
     public void setCcdSampleTemplate(String ccdSampleTemplate) {
         this.ccdSampleTemplate = ccdSampleTemplate;
-    }
-
-    public MultipartFile getCcdTemplatefile() {
-        return ccdTemplatefile;
-    }
-
-    public void setCcdTemplatefile(MultipartFile ccdTemplatefile) {
-        this.ccdTemplatefile = ccdTemplatefile;
     }
 
     public String getHL7PDFSampleTemplate() {
@@ -379,140 +418,108 @@ public class configurationTransport {
         this.HL7PDFSampleTemplate = HL7PDFSampleTemplate;
     }
 
-    public MultipartFile getHl7PDFTemplatefile() {
-        return hl7PDFTemplatefile;
-    }
-
-    public void setHl7PDFTemplatefile(MultipartFile hl7PDFTemplatefile) {
-        this.hl7PDFTemplatefile = hl7PDFTemplatefile;
-    }
-
-    public boolean isMassTranslation() {
-        return massTranslation;
-    }
-
-    public void setMassTranslation(boolean massTranslation) {
-        this.massTranslation = massTranslation;
-    }
-
     public boolean isZipped() {
-	return zipped;
+        return zipped;
     }
 
     public void setZipped(boolean zipped) {
-	this.zipped = zipped;
+        this.zipped = zipped;
     }
 
     public Integer getZipType() {
-	return zipType;
+        return zipType;
     }
 
     public void setZipType(Integer zipType) {
-	this.zipType = zipType;
+        this.zipType = zipType;
     }
 
     public String getRestAPIURL() {
-	return restAPIURL;
+        return restAPIURL;
     }
 
     public void setRestAPIURL(String restAPIURL) {
-	this.restAPIURL = restAPIURL;
+        this.restAPIURL = restAPIURL;
     }
 
     public String getRestAPIUsername() {
-	return restAPIUsername;
+        return restAPIUsername;
     }
 
     public void setRestAPIUsername(String restAPIUsername) {
-	this.restAPIUsername = restAPIUsername;
+        this.restAPIUsername = restAPIUsername;
     }
 
     public String getRestAPIPassword() {
-	return restAPIPassword;
+        return restAPIPassword;
     }
 
     public void setRestAPIPassword(String restAPIPassword) {
-	this.restAPIPassword = restAPIPassword;
+        this.restAPIPassword = restAPIPassword;
     }
 
     public Integer getRestAPIType() {
-	return restAPIType;
+        return restAPIType;
     }
 
     public void setRestAPIType(Integer restAPIType) {
-	this.restAPIType = restAPIType;
+        this.restAPIType = restAPIType;
     }
 
     public boolean isWaitForResponse() {
-	return waitForResponse;
+        return waitForResponse;
     }
 
     public void setWaitForResponse(boolean waitForResponse) {
-	this.waitForResponse = waitForResponse;
+        this.waitForResponse = waitForResponse;
     }
 
     public Integer getRestAPIFunctionId() {
-	return restAPIFunctionId;
+        return restAPIFunctionId;
     }
 
     public void setRestAPIFunctionId(Integer restAPIFunctionId) {
-	this.restAPIFunctionId = restAPIFunctionId;
+        this.restAPIFunctionId = restAPIFunctionId;
     }
 
     public String getJsonWrapperElement() {
-	return jsonWrapperElement;
+        return jsonWrapperElement;
     }
 
     public void setJsonWrapperElement(String jsonWrapperElement) {
-	this.jsonWrapperElement = jsonWrapperElement;
+        this.jsonWrapperElement = jsonWrapperElement;
     }
 
     public String getLineTerminator() {
-	return lineTerminator;
+        return lineTerminator;
     }
 
     public void setLineTerminator(String lineTerminator) {
-	this.lineTerminator = lineTerminator;
-    }
-
-    public Integer getThreshold() {
-	return threshold;
-    }
-
-    public void setThreshold(Integer threshold) {
-	this.threshold = threshold;
+        this.lineTerminator = lineTerminator;
     }
 
     public Integer getHelRegistryConfigId() {
-	return helRegistryConfigId;
+        return helRegistryConfigId;
     }
 
     public void setHelRegistryConfigId(Integer helRegistryConfigId) {
-	this.helRegistryConfigId = helRegistryConfigId;
+        this.helRegistryConfigId = helRegistryConfigId;
     }
 
     public String getHelSchemaName() {
-	return helSchemaName;
+        return helSchemaName;
     }
 
     public void setHelSchemaName(String helSchemaName) {
-	this.helSchemaName = helSchemaName;
+        this.helSchemaName = helSchemaName;
     }
 
     public Integer getHelRegistryId() {
-	return helRegistryId;
+        return helRegistryId;
     }
 
     public void setHelRegistryId(Integer helRegistryId) {
-	this.helRegistryId = helRegistryId;
-    }
-
-    public List<organizationDirectDetails> getDirectMessageFields() {
-	return directMessageFields;
-    }
-
-    public void setDirectMessageFields(List<organizationDirectDetails> directMessageFields) {
-	this.directMessageFields = directMessageFields;
+        this.helRegistryId = helRegistryId;
     }
 
     public String getDmConfigKeyword() {
@@ -524,27 +531,19 @@ public class configurationTransport {
     }
 
     public boolean isErgFileDownload() {
-	return ergFileDownload;
+        return ergFileDownload;
     }
 
     public void setErgFileDownload(boolean ergFileDownload) {
-	this.ergFileDownload = ergFileDownload;
+        this.ergFileDownload = ergFileDownload;
     }
 
     public boolean isPopulateInboundAuditReport() {
-	return populateInboundAuditReport;
+        return populateInboundAuditReport;
     }
 
     public void setPopulateInboundAuditReport(boolean populateInboundAuditReport) {
-	this.populateInboundAuditReport = populateInboundAuditReport;
-    }
-
-    public List<appenedNewconfigurationFormFields> getNewfields() {
-	return newfields;
-    }
-
-    public void setNewfields(List<appenedNewconfigurationFormFields> newfields) {
-	this.newfields = newfields;
+        this.populateInboundAuditReport = populateInboundAuditReport;
     }
 
     public boolean isAddTargetFileHeaderRow() {
@@ -556,10 +555,10 @@ public class configurationTransport {
     }
 
     public String getErrorEmailAddresses() {
-	return errorEmailAddresses;
+        return errorEmailAddresses;
     }
 
     public void setErrorEmailAddresses(String errorEmailAddresses) {
-	this.errorEmailAddresses = errorEmailAddresses;
+        this.errorEmailAddresses = errorEmailAddresses;
     }
 }

@@ -1,112 +1,51 @@
 
 
-require(['./main'], function () {
+jQuery(function ($) {
     
-    $(document).on('click', '.exportConfig', function() {
-            
-        var configId = $(this).attr('rel');
-
-        if(confirm("Are you sure you want to export this configuration?")) {
-
-            $.ajax({
-                url: 'createConfigExportFile.do',
-                data: {
-                    'configId': configId
-                },
-                type: "GET",
-                dataType : 'text',
-                contentType : 'application/json;charset=UTF-8',
-                success: function(data) {
-                    if(data !== '') {
-                        window.location.href = '/administrator/configurations/printConfigExport/'+ data;
-                        //$('#dtDownloadModal').modal('toggle');
-                    }
-                    else {
-                        $('#exportErrorMsg').show();
-                    }
-                }
-            });
-        }
-    });
+    $(document).ready(function () {
         
-    $(document).on('click','.printConfig',function() {
-        $('body').overlay({
-           glyphicon : 'print',
-           message : 'Gathering Details...'
-        });
-        
-        var configId = $(this).attr('rel');
+        showScheduleForm();
 
-        $.ajax({
-            url: 'createConfigPrintPDF.do',
-            data: {
-                'configId': configId
-            },
-            type: "GET",
-            dataType : 'text',
-            contentType : 'application/json;charset=UTF-8',
-            success: function(data) {
-                if(data !== '') {
-                   window.location.href = '/administrator/configurations/printConfig/'+ data;
-                   $('.overlay').css('display','none');
-                }
-                else {
-                    $('#errorMsg').show();
-                }
+        //function that will get the field mappings for the selected transport method
+        $('.changeTransportMethod').click(function () {
+            var selTransportMethod = $('#transportMethod').val();
+
+            if (selTransportMethod === "") {
+                $('#transportMethodDiv').addClass("has-error");
+            } else {
+                window.location.href = 'scheduling?i=' + selTransportMethod;
             }
         });
-    });
 
-    $("input:text,form").attr("autocomplete", "off");
+        //Toggle Scheduling Specs when process configuration is changed
+        $('.processMethod').change(function () {
+            showScheduleForm();
+        });
 
-    showScheduleForm();
+        //Toggle check how often
+        $('.processingType').change(function () {
 
-    //Fade out the updated/created message after being displayed.
-    if ($('.alert').length > 0) {
-        $('.alert').delay(2000).fadeOut(1000);
-    }
+            if ($(this).val() === "1") {
+                $('#processingTimeDiv').show();
+                $('#newfilecheckDiv').hide();
+            } else {
+                $('#newfilecheckDiv').show();
+                $('#processingTimeDiv').hide();
+            }
 
-    //function that will get the field mappings for the selected transport method
-    $('.changeTransportMethod').click(function () {
-        var selTransportMethod = $('#transportMethod').val();
+        });
 
-        if (selTransportMethod === "") {
-            $('#transportMethodDiv').addClass("has-error");
-        } else {
-            window.location.href = 'scheduling?i=' + selTransportMethod;
-        }
-    });
+        //This function will save the schedule mappings
+        $('#saveDetails').click(function () {
+            $('#schedulingSpecs').submit();
+        });
 
-    //Toggle Scheduling Specs when process configuration is changed
-    $('.processMethod').change(function () {
-        showScheduleForm();
-    });
-
-    //Toggle check how often
-    $('.processingType').change(function () {
-
-        if ($(this).val() === "1") {
-            $('#processingTimeDiv').show();
-            $('#newfilecheckDiv').hide();
-        } else {
-            $('#newfilecheckDiv').show();
-            $('#processingTimeDiv').hide();
-        }
-
-    });
-
-    //This function will save the schedule mappings
-    $('#saveDetails').click(function () {
-        $('#schedulingSpecs').submit();
-    });
-
-
-    $('#next').click(function () {
-        $('#action').val("next");
-        $('#schedulingSpecs').submit();
+        $('#next').click(function () {
+            $('#action').val("next");
+            $('#schedulingSpecs').submit();
+        });
     });
 })
-
 
 
 function showScheduleForm() {

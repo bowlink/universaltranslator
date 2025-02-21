@@ -20,21 +20,20 @@ public class configurationconnectionfieldmappings {
     private int id;
 
     @Column(name = "connectionId", nullable = false)
-    private int connectionId = 0;
+    private Integer connectionId = 0;
 
     @Column(name = "sourceConfigId", nullable = false)
-    private int sourceConfigId;
+    private Integer sourceConfigId;
 
     @Column(name = "targetConfigId", nullable = false)
-    private int targetConfigId;
+    private Integer targetConfigId;
 
     @Column(name = "fieldNo", nullable = false)
-    private int fieldNo;
+    private Integer fieldNo;
 
     @NoHtml
     @Column(name = "fieldDesc", nullable = true)
     private String fieldDesc;
-
 
     @Column(name = "useField", nullable = false)
     private boolean useField = false;
@@ -47,85 +46,84 @@ public class configurationconnectionfieldmappings {
     
     @Column(name = "defaultValue", nullable = true)
     private String defaultValue;
-    
+
     public int getId() {
-	return id;
+        return id;
     }
 
     public void setId(int id) {
-	this.id = id;
+        this.id = id;
     }
 
-    public int getConnectionId() {
-	return connectionId;
+    public Integer getConnectionId() {
+        return connectionId;
     }
 
-    public void setConnectionId(int connectionId) {
-	this.connectionId = connectionId;
+    public void setConnectionId(Integer connectionId) {
+        this.connectionId = connectionId;
     }
 
-    public int getSourceConfigId() {
-	return sourceConfigId;
+    public Integer getSourceConfigId() {
+        return sourceConfigId;
     }
 
-    public void setSourceConfigId(int sourceConfigId) {
-	this.sourceConfigId = sourceConfigId;
+    public void setSourceConfigId(Integer sourceConfigId) {
+        this.sourceConfigId = sourceConfigId;
     }
 
-    public int getTargetConfigId() {
-	return targetConfigId;
+    public Integer getTargetConfigId() {
+        return targetConfigId;
     }
 
-    public void setTargetConfigId(int targetConfigId) {
-	this.targetConfigId = targetConfigId;
+    public void setTargetConfigId(Integer targetConfigId) {
+        this.targetConfigId = targetConfigId;
     }
 
-    public int getFieldNo() {
-	return fieldNo;
+    public Integer getFieldNo() {
+        return fieldNo;
     }
 
-    public void setFieldNo(int fieldNo) {
-	this.fieldNo = fieldNo;
+    public void setFieldNo(Integer fieldNo) {
+        this.fieldNo = fieldNo;
     }
 
     public String getFieldDesc() {
-	return fieldDesc;
+        return fieldDesc;
     }
 
     public void setFieldDesc(String fieldDesc) {
-	this.fieldDesc = fieldDesc;
+        this.fieldDesc = fieldDesc;
     }
 
     public boolean isUseField() {
-	return useField;
+        return useField;
     }
 
     public void setUseField(boolean useField) {
-	this.useField = useField;
+        this.useField = useField;
     }
 
     public Integer getAssociatedFieldNo() {
-	return associatedFieldNo;
+        return associatedFieldNo;
     }
 
     public void setAssociatedFieldNo(Integer associatedFieldNo) {
-	this.associatedFieldNo = associatedFieldNo;
+        this.associatedFieldNo = associatedFieldNo;
     }
 
     public Integer getPopulateErrorFieldNo() {
-	return populateErrorFieldNo;
+        return populateErrorFieldNo;
     }
 
     public void setPopulateErrorFieldNo(Integer populateErrorFieldNo) {
-	this.populateErrorFieldNo = populateErrorFieldNo;
+        this.populateErrorFieldNo = populateErrorFieldNo;
     }
 
     public String getDefaultValue() {
-	return defaultValue;
+        return defaultValue;
     }
 
     public void setDefaultValue(String defaultValue) {
-	this.defaultValue = defaultValue;
+        this.defaultValue = defaultValue;
     }
-
 }

@@ -22,7 +22,7 @@ public class Crosswalks {
     private MultipartFile file;
     
     @Transient
-    private int dtsId = 0;
+    private Integer dtsId = 0;
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
@@ -35,7 +35,7 @@ public class Crosswalks {
     private String name;
 
     @Column(name = "FILEDELIMITER", nullable = false)
-    private int fileDelimiter = 0;
+    private Integer fileDelimiter = 0;
 
     @NoHtml
     @Column(name = "FILENAME", nullable = false)
@@ -46,12 +46,11 @@ public class Crosswalks {
     private Date dateCreated = new Date();
 
     @Column(name = "ORGID", nullable = true)
-    private int orgId = 0;
+    private Integer orgId = 0;
     
     @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "lastUpdated", nullable = true)
     private Date lastUpdated = null;
-
 
     public int getId() {
         return id;
@@ -69,19 +68,19 @@ public class Crosswalks {
         this.name = name;
     }
 
-    public int getFileDelimiter() {
+    public Integer getFileDelimiter() {
         return fileDelimiter;
     }
 
-    public void setFileDelimiter(int fileDelimiter) {
+    public void setFileDelimiter(Integer fileDelimiter) {
         this.fileDelimiter = fileDelimiter;
     }
 
-    public String getfileName() {
+    public String getFileName() {
         return fileName;
     }
 
-    public void setfileName(String fileName) {
+    public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
@@ -93,11 +92,11 @@ public class Crosswalks {
         this.dateCreated = dateCreated;
     }
 
-    public int getOrgId() {
+    public Integer getOrgId() {
         return orgId;
     }
 
-    public void setOrgId(int orgId) {
+    public void setOrgId(Integer orgId) {
         this.orgId = orgId;
     }
 
@@ -109,11 +108,11 @@ public class Crosswalks {
         this.file = file;
     }
 
-    public int getDtsId() {
+    public Integer getDtsId() {
 	return dtsId;
     }
 
-    public void setDtsId(int dtsId) {
+    public void setDtsId(Integer dtsId) {
 	this.dtsId = dtsId;
     }
 
@@ -124,6 +123,4 @@ public class Crosswalks {
     public void setLastUpdated(Date lastUpdated) {
 	this.lastUpdated = lastUpdated;
     }
-
-    
 }

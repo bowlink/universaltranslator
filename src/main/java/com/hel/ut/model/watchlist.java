@@ -28,7 +28,7 @@ public class watchlist {
     private String orgName, configName, messageTypeName, transportMethod, expectedTimeAMPM = "AM";
 
     @Transient
-    private int expectedTimeHour = 12, expectedTimeMinute = 0, messageTypeId = 0;
+    private Integer expectedTimeHour = 12, expectedTimeMinute = 0, messageTypeId = 0;
     
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
@@ -37,10 +37,10 @@ public class watchlist {
     private int id;
 
     @Column(name = "orgId", nullable = false)
-    private int orgId;
+    private Integer orgId;
 
     @Column(name = "configId", nullable = false)
-    private int configId;
+    private Integer configId;
 
     @Column(name = "expected", nullable = true)
     private String expected = "Daily";
@@ -63,140 +63,138 @@ public class watchlist {
     private String entryMessage;
 
     public String getOrgName() {
-	return orgName;
+        return orgName;
     }
 
     public void setOrgName(String orgName) {
-	this.orgName = orgName;
+        this.orgName = orgName;
     }
 
     public String getConfigName() {
-	return configName;
+        return configName;
     }
 
     public void setConfigName(String configName) {
-	this.configName = configName;
+        this.configName = configName;
     }
 
     public String getMessageTypeName() {
-	return messageTypeName;
+        return messageTypeName;
     }
 
     public void setMessageTypeName(String messageTypeName) {
-	this.messageTypeName = messageTypeName;
+        this.messageTypeName = messageTypeName;
     }
 
     public String getTransportMethod() {
-	return transportMethod;
+        return transportMethod;
     }
 
     public void setTransportMethod(String transportMethod) {
-	this.transportMethod = transportMethod;
-    }
-
-    public int getId() {
-	return id;
-    }
-
-    public void setId(int id) {
-	this.id = id;
-    }
-
-    public int getOrgId() {
-	return orgId;
-    }
-
-    public void setOrgId(int orgId) {
-	this.orgId = orgId;
-    }
-
-    public int getConfigId() {
-	return configId;
-    }
-
-    public void setConfigId(int configId) {
-	this.configId = configId;
-    }
-
-    public String getExpected() {
-	return expected;
-    }
-
-    public void setExpected(String expected) {
-	this.expected = expected;
-    }
-
-    public String getExpectFirstFile() {
-	return expectFirstFile;
-    }
-
-    public void setExpectFirstFile(String expectFirstFile) {
-	this.expectFirstFile = expectFirstFile;
-    }
-
-    public Date getDateCreated() {
-	return dateCreated;
-    }
-
-    public void setDateCreated(Date dateCreated) {
-	this.dateCreated = dateCreated;
-    }
-
-    public String getExpectFirstFileTime() {
-	return expectFirstFileTime;
-    }
-
-    public void setExpectFirstFileTime(String expectFirstFileTime) {
-	this.expectFirstFileTime = expectFirstFileTime;
-    }
-
-    public int getExpectedTimeHour() {
-	return expectedTimeHour;
-    }
-
-    public void setExpectedTimeHour(int expectedTimeHour) {
-	this.expectedTimeHour = expectedTimeHour;
-    }
-
-    public int getExpectedTimeMinute() {
-	return expectedTimeMinute;
-    }
-
-    public void setExpectedTimeMinute(int expectedTimeMinute) {
-	this.expectedTimeMinute = expectedTimeMinute;
+        this.transportMethod = transportMethod;
     }
 
     public String getExpectedTimeAMPM() {
-	return expectedTimeAMPM;
+        return expectedTimeAMPM;
     }
 
     public void setExpectedTimeAMPM(String expectedTimeAMPM) {
-	this.expectedTimeAMPM = expectedTimeAMPM;
+        this.expectedTimeAMPM = expectedTimeAMPM;
+    }
+
+    public Integer getExpectedTimeHour() {
+        return expectedTimeHour;
+    }
+
+    public void setExpectedTimeHour(Integer expectedTimeHour) {
+        this.expectedTimeHour = expectedTimeHour;
+    }
+
+    public Integer getExpectedTimeMinute() {
+        return expectedTimeMinute;
+    }
+
+    public void setExpectedTimeMinute(Integer expectedTimeMinute) {
+        this.expectedTimeMinute = expectedTimeMinute;
+    }
+
+    public Integer getMessageTypeId() {
+        return messageTypeId;
+    }
+
+    public void setMessageTypeId(Integer messageTypeId) {
+        this.messageTypeId = messageTypeId;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Integer getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Integer orgId) {
+        this.orgId = orgId;
+    }
+
+    public Integer getConfigId() {
+        return configId;
+    }
+
+    public void setConfigId(Integer configId) {
+        this.configId = configId;
+    }
+
+    public String getExpected() {
+        return expected;
+    }
+
+    public void setExpected(String expected) {
+        this.expected = expected;
+    }
+
+    public String getExpectFirstFile() {
+        return expectFirstFile;
+    }
+
+    public void setExpectFirstFile(String expectFirstFile) {
+        this.expectFirstFile = expectFirstFile;
+    }
+
+    public String getExpectFirstFileTime() {
+        return expectFirstFileTime;
+    }
+
+    public void setExpectFirstFileTime(String expectFirstFileTime) {
+        this.expectFirstFileTime = expectFirstFileTime;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
     }
 
     public Date getNextInsertDate() {
-	return nextInsertDate;
+        return nextInsertDate;
     }
 
     public void setNextInsertDate(Date nextInsertDate) {
-	this.nextInsertDate = nextInsertDate;
-    }
-
-    public int getMessageTypeId() {
-	return messageTypeId;
-    }
-
-    public void setMessageTypeId(int messageTypeId) {
-	this.messageTypeId = messageTypeId;
+        this.nextInsertDate = nextInsertDate;
     }
 
     public String getEntryMessage() {
-	return entryMessage;
+        return entryMessage;
     }
 
     public void setEntryMessage(String entryMessage) {
-	this.entryMessage = entryMessage;
+        this.entryMessage = entryMessage;
     }
-
-    
 }

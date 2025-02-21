@@ -27,14 +27,6 @@ public class activityReportList {
         this.orgName = orgName;
     }
 
-    public String gettgtOrgName() {
-        return tgtOrgName;
-    }
-
-    public void settgtOrgName(String tgtOrgName) {
-        this.tgtOrgName = tgtOrgName;
-    }
-
     public String getMessageType() {
         return messageType;
     }
@@ -43,12 +35,12 @@ public class activityReportList {
         this.messageType = messageType;
     }
 
-    public BigInteger getTotal() {
-        return total;
+    public String getTgtOrgName() {
+        return tgtOrgName;
     }
 
-    public void setTotal(BigInteger total) {
-        this.total = total;
+    public void setTgtOrgName(String tgtOrgName) {
+        this.tgtOrgName = tgtOrgName;
     }
 
     public BigInteger getOpenTotal() {
@@ -67,6 +59,22 @@ public class activityReportList {
         this.closedTotal = closedTotal;
     }
 
+    public BigInteger getTotal() {
+        return total;
+    }
+
+    public void setTotal(BigInteger total) {
+        this.total = total;
+    }
+
+    public BigInteger getTotalReceived() {
+        return totalReceived;
+    }
+
+    public void setTotalReceived(BigInteger totalReceived) {
+        this.totalReceived = totalReceived;
+    }
+
     public Integer getConfigId() {
         return configId;
     }
@@ -83,21 +91,11 @@ public class activityReportList {
         this.messageTypeId = messageTypeId;
     }
 
-    public BigInteger getTotalReceived() {
-	return totalReceived;
-    }
-
-    public void setTotalReceived(BigInteger totalReceived) {
-	this.totalReceived = totalReceived;
-    }
-
     public Integer getTargetOrgId() {
-	return targetOrgId;
+        return targetOrgId;
     }
 
     public void setTargetOrgId(Integer targetOrgId) {
-	this.targetOrgId = targetOrgId;
+        this.targetOrgId = targetOrgId;
     }
-
-    
 }

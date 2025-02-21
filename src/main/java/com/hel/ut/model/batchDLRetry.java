@@ -6,7 +6,6 @@
 package com.hel.ut.model;
 
 import java.util.Date;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,7 +13,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
-
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
@@ -32,44 +30,44 @@ public class batchDLRetry {
     private int id;
 
     @Column(name = "batchDownloadId", nullable = false)
-    private int batchDownloadId;
+    private Integer batchDownloadId;
 
     @Column(name = "fromStatusId", nullable = false)
-    private int fromStatusId;
+    private Integer fromStatusId;
     
     @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "DATECREATED", nullable = false)
     private Date dateCreated = new Date();
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public int getBatchDownloadId() {
-		return batchDownloadId;
-	}
+    public Integer getBatchDownloadId() {
+        return batchDownloadId;
+    }
 
-	public void setBatchDownloadId(int batchDownloadId) {
-		this.batchDownloadId = batchDownloadId;
-	}
+    public void setBatchDownloadId(Integer batchDownloadId) {
+        this.batchDownloadId = batchDownloadId;
+    }
 
-	public int getFromStatusId() {
-		return fromStatusId;
-	}
+    public Integer getFromStatusId() {
+        return fromStatusId;
+    }
 
-	public void setFromStatusId(int fromStatusId) {
-		this.fromStatusId = fromStatusId;
-	}
+    public void setFromStatusId(Integer fromStatusId) {
+        this.fromStatusId = fromStatusId;
+    }
 
-	public Date getDateCreated() {
-		return dateCreated;
-	}
+    public Date getDateCreated() {
+        return dateCreated;
+    }
 
-	public void setDateCreated(Date dateCreated) {
-		this.dateCreated = dateCreated;
-	}
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
 }

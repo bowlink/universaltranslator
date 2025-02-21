@@ -126,7 +126,9 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @SuppressWarnings("rawtypes")
     @Transactional(readOnly = true)
     public List getValidationTypes() {
-        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, validationType FROM ref_validationTypes order by id asc", String.class);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id, validationType FROM ref_validationTypes order by id asc", String.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("validationType", StandardBasicTypes.STRING);
         return query.list();
     }
 
@@ -313,11 +315,11 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Override
     @SuppressWarnings("rawtypes")
     @Transactional(readOnly = true)
-    public List getCrosswalkData(int cwId) {
-        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT sourceValue, targetValue, descValue FROM rel_crosswalkData where crosswalkId = :crosswalkid order by id asc", String.class);
+    public List<CrosswalkData> getCrosswalkData(int cwId) {
+        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT * FROM rel_crosswalkData where crosswalkId = :crosswalkid order by id asc", CrosswalkData.class);
         query.setParameter("crosswalkid", cwId);
 
-        return query.list();
+        return query.getResultList();
     }
 
     /**
@@ -421,32 +423,33 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Transactional(readOnly = true)
     public List<Crosswalks> getCrosswalksForConfig(int page, int maxCrosswalks, int orgId, int configId, boolean inUseOnly) {
 	
-	String sql = "select distinct a.*, IFNULL((select id from configurationdatatranslations where configId = :configId and crosswalkId = a.id LIMIT 1),0) as dtsId "
+	String sql = "select distinct a.id, a.name, a.fileDelimiter, a.fileName, a.dateCreated, a.orgId, a.lastUpdated,"
+        + "IFNULL((select id from configurationdatatranslations where configId = :configId and crosswalkId = a.id LIMIT 1),0) as dtsId "
 	+ "from crosswalks a ";
 	
 	if(inUseOnly) {
 	    sql += "inner join configurationdatatranslations b on (b.crosswalkid = a.id or (b.macroId in (129,160,177,195,199,201) and b.constant1 = a.id)) and b.configId = :configId ";
+            sql += "where a.orgId = ";
 	}	  
+        else {
+            sql += "where a.id not in (select crosswalkId from configurationdatatranslations where configId = :configId) ";
+            sql += "and a.id not in (select constant1 from configurationdatatranslations where macroId in (129,160,177,195,199,201) and configId = :configId) ";
+            sql += "and a.orgId = ";
+        }
 	
 	if(orgId > 0) {
-	    sql += "where a.orgId = :orgId or a.orgId = 0 order by a.name asc";
+	    sql += ":orgId or a.orgId = 0 order by a.orgId desc, a.name asc";
 	}
 	else {
-	    sql += "where a.orgId = 0 order by a.name asc";
+	    sql += "0 order by a.name asc";
 	}
-	
+        
 	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,Crosswalks.class)
-	.addScalar("id", StandardBasicTypes.INTEGER)
-	.addScalar("orgId", StandardBasicTypes.INTEGER)
-	.addScalar("dtsId", StandardBasicTypes.INTEGER)
-	.addScalar("name", StandardBasicTypes.STRING)
-	.addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
-	.addScalar("lastUpdated", StandardBasicTypes.TIMESTAMP)	
 	.setParameter("orgId", orgId)
 	.setParameter("configId", configId);
-	
-	List<Crosswalks> crosswalks = query.list();
-	
+        
+	List<Crosswalks> crosswalks = query.getResultList();
+        
         return crosswalks;
     }
     
@@ -623,10 +626,15 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	+ "ref_delimiters c on c.id = a.fileDelimiter "
 	+ "where a.id = :crosswalkId";
 	
-        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, Object.class);
-        query.setParameter("crosswalkId", crosswalkId);
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
+        .addScalar("sourceValue", StandardBasicTypes.STRING)	
+        .addScalar("targetValue", StandardBasicTypes.STRING)	
+        .addScalar("descValue", StandardBasicTypes.STRING)	
+        .addScalar("delimiter", StandardBasicTypes.STRING)        
+        .addScalar("delimChar", StandardBasicTypes.STRING)    
+	.setParameter("crosswalkId", crosswalkId);     
 	
-        return query.list();
+        return query.getResultList();
     }
     
     @Override

@@ -2253,6 +2253,28 @@ fieldset[disabled] .btn-link:focus {
 .btn-block + .btn-block {
     margin-top: 5px;
 }
+
+.btn-success:hover {
+    background-color: #5cb85c !important;
+    border-color: #4cae4c !important;
+    color: fff !important;
+    text-decoration: none;
+}
+
+.btn-primary:hover {
+   background-color: #0096ff !important;
+    border-color: #0087e6 !important;
+    color: fff !important;
+    text-decoration: none;
+}
+
+.btn-danger:hover {
+    background-color: #d9534f !important;
+    border-color: #d43f3a !important;
+    color: fff !important;
+    text-decoration: none;
+}
+
 input[type="submit"].btn-block,
 input[type="reset"].btn-block,
 input[type="button"].btn-block {
@@ -5237,10 +5259,10 @@ button.close {
 .tooltip {
     --bs-tooltip-zindex: 1080;
     --bs-tooltip-max-width: 200px;
-    --bs-tooltip-padding-x: 0.5rem;
-    --bs-tooltip-padding-y: 0.25rem;
+    --bs-tooltip-padding-x: 1rem;
+    --bs-tooltip-padding-y: 1rem;
     --bs-tooltip-margin: 0;
-    --bs-tooltip-font-size: 0.875rem;
+    --bs-tooltip-font-size: 1.15rem;
     --bs-tooltip-color: var(--bs-body-bg);
     --bs-tooltip-bg: var(--bs-emphasis-color);
     --bs-tooltip-border-radius: var(--bs-border-radius);

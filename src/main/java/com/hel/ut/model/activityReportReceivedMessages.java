@@ -23,6 +23,14 @@ public class activityReportReceivedMessages {
     private String recevedBatchIds = "";
     private Integer totalTransactions = 0;
 
+    public Integer getRowId() {
+        return rowId;
+    }
+
+    public void setRowId(Integer rowId) {
+        this.rowId = rowId;
+    }
+
     public Integer getTotalReceived() {
         return totalReceived;
     }
@@ -95,20 +103,11 @@ public class activityReportReceivedMessages {
         this.recevedBatchIds = recevedBatchIds;
     }
 
-    public Integer getRowId() {
-        return rowId;
-    }
-
-    public void setRowId(Integer rowId) {
-        this.rowId = rowId;
-    }
-
     public Integer getTotalTransactions() {
-	return totalTransactions;
+        return totalTransactions;
     }
 
     public void setTotalTransactions(Integer totalTransactions) {
-	this.totalTransactions = totalTransactions;
+        this.totalTransactions = totalTransactions;
     }
-    
 }

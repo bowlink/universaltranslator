@@ -32,7 +32,6 @@ public class RestAPIMessagesIn {
     @Transient
     private String errorDisplayText = null, batchName = null, statusName = null, orgName = null;
 
-    
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
     @GenericGenerator(name = "native",strategy = "native")
@@ -40,13 +39,13 @@ public class RestAPIMessagesIn {
     private int id;
 
     @Column(name = "orgId", nullable = true)
-    private int orgId = 0;
+    private Integer orgId = 0;
 
     @Column(name = "archiveFileName", nullable = true)
     private String archiveFileName;
 
     @Column(name = "statusId", nullable = false)
-    private int statusId = 3; //set to reject
+    private Integer statusId = 3; //set to reject
 
     @Column(name = "errorId", nullable = true)
     private Integer errorId = 0;
@@ -56,14 +55,53 @@ public class RestAPIMessagesIn {
     private Date dateCreated = new Date();
 
     @Column(name = "batchUploadId", nullable = true)
-    private int batchUploadId = 0;
+    private Integer batchUploadId = 0;
 
     @Column(name = "configId", nullable = true)
-    private int configId = 0;
+    private Integer configId = 0;
     
     @Column(name = "messageTitle", nullable = true)
     private String messageTitle;
 
+    public Integer getTotalMessages() {
+        return totalMessages;
+    }
+
+    public void setTotalMessages(Integer totalMessages) {
+        this.totalMessages = totalMessages;
+    }
+
+    public String getErrorDisplayText() {
+        return errorDisplayText;
+    }
+
+    public void setErrorDisplayText(String errorDisplayText) {
+        this.errorDisplayText = errorDisplayText;
+    }
+
+    public String getBatchName() {
+        return batchName;
+    }
+
+    public void setBatchName(String batchName) {
+        this.batchName = batchName;
+    }
+
+    public String getStatusName() {
+        return statusName;
+    }
+
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
+    }
+
+    public String getOrgName() {
+        return orgName;
+    }
+
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
+    }
 
     public int getId() {
         return id;
@@ -73,20 +111,36 @@ public class RestAPIMessagesIn {
         this.id = id;
     }
 
-    public int getOrgId() {
+    public Integer getOrgId() {
         return orgId;
     }
 
-    public void setOrgId(int orgId) {
+    public void setOrgId(Integer orgId) {
         this.orgId = orgId;
     }
 
-    public int getStatusId() {
+    public String getArchiveFileName() {
+        return archiveFileName;
+    }
+
+    public void setArchiveFileName(String archiveFileName) {
+        this.archiveFileName = archiveFileName;
+    }
+
+    public Integer getStatusId() {
         return statusId;
     }
 
-    public void setStatusId(int statusId) {
+    public void setStatusId(Integer statusId) {
         this.statusId = statusId;
+    }
+
+    public Integer getErrorId() {
+        return errorId;
+    }
+
+    public void setErrorId(Integer errorId) {
+        this.errorId = errorId;
     }
 
     public Date getDateCreated() {
@@ -97,87 +151,27 @@ public class RestAPIMessagesIn {
         this.dateCreated = dateCreated;
     }
 
-    public String getArchiveFileName() {
-	return archiveFileName;
-    }
-
-    public void setArchiveFileName(String archiveFileName) {
-	this.archiveFileName = archiveFileName;
-    }
-
-
-    public Integer getErrorId() {
-        return errorId;
-    }
-
-    public void setErrorId(Integer errorId) {
-        this.errorId = errorId;
-    }
-
-
-    public int getBatchUploadId() {
+    public Integer getBatchUploadId() {
         return batchUploadId;
     }
 
-    public void setBatchUploadId(int batchUploadId) {
+    public void setBatchUploadId(Integer batchUploadId) {
         this.batchUploadId = batchUploadId;
     }
 
-    public int getConfigId() {
-	return configId;
+    public Integer getConfigId() {
+        return configId;
     }
 
-    public void setConfigId(int configId) {
-	this.configId = configId;
-    }
-
-    public String getOrgName() {
-	return orgName;
-    }
-
-    public void setOrgName(String orgName) {
-	this.orgName = orgName;
-    }
-
-    public String getStatusName() {
-	return statusName;
-    }
-
-    public void setStatusName(String statusName) {
-	this.statusName = statusName;
-    }
-
-    public String getErrorDisplayText() {
-	return errorDisplayText;
-    }
-
-    public void setErrorDisplayText(String errorDisplayText) {
-	this.errorDisplayText = errorDisplayText;
-    }
-
-    public String getBatchName() {
-	return batchName;
-    }
-
-    public void setBatchName(String batchName) {
-	this.batchName = batchName;
-    }
-
-    public Integer getTotalMessages() {
-	return totalMessages;
-    }
-
-    public void setTotalMessages(Integer totalMessages) {
-	this.totalMessages = totalMessages;
+    public void setConfigId(Integer configId) {
+        this.configId = configId;
     }
 
     public String getMessageTitle() {
-	return messageTitle;
+        return messageTitle;
     }
 
     public void setMessageTitle(String messageTitle) {
-	this.messageTitle = messageTitle;
+        this.messageTitle = messageTitle;
     }
-
-    
 }

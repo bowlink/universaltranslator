@@ -26,20 +26,17 @@ public class configurationWebServiceFields {
     private int id;
 
     @Column(name = "TRANSPORTID", nullable = false)
-    private int transportId = 0;
+    private Integer transportId = 0;
 
     @NoHtml
     @Column(name = "email", nullable = true)
     private String email = null;
 
-    /**
-     * 1 = toUT\n2 = fromUT *
-     */
     @Column(name = "Method", nullable = true)
-    private int method = 0;
+    private Integer method = 0;
 
     @Column(name = "tagPosition", nullable = true)
-    private int tagPosition = 1;
+    private Integer tagPosition = 1;
 
     @NoHtml
     @Column(name = "tagName", nullable = true)
@@ -51,6 +48,14 @@ public class configurationWebServiceFields {
     @Column(name = "mimeType", nullable = true)
     private String mimeType = "text/xml";
 
+    public List<configurationWebServiceSenders> getSenderDomainList() {
+        return senderDomainList;
+    }
+
+    public void setSenderDomainList(List<configurationWebServiceSenders> senderDomainList) {
+        this.senderDomainList = senderDomainList;
+    }
+
     public int getId() {
         return id;
     }
@@ -59,20 +64,12 @@ public class configurationWebServiceFields {
         this.id = id;
     }
 
-    public int getTransportId() {
+    public Integer getTransportId() {
         return transportId;
     }
 
-    public void setTransportId(int transportId) {
+    public void setTransportId(Integer transportId) {
         this.transportId = transportId;
-    }
-
-    public int getMethod() {
-        return method;
-    }
-
-    public void setMethod(int method) {
-        this.method = method;
     }
 
     public String getEmail() {
@@ -83,11 +80,19 @@ public class configurationWebServiceFields {
         this.email = email;
     }
 
-    public int getTagPosition() {
+    public Integer getMethod() {
+        return method;
+    }
+
+    public void setMethod(Integer method) {
+        this.method = method;
+    }
+
+    public Integer getTagPosition() {
         return tagPosition;
     }
 
-    public void setTagPosition(int tagPosition) {
+    public void setTagPosition(Integer tagPosition) {
         this.tagPosition = tagPosition;
     }
 
@@ -107,15 +112,6 @@ public class configurationWebServiceFields {
         this.textInAttachment = textInAttachment;
     }
 
-    public List<configurationWebServiceSenders> getSenderDomainList() {
-        return senderDomainList;
-    }
-
-    public void setSenderDomainList(
-            List<configurationWebServiceSenders> senderDomainList) {
-        this.senderDomainList = senderDomainList;
-    }
-
     public String getMimeType() {
         return mimeType;
     }
@@ -123,5 +119,4 @@ public class configurationWebServiceFields {
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
-
 }

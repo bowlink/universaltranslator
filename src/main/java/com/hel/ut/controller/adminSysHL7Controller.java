@@ -178,8 +178,8 @@ public class adminSysHL7Controller {
         mav.setViewName("/administrator/configurations/HL7Segment");
 
         HL7Segments segmentDetails = new HL7Segments();
-        segmentDetails.sethl7Id(hl7Id);
-        segmentDetails.setdisplayPos(nextPos);
+        segmentDetails.setHl7Id(hl7Id);
+        segmentDetails.setDisplayPos(nextPos);
 
         mav.addObject("HL7SegmentDetails", segmentDetails);
 
@@ -203,7 +203,7 @@ public class adminSysHL7Controller {
         sysAdminManager.saveHL7Segment(HL7SegmentDetails);
 
         redirectAttr.addFlashAttribute("savedStatus", "savedSegment");
-        ModelAndView mav = new ModelAndView(new RedirectView("details?hl7Id=" + HL7SegmentDetails.gethl7Id()));
+        ModelAndView mav = new ModelAndView(new RedirectView("details?hl7Id=" + HL7SegmentDetails.getHl7Id()));
         return mav;
     }
 
@@ -224,9 +224,9 @@ public class adminSysHL7Controller {
         mav.setViewName("/administrator/configurations/HL7Element");
 
         HL7Elements elementDetails = new HL7Elements();
-        elementDetails.sethl7Id(hl7Id);
-        elementDetails.setsegmentId(segmentId);
-        elementDetails.setdisplayPos(nextPos);
+        elementDetails.setHl7Id(hl7Id);
+        elementDetails.setSegmentId(segmentId);
+        elementDetails.setDisplayPos(nextPos);
 
         mav.addObject("HL7ElementDetails", elementDetails);
 
@@ -250,7 +250,7 @@ public class adminSysHL7Controller {
         sysAdminManager.saveHL7Element(HL7ElementDetails);
 
         redirectAttr.addFlashAttribute("savedStatus", "savedElement");
-        ModelAndView mav = new ModelAndView(new RedirectView("details?hl7Id=" + HL7ElementDetails.gethl7Id()));
+        ModelAndView mav = new ModelAndView(new RedirectView("details?hl7Id=" + HL7ElementDetails.getHl7Id()));
         return mav;
     }
 

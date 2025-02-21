@@ -20,17 +20,17 @@ public class configurationExcelDetails {
     private int id;
 
     @Column(name = "orgId", nullable = false)
-    private int orgId = 0;
+    private Integer orgId = 0;
 
     @Column(name = "configId", nullable = false)
-    private int configId = 0;
+    private Integer configId = 0;
 
     @NoHtml
     @Column(name = "startRow", nullable = false)
-    private int startRow = 0;
+    private Integer startRow = 0;
 
     @Column(name = "discardLastRows", nullable = false)
-    private int discardLastRows = 0;
+    private Integer discardLastRows = 0;
 
     public int getId() {
         return id;
@@ -40,36 +40,35 @@ public class configurationExcelDetails {
         this.id = id;
     }
 
-    public int getOrgId() {
+    public Integer getOrgId() {
         return orgId;
     }
 
-    public void setOrgId(int orgId) {
+    public void setOrgId(Integer orgId) {
         this.orgId = orgId;
     }
 
-    public int getConfigId() {
+    public Integer getConfigId() {
         return configId;
     }
 
-    public void setConfigId(int configId) {
+    public void setConfigId(Integer configId) {
         this.configId = configId;
     }
 
-    public int getStartRow() {
+    public Integer getStartRow() {
         return startRow;
     }
 
-    public void setStartRow(int startRow) {
+    public void setStartRow(Integer startRow) {
         this.startRow = startRow;
     }
 
-    public int getDiscardLastRows() {
+    public Integer getDiscardLastRows() {
         return discardLastRows;
     }
 
-    public void setDiscardLastRows(int discardLastRows) {
+    public void setDiscardLastRows(Integer discardLastRows) {
         this.discardLastRows = discardLastRows;
     }
-
 }

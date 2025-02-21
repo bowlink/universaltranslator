@@ -32,13 +32,21 @@ public class configurationConnectionSenders {
     private int id;
 
     @Column(name = "CONNECTIONID", nullable = false)
-    private int connectionId;
+    private Integer connectionId;
 
     @Column(name = "emailAddress", nullable = false)
     private String emailAddress;
 
     @Column(name = "sendEmailNotifications", nullable = false)
     private Boolean sendEmailNotifications = false;
+
+    public String getContactType() {
+        return contactType;
+    }
+
+    public void setContactType(String contactType) {
+        this.contactType = contactType;
+    }
 
     public int getId() {
         return id;
@@ -48,36 +56,27 @@ public class configurationConnectionSenders {
         this.id = id;
     }
 
-    public int getConnectionId() {
-	return connectionId;
+    public Integer getConnectionId() {
+        return connectionId;
     }
 
-    public void setConnectionId(int connectionId) {
-	this.connectionId = connectionId;
+    public void setConnectionId(Integer connectionId) {
+        this.connectionId = connectionId;
     }
 
     public String getEmailAddress() {
-	return emailAddress;
+        return emailAddress;
     }
 
     public void setEmailAddress(String emailAddress) {
-	this.emailAddress = emailAddress;
+        this.emailAddress = emailAddress;
     }
 
     public Boolean getSendEmailNotifications() {
-	return sendEmailNotifications;
+        return sendEmailNotifications;
     }
 
     public void setSendEmailNotifications(Boolean sendEmailNotifications) {
-	this.sendEmailNotifications = sendEmailNotifications;
+        this.sendEmailNotifications = sendEmailNotifications;
     }
-
-    public String getContactType() {
-	return contactType;
-    }
-
-    public void setContactType(String contactType) {
-	this.contactType = contactType;
-    }
-
 }

@@ -72,7 +72,118 @@ public class utConfiguration {
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
 
-    
+    public String getOrgName() {
+        return orgName;
+    }
+
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
+    }
+
+    public String getMessageTypeName() {
+        return messageTypeName;
+    }
+
+    public void setMessageTypeName(String messageTypeName) {
+        this.messageTypeName = messageTypeName;
+    }
+
+    public String getTransportMethod() {
+        return transportMethod;
+    }
+
+    public void setTransportMethod(String transportMethod) {
+        this.transportMethod = transportMethod;
+    }
+
+    public String getFileDropLocation() {
+        return fileDropLocation;
+    }
+
+    public void setFileDropLocation(String fileDropLocation) {
+        this.fileDropLocation = fileDropLocation;
+    }
+
+    public String getHelRegistry() {
+        return helRegistry;
+    }
+
+    public void setHelRegistry(String helRegistry) {
+        this.helRegistry = helRegistry;
+    }
+
+    public String getCleanOrgURL() {
+        return cleanOrgURL;
+    }
+
+    public void setCleanOrgURL(String cleanOrgURL) {
+        this.cleanOrgURL = cleanOrgURL;
+    }
+
+    public Integer getTransportDetailId() {
+        return transportDetailId;
+    }
+
+    public void setTransportDetailId(Integer transportDetailId) {
+        this.transportDetailId = transportDetailId;
+    }
+
+    public Integer getScheduleType() {
+        return scheduleType;
+    }
+
+    public void setScheduleType(Integer scheduleType) {
+        this.scheduleType = scheduleType;
+    }
+
+    public Integer getHelRegistryId() {
+        return helRegistryId;
+    }
+
+    public void setHelRegistryId(Integer helRegistryId) {
+        this.helRegistryId = helRegistryId;
+    }
+
+    public Integer getTransportMethodId() {
+        return transportMethodId;
+    }
+
+    public void setTransportMethodId(Integer transportMethodId) {
+        this.transportMethodId = transportMethodId;
+    }
+
+    public List<configurationConnection> getConnections() {
+        return connections;
+    }
+
+    public void setConnections(List<configurationConnection> connections) {
+        this.connections = connections;
+    }
+
+    public Date getDateUpdated() {
+        return dateUpdated;
+    }
+
+    public void setDateUpdated(Date dateUpdated) {
+        this.dateUpdated = dateUpdated;
+    }
+
+    public boolean isAllowExport() {
+        return allowExport;
+    }
+
+    public void setAllowExport(boolean allowExport) {
+        this.allowExport = allowExport;
+    }
+
+    public boolean isAllowFTPLink() {
+        return allowFTPLink;
+    }
+
+    public void setAllowFTPLink(boolean allowFTPLink) {
+        this.allowFTPLink = allowFTPLink;
+    }
+
     public int getId() {
         return id;
     }
@@ -97,7 +208,7 @@ public class utConfiguration {
         this.dateCreated = dateCreated;
     }
 
-    public boolean getStatus() {
+    public boolean isStatus() {
         return status;
     }
 
@@ -121,22 +232,6 @@ public class utConfiguration {
         this.messageTypeId = messageTypeId;
     }
 
-    public String getOrgName() {
-        return orgName;
-    }
-
-    public void setOrgName(String orgName) {
-        this.orgName = orgName;
-    }
-
-    public String getMessageTypeName() {
-        return messageTypeName;
-    }
-
-    public void setMessageTypeName(String messageTypeName) {
-        this.messageTypeName = messageTypeName;
-    }
-
     public Integer getStepsCompleted() {
         return stepsCompleted;
     }
@@ -145,131 +240,35 @@ public class utConfiguration {
         this.stepsCompleted = stepsCompleted;
     }
 
-    public String getTransportMethod() {
-        return transportMethod;
-    }
-
-    public void setTransportMethod(String transportMethod) {
-        this.transportMethod = transportMethod;
-    }
-
-    public Integer gettransportDetailId() {
-        return transportDetailId;
-    }
-
-    public void settransportDetailId(Integer transportDetailId) {
-        this.transportDetailId = transportDetailId;
-    }
-
-    public List<configurationConnection> getconnections() {
-        return connections;
-    }
-
-    public void setconnections(List<configurationConnection> connections) {
-        this.connections = connections;
-    }
-
-    public void setConfigname(String configName) {
-        this.configname = configName;
-    }
-
     public String getConfigname() {
         return configname;
     }
 
-    public Integer getScheduleType() {
-	return scheduleType;
-    }
-
-    public void setScheduleType(Integer scheduleType) {
-	this.scheduleType = scheduleType;
+    public void setConfigname(String configname) {
+        this.configname = configname;
     }
 
     public Integer getThreshold() {
-	return threshold;
+        return threshold;
     }
 
     public void setThreshold(Integer threshold) {
-	this.threshold = threshold;
+        this.threshold = threshold;
     }
 
     public Integer getConfigurationType() {
-	return configurationType;
+        return configurationType;
     }
 
     public void setConfigurationType(Integer configurationType) {
-	this.configurationType = configurationType;
+        this.configurationType = configurationType;
     }
 
     public boolean isDeleted() {
-	return deleted;
+        return deleted;
     }
 
     public void setDeleted(boolean deleted) {
-	this.deleted = deleted;
-    }
-
-    public String getFileDropLocation() {
-	return fileDropLocation;
-    }
-
-    public void setFileDropLocation(String fileDropLocation) {
-	this.fileDropLocation = fileDropLocation;
-    }
-
-    public Date getDateUpdated() {
-	return dateUpdated;
-    }
-
-    public void setDateUpdated(Date dateUpdated) {
-	this.dateUpdated = dateUpdated;
-    }
-
-    public boolean isAllowExport() {
-	return allowExport;
-    }
-
-    public void setAllowExport(boolean allowExport) {
-	this.allowExport = allowExport;
-    }
-
-    public boolean isAllowFTPLink() {
-	return allowFTPLink;
-    }
-
-    public void setAllowFTPLink(boolean allowFTPLink) {
-	this.allowFTPLink = allowFTPLink;
-    }
-
-    public String getHelRegistry() {
-	return helRegistry;
-    }
-
-    public void setHelRegistry(String helRegistry) {
-	this.helRegistry = helRegistry;
-    }
-
-    public Integer getHelRegistryId() {
-        return helRegistryId;
-    }
-
-    public void setHelRegistryId(Integer helRegistryId) {
-        this.helRegistryId = helRegistryId;
-    }
-
-    public String getCleanOrgURL() {
-        return cleanOrgURL;
-    }
-
-    public void setCleanOrgURL(String cleanOrgURL) {
-        this.cleanOrgURL = cleanOrgURL;
-    }
-
-    public Integer getTransportMethodId() {
-        return transportMethodId;
-    }
-
-    public void setTransportMethodId(Integer transportMethodId) {
-        this.transportMethodId = transportMethodId;
+        this.deleted = deleted;
     }
 }

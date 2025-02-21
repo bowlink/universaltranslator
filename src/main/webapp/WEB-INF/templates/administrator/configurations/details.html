@@ -13,17 +13,16 @@
                     <div class="alert alert-success" role="alert"  th:if="${savedStatus != null}">
                         <strong>Success!</strong> 
                         <p th:if="${savedStatus == 'updated'}">The configuration has been successfully updated!</p>
-                        <p th:if="${savedStatus != 'created'}">The configuration has been successfully added!</p>
+                        <p th:if="${savedStatus != 'updated'}">The configuration has been successfully added!</p>
                     </div>
                     
-                    <form id="configuration" th:action="${'/administrator/configurations/details'}" th:object="${configurationDetails}" method="post" role="form" enctype="multipart/form-data">
+                    <form id="configuration" th:action="${configurationDetails.id > 0 ? '/administrator/configurations/details' : '/administrator/configurations/create'}" th:object="${configurationDetails}" method="post" role="form" enctype="multipart/form-data">
                         <input type="hidden" id="action" name="action" value="save" />
                         <input type="hidden" th:field="*{id}"/>
                         <input type="hidden" th:field="*{dateCreated}"/>
                         <input type="hidden" th:field="*{stepsCompleted}"/>
 
                         <section class="panel panel-default">
-
                             <div class="panel-heading">
                                 <h3 class="panel-title">Details</h3>
                             </div>
@@ -54,7 +53,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group">
+                                    <div class="form-group" th:if="${!eahUT}">
                                         <label for="messageTypeId">Message Type *</label>
                                         <div>
                                             <label class="radio-inline">
@@ -70,6 +69,9 @@
                                                 <input type="hidden" th:field="*{messageTypeId}"/>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="form-group" th:unless="${!eahUT}">
+                                        <input type="hidden" th:field="*{messageTypeId}"/>
                                     </div>
                                     <div id="configurationTypeDiv" class="form-group" th:style="${type == 1 ? 'block' : 'none'}">
                                         <label for="configurationType">Processing Type * </label>
