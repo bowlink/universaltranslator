@@ -6367,7 +6367,8 @@ body {
     padding-top: 20px;
 }
 .scrollable {
-    overflow: auto;
+   max-width: 100%;
+    overflow-x: hidden;
 }
 .modal {
     overflow: auto;
@@ -6522,7 +6523,7 @@ input[type="checkbox"] {
     padding-bottom: 4px;
 }
 .secondary {
-    width: 170px;
+    width: 180px;
     float: left;
     height: 100%;
     position: relative;

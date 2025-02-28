@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+    <head>
+        <title>Health-e-Link UT Configuration Connection Details</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/connections/actionBar :: actionBar}"></div>
+            <div class="main clearfix full-width" role="main">
+                <div class="col-md-12">
+                    <th:block th:if="${param.msg != null}">
+                        <div class="alert alert-success">
+                            <strong>Success!</strong> 
+                            <p th:if="${param.msg[0] == 'saved'}">The configuration connection has been successfully saved!</p>
+                        </div>
+                    </th:block>
+                </div>
+                <div class="col-md-12">
+                    <input type="hidden" name="connectionId" id="connectionId" th:value="${connectionId}" />
+                    <div class="col-md-6">
+                        <section class="panel panel-info">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Source Organization</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-container scrollable">
+                                    <div id="srcorgDiv" class="form-group">
+                                        <label class="control-label" for="organization">Organization *</label>
+                                        <select id="organization" class="form-control selSendingOrganization" th:disabled="${connectionId > 0 ? 'true' : 'false'}">
+                                            <option value="">- Select -</option>
+                                            <th:block th:each="org, oStatus : ${sourceOrganizations}">
+                                                <th:block th:if="${oStatus.index == 0 || org.helRegistry != sourceOrganizations[oStatus.index - 1].helRegistry}">
+                                                     <optgroup th:label="${org.helRegistry}">
+                                                </th:block>
+                                                <option th:value="${org.id}" th:text="${org.orgName}" th:selected="*{sourceOrganizations[oStatus.index].id == sourceOrgId ? 'true' : 'false'}"></option>
+                                                <th:block th:if="${oStatus.last || org.helRegistry != sourceOrganizations[oStatus.index + 1].helRegistry}">
+                                                    </optgroup>
+                                                </th:block>
+                                            </th:block>
+                                        </select>
+                                        <span id="srcOrgMsg" class="control-label"></span>
+                                    </div>  
+                                    <div id="srcConfigDiv" class="form-group">
+                                        <label class="control-label" for="srcConfig">Configuration *</label>
+                                        <select id="srcConfig" th:rel="${sourceConfigId}" class="form-control" th:disabled="${connectionId > 0 ? 'true' : 'false'}">
+                                            <option value="">- Select -</option>
+                                        </select>  
+                                        <span id="srcConfigMsg" class="control-label"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="col-md-6">
+                        <section class="panel panel-info">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Target Organization</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-container scrollable">
+                                    <div id="tgtorgDiv" class="form-group">
+                                        <label class="control-label" for="organization">Organization *</label>
+                                        <select id="organization" class="form-control seltgtOrganization" th:disabled="${connectionId > 0 ? 'true' : 'false'}">
+                                            <option value="">- Select -</option>
+                                            <th:block th:each="org, oStatus : ${targetOrganizations}">
+                                                <th:block th:if="${oStatus.index == 0 || org.helRegistry != targetOrganizations[oStatus.index - 1].helRegistry}">
+                                                     <optgroup th:label="${org.helRegistry}">
+                                                </th:block>
+                                                <option th:value="${org.id}" th:text="${org.orgName}" th:selected="*{targetOrganizations[oStatus.index].id == targetOrgId ? 'true' : 'false'}"></option>
+                                                <th:block th:if="${oStatus.last || org.helRegistry != targetOrganizations[oStatus.index + 1].helRegistry}">
+                                                    </optgroup>
+                                                </th:block>
+                                            </th:block>
+                                        </select>
+                                        <span id="tgtOrgMsg" class="control-label"></span>
+                                    </div>   
+                                    <div id="tgtConfigDiv" class="form-group ${status.error ? 'has-error' : '' }">
+                                        <label class="control-label" for="messageTypeId">Configuration *</label>
+                                        <select  id="tgtConfig" th:rel="${targetConfigId}" class="form-control" th:disabled="${connectionId > 0 ? 'true' : 'false'}">
+                                            <option value="">- Select -</option>
+                                        </select>
+                                        <span id="tgtConfigMsg" class="control-label"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                <div class="col-md-12 dataElementDivs" style="display:none">
+                    <div class="col-md-6" >
+                        <section class="panel panel-info sourceDataElementDiv" style="display:none">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Source Configuration Data Elements</h3>
+                            </div>
+                             <div class="panel-body">
+                                 <div class="form-container scrollable sourceDataElements"></div>
+                             </div>
+                        </section>
+                    </div>
+                    <div class="col-md-6">
+                        <section class="panel panel-info targetDataElementDiv" style="display:none">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Target Configuration Data Elements</h3>
+                            </div>
+                             <div class="panel-body">
+                                 <div class="form-container scrollable targetDataElements"></div>
+                             </div>
+                        </section>
+                    </div>
+                </div>
+            </div>		
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
+            <script th:src="@{/dspResources/js/overlay.js}"></script>    
+            <script th:src="@{/dspResources/js/admin/configuration/connections/details.js}"></script>
+        </th:block>
+    </body>
+</html>

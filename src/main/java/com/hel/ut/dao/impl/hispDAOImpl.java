@@ -6,6 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import com.hel.ut.model.hisps;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.util.List;
 import java.util.Objects;
 import org.hibernate.query.SelectionQuery;
@@ -32,11 +36,15 @@ public class hispDAOImpl implements hispDAO {
     @Override
     @Transactional(readOnly = true)
     public List<hisps> getAllActiveHisps() {
-	
-        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from hisps where status = 1 order by hispName asc");
-	List<hisps> hisps = query.list();
-
-        return hisps;
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<hisps> criteria = builder.createQuery(hisps.class);
+        Root<hisps> root = criteria.from(hisps.class);
+        
+        Predicate whereClause = builder.equal(root.get("status"), true);
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     /**

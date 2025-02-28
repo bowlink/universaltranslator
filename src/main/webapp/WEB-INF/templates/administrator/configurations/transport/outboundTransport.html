@@ -1,15 +1,445 @@
 <!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit this template
--->
-<html>
-    <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+     <head>
+        <title>Health-e-Link UT Configuration Transport Details</title>
     </head>
     <body>
-        <div>TODO write content</div>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/configurations/actionBar :: actionBar}"></div>
+            <div th:insert="~{administrator/configurations/menuBar :: menuBar}"></div>
+            <div class="main clearfix" role="main">
+                <div class="row-fluid">
+                    <div class="col-md-12">
+                        <div class="alert alert-success" role="alert"  th:if="${savedStatus != null}">
+                            <strong>Success!</strong> 
+                            <p th:if="${savedStatus == 'detailsupdated'}">The configuration details has been successfully updated!</p>
+                            <p th:if="${savedStatus == 'updated'}">The configuration transport details has been successfully updated!</p>
+                        </div>
+                        <section class="panel panel-info">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Configuration Summary</h3>
+                            </div>
+                            <div class="panel-body">
+                                <p th:utext="${'<strong>Organization:</strong> '+configurationDetails.orgName}"></p>
+                                <p th:utext="${'<strong>System Name:</strong> '+helSystemName}"></p>
+                                <p th:utext="${'<strong>Configuration Name:</strong> '+configurationDetails.configname+' (Id: '+configurationDetails.id+')'}"></p>
+                                <p th:utext="${'<strong>Configuration Type:</strong> ' + (configurationDetails.type == 1 ? 'Source':'Target')}" id="configType"></p>
+                                <p th:if="${lastConfigUpdate != ''}" th:utext="${'<strong>Template file last updated on:</strong> ' + #dates.format(lastConfigUpdate, 'M/dd/yyyy h:mm a')}"></p>
+                            </div>
+                        </section>
+                    </div>
+                </div>   
+                <div class="row-fluid">                    
+                    <div class="col-md-12">
+                       <form id="transportDetails" th:action="${'/administrator/configurations/transport'}" th:object="${transportDetails}" method="post" role="form" enctype="multipart/form-data">
+                            <input type="hidden" id="action" name="action" value="save" />
+                            <input type="hidden" id="messageTypeId" th:value="${messageTypeId}" />
+                            <input type="hidden" id="helRegistryFolderName" th:value="${helRegistryFolderName}" />
+                            <input type="hidden" id="id" th:field="*{id}"/>
+                            <input type="hidden" id="configId" th:field="*{configId}"/>
+                            <input type="hidden" th:field="*{autoRelease}" value="1" />
+                            <input type="hidden" th:field="*{clearRecords}" value="1" />
+                            <input type="hidden" th:field="*{massTranslation}" value="true" />
+                            <input type="hidden" id="helRegistryId" th:field="*{helRegistryId}" />
+                            <input type="hidden" id="helSchemaName" th:field="*{helSchemaName}" />
+                            <input type="hidden" th:field="*{mergeBatches}" />
+                            <input type="hidden" th:field="*{restAPIType}" value = "0" />
+                            <input type="hidden" th:field="*{maxFileSize}" />
+                           
+                            <section class="panel panel-info">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">
+                                        Transport Method (How is the file leaving the UT?) *
+                                    </h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="form-container">
+                                        <div id="transportMethodDiv" class="form-group" th:classappend="${#fields.hasErrors('transportMethodId') ? 'has-error' : ''}">
+                                            <select th:field="*{transportMethodId}" id="transportMethod" class="form-control" th:rel="${transportDetails.transportMethodId}">
+                                                <option value="">- Select -</option>
+                                                <option th:each="transMethod, tStatus : ${transportMethods}" th:selected="${transportMethodId == transportMethods[tStatus.index][1] ? 'true' : 'false'}" th:value="${transportMethods[tStatus.index][1]}" th:text="${transportMethods[tStatus.index][2]}"></option>
+                                            </select>
+                                            <span id="transportMethodMsg" class="control-label" th:if="${#fields.hasErrors('transportMethodId')}" th:errors="*{transportMethodId}"></span>
+                                        </div>
+                                    </div>
+                                   <div id="helRegistryConfigDiv" class="form-group"  th:classappend="${#fields.hasErrors('helRegistryConfigId') ? 'has-error' : ''}"  style="display:none">
+                                        <label class="control-label" for="helRegistryConfigId">Associated Health-e-Link eReferral Configuration *</label>
+                                        <select th:field="*{helRegistryConfigId}" id="helRegistryConfigId" th:rel="${transportDetails.helRegistryConfigId}" class="form-control half" th:disabled="${transportDetails.id == 0 ? 'false' : 'true' }"></select>
+                                        <div th:if="${id > 0}">
+                                            <input type="hidden" th:field="*{helRegistryConfigId}" />
+                                        </div>
+                                        <span id="helRegistryConfigIdMsg" class="control-label"></span>
+                                    </div>
+                                    <div class="form-group"  id="ergFileDownloadDiv" style="display:none">
+                                        <label class="control-label" for="ergFileDownload">Will this file be created to be downloaded from the eRG?</label>
+                                        <p><small>(This file will not update or create a received message in the eRG, it will only be attached to the message to be downloaded.)</small></p>
+                                        <div>
+                                            <label class="radio-inline">
+                                                <input id="ergFileDownload" type="radio" th:field="*{ergFileDownload}" value="1" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" /> Yes
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input id="ergFileDownload" type="radio" th:field="*{ergFileDownload}" value="0" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" />No
+                                            </label>
+                                        </div>
+                                        <div th:if="${transportDetails.copiedTransportId > 0}">
+                                            <input type="hidden" th:field="*{ergFileDownload}" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="panel panel-info">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">File Details</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="form-container">
+                                        <div id="fileDetailsDiv" style="display:none">
+                                            <div class="form-group" th:classappend="${#fields.hasErrors('fileLocation') ? 'has-error' : ''}">
+                                                <label class="control-label" for="fileLocation">Where will the file be stored on the UT prior to processing? *</label>
+                                                <input th:disabled="${transportDetails.fileLocation != null ? 'true' : 'false' }" origVal="${transportDetails.fileLocation}" th:field="*{fileLocation}" id="fileLocation" class="form-control" type="text" maxLength="255" />
+                                                <span class="control-label" th:if="${#fields.hasErrors('fileLocation')}" th:errors="*{fileLocation}"></span>
+                                                <div th:if="${transportDetails.fileLocation != ''}">
+                                                    <input type="hidden" th:field="*{fileLocation}" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label" for="status">Should the target file be zipped? *</label>
+                                                <div>
+                                                    <label class="radio-inline">
+                                                        <input id="zipped" type="radio" th:field="*{zipped}" value="true" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" /> Yes
+                                                    </label>
+                                                    <label class="radio-inline">
+                                                        <input id="zipped" type="radio" th:field="*{zipped}" value="false" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" />No
+                                                    </label>
+                                                </div>
+                                                <div th:if="${transportDetails.copiedTransportId > 0}">
+                                                    <input type="hidden" th:field="*{zipped}" />
+                                                </div>
+                                            </div>
+                                            <div id="zipTypeTopDiv" th:style="'display:'+${transportDetails.zipped == true ? 'block' : 'none'}">
+                                                <div id="zipTypeDiv" class="form-group" th:classappend="${#fields.hasErrors('zipType') ? 'has-error' : ''}">
+                                                    <label class="control-label" for="zipType">Zip Type *</label>
+                                                    <select th:field="*{zipType}" id="zipType" class="form-control" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}">
+                                                        <option value="">- Select -</option>
+                                                        <option th:each="zipType, zStatus : ${zipTypes}" th:selected="${zipType == zipTypes[zStatus.index][1] ? 'true' : 'false'}" th:value="${zipTypes[zStatus.index][1]}" th:text="${zipTypes[zStatus.index][2]}"></option>
+                                                    </select>
+                                                    <span id="zipTypeMsg" class="control-label"></span>
+                                                    <div th:if="${transportDetails.copiedTransportId > 0}">
+                                                        <input type="hidden" th:field="*{zipType}" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="fileTypeDiv" class="form-group" th:classappend="${#fields.hasErrors('fileType') ? 'has-error' : ''}">
+                                                <label class="control-label" for="fileType">File Type *</label>
+                                                <select th:field="*{fileType}" id="fileType" class="form-control" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}">
+                                                    <option value="">- Select -</option>
+                                                    <option th:each="fileType, fStatus : ${fileTypes}" th:selected="${fileType == fileTypes[fStatus.index][1] ? 'true' : 'false'}" th:value="${fileTypes[fStatus.index][1]}" th:text="${fileTypes[fStatus.index][2]}"></option>
+                                                </select>
+                                                <span id="fileTypeMsg" class="control-label"></span>
+                                                <div th:if="${transportDetails.copiedTransportId > 0}">
+                                                    <input type="hidden" th:field="*{fileType}" />
+                                                </div>
+                                            </div>
+                                            <th:block th:if="${configurationDetails.type == 2}">
+                                                <div id="jsonWrapperElementDiv" class="form-group" th:classappend="${#fields.hasErrors('jsonWrapperElement') ? 'has-error' : ''}" style="display:none;">
+                                                    <label class="control-label" for="jsonWrapperElement">JSON Main Data Elements Wrapper</label>
+                                                    <input th:field="*{jsonWrapperElement}" id="jsonWrapperElement" class="form-control" type="text" maxLength="55" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" />
+                                                    <span class="control-label" th:if="${#fields.hasErrors('jsonWrapperElement')}" th:errors="*{jsonWrapperElement}"></span>
+                                                    <span id="jsonWrapperElementMsg" class="control-label"></span>
+                                                    <div th:if="${transportDetails.copiedTransportId > 0}">
+                                                        <input type="hidden" th:field="*{jsonWrapperElement}" />
+                                                    </div>
+                                                </div>
+                                            </th:block> 
+                                            <div id="fileExtDiv" class="form-group" th:classappend="${#fields.hasErrors('fileExt') ? 'has-error' : ''}">
+                                                <label class="control-label" for="fileExt">File Extension *</label>
+                                                <input th:field="*{fileExt}" id="fileExt" class="form-control sm-input" type="text" maxLength="4" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" />
+                                                <span class="control-label" th:if="${#fields.hasErrors('fileExt')}" th:errors="*{fileExt}"></span>
+                                                <span id="fileExtMsg" class="control-label"></span>
+                                                <div th:if="${transportDetails.copiedTransportId > 0}">
+                                                    <input type="hidden" th:field="*{fileExt}" />
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="fileDelimiterDiv" class="form-group" th:classappend="${#fields.hasErrors('fileDelimiter') ? 'has-error' : ''}">
+                                                <label class="control-label" for="fileDelimiter">File Delimiter *</label>
+                                                <select th:field="*{fileDelimiter}" id="fileDelimiter" class="form-control" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}">
+                                                    <option value="">- Select -</option>
+                                                    <option th:each="delimiter, dStatus : ${delimiters}" th:selected="${fileDelimiter == delimiters[dStatus.index][1] ? 'true' : 'false'}" th:value="${delimiters[dStatus.index][1]}" th:text="${delimiters[dStatus.index][2]}"></option>
+                                                </select>
+                                                <span id="fileDelimiterMsg" class="control-label"></span>
+                                                <div th:if="${transportDetails.copiedTransportId > 0}">
+                                                    <input type="hidden" th:field="*{fileDelimiter}" />
+                                                </div>
+                                            </div>
+                                            <div id="lineTerminatortDiv" class="form-group" th:classappend="${#fields.hasErrors('lineTerminator') ? 'has-error' : ''}">
+                                                <label class="control-label" for="lineTerminator">Line Terminator</label>
+                                                <input th:field="*{lineTerminator}" id="lineTerminator" class="form-control sm-input" type="text" maxLength="10" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" />
+                                                <span class="control-label" th:if="${#fields.hasErrors('lineTerminator')}" th:errors="*{lineTerminator}"></span>
+                                                <span id="fileExtMsg" class="control-label"></span>
+                                                <div th:if="${transportDetails.copiedTransportId > 0}">
+                                                    <input type="hidden" th:field="*{lineTerminator}" />
+                                                </div>
+                                            </div>
+                                            <div id="encodingDiv" class="form-group" th:classappend="${#fields.hasErrors('encodingId') ? 'has-error' : ''}">
+                                                <label class="control-label" for="encodingId">What type of Encoding should the target file? *</label>
+                                                <select th:field="*{encodingId}" id="encodingId" class="form-control" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}">
+                                                    <option value="">- Select -</option>
+                                                    <option th:each="encoding, fStatus : ${encodings}" th:selected="${encodingId == encodings[fStatus.index][1] ? 'true' : 'false'}" th:value="${encodings[fStatus.index][1]}" th:text="${encodings[fStatus.index][2]}"></option>
+                                                </select>
+                                                <span id="encodingMsg" class="control-label"></span>
+                                                <div th:if="${transportDetails.copiedTransportId > 0}">
+                                                    <input type="hidden" th:field="*{encodingId}" />
+                                                </div>
+                                            </div>
+                                            <div class="targetFileNameDiv form-group" th:classappend="${#fields.hasErrors('targetFileName') ? 'has-error' : ''}">
+                                                <label class="control-label" for="targetFileName">What should the target file name be? * <span id="useSourceFileName"><input id="useSource" type="checkbox"> Use Source File Name</label></span>
+                                                <input th:field="*{targetFileName}" id="targetFileName" class="form-control" type="text" maxLength="255" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" />
+                                                <span class="control-label" th:if="${#fields.hasErrors('targetFileName')}" th:errors="*{targetFileName}"></span>
+                                                <div th:if="${transportDetails.copiedTransportId > 0}">
+                                                    <input type="hidden" th:field="*{targetFileName}" />
+                                                </div>
+                                                <span id="targetFileNameMsg" class="control-label"></span>
+                                            </div>
+                                            <div class="form-group"  id="appendDateTimeDiv">
+                                                <label class="control-label" for="appendDateTime">Append Date and Time to file Name? *</label>
+                                                <div>
+                                                    <label class="radio-inline">
+                                                        <input id="appendDateTime" type="radio" th:field="*{appendDateTime}" value="1" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" /> Yes
+                                                    </label>
+                                                    <label class="radio-inline">
+                                                        <input id="appendDateTime" type="radio" th:field="*{appendDateTime}" value="0" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" />No
+                                                    </label>
+                                                </div>
+                                                <div th:if="${transportDetails.copiedTransportId > 0}">
+                                                    <input type="hidden" th:field="*{appendDateTime}" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group"  id="addTargetFileHeaderRowDiv">
+                                                <label class="control-label" for="appendDateTime">Add header row to the target file? *<span class="badge badge-help" id="toolTipBTN" data-bs-toggle="tooltip" data-bs-placement="top" title="Select &quot;Yes&quot; if you would like a header row added to the target file. The header row will include the Field Name for all Used fields from the Field settings page.">?</span></label>
+                                                <div>
+                                                    <label class="radio-inline">
+                                                        <input id="addTargetFileHeaderRow1" type="radio" th:field="*{addTargetFileHeaderRow}" value="1" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" /> Yes
+                                                    </label>
+                                                    <label class="radio-inline">
+                                                        <input id="addTargetFileHeaderRow1" type="radio" th:field="*{addTargetFileHeaderRow}" value="0" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" />No
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section id="fileDropDetailsDiv" class="panel panel-info" style="display:none">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">File Drop Location</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="form-container">
+                                        <div class="row">
+                                            <div class="form-group col-md-6">
+                                                <th:block th:each="fileDropDetails, field : ${transportDetails.fileDropFields}">
+                                                    <input th:name="${'fileDropFields['+field.index+'].method'}" class="form-control" type="hidden" th:value="${fileDropDetails.method}"  />
+                                                    <input th:name="${'fileDropFields['+field.index+'].id'}" th:id="${'id'+fileDropDetails.method}" class="form-control" type="hidden" th:value="${fileDropDetails.id}"  />
+                                                    <input th:if="${fileDropDetails.method == 1}" th:name="${'fileDropFields['+field.index+'].directory'}" th:id="${'directory'+fileDropDetails.method}" class="form-control" type="hidden" maxLength="255" th:value="${fileDropDetails.directory}"  />
+                                                    <th:block th:if="${fileDropDetails.method == 2}">
+                                                        <label class="control-label" th:for="${'directory'+fileDropDetails.method}">Location on the server where generated target file will be dropped</label>
+                                                        <input th:name="${'fileDropFields['+field.index+'].directory'}" th:id="${'directory'+fileDropDetails.method}" class="form-control" type="text" maxLength="255" th:value="${fileDropDetails.directory}"  />
+                                                        <span th:id="${'rDirectory'+fileDropDetails.method+'Msg'}" class="control-label"></span>
+                                                    </th:block>
+                                                </th:block>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <th:block th:if="${!eahUT}">
+                                <section id="restDetailsDiv" class="panel panel-info" style="display:none">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">
+                                           REST API Details
+                                        </h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="form-container">
+                                            <div id="apiURLDiv" class="form-group" th:classappend="${#fields.hasErrors('restAPIURL') ? 'has-error' : ''}">
+                                                <label class="control-label" for="restAPIURL">API URL *</label>
+                                                <input th:field="*{restAPIURL}" id="restAPIURL" class="form-control" type="text" maxLength="255" />
+                                                <span class="control-label" th:if="${#fields.hasErrors('restAPIURL')}" th:errors="*{restAPIURL}"></span>
+                                                <span id="apiURLMsg" class="control-label"></span>
+                                            </div>
+                                            <div id="apiUsernameDiv" class="form-group" th:classappend="${#fields.hasErrors('restAPIUsername') ? 'has-error' : ''}">
+                                                <label class="control-label" for="restAPIUsername">API Username *</label>
+                                                <input th:field="*{restAPIUsername}" id="restAPIUsername" class="form-control half" type="text" maxLength="45" />
+                                                <span class="control-label" th:if="${#fields.hasErrors('restAPIUsername')}" th:errors="*{restAPIUsername}"></span>
+                                                <span id="apiUsernameMsg" class="control-label"></span>
+                                            </div>
+                                            <div id="apiPasswordDiv" class="form-group" th:classappend="${#fields.hasErrors('restAPIPassword') ? 'has-error' : ''}">
+                                                <label class="control-label" for="restAPIPassword">API Password *</label>
+                                                <input th:field="*{restAPIPassword}" id="restAPIPassword" class="form-control half" type="text" maxLength="45" />
+                                                <span class="control-label" th:if="${#fields.hasErrors('restAPIPassword')}" th:errors="*{restAPIPassword}"></span>
+                                                <span id="apiPasswordMsg" class="control-label"></span>
+                                            </div>
+                                            <th:block th:if="${configurationDetails.type == 1}">
+                                                <div id="restAPITypeDiv" class="form-group" th:classappend="${#fields.hasErrors('restAPIType') ? 'has-error' : ''}">
+                                                    <label class="control-label" for="restAPIType">API Type *</label>
+                                                    <select th:field="*{restAPIType}" id="restAPIType" class="form-control half">
+                                                        <option value="">- Select -</option>
+                                                        <option th:each="function, tStatus : ${restAPITypes}" th:selected="${transportDetails.restAPIType == restAPITypes[tStatus.index][1] ? 'true' : 'false'}" th:value="${restAPITypes[tStatus.index][1]}" th:text="${restAPITypes[tStatus.index][2]}"></option>
+                                                    </select>
+                                                    <span id="restAPITypeMsg" class="control-label"></span>
+                                                </div>
+                                            </th:block>
+                                            <th:block th:if="${configurationDetails.type != 1}">
+                                                <input type="hidden" th:field="*{restAPIType}" value="0" />
+                                            </th:block>
+                                            <th:block th:if="${configurationDetails.type == 2}">
+                                                <div id="restAPIFunctionIdDiv"  class="form-group" th:classappend="${#fields.hasErrors('restAPIFunctionId') ? 'has-error' : ''}">
+                                                    <label class="control-label" for="restAPIFunctionId">IL Rest API Function to Call *</label>
+                                                    <select th:field="*{restAPIFunctionId}" id="restAPIFunctionId" class="form-control half">
+                                                        <option value="">- Select -</option>
+                                                        <optgroup<option th:each="function, tStatus : ${restAPIFunctions}" th:selected="${transportDetails.restAPIFunctionId == restAPIFunctions[tStatus.index][1] ? 'true' : 'false'}" th:value="${restAPIFunctions[tStatus.index][1]}" th:text="${restAPIFunctions[tStatus.index][2]}"></option>
+                                                    </select>
+                                                    <span id="restAPIFunctionIdMsg" class="control-label"></span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label" for="waitForResponse">Wait for SAVED ACK from target before finalizing batch status? <span class="badge badge-help" data-placement="top" title="" data-original-title="If set to NO, the inbound and outbound batch will be set to a final success status, if 200 is received with the initial API ACK. If YES, the inbound and outbound batch will be set to SDP until the target sends a message to the IL with an updated status.">?</span> *</label>
+                                                    <div>
+                                                        <label class="radio-inline">
+                                                            <input id="waitForResponse" type="radio" th:field="*{waitForResponse}" value="1" /> Yes, wait for target SAVED ACK
+                                                        </label>
+                                                        <label class="radio-inline">
+                                                            <input id="waitForResponse" type="radio" th:field="*{waitForResponse}" value="0" /> No, finalize on initial 200 ACK
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </th:block>
+                                            <th:block th:if="${configurationDetails.type != 2}">
+                                                <input type="hidden" th:field="*{restAPIFunctionId}" value="0" />
+                                            </th:block>  
+                                        </div>
+                                    </div>
+                                </section>
+                            </th:block>
+                            <section id="ftpDetailsDiv" class="panel panel-info" style="display:none">
+                                <div class="panel-heading">
+                                     <h3 class="panel-title">FTP Details</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="form-container">
+                                        <div class="row">
+                                            <th:block th:each="ftpDetails, field : ${transportDetails.FTPfields}">
+                                                <th:block th:if="${ftpDetails.method == 2}">
+                                                    <input th:name="${'FTPfields['+field.index+'].method'}" class="form-control" type="hidden" th:value="${ftpDetails.method}" />
+                                                    <input th:name="${'FTPfields['+field.index+'].id'}" th:id="${'id'+ftpDetails.method}" class="form-control ftpDetailId" type="text" th:value="${ftpDetails.id}" />
+                                                    <div class="form-group col-md-6">
+                                                        <div th:id="${'protocol'+ftpDetails.method+'Div'}" class="form-group">
+                                                            <label class="control-label" th:for="${'protocol'+ftpDetails.method}">Protocol *</label>
+                                                            <select th:name="${'FTPfields['+field.index+'].protocol'}" th:id="${'protocol'+ftpDetails.method}" th:rel="${ftpDetails.method}" class="form-control ftpProtocol">
+                                                                <option value="">- Select -</option>
+                                                                <option value="FTP" th:selected="${ftpDetails.protocol == 'FTP' ? 'true' : 'false'}">FTP</option>
+                                                                <option value="SFTP" th:selected="${ftpDetails.protocol == 'SFTP' ? 'true' : 'false'}">SFTP</option>
+                                                            </select>
+                                                            <span th:id="${'protocol'+ftpDetails.method+'Msg'}" class="control-label"></span>
+                                                        </div>
+                                                        <div th:id="${'ip'+ftpDetails.method+'Div'}" class="form-group">
+                                                            <label class="control-label" th:for="${'ip'+ftpDetails.method}">Host *</label>
+                                                            <input th:name="${'FTPfields['+field.index+'].ip'}" th:id="${'ip'+ftpDetails.method}" class="form-control" type="text" maxLength="45" th:value="${ftpDetails.ip}"  />
+                                                            <span th:id="${'ip'+ftpDetails.method+'Msg'}" class="control-label"></span>
+                                                        </div>
+                                                        <div th:id="${'username'+ftpDetails.method+'Div'}" class="form-group">
+                                                            <label th:class="control-label" th:for="${'username'+ftpDetails.method}">Username *</label>
+                                                            <input th:name="${'FTPfields['+field.index+'].username'}" th:id="${'username'+ftpDetails.method}" class="form-control" type="text" maxLength="45" th:value="${ftpDetails.username}"  />
+                                                            <span th:id="${'username'+ftpDetails.method+'Msg'}" class="control-label"></span>
+                                                        </div>
+                                                        <div th:id="${'password'+ftpDetails.method+'Div'}" class="form-group">
+                                                            <label class="control-label" th:for="${'password'+ftpDetails.method}">
+                                                                Password <span th:if="${ftpDetails.password == ''}" th:text="*"></span>
+                                                            </label>
+                                                            <th:block th:if="${ftpDetails.password != ''}">
+                                                                <span><br /><small>(The current password is encrypted. To change the current password enter in the new password below.)</small></span>
+                                                            </th:block>
+                                                            <input type="hidden" th:id="${'currPassword'+ftpDetails.method}" th:name="${'FTPfields['+field.index+'].password'}" th:value="${ftpDetails.password}" />
+                                                            <input th:name="${'FTPfields['+field.index+'].FTPPassword'}" th:id="${'password'+ftpDetails.method}" class="form-control" type="text" maxLength="45" value=""  />
+                                                            <span th:id="${'password'+ftpDetails.method+'Msg'}" class="control-label"></span>
+                                                        </div>
+                                                        <div th:id="${'directory'+ftpDetails.method+'Div'}" class="form-group">
+                                                            <label class="control-label" th:for="${'directory'+ftpDetails.method}">Remote FTP Directory * <small>(Remote file will be moved to the File Drop location above.)</small></label>
+                                                            <input th:name="${'FTPfields['+field.index+'].directory'}" th:id="${'ftpdirectory'+ftpDetails.method}" class="form-control" type="text" maxLength="255" th:value="${ftpDetails.directory}"  />
+                                                            <span th:id="${'directory'+ftpDetails.method+'Msg'}" class="control-label"></span>
+                                                        </div>
+                                                        <div th:id="${'port'+ftpDetails.method+'Div'}" class="form-group">
+                                                            <label class="control-label" th:for="${'port'+ftpDetails.method}">Port *</label>
+                                                            <input th:name="${'FTPfields['+field.index+'].port'}" th:id="${'port'+ftpDetails.method}" class="form-control" type="text" maxLength="45" th:value="${ftpDetails.port}"  />
+                                                            <span th:id="${'port'+ftpDetails.method+'Msg'}" class="control-label"></span>
+                                                        </div>
+                                                        <div class="form-group" th:style="'display:'+${ftpDetails.certification == null || ftpDetails.certification == '' ? 'none' : 'block'}">
+                                                            <label class="control-label">Existing Certification:</label>
+                                                            <input type="text" disabled th:value="${ftpDetails.certification}" class="form-control" />
+                                                            <input type="hidden" th:id="${'certification'+ftpDetails.method}" th:name="${'FTPfields['+field.index+'].certification'}" th:value="${ftpDetails.certification}" />
+                                                        </div>
+                                                        <div th:id="${'certificationfileDiv'+ftpDetails.method}" class="form-group" style="display:none;">
+                                                            <label class="control-label" for="certification"><span th:if="${ftpDetails.certification != null}" th:text="New "></span>Certification File </label>
+                                                            <input type="file" th:id="${'file'+ftpDetails.method}" th:name="${'FTPfields['+field.index+'].file'}" class="form-control"  />
+                                                            <span id="certificationfileMsg" class="control-label"></span>
+                                                        </div>
+                                                    </div>
+                                                </th:block>
+                                            </th:block>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="panel panel-info">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">File Error Handling</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="form-container">
+                                        <div class="form-group">
+                                            <label class="control-label" for="errorHandling">Error Handling *</label>
+                                            <div>
+                                                <label class="radio-inline">
+                                                    <input id="errorHandling" type="radio" th:field="*{errorHandling}" value="2" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" /> Reject individual transactions on error
+                                                </label>
+                                                <label class="radio-inline">
+                                                    <input id="errorHandling" type="radio" th:field="*{errorHandling}" value="3" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" /> Reject entire file on a single transaction error
+                                                </label>
+                                                <label class="radio-inline">
+                                                    <input id="errorHandling" type="radio" th:field="*{errorHandling}" value="4" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" /> Send error records through to the target file
+                                                </label>
+                                            </div>
+                                            <div th:if="${transportDetails.copiedTransportId > 0}">
+                                                <input type="hidden" th:field="*{errorHandling}" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group" style="padding-top:10px;">
+                                            <label class="control-label" for="populateInboundAuditReport">Do you want to populate the inbound audit report with errors found while processing this target file? *</label>
+                                            <div>
+                                                <label class="radio-inline">
+                                                    <input class="populateInboundAuditReport" type="radio" th:field="*{populateInboundAuditReport}" value="1" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" /> Yes
+                                                </label>
+                                                <label class="radio-inline">
+                                                    <input class="populateInboundAuditReport" type="radio" th:field="*{populateInboundAuditReport}" value="0" th:disabled="${transportDetails.copiedTransportId > 0 ? 'true' : 'false'}" /> No
+                                                </label>
+                                            </div>
+                                            <div th:if="${transportDetails.copiedTransportId > 0}">
+                                                <input type="hidden" th:field="*{populateInboundAuditReport}" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
+            <script th:src="@{/dspResources/js/overlay.js}"></script>    
+            <script th:src="@{/dspResources/js/admin/configuration/mainConfigFunctions.js}"></script>
+            <script th:src="@{/dspResources/js/admin/configuration/outbound/transport.js}"></script>
+        </th:block>
     </body>
 </html>

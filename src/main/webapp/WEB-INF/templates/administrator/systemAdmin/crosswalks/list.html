@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+    <head>
+        <title>Health-e-Link UT Standard System Crosswalks</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/systemAdmin/actionBar :: actionBar}"></div>
+            <div th:insert="~{administrator/systemAdmin/menuBar :: menuBar}"></div>
+            <div class="main clearfix" role="main">
+                <div class="col-md-12">
+                    <div class="alert alert-success" role="alert" th:if="${param.msg != null}">
+                        <strong>Success!</strong> 
+                        <p th:if="${param.msg[0] == 'updated'}">The crosswalk has been successfully updated!</p>
+                        <p th:if="${param.msg[0] == 'created'}">The crosswalk has been successfully added!</p>
+                        <p th:if="${param.msg[0] == 'deleted'}">The crosswalk has been successfully deleted!</p>
+                    </div>
+                    <section class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Standard System Crosswalks</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="scrollable">
+                                <div class="col-md-12">
+                                    <table class="table table-striped table-hover table-default" th:id="${not #lists.isEmpty(crosswalkList) ? 'crosswalkListtable' : ''}">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Id</th>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">File Name</th>
+                                                <th scope="col">Date Created</th>
+                                                <th scope="col"></th>
+                                            </tr>
+                                        </thead>
+                                        <div th:if="${not #lists.isEmpty(crosswalkList)}">
+                                            <tr style="cursor: pointer" th:each="crosswalk : ${crosswalkList}">
+                                                <td scope="row" th:text="${crosswalk.id}"></td>
+                                                <td scope="row" th:text="${crosswalk.name}"></td>
+                                                <td scope="row" th:text="${crosswalk.fileName}"></td>
+                                                <td th:text="${#dates.format(crosswalk.dateCreated, 'M/dd/yy h:mm a')}"></td>
+                                                <td class="center-text">
+                                                    <div class="dropdown pull-left">
+                                                        <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                            <i class="fa fa-cog"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu pull-right">
+                                                            <li>
+                                                                 <a href="#crosswalkModal" data-bs-toggle="modal" th:rel="${crosswalk.id}" class="viewCrosswalk" title="Edit this crosswalk">
+                                                                    <span class="glyphicon glyphicon-edit"></span>
+                                                                    View Crosswalk	
+                                                                </a>
+                                                            </li>
+                                                            <li class="divider"></li>
+                                                            <li>
+                                                                <a href="#!" th:rel="${crosswalk.id}" class="btn btn-link crosswalkDelete" title="Delete this crosswalk">
+                                                                    <span class="glyphicon glyphicon-remove"></span>
+                                                                    Delete Crosswalk
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </div>
+                                        <div th:unless="${not #lists.isEmpty(crosswalkList)}">
+                                             <tr><td colspan="5" class="center-text">There are currently no system crosswalks set up.</td></tr>
+                                        </div>
+                                    </table>
+                                </div>    
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>		
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
+            <script th:src="@{/dspResources/js/overlay.js}"></script>    
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.min.js}"></script>
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.bootstrap.min.js}"></script>
+            <script th:src="@{/dspResources/js/admin/sysadmin/crosswalks/list.js}"></script>
+            <script th:src="@{/dspResources/js/admin/sysadmin/mainAdminFunctions.js}"></script>
+        </th:block>
+    </body>
+</html>
+<div class="modal fade" id="crosswalkModal" role="dialog" tabindex="-1" aria-labeledby="Configuration File Upload" aria-hidden="true" aria-describedby="Configuration File Upload">
+    <div class="modal-dialog modal-lg"><div class="modal-content" id="crosswalkModalContent"></div></div>
+</div>

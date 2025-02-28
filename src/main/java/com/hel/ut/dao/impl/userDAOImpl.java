@@ -584,14 +584,15 @@ public class userDAOImpl implements userDAO {
         List<Integer> OrgIds = new ArrayList<>();
         OrgIds.add(orgId);
 	
-	String sql = "select a.id, a.firstName, a.lastName, a.status, b.role as roleType," 
-        + "(select dateCreated from rel_userlogins where userId = a.id order by dateCreated desc limit 1) as dateLastLoggedIn,"
+	String sql = "select a.id, a.status, a.orgId, a.firstName, a.lastName, a.username, a.roleId, a.mainContact, a.sendEmailAlert,"
+        + "a.dateCreated, a.email, a.userType, a.deliverAuthority, a.editAuthority, a.createAuthority, a.cancelAuthority, a.resetCode, a.randomSalt, a.encryptedPw, a.receiveEmailAlert,"
+        + "b.role as roleType,(select dateCreated from rel_userlogins where userId = a.id order by dateCreated desc limit 1) as dateLastLoggedIn,"
         + "(select TIMESTAMPDIFF(MINUTE,dateCreated,dateLoggedOut) as totalTimeLoggedIn from rel_userlogins where userId = a.id order by dateCreated desc limit 1) as totalTimeLoggedIn," 
         + "(select count(id) from rel_userlogins where userId = a.id) as totalLogins " 
         + "from users a inner join userroles b on a.roleId = b.id " 
         + "where a.orgId in ("+OrgIds.toString().replace("[", "").replace("]", "")+")";
 	
-	 Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
         .addScalar("id", StandardBasicTypes.INTEGER)
         .addScalar("firstName", StandardBasicTypes.STRING)
         .addScalar("lastName", StandardBasicTypes.STRING)
@@ -601,8 +602,23 @@ public class userDAOImpl implements userDAO {
         .addScalar("totalLogins", StandardBasicTypes.INTEGER)
         .addScalar("roleType", StandardBasicTypes.STRING);
 
-        List<utUser> userList = query.list();
-
+        List<Object[]> results = query.getResultList();
+        
+        List<utUser> userList = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            utUser user = new utUser();
+            user.setId((Integer) record[1]);
+            user.setFirstName((String) record[2]);
+            user.setLastName((String) record[3]);
+            user.setStatus((boolean) record[4]);
+            user.setDateLastLoggedIn((Date) record[5]);
+            user.setTotalTimeLoggedIn((Integer) record[6]);
+            user.setTotalLogins((Integer) record[7]);
+            user.setRoleType((String) record[8]);
+            userList.add(user);
+        });
+        
         return userList;
     }
     
@@ -620,9 +636,9 @@ public class userDAOImpl implements userDAO {
 	String sql = "select dateCreated,IFNULL(TIMESTAMPDIFF(MINUTE,dateCreated,dateLoggedOut),0) as totalTimeLoggedIn " 
         + "from rel_userlogins where userId = " + userId + " order by dateCreated desc";
 	
-	 Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUserLogin.class)
-        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
-        .addScalar("totalTimeLoggedIn", StandardBasicTypes.INTEGER);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUserLogin.class)
+       .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
+       .addScalar("totalTimeLoggedIn", StandardBasicTypes.INTEGER);
 
         List<utUserLogin> userLogins = query.list();
 

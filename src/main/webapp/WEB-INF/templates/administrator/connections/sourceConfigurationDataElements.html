@@ -1,0 +1,21 @@
+<p class="text-danger"><strong>Strikethrough rows are marked as not in use.</strong></p>
+<table class="table table-striped table-hover table-default" style="border-collapse:collapse">
+    <thead>
+	<tr>
+	    <th scope="col" class="center-text">Field No</th>
+	    <th scope="col">Field Name</th>
+	    <th scope="col" class="center-text">Required</th> 
+	</tr>
+    </thead>
+    <tbody>
+        <th:block th:each="fields, field : ${sourceConfigurationDataElements}">
+            <tr class="uFieldRow" th:classappend="${fields.useField == false ? 'strikeout':''}" th:rel="${fields.fieldNo}" th:rel2="${field.index}">
+		<td scope="row" class="center-text" th:text="${fields.fieldNo}"></td>
+		<td th:text="${fields.fieldDesc}"></td>
+		<td class="center-text">
+                    <span th:if="${fields.required == true}">Required</span>
+                    <span th:unless="${fields.required == true}">Not Required</span>
+		</td>
+	    </tr>
+        </th:block>
+</table>

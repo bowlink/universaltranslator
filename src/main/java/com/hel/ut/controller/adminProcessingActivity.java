@@ -103,6 +103,8 @@ import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
 import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
+import com.registryKit.registry.helRegistry;
+import com.registryKit.registry.helRegistryManager;
 import jakarta.annotation.Resource;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
@@ -134,6 +136,9 @@ public class adminProcessingActivity {
     
     @Value("${siteTimeZone}")
     private String siteTimeZone; 
+    
+    @Value("${eahUT}")
+    private String eahUT;
     
     @Autowired
     private transactionInManager transactionInManager;
@@ -170,6 +175,9 @@ public class adminProcessingActivity {
     
     @Autowired
     private emailMessageManager emailMessageManager;
+    
+    @Autowired
+    private helRegistryManager helregistrymanager;
 
     private String topSecret = "Hello123JavaTomcatMysqlDPHSystem2016";
 
@@ -199,7 +207,12 @@ public class adminProcessingActivity {
         Date toDate = getMonthDate("END-TODAY");
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activity/activityReport");
+        mav.addObject("pageId", "processing-inbound");
+        mav.addObject("pageSection", "section-processing");
+        mav.addObject("sect","activity");
+        mav.addObject("actionPage","activityReport");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/processingActivities/activityReport");
 
         // Retrieve search parameters from session
         searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters");
@@ -286,7 +299,12 @@ public class adminProcessingActivity {
         Date originalDate = new Date(year, month, day);
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activity/activityReport");
+        mav.addObject("pageId", "processing-inbound");
+        mav.addObject("pageSection", "section-processing");
+        mav.addObject("sect","activity");
+        mav.addObject("actionPage","activityReport");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/processingActivities/activityReport");
 
         mav.addObject("fromDate", fromDate);
         mav.addObject("toDate", toDate);
@@ -359,7 +377,12 @@ public class adminProcessingActivity {
         searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters");
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activity/inbound");
+        mav.addObject("pageId", "processing-inbound");
+        mav.addObject("pageSection", "section-processing");
+        mav.addObject("sect","activity");
+        mav.addObject("actionPage","inbound");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/processingActivities/inbound");
 	
 	String searchTerm = "";
 	
@@ -415,7 +438,7 @@ public class adminProcessingActivity {
     @ResponseBody
     public String getBatchUploads(HttpServletRequest request, HttpServletResponse response, HttpSession session, @RequestParam Date fromDate, @RequestParam Date toDate, @RequestParam String batchName) throws Exception {
 	
-	Gson gson = new Gson();
+        Gson gson = new Gson();
         JsonObject jsonResponse = new JsonObject();
 	Integer iDisplayStart = Integer.parseInt(request.getParameter("iDisplayStart"));
         Integer iDisplayLength = Integer.parseInt(request.getParameter("iDisplayLength"));
@@ -440,13 +463,14 @@ public class adminProcessingActivity {
 	}
 	
         // Get all ws in 
-        List<batchUploads> batchUploadList = transactionInManager.getAllUploadBatchesPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
-	
+        List<Object> batchUploadList = transactionInManager.getAllUploadBatchesPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
+	List<helRegistry> helRegistries = helregistrymanager.getAllActiveRegistries();
+        
 	if(batchUploadList.isEmpty()) {
 	    totalRecords = 0;
 	}
 	else {
-	    totalRecords = batchUploadList.get(0).getTotalMessages();
+            totalRecords = (Integer) batchUploadList.get(0);
 	}
 	
 	TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
@@ -454,8 +478,10 @@ public class adminProcessingActivity {
 	DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	requiredFormat.setTimeZone(timeZone);
 	String dateinTZ = "";
-	
-	for (batchUploads batch : batchUploadList) {
+        
+        List<batchUploads> returnedBatchUploads = (List<batchUploads>) batchUploadList.get(1);
+        
+	for (batchUploads batch : returnedBatchUploads) {
 	    dateinTZ = requiredFormat.format(batch.getDateSubmitted());
 	    
 	    batch.setDateSubmitted(dft.parse(dateinTZ));
@@ -469,12 +495,22 @@ public class adminProcessingActivity {
 		dateinTZ = requiredFormat.format(batch.getEndDateTime());
 		batch.setEndDateTime(dft.parse(dateinTZ));
 	    }
+            
+            if(batch.getHelRegistryId() > 0) {
+		if(helRegistries != null) {
+		    for(helRegistry reg : helRegistries) {
+			if(reg.getId() == batch.getHelRegistryId()) {
+			    batch.setSystemName(reg.getRegistryName());
+			}
+		    }
+		}
+	    }
         }
 	
 	jsonResponse.addProperty("sEcho", sEcho);
         jsonResponse.addProperty("iTotalRecords", totalRecords);
         jsonResponse.addProperty("iTotalDisplayRecords", totalRecords);
-        jsonResponse.add("aaData", gson.toJsonTree(batchUploadList));
+        jsonResponse.add("aaData", gson.toJsonTree(returnedBatchUploads));
 	
         return jsonResponse.toString();
     }
@@ -507,7 +543,12 @@ public class adminProcessingActivity {
         searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters");
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activity/outbound");
+        mav.addObject("pageId", "processing-outbound");
+        mav.addObject("pageSection", "section-processing");
+        mav.addObject("sect","activity");
+        mav.addObject("actionPage","outbound");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/processingActivities/outbound");
 	
 	String searchTerm = "";
 	
@@ -597,22 +638,24 @@ public class adminProcessingActivity {
 	}
 	
         // Get all ws in 
-        List<batchDownloads> batchDownloadList = transactionOutManager.getAllSentBatchesPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
+        List<Object> batchDownloadList = transactionOutManager.getAllSentBatchesPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
 	
-	if(batchDownloadList.isEmpty()) {
+        if(batchDownloadList.isEmpty()) {
 	    totalRecords = 0;
 	}
 	else {
-	    totalRecords = batchDownloadList.get(0).getTotalMessages();
+            totalRecords = (Integer) batchDownloadList.get(0);
 	}
-	
+        
 	TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
 	DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	requiredFormat.setTimeZone(timeZone);
 	String dateinTZ = "";
-	
-	for (batchDownloads batch : batchDownloadList) {
+        
+        List<batchDownloads> returnedBatchDownloads = (List<batchDownloads>) batchDownloadList.get(1);
+        
+	for (batchDownloads batch : returnedBatchDownloads) {
 	    dateinTZ = requiredFormat.format(batch.getDateCreated());
 	    
 	    batch.setDateCreated(dft.parse(dateinTZ));
@@ -631,7 +674,7 @@ public class adminProcessingActivity {
 	jsonResponse.addProperty("sEcho", sEcho);
         jsonResponse.addProperty("iTotalRecords", totalRecords);
         jsonResponse.addProperty("iTotalDisplayRecords", totalRecords);
-        jsonResponse.add("aaData", gson.toJsonTree(batchDownloadList));
+        jsonResponse.add("aaData", gson.toJsonTree(returnedBatchDownloads));
 	
         return jsonResponse.toString();
     }
@@ -651,7 +694,7 @@ public class adminProcessingActivity {
     ModelAndView viewStatus(@PathVariable int statusId) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activities/statusDetails");
+        mav.setViewName("/administrator/processingActivities/statusDetails");
 
         // Get the details of the selected status
         lu_ProcessStatus processStatus = sysAdminManager.getProcessStatusById(statusId);
@@ -841,9 +884,13 @@ public class adminProcessingActivity {
     public ModelAndView listBatchActivities(@PathVariable String path, @PathVariable String batchName) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activity/batchActivities");
-        mav.addObject("page", path);
-	
+        mav.addObject("pageId", "processing-inbound");
+        mav.addObject("pageSection", "section-processing");
+        mav.addObject("sect","activity");
+        mav.addObject("actionPage",path+"activity");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/processingActivities/batchActivities");
+        
 	if("inbound".equals(path) || "invalidIn".equals(path) || "rejected".equals(path)) {
 	    // Get the details of the batch
 	    batchUploads batchDetails = transactionInManager.getBatchDetailsByBatchName(batchName);
@@ -852,8 +899,49 @@ public class adminProcessingActivity {
 
 		Organization orgDetails = organizationmanager.getOrganizationById(batchDetails.getOrgId());
 		batchDetails.setOrgName(orgDetails.getOrgName());
+                
+                utConfiguration configDetails = configurationManager.getConfigurationById(batchDetails.getConfigId());
+                batchDetails.setConfigName(configDetails.getConfigname());
 
 		mav.addObject("batchDetails", batchDetails);
+                
+                configurationTransport transportDetails = configurationTransportManager.getTransportDetails(batchDetails.getConfigId());
+	    
+                String transportMethod = "";
+                if(transportDetails != null) {
+                    if(!"".equals(transportDetails.getDmConfigKeyword())) {
+                        transportMethod = "File Drop (Direct)";
+                    }
+
+                    if(!"".equals(transportDetails.getRestAPIUsername())) {
+                        transportMethod = "File Drop (Rest)";
+                    }
+                }
+
+                mav.addObject("transportMethod",transportMethod);
+                
+                mav.addObject("batchDownload",false);
+                
+                List<batchDownloads> associatedDownloadBatches = transactionOutManager.getDownloadBatchesByBatchUploadId(batchDetails.getId());
+	    
+                if(associatedDownloadBatches != null) {
+                    if(!associatedDownloadBatches.isEmpty()) {
+                        for(batchDownloads batchDownload : associatedDownloadBatches) {
+                            Organization tgtOrgDetails = organizationmanager.getOrganizationById(batchDownload.getOrgId());
+                            File targetFile = null;
+                            //Check if target file has been generated
+                            if(batchDownload.getOutputFileName() != null) {
+                                if(!"".equals(batchDownload.getOutputFileName())) {
+                                    targetFile = new File(myProps.getProperty("ut.directory.utRootDir") + tgtOrgDetails.getCleanURL() + "/output files/" + batchDownload.getOutputFileName());
+                                    if(targetFile.exists()) {
+                                        batchDownload.setTargetFileExists(true);
+                                    }
+                                }
+                            }
+                        }
+                        batchDetails.setRelatedBatchDownloads(associatedDownloadBatches);
+                    }
+                }
 
 		try {
 		    
@@ -883,9 +971,21 @@ public class adminProcessingActivity {
 
 		Organization orgDetails = organizationmanager.getOrganizationById(batchDetails.getOrgId());
 		batchDetails.setOrgName(orgDetails.getOrgName());
+                
+                batchUploads batchUploadDetails = transactionInManager.getBatchDetails(batchDetails.getBatchUploadId());
+                Organization sendingOrgDetails = organizationmanager.getOrganizationById(batchUploadDetails.getOrgId());
+		batchDetails.setSrcOrgName(sendingOrgDetails.getOrgName());
+                batchDetails.setFromBatchName(batchUploadDetails.getUtBatchName());
+                
+                mav.addObject("internalInboundBatchId", batchUploadDetails.getId());
+                
+                utConfiguration configDetails = configurationManager.getConfigurationById(batchDetails.getConfigId());
+                batchDetails.setConfigName(configDetails.getConfigname());
 
 		mav.addObject("batchDetails", batchDetails);
-
+                
+                mav.addObject("batchDownload",true);
+                
 		try {
 		    List<batchdownloadactivity> batchActivities = transactionOutManager.getBatchActivities(batchDetails);
 		    
@@ -960,7 +1060,15 @@ public class adminProcessingActivity {
     public ModelAndView viewInboundAuditReport(@PathVariable String batchName, HttpServletRequest request) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activity/auditReport");
+        
+        mav.addObject("pageId", "processing-inbound");
+        mav.addObject("pageSection", "section-processing");
+        mav.addObject("sect","activity");
+        mav.addObject("actionPage","inboundauditreport");
+        mav.addObject("eahUT",eahUT);
+        mav.addObject("batchDownload",false);
+        mav.setViewName("administrator/processingActivities/auditReport");
+        
         boolean canCancel = false;
         boolean canReset = false;
         boolean canEdit = false;
@@ -1035,24 +1143,29 @@ public class adminProcessingActivity {
             }
 
             List<Integer> resetStatusList = Arrays.asList(2, 22, 23, 1, 8, 35, 28); //DNP (21) is not a final status for admin
-            if (!resetStatusList.contains(batchDetails.getStatusId()) && configDetails.getMessageTypeId() != 2) {
-                canReset = true;
+            if(configDetails.getMessageTypeId() != 2) {
+                if (!resetStatusList.contains(batchDetails.getStatusId())) {
+                    canReset = true;
+                }
             }
+            
 
-            if (batchDetails.getStatusId() == 5 || batchDetails.getStatusId() == 64) {
+           if (batchDetails.getStatusId() == 5 || batchDetails.getStatusId() == 64) {
+               BigInteger recordCount = transactionInManager.getRecordCounts(batchDetails.getId(), Arrays.asList(11, 12, 13, 16), false, false);
+                if (recordCount.compareTo(BigInteger.ZERO) == 0) {
                 // now we check so we don't have to make a db hit if batch status is not 5 
-                if (transactionInManager.getRecordCounts(batchDetails.getId(), Arrays.asList(11, 12, 13, 16), false, false) == 0) {
                     canSend = true;
                 }
             }
 
-            if (batchDetails.getStatusId() == 5 && transactionInManager.getRecordCounts(batchDetails.getId(), Arrays.asList(14), false, true) > 0) {
-                canEdit = true;
+            if (batchDetails.getStatusId() == 5) {
+                BigInteger recordCount = transactionInManager.getRecordCounts(batchDetails.getId(), Arrays.asList(14), false, true);
+                if (recordCount.compareTo(BigInteger.ZERO) == 0) {
+                    canEdit = true;
+                }
             }
 
-            /**
-             * we need to check sbp (4), tbc (25) status, 38 SBL - if server is restarted and somehow the file hangs in SBP, we want to give them option to reset if sbp/tbc start time is about two hours, that should be sufficient indication that a file is stuck we don't want to reset or cancel in the middle of the processing
-             */
+            //we need to check sbp (4), tbc (25) status, 38 SBL - if server is restarted and somehow the file hangs in SBP, we want to give them option to reset if sbp/tbc start time is about two hours, that should be sufficient indication that a file is stuck we don't want to reset or cancel in the middle of the processing
             if (batchDetails.getStatusId() == 4 || batchDetails.getStatusId() == 25 || batchDetails.getStatusId() == 38) {
                 Date d1 = batchDetails.getStartDateTime();
                 Date d2 = new Date();
@@ -1081,18 +1194,18 @@ public class adminProcessingActivity {
 	    batchDetails.setDateSubmitted(dft.parse(requiredFormat.format(batchDetails.getDateSubmitted())));
 	  
             mav.addObject("batchDetails", batchDetails);
-	    
+            
             if (batchDetails.getErrorRecordCount() > 0) {
 		List<batchErrorSummary> batchErrorSummary = transactionInManager.getBatchErrorSummary(batchDetails.getId(),"inbound");
 		mav.addObject("batchErrorSummary", batchErrorSummary);
-		
+                
 		totalErroredRows = transactionInManager.getTotalErroredRows(batchDetails.getId());
 	    }
-	    
+            
 	    //Check to see if we have any dropped values
-	    List<batchUploadDroppedValues> droppedValues = transactionInManager.getBatchDroppedValues(batchDetails.getId());
+            List<batchUploadDroppedValues> droppedValues = transactionInManager.getBatchDroppedValues(batchDetails.getId());
             mav.addObject("batchDroppedValues", droppedValues);
-	    
+            
 	    //If allowed to cancel check if the outbound targets have already been sent
 	    if(canCancel) {
 		if(associatedDownloadBatches != null) {
@@ -1105,7 +1218,7 @@ public class adminProcessingActivity {
 		    }
 		}
 	    }
-	   
+            
 	    if(batchDetails.getStatusId() == 7) {
 		List<batchErrorSummary> batchSystemErrors = transactionInManager.getBatchSystemErrorSummary(batchDetails.getId(),"inbound");
 		mav.addObject("batchSystemErrors", batchSystemErrors);
@@ -1124,7 +1237,7 @@ public class adminProcessingActivity {
 	mav.addObject("batchDownload",false);
 	mav.addObject("totalErroredRows", totalErroredRows);
 	mav.addObject("page", page);
-	
+        
 	if(canReset || canCancel || canEdit || canSend || batchStatus == 2 || batchStatus == 3 || batchStatus == 36) {
 	    showButtons = true;
 	}
@@ -1193,6 +1306,7 @@ public class adminProcessingActivity {
 		
 		//Delete batch transaction tables
 		transactionInManager.deleteBatchTransactionTables(batchId);
+                
                 transactionInManager.updateBatchStatus(batchId, 42, "startDateTime");
             } 
 	    else if (batchOption.equalsIgnoreCase("releaseBatch")) {
@@ -1204,7 +1318,8 @@ public class adminProcessingActivity {
 		else if (batchDetails.getStatusId() == 5) {
                     transactionInManager.updateBatchStatus(batchId, 4, "startDateTime");
                     //check once again to make sure all transactions are in final status
-                    if (transactionInManager.getRecordCounts(batchId, Arrays.asList(11, 12, 13, 16), false, false) == 0) {
+                    BigInteger recordCount = transactionInManager.getRecordCounts(batchId, Arrays.asList(11, 12, 13, 16), false, false);
+                    if (recordCount.compareTo(BigInteger.ZERO) > 0) {
                         transactionInManager.updateBatchStatus(batchId, 6, "endDateTime");
                     } else {
                         transactionInManager.updateBatchStatus(batchId, 5, "endDateTime");
@@ -1221,7 +1336,6 @@ public class adminProcessingActivity {
 		    
 		    //Delete batch target tables
                 }
-		
             }
         }
 
@@ -1239,6 +1353,275 @@ public class adminProcessingActivity {
         return true;
     }
 
+    
+    /**
+     * The '/outbound/auditReport/{batchName}' GET request will retrieve the audit report that is associated to the clicked batch
+     *
+     * @param batchName	The name of the batch to retrieve transactions for
+     * @return The audit report for the batch
+     *
+     * @Objects	(1) An object containing all the errored transactions
+     *
+     * @throws Exception
+     */
+    @RequestMapping(value = "/outbound/auditReport/{batchName}", method = RequestMethod.GET)
+    public ModelAndView viewOutboundAuditReport(@PathVariable String batchName, HttpSession session) throws Exception {
+
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("pageId", "processing-outbound");
+        mav.addObject("pageSection", "section-processing");
+        mav.addObject("sect","activity");
+        mav.addObject("actionPage","outboundauditreport");
+        mav.addObject("eahUT",eahUT);
+        mav.addObject("batchDownload",true);
+        mav.setViewName("administrator/processingActivities/auditReport");
+        
+        boolean canCancel = false;
+        boolean canReset = false;
+	boolean canEdit = false;
+	boolean canSend = false;
+        boolean showButtons = false;
+	
+	searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters");
+	searchParameters.setsection("outbound");
+	session.setAttribute("searchParameters", searchParameters);
+	
+        //Get the details of the batch/
+	batchDownloads batchDetails = transactionOutManager.getBatchDetailsByBatchName(batchName);
+	
+	// Get the details of the batch
+	batchUploads batchUploadDetails = transactionInManager.getBatchDetails(batchDetails.getBatchUploadId());
+       
+        if (batchDetails != null) {
+            
+            batchDetails.setFromBatchName(batchUploadDetails.getUtBatchName());
+                
+            mav.addObject("internalInboundBatchId", batchUploadDetails.getId());
+	    
+	    utConfiguration configDetails = configurationManager.getConfigurationById(batchDetails.getConfigId());
+	    mav.addObject("configDetails",configDetails);
+            
+            batchDetails.setConfigName(configDetails.getConfigname());
+	    
+	    Organization orgDetails = organizationmanager.getOrganizationById(batchDetails.getOrgId());
+            batchDetails.setTgtorgName(orgDetails.getOrgName());
+            batchDetails.setOrgName(orgDetails.getOrgName());
+	    
+	    Organization srcorgDetails = organizationmanager.getOrganizationById(batchUploadDetails.getOrgId());
+            batchDetails.setSrcOrgName(srcorgDetails.getOrgName());
+	    
+            lu_ProcessStatus processStatus = sysAdminManager.getProcessStatusById(batchDetails.getStatusId());
+            batchDetails.setStatusValue(processStatus.getDisplayCode());
+
+            List<Integer> cancelStatusList = Arrays.asList(25,30,61,64,59);
+            if (cancelStatusList.contains(batchDetails.getStatusId())) {
+                canCancel = true;
+            }
+
+            List<Integer> resetStatusList = Arrays.asList(28,30,31,41,58); //DNP (21) is not a final status for admin
+	    
+	    if (!resetStatusList.contains(batchDetails.getStatusId()) && configDetails.getMessageTypeId() != 2) {
+                canReset = true;
+            }
+	    
+	    if(batchDetails.getStatusId() == 64 || batchDetails.getStatusId() == 59) {
+		canSend = true;
+	    }
+	    
+	    TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
+	    DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	    DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	    requiredFormat.setTimeZone(timeZone);
+
+	    batchDetails.setDateCreated(dft.parse(requiredFormat.format(batchDetails.getDateCreated())));
+            
+            mav.addObject("batchDetails", batchDetails);
+	    
+            if (batchDetails.getTotalErrorCount() > 0) {
+		List<batchErrorSummary> batchErrorSummary = transactionInManager.getBatchErrorSummary(batchDetails.getId(),"outbound");
+		mav.addObject("batchErrorSummary", batchErrorSummary);
+	    }
+	    
+	    //Check to see if we have any dropped values
+	    List<batchDownloadDroppedValues> droppedValues = transactionOutManager.getBatchDroppedValues(batchDetails.getId());
+            mav.addObject("batchDroppedValues", droppedValues);
+        } 
+	else {
+            mav.addObject("doesNotExist", true);
+        }
+	
+        mav.addObject("canCancel", canCancel);
+        mav.addObject("canReset", canReset);
+        mav.addObject("canEdit", canEdit);
+        mav.addObject("canSend", canSend);
+	mav.addObject("batchDownload",true);
+	
+	if(canReset || canCancel || canEdit || canSend) {
+	    showButtons = true;
+	}
+	
+	mav.addObject("showButtons", showButtons);
+
+        return mav;
+    }
+    
+    /**
+     * The 'outboundBatchOptions' function will process the batch according to the option submitted by admin
+     * @param session
+     * @param batchId
+     * @param authentication
+     * @param batchOption
+     * @return 
+     * @throws java.lang.Exception 
+     */
+    @RequestMapping(value = "/outboundBatchOptions", method = RequestMethod.POST)
+    public @ResponseBody
+    boolean outboundBatchOptions(HttpSession session,@RequestParam(value = "batchId", required = true) Integer batchId, Authentication authentication,
+            @RequestParam(value = "batchOption", required = true) String batchOption) throws Exception {
+
+        String strBatchOption = "";
+        utUser userInfo = usermanager.getUserByUserName(authentication.getName());
+	
+	batchDownloads batchDetails = transactionOutManager.getBatchDetails(batchId);
+
+        if (userInfo != null && batchDetails != null) {
+	    //Release a manual target batch
+	    if(batchOption.equalsIgnoreCase("releaseBatch")) {
+		strBatchOption = "Release Outbound Batch";
+		transactionOutManager.updateTargetBatchStatus(batchId, 61, "startDateTime");
+	    }
+	    
+	    else if (batchOption.equalsIgnoreCase("cancel")) {
+		strBatchOption = "Cancelled Outbound Batch";
+		
+		//need to cancel target batch
+                transactionOutManager.updateTargetBatchStatus(batchId, 32, "startDateTime");
+		
+		//Delete batch target tables
+		transactionOutManager.deleteBatchDownloadTables(batchId);
+
+            } 
+	    else if (batchOption.equalsIgnoreCase("reset")) {
+                strBatchOption = "Reset Outbound Batch";
+		
+		//Clear Batch Activity Log table
+		transactionOutManager.clearBatchActivityLogTable(batchId);
+		
+		//Delete all target tables
+		transactionOutManager.deleteBatchDownloadTables(batchId);
+		
+		//Rest total record and error counts
+		batchDetails.setTotalRecordCount(0);
+		batchDetails.setTotalErrorCount(0);
+		transactionOutManager.submitBatchDownloadChanges(batchDetails);
+		
+		//Need to check to see if the transactiontranslatedin_BatchUploadId table exists
+		boolean transactionInTableForBatchExists = transactionOutManager.chechForTransactionInTable(batchDetails.getBatchUploadId());
+		
+		if(transactionInTableForBatchExists) {
+		    //Reset status to 61 to start the outbound process over
+		    transactionOutManager.updateTargetBatchStatus(batchId, 61, "startDateTime");
+		}
+		else {
+		    transactionOutManager.updateTargetBatchStatus(batchId, 66, "startDateTime");
+		    
+		    //Clear transaction counts
+		    transactionInManager.resetTransactionCounts(batchDetails.getBatchUploadId());
+		    
+		    batchUploads batchUploadDetails = transactionInManager.getBatchDetails(batchDetails.getBatchUploadId());
+		    
+		    //Need to move the archive file back to the loading directory
+		    File archiveFile = new File(myProps.getProperty("ut.directory.utRootDir") + "archivesIn/" + "archive_" + batchUploadDetails.getUtBatchName() + batchUploadDetails.getOriginalFileName().substring(batchUploadDetails.getOriginalFileName().lastIndexOf(".")));
+		    File archiveDecFile = new File(myProps.getProperty("ut.directory.utRootDir") + "archivesIn/" + batchUploadDetails.getUtBatchName() + "_dec" + batchUploadDetails.getOriginalFileName().substring(batchUploadDetails.getOriginalFileName().lastIndexOf(".")));
+		   
+		    //Need to get the configuration details and transport method
+		    configurationTransport transportDetails = configurationTransportManager.getTransportDetails(batchUploadDetails.getConfigId());
+		    
+		    File encodedUploadedFile = new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getFileLocation() + "encoded_" + batchUploadDetails.getUtBatchName());
+		    
+		    //File Dropped
+		    if(transportDetails.getTransportMethodId() == 10 || transportDetails.getTransportMethodId() == 13) {
+			List<configurationFileDropFields> fileDropDetails = configurationTransportManager.getTransFileDropDetails(transportDetails.getId());
+			
+			if(fileDropDetails != null) {
+			    for(configurationFileDropFields fileDropDetail : fileDropDetails) {
+				if(fileDropDetail.getMethod() == 1) {
+				    
+				    if(archiveFile.renameTo(new File(myProps.getProperty("ut.directory.utRootDir") + fileDropDetail.getDirectory() + batchUploadDetails.getOriginalFileName()))) {
+					archiveFile.delete();
+					
+					if(archiveDecFile.exists()) {
+					    archiveDecFile.delete();
+					}
+					if(encodedUploadedFile.exists()) {
+					    encodedUploadedFile.delete();
+					}
+				    }
+				}
+			    }
+			}
+		    }
+		    //SFTP
+		    else if(transportDetails.getTransportMethodId() == 8) {
+			List<configurationFTPFields> ftpDetails = configurationTransportManager.getTransportFTPDetails(transportDetails.getId());
+			
+			if(ftpDetails != null) {
+			    for(configurationFTPFields ftpDetail : ftpDetails) {
+				if(ftpDetail.getMethod()== 1) {
+				    
+				    if(archiveFile.renameTo(new File(myProps.getProperty("ut.directory.utRootDir") + ftpDetail.getDirectory().replace("/sFTP","sFTP") + batchUploadDetails.getOriginalFileName()))) {
+					archiveFile.delete();
+					
+					if(archiveDecFile.exists()) {
+					    archiveDecFile.delete();
+					}
+					if(encodedUploadedFile.exists()) {
+					    encodedUploadedFile.delete();
+					}
+				    }
+				}
+			    }
+			}
+		    }
+		    else {
+			if(archiveFile.renameTo(new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getFileLocation() + batchUploadDetails.getOriginalFileName()))) {
+			    archiveFile.delete();
+
+			    if(archiveDecFile.exists()) {
+				archiveDecFile.delete();
+			    }
+			    if(encodedUploadedFile.exists()) {
+				encodedUploadedFile.delete();
+			    }
+			}
+		    }
+		    
+		    //log user activity
+		    utUserActivity ua = new utUserActivity();
+		    ua.setUserId(0);
+		    ua.setFeatureId(0);
+		    ua.setAccessMethod("System");
+		    ua.setPageAccess("/outnboundBatchOptions");
+		    ua.setActivity("Inbound batchId:"+batchDetails.getId() + " will be reprocessed due to outbound batch being reset and inbound batch tables have been removed.");
+		    ua.setBatchUploadId(batchDetails.getBatchUploadId());
+		    usermanager.insertUserLog(ua);
+		    
+		    transactionInManager.updateBatchStatus(batchDetails.getBatchUploadId(), 35, "startDateTime");
+		}
+            } 
+        }
+
+        //log user activity
+        utUserActivity ua = new utUserActivity();
+        ua.setUserId(userInfo.getId());
+        ua.setAccessMethod("POST");
+        ua.setPageAccess("/outnboundBatchOptions");
+        ua.setActivity("Admin - " + strBatchOption);
+	ua.setBatchDownloadId(batchId);
+        usermanager.insertUserLog(ua);
+        return true;
+    }
+    
     /**
      * The '/referralActivityExport' GET request will return the latest export created
      *
@@ -2209,8 +2592,9 @@ public class adminProcessingActivity {
 	    @RequestParam Integer totalErrors, @RequestParam Integer indexVal,@RequestParam String type) throws Exception {
 
 	ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activities/auditReportErrorDetails");
+        mav.setViewName("/administrator/processingActivities/auditReportErrorDetails");
 	mav.addObject("indexVal", indexVal);
+        mav.addObject("errorId", errorId);
 	
 	List<String> customCols = new ArrayList<>();
 	
@@ -2221,14 +2605,14 @@ public class adminProcessingActivity {
 	customCols.add("Field No.");
 	
 	List reportableFields = null;
-	
+        
 	if("inbound".equals(type)) {
 	    reportableFields = transactionInManager.getErrorReportField(batchId);
 	}
 	else {
 	    reportableFields = transactionOutManager.getErrorReportField(batchId);
 	}
-	
+        
 	customCols.add("Column Name");
 	
 	//Set the custom columns based on the error selected
@@ -2238,18 +2622,16 @@ public class adminProcessingActivity {
 		if("inbound".equals(type)) {
 		    customCols.add("Field Value");
 		
-		    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
-			+ "from batchuploadauditerrors a left outer join "
-			+ "configurationmessagespecs b on a.configId = b.configId "
-			+ "where a.batchUploadId = " + batchId + " and a.errorId = " + errorId + " order by a.rownumber asc";
+		    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,'' as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
+			+ "from batchuploadauditerrors a "
+			+ "where a.batchUploadId = " + batchId + " order by a.rownumber asc";
 		}
 		else {
 		    customCols.add("Field Value");
 		
-		    sql = "select 'false' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
-			+ "from batchdownloadauditerrors a left outer join "
-			+ "configurationmessagespecs b on a.configId = b.configId "
-			+ "where a.batchDownloadId = " + batchId + " and a.errorId = " + errorId + " order by a.rownumber asc";
+		    sql = "select 'false' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,'' as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
+			+ "from batchdownloadauditerrors a "
+			+ "where a.batchDownloadId = " + batchId + " order by a.rownumber asc";
 		}
 		break;
 		
@@ -2259,18 +2641,16 @@ public class adminProcessingActivity {
 		if("inbound".equals(type)) {
 		    customCols.add("Field Value");
 
-		    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber, a.fieldName as column_name, a.errorDetails as validation_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
-			+ "from batchuploadauditerrors a left outer join "
-			+ "configurationmessagespecs b on a.configId = b.configId "
-			+ "where a.batchUploadId = " + batchId + " and a.errorId = " + errorId + " order by a.rownumber asc";
+		    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber, a.fieldName as column_name, a.errorDetails as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
+			+ "from batchuploadauditerrors a "
+			+ "where a.batchUploadId = " + batchId + " order by a.rownumber asc";
 		}
 		else {
 		    customCols.add("Field Value");
 
-		    sql = "select 'false' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber, a.fieldName as column_name, a.errorDetails as validation_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
-			+ "from batchdownloadauditerrors a left outer join "
-			+ "configurationmessagespecs b on a.configId = b.configId "
-			+ "where a.batchDownloadId = " + batchId + " and a.errorId = " + errorId + " order by a.rownumber asc";
+		    sql = "select 'false' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber, a.fieldName as column_name, a.errorDetails as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
+			+ "from batchdownloadauditerrors a "
+			+ "where a.batchDownloadId = " + batchId + " order by a.rownumber asc";
 		}
 		break;
 		
@@ -2280,18 +2660,17 @@ public class adminProcessingActivity {
 		if("inbound".equals(type)) {
 		    customCols.add("Field Value");	
 
-		    sql = "select fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name, a.errorDetails as crosswalk, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
-			+ "from batchuploadauditerrors a left outer join "
-			+ "configurationmessagespecs b on a.configId = b.configId "
-			+ "where a.batchUploadId = " + batchId + " and a.errorId = " + errorId + " order by a.rownumber asc";
+		    sql = "select fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name, a.errorDetails as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
+			+ "from batchuploadauditerrors a "
+			+ "where a.batchUploadId = " + batchId + " order by a.rownumber asc";
 		}
 		else {
 		    customCols.add("Field Value");	
 		    
-		    sql = "select 'false' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name, a.errorDetails as crosswalk, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+		    sql = "select 'false' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name, a.errorDetails as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 			+ "from batchdownloadauditerrors a left outer join "
 			+ "configurationmessagespecs b on a.configId = b.configId "
-			+ "where a.batchDownloadId = " + batchId + " and a.errorId = " + errorId + " order by a.rownumber asc";
+			+ "where a.batchDownloadId = " + batchId + " order by a.rownumber asc";
 		    
 		}
 		break;
@@ -2302,18 +2681,18 @@ public class adminProcessingActivity {
 		if("inbound".equals(type)) {
 		    customCols.add("Field Value");
 
-		    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,a.errorDetails as macro, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+		    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,a.errorDetails as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 			+ "from batchuploadauditerrors a left outer join "
 			+ "configurationmessagespecs b on a.configId = b.configId "
-			+ "where a.batchUploadId = " + batchId + " and a.errorId = " + errorId + " order by a.rownumber asc";
+			+ "where a.batchUploadId = " + batchId + " order by a.rownumber asc";
 		}
 		else {
 		    customCols.add("Field Value");
 
-		    sql = "select 'false' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,a.errorDetails as macro, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+		    sql = "select 'false' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,a.errorDetails as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 			+ "from batchdownloadauditerrors a left outer join "
 			+ "configurationmessagespecs b on a.configId = b.configId "
-			+ "where a.batchDownloadId = " + batchId + " and a.errorId = " + errorId + " order by a.rownumber asc";
+			+ "where a.batchDownloadId = " + batchId + " order by a.rownumber asc";
 		}
 		break;
 		
@@ -2326,10 +2705,10 @@ public class adminProcessingActivity {
 			customCols.add("Field Value");
 		    }
 
-		    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,CASE WHEN a.fieldName IS NULL THEN (select fieldDesc from configurationformfields where configId = a.configId and fieldNo = a.fieldNo) ELSE a.fieldName END as column_name,a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+		    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,CASE WHEN a.fieldName IS NULL THEN (select fieldDesc from configurationformfields where configId = a.configId and fieldNo = a.fieldNo) ELSE a.fieldName END as column_name,'' as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 			+ "from batchuploadauditerrors a left outer join "
 			+ "configurationmessagespecs b on a.configId = b.configId "
-			+ "where a.batchUploadId = " + batchId + " and a.errorId = " + errorId + " order by a.rownumber asc";
+			+ "where a.batchUploadId = " + batchId + " order by a.rownumber asc";
 		}
 		else {
 		    if(errorId == 5) {
@@ -2339,10 +2718,10 @@ public class adminProcessingActivity {
 			customCols.add("Field Value");
 		    }
 
-		    sql = "select 'false' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,CASE WHEN a.fieldName IS NULL THEN (select fieldDesc from configurationformfields where configId = a.configId and fieldNo = a.fieldNo) ELSE a.fieldName END as column_name,a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+		    sql = "select 'false' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,CASE WHEN a.fieldName IS NULL THEN (select fieldDesc from configurationformfields where configId = a.configId and fieldNo = a.fieldNo) ELSE a.fieldName END as column_name,'' as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 			+ "from batchdownloadauditerrors a left outer join "
 			+ "configurationmessagespecs b on a.configId = b.configId "
-			+ "where a.batchDownloadId = " + batchId + " and a.errorId = " + errorId + " order by a.rownumber asc";
+			+ "where a.batchDownloadId = " + batchId + " order by a.rownumber asc";
 		}
 		break;
 	}
@@ -2352,17 +2731,35 @@ public class adminProcessingActivity {
 	
 	    while (reportableFieldsIt.hasNext()) {
 		Object rptFieldrow[] = (Object[]) reportableFieldsIt.next();
-		customCols.add(rptFieldrow[0].toString());
 		customCols.add(rptFieldrow[1].toString());
 		customCols.add(rptFieldrow[2].toString());
 		customCols.add(rptFieldrow[3].toString());
+		customCols.add(rptFieldrow[4].toString());
 	    }
 	}
 		
 	mav.addObject("customCols", customCols);
 	mav.addObject("totalErrors",totalErrors);
-	
+        
 	List errors = transactionInManager.getErrorDataBySQLStmt(sql);
+        
+        Integer hasOutboundError = 0;
+        
+        if(!errors.isEmpty()) {
+            
+            Iterator<Object> iterator = errors.iterator();
+             while (iterator.hasNext()) {
+                  Object errorsRow[] = (Object[]) iterator.next(); 
+                  if(hasOutboundError == 0 && errorsRow[0].toString().equals("true")) {
+                    hasOutboundError = 1;
+                }
+                if(errorId != errorsRow[11]) {
+                   iterator.remove();
+                }  
+             }
+        }
+        
+        mav.addObject("hasOutboundError", hasOutboundError);
 	
 	mav.addObject("errors", errors);
         
@@ -2877,7 +3274,12 @@ public class adminProcessingActivity {
         searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters");
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activity/apimessages");
+        mav.addObject("pageId", "processing-wsmessage");
+        mav.addObject("pageSection", "section-processing");
+        mav.addObject("sect","activity");
+        mav.addObject("actionPage","apimessages");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/processingActivities/rest/apimessages");
 
         if ("".equals(searchParameters.getsection()) || !"inbound".equals(searchParameters.getsection())) {
             searchParameters.setfromDate(fromDate);
@@ -2922,19 +3324,33 @@ public class adminProcessingActivity {
 	}
 	
         // Get all ws in 
-        List<RestAPIMessagesIn> restAPIMessagesList = restfulmanager.getRestAPIMessagesInListPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
+        List<Object> restAPIMessagesList = restfulmanager.getRestAPIMessagesInListPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
 	
-	if(restAPIMessagesList.isEmpty()) {
+        if(restAPIMessagesList.isEmpty()) {
 	    totalRecords = 0;
 	}
 	else {
-	    totalRecords = restAPIMessagesList.get(0).getTotalMessages();
+            totalRecords = (Integer) restAPIMessagesList.get(0);
 	}
-	
+        
+        TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
+	DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	requiredFormat.setTimeZone(timeZone);
+	String dateinTZ = "";
+        
+        List<RestAPIMessagesIn> returnedBatchDownloads = (List<RestAPIMessagesIn>) restAPIMessagesList.get(1);
+        
+	for (RestAPIMessagesIn batch : returnedBatchDownloads) {
+	    dateinTZ = requiredFormat.format(batch.getDateCreated());
+	    
+	    batch.setDateCreated(dft.parse(dateinTZ));
+        } 
+        
 	jsonResponse.addProperty("sEcho", sEcho);
         jsonResponse.addProperty("iTotalRecords", totalRecords);
         jsonResponse.addProperty("iTotalDisplayRecords", totalRecords);
-        jsonResponse.add("aaData", gson.toJsonTree(restAPIMessagesList));
+        jsonResponse.add("aaData", gson.toJsonTree(returnedBatchDownloads));
 	
         return jsonResponse.toString();
     }
@@ -2965,7 +3381,12 @@ public class adminProcessingActivity {
         searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters");
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activity/apimessagesOut");
+        mav.addObject("pageId", "processing-wsmessage");
+        mav.addObject("pageSection", "section-processing");
+        mav.addObject("sect","activity");
+        mav.addObject("actionPage","apimessagesOut");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/processingActivities/rest/apimessagesOut");
 
         if ("".equals(searchParameters.getsection()) || !"inbound".equals(searchParameters.getsection())) {
             searchParameters.setfromDate(fromDate);
@@ -3009,19 +3430,33 @@ public class adminProcessingActivity {
 	    searchTerm = batchName;
 	}
 	
-        List<RestAPIMessagesOut> restAPIMessagesList = restfulmanager.getRestAPIMessagesOutListPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
+        List<Object> restAPIMessagesList = restfulmanager.getRestAPIMessagesOutListPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
 	
-	if(restAPIMessagesList.isEmpty()) {
+        if(restAPIMessagesList.isEmpty()) {
 	    totalRecords = 0;
 	}
 	else {
-	    totalRecords = restAPIMessagesList.get(0).getTotalMessages();
+            totalRecords = (Integer) restAPIMessagesList.get(0);
 	}
+        
+        TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
+	DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	requiredFormat.setTimeZone(timeZone);
+	String dateinTZ = "";
+        
+        List<RestAPIMessagesOut> returnedBatchDownloads = (List<RestAPIMessagesOut>) restAPIMessagesList.get(1);
+        
+	for (RestAPIMessagesOut batch : returnedBatchDownloads) {
+	    dateinTZ = requiredFormat.format(batch.getDateCreated());
+	    
+	    batch.setDateCreated(dft.parse(dateinTZ));
+        } 
 	
 	jsonResponse.addProperty("sEcho", sEcho);
         jsonResponse.addProperty("iTotalRecords", totalRecords);
         jsonResponse.addProperty("iTotalDisplayRecords", totalRecords);
-        jsonResponse.add("aaData", gson.toJsonTree(restAPIMessagesList));
+        jsonResponse.add("aaData", gson.toJsonTree(returnedBatchDownloads));
 	
         return jsonResponse.toString();
     }
@@ -3106,7 +3541,7 @@ public class adminProcessingActivity {
         // Get all inbound transactions
         toDate = DateUtils.addDays(toDate, 1);
 	
-	List<batchUploads> batchUploadList = transactionInManager.getAllUploadBatchesPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
+	List<Object> batchUploadList = transactionInManager.getAllUploadBatchesPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
 	
 	List<batchUploads> batchUploadsToReturn = new ArrayList<>();
         
@@ -3120,9 +3555,12 @@ public class adminProcessingActivity {
 	    totalRecords = 0;
 	}
 	else {
-	    totalRecords = batchUploadList.get(0).getTotalMessages();
+	    //totalRecords = batchUploadList.get(0).getTotalMessages();
+            totalRecords = (Integer) batchUploadList.get(0);
+            
+            List<batchUploads> returnedBatchUploads = (List<batchUploads>) batchUploadList.get(1);
 	    
-	    for(batchUploads batchUpload : batchUploadList) {
+	    for(batchUploads batchUpload : returnedBatchUploads) {
 		dateinTZ = requiredFormat.format(batchUpload.getDateSubmitted());
 	    
 		batchUpload.setDateSubmitted(dft.parse(dateinTZ));
@@ -3203,9 +3641,11 @@ public class adminProcessingActivity {
         // Get all inbound transactions
         toDate = DateUtils.addDays(toDate, 1);
 	
-	List<batchDownloads> outboundBatches = transactionOutManager.getAllSentBatchesPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
+	List<Object> outboundBatches = transactionOutManager.getAllSentBatchesPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
 	
-	if(outboundBatches.isEmpty()) {
+	List<batchDownloads> batchDOwnloadsToReturn = new ArrayList<>();
+        
+        if(outboundBatches.isEmpty()) {
 	    totalRecords = 0;
 	}
 	else {
@@ -3214,8 +3654,12 @@ public class adminProcessingActivity {
 	    DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	    requiredFormat.setTimeZone(timeZone);
 	    String dateinTZ = "";
+            
+            List<batchDownloads> returnedBatchDownloads = (List<batchDownloads>) outboundBatches.get(1);
+            
+            totalRecords = (Integer) outboundBatches.get(0);
 
-	    for(batchDownloads batchDownload : outboundBatches) {
+	    for(batchDownloads batchDownload : returnedBatchDownloads) {
 		dateinTZ = requiredFormat.format(batchDownload.getDateCreated());
 
 		batchDownload.setDateCreated(dft.parse(dateinTZ));
@@ -3229,15 +3673,14 @@ public class adminProcessingActivity {
 		    dateinTZ = requiredFormat.format(batchDownload.getEndDateTime());
 		    batchDownload.setEndDateTime(dft.parse(dateinTZ));
 		}
+                batchDOwnloadsToReturn.add(batchDownload);
 	    }
-	    
-	    totalRecords = outboundBatches.get(0).getTotalMessages();
 	}
 	
 	jsonResponse.addProperty("sEcho", sEcho);
         jsonResponse.addProperty("iTotalRecords", totalRecords);
         jsonResponse.addProperty("iTotalDisplayRecords", totalRecords);
-        jsonResponse.add("aaData", gson.toJsonTree(outboundBatches));
+        jsonResponse.add("aaData", gson.toJsonTree(batchDOwnloadsToReturn));
 	
         return jsonResponse.toString();
     }
@@ -3352,262 +3795,6 @@ public class adminProcessingActivity {
     }
     
     /**
-     * The '/outbound/auditReport/{batchName}' GET request will retrieve the audit report that is associated to the clicked batch
-     *
-     * @param batchName	The name of the batch to retrieve transactions for
-     * @return The audit report for the batch
-     *
-     * @Objects	(1) An object containing all the errored transactions
-     *
-     * @throws Exception
-     */
-    @RequestMapping(value = "/outbound/auditReport/{batchName}", method = RequestMethod.GET)
-    public ModelAndView viewOutboundAuditReport(@PathVariable String batchName, HttpSession session) throws Exception {
-
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activity/outbound/auditReport");
-        boolean canCancel = false;
-        boolean canReset = false;
-	boolean canEdit = false;
-	boolean canSend = false;
-        boolean showButtons = false;
-	
-	searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters");
-	searchParameters.setsection("outbound");
-	session.setAttribute("searchParameters", searchParameters);
-	
-        //Get the details of the batch/
-	batchDownloads batchDetails = transactionOutManager.getBatchDetailsByBatchName(batchName);
-	
-	// Get the details of the batch
-	batchUploads batchUploadDetails = transactionInManager.getBatchDetails(batchDetails.getBatchUploadId());
-       
-        if (batchDetails != null) {
-	    
-	    utConfiguration configDetails = configurationManager.getConfigurationById(batchDetails.getConfigId());
-	    mav.addObject("configDetails",configDetails);
-	    
-	    Organization orgDetails = organizationmanager.getOrganizationById(batchDetails.getOrgId());
-            batchDetails.setTgtorgName(orgDetails.getOrgName());
-	    
-	    Organization srcorgDetails = organizationmanager.getOrganizationById(batchUploadDetails.getOrgId());
-            batchDetails.setOrgName(srcorgDetails.getOrgName());
-	    
-            lu_ProcessStatus processStatus = sysAdminManager.getProcessStatusById(batchDetails.getStatusId());
-            batchDetails.setStatusValue(processStatus.getDisplayCode());
-
-            List<Integer> cancelStatusList = Arrays.asList(25,30,61,64,59);
-            if (cancelStatusList.contains(batchDetails.getStatusId())) {
-                canCancel = true;
-            }
-
-            List<Integer> resetStatusList = Arrays.asList(28,30,31,41,58); //DNP (21) is not a final status for admin
-	    
-	    if (!resetStatusList.contains(batchDetails.getStatusId()) && configDetails.getMessageTypeId() != 2) {
-                canReset = true;
-            }
-	    
-	    if(batchDetails.getStatusId() == 64 || batchDetails.getStatusId() == 59) {
-		canSend = true;
-	    }
-	    
-            batchDetails.setConfigName(configurationManager.getMessageTypeNameByConfigId(batchDetails.getConfigId()));
-	    
-	    TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
-	    DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	    DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	    requiredFormat.setTimeZone(timeZone);
-
-	    batchDetails.setDateCreated(dft.parse(requiredFormat.format(batchDetails.getDateCreated())));
-            
-            mav.addObject("batchDetails", batchDetails);
-	    
-            if (batchDetails.getTotalErrorCount() > 0) {
-		List<batchErrorSummary> batchErrorSummary = transactionInManager.getBatchErrorSummary(batchDetails.getId(),"outbound");
-		mav.addObject("batchErrorSummary", batchErrorSummary);
-	    }
-	    
-	    //Check to see if we have any dropped values
-	    List<batchDownloadDroppedValues> droppedValues = transactionOutManager.getBatchDroppedValues(batchDetails.getId());
-            mav.addObject("batchDroppedValues", droppedValues);
-        } 
-	else {
-            mav.addObject("doesNotExist", true);
-        }
-	
-        mav.addObject("canCancel", canCancel);
-        mav.addObject("canReset", canReset);
-        mav.addObject("canEdit", canEdit);
-        mav.addObject("canSend", canSend);
-	mav.addObject("batchDownload",true);
-	
-	if(canReset || canCancel || canEdit || canSend) {
-	    showButtons = true;
-	}
-	
-	mav.addObject("showButtons", showButtons);
-
-        return mav;
-    }
-    
-    /**
-     * The 'outboundBatchOptions' function will process the batch according to the option submitted by admin
-     * @param session
-     * @param batchId
-     * @param authentication
-     * @param batchOption
-     * @return 
-     * @throws java.lang.Exception 
-     */
-    @RequestMapping(value = "/outboundBatchOptions", method = RequestMethod.POST)
-    public @ResponseBody
-    boolean outboundBatchOptions(HttpSession session,@RequestParam(value = "batchId", required = true) Integer batchId, Authentication authentication,
-            @RequestParam(value = "batchOption", required = true) String batchOption) throws Exception {
-
-        String strBatchOption = "";
-        utUser userInfo = usermanager.getUserByUserName(authentication.getName());
-	
-	batchDownloads batchDetails = transactionOutManager.getBatchDetails(batchId);
-
-        if (userInfo != null && batchDetails != null) {
-	    //Release a manual target batch
-	    if(batchOption.equalsIgnoreCase("releaseBatch")) {
-		strBatchOption = "Release Outbound Batch";
-		transactionOutManager.updateTargetBatchStatus(batchId, 61, "startDateTime");
-	    }
-	    
-	    else if (batchOption.equalsIgnoreCase("cancel")) {
-		strBatchOption = "Cancelled Outbound Batch";
-		
-		//need to cancel target batch
-                transactionOutManager.updateTargetBatchStatus(batchId, 32, "startDateTime");
-		
-		//Delete batch target tables
-		transactionOutManager.deleteBatchDownloadTables(batchId);
-
-            } 
-	    else if (batchOption.equalsIgnoreCase("reset")) {
-                strBatchOption = "Reset Outbound Batch";
-		
-		//Clear Batch Activity Log table
-		transactionOutManager.clearBatchActivityLogTable(batchId);
-		
-		//Delete all target tables
-		transactionOutManager.deleteBatchDownloadTables(batchId);
-		
-		//Rest total record and error counts
-		batchDetails.setTotalRecordCount(0);
-		batchDetails.setTotalErrorCount(0);
-		transactionOutManager.submitBatchDownloadChanges(batchDetails);
-		
-		//Need to check to see if the transactiontranslatedin_BatchUploadId table exists
-		boolean transactionInTableForBatchExists = transactionOutManager.chechForTransactionInTable(batchDetails.getBatchUploadId());
-		
-		if(transactionInTableForBatchExists) {
-		    //Reset status to 61 to start the outbound process over
-		    transactionOutManager.updateTargetBatchStatus(batchId, 61, "startDateTime");
-		}
-		else {
-		    transactionOutManager.updateTargetBatchStatus(batchId, 66, "startDateTime");
-		    
-		    //Clear transaction counts
-		    transactionInManager.resetTransactionCounts(batchDetails.getBatchUploadId());
-		    
-		    batchUploads batchUploadDetails = transactionInManager.getBatchDetails(batchDetails.getBatchUploadId());
-		    
-		    //Need to move the archive file back to the loading directory
-		    File archiveFile = new File(myProps.getProperty("ut.directory.utRootDir") + "archivesIn/" + "archive_" + batchUploadDetails.getUtBatchName() + batchUploadDetails.getOriginalFileName().substring(batchUploadDetails.getOriginalFileName().lastIndexOf(".")));
-		    File archiveDecFile = new File(myProps.getProperty("ut.directory.utRootDir") + "archivesIn/" + batchUploadDetails.getUtBatchName() + "_dec" + batchUploadDetails.getOriginalFileName().substring(batchUploadDetails.getOriginalFileName().lastIndexOf(".")));
-		   
-		    //Need to get the configuration details and transport method
-		    configurationTransport transportDetails = configurationTransportManager.getTransportDetails(batchUploadDetails.getConfigId());
-		    
-		    File encodedUploadedFile = new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getFileLocation() + "encoded_" + batchUploadDetails.getUtBatchName());
-		    
-		    //File Dropped
-		    if(transportDetails.getTransportMethodId() == 10 || transportDetails.getTransportMethodId() == 13) {
-			List<configurationFileDropFields> fileDropDetails = configurationTransportManager.getTransFileDropDetails(transportDetails.getId());
-			
-			if(fileDropDetails != null) {
-			    for(configurationFileDropFields fileDropDetail : fileDropDetails) {
-				if(fileDropDetail.getMethod() == 1) {
-				    
-				    if(archiveFile.renameTo(new File(myProps.getProperty("ut.directory.utRootDir") + fileDropDetail.getDirectory() + batchUploadDetails.getOriginalFileName()))) {
-					archiveFile.delete();
-					
-					if(archiveDecFile.exists()) {
-					    archiveDecFile.delete();
-					}
-					if(encodedUploadedFile.exists()) {
-					    encodedUploadedFile.delete();
-					}
-				    }
-				}
-			    }
-			}
-		    }
-		    //SFTP
-		    else if(transportDetails.getTransportMethodId() == 8) {
-			List<configurationFTPFields> ftpDetails = configurationTransportManager.getTransportFTPDetails(transportDetails.getId());
-			
-			if(ftpDetails != null) {
-			    for(configurationFTPFields ftpDetail : ftpDetails) {
-				if(ftpDetail.getMethod()== 1) {
-				    
-				    if(archiveFile.renameTo(new File(myProps.getProperty("ut.directory.utRootDir") + ftpDetail.getDirectory().replace("/sFTP","sFTP") + batchUploadDetails.getOriginalFileName()))) {
-					archiveFile.delete();
-					
-					if(archiveDecFile.exists()) {
-					    archiveDecFile.delete();
-					}
-					if(encodedUploadedFile.exists()) {
-					    encodedUploadedFile.delete();
-					}
-				    }
-				}
-			    }
-			}
-		    }
-		    else {
-			if(archiveFile.renameTo(new File(myProps.getProperty("ut.directory.utRootDir") + transportDetails.getFileLocation() + batchUploadDetails.getOriginalFileName()))) {
-			    archiveFile.delete();
-
-			    if(archiveDecFile.exists()) {
-				archiveDecFile.delete();
-			    }
-			    if(encodedUploadedFile.exists()) {
-				encodedUploadedFile.delete();
-			    }
-			}
-		    }
-		    
-		    //log user activity
-		    utUserActivity ua = new utUserActivity();
-		    ua.setUserId(0);
-		    ua.setFeatureId(0);
-		    ua.setAccessMethod("System");
-		    ua.setPageAccess("/outnboundBatchOptions");
-		    ua.setActivity("Inbound batchId:"+batchDetails.getId() + " will be reprocessed due to outbound batch being reset and inbound batch tables have been removed.");
-		    ua.setBatchUploadId(batchDetails.getBatchUploadId());
-		    usermanager.insertUserLog(ua);
-		    
-		    transactionInManager.updateBatchStatus(batchDetails.getBatchUploadId(), 35, "startDateTime");
-		}
-            } 
-        }
-
-        //log user activity
-        utUserActivity ua = new utUserActivity();
-        ua.setUserId(userInfo.getId());
-        ua.setAccessMethod("POST");
-        ua.setPageAccess("/outnboundBatchOptions");
-        ua.setActivity("Admin - " + strBatchOption);
-	ua.setBatchDownloadId(batchId);
-        usermanager.insertUserLog(ua);
-        return true;
-    }
-    
-    /**
      * The '/viewDirectDetails{batchUploadId}' function will return the details of the selected batch uploaded message received from a HISP via DIRECT.The results will be displayed in the overlay.
      *
      * @param batchUploadId
@@ -3656,7 +3843,12 @@ public class adminProcessingActivity {
         searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters");
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activity/directmessages");
+        mav.addObject("pageId", "processing-wsmessage");
+        mav.addObject("pageSection", "section-processing");
+        mav.addObject("sect","activity");
+        mav.addObject("actionPage","directmessages");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/processingActivities/direct/directmessages");
 
         if ("".equals(searchParameters.getsection()) || !"inbound".equals(searchParameters.getsection())) {
             searchParameters.setfromDate(fromDate);
@@ -3701,19 +3893,44 @@ public class adminProcessingActivity {
 	}
 	
         // Get all direct messages in 
-        List<directmessagesin> directMessagesList = directmanager.getDirectMessagesInListPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
+        List<Object> directMessagesList = directmanager.getDirectMessagesInListPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
 	
-	if(directMessagesList.isEmpty()) {
+        if(directMessagesList.isEmpty()) {
 	    totalRecords = 0;
 	}
 	else {
-	    totalRecords = directMessagesList.get(0).getTotalMessages();
+            totalRecords = (Integer) directMessagesList.get(0);
 	}
+        
+        TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
+	DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	requiredFormat.setTimeZone(timeZone);
+	String dateinTZ = "";
+        
+        List<directmessagesin> returnedDirectMessages = (List<directmessagesin>) directMessagesList.get(1);
+        
+        List<helRegistry> helRegistries = helregistrymanager.getAllActiveRegistries();
+         
+	for (directmessagesin batch : returnedDirectMessages) {
+	    dateinTZ = requiredFormat.format(batch.getDateCreated());
+	    batch.setDateCreated(dft.parse(dateinTZ));
+            
+            if(batch.getHelRegistryId()> 0) {
+		if(helRegistries != null) {
+		    for(helRegistry reg : helRegistries) {
+			if(reg.getId() == batch.getHelRegistryId()) {
+			    batch.setSystemName(reg.getRegistryName());
+			}
+		    }
+		}
+	    }
+        } 
 	
 	jsonResponse.addProperty("sEcho", sEcho);
         jsonResponse.addProperty("iTotalRecords", totalRecords);
         jsonResponse.addProperty("iTotalDisplayRecords", totalRecords);
-        jsonResponse.add("aaData", gson.toJsonTree(directMessagesList));
+        jsonResponse.add("aaData", gson.toJsonTree(returnedDirectMessages));
 	
         return jsonResponse.toString();
     }
@@ -3744,7 +3961,12 @@ public class adminProcessingActivity {
         searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters");
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activity/directmessagesOut");
+        mav.addObject("pageId", "processing-wsmessage");
+        mav.addObject("pageSection", "section-processing");
+        mav.addObject("sect","activity");
+        mav.addObject("actionPage","directmessagesout");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/processingActivities/direct/directmessagesOut");
 
         if ("".equals(searchParameters.getsection()) || !"outbound".equals(searchParameters.getsection())) {
             searchParameters.setfromDate(fromDate);
@@ -3788,19 +4010,32 @@ public class adminProcessingActivity {
 	    searchTerm = batchName;
 	}
 	
-        List<directmessagesout> directMessagesList = directmanager.getDirectMessagesOutListPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
+        List<Object> directMessagesList = directmanager.getDirectMessagesOutListPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
 	
 	if(directMessagesList.isEmpty()) {
 	    totalRecords = 0;
 	}
 	else {
-	    totalRecords = directMessagesList.get(0).getTotalMessages();
+            totalRecords = (Integer) directMessagesList.get(0);
 	}
+        
+        TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
+	DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	requiredFormat.setTimeZone(timeZone);
+	String dateinTZ = "";
+        
+        List<directmessagesout> returnedDirectMessages = (List<directmessagesout>) directMessagesList.get(1);
+        
+	for (directmessagesout batch : returnedDirectMessages) {
+	    dateinTZ = requiredFormat.format(batch.getDateCreated());
+	    batch.setDateCreated(dft.parse(dateinTZ));
+        } 
 	
 	jsonResponse.addProperty("sEcho", sEcho);
         jsonResponse.addProperty("iTotalRecords", totalRecords);
         jsonResponse.addProperty("iTotalDisplayRecords", totalRecords);
-        jsonResponse.add("aaData", gson.toJsonTree(directMessagesList));
+        jsonResponse.add("aaData", gson.toJsonTree(returnedDirectMessages));
 	
         return jsonResponse.toString();
     }
@@ -3820,7 +4055,7 @@ public class adminProcessingActivity {
     ModelAndView viewDirectDetailsById(@PathVariable int directMessageId) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activities/directHISPDetails");
+        mav.setViewName("/administrator/processingActivities/direct/directHISPDetails");
 
         directmessagesin directMessageDetails = transactionInManager.getDirectAPIMessagesById(directMessageId);
 	mav.addObject("directMessageDetails",directMessageDetails);
@@ -3843,7 +4078,7 @@ public class adminProcessingActivity {
     ModelAndView viewDirectDetailsOutById(@PathVariable int directMessageId) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activities/directOutDetails");
+        mav.setViewName("/administrator/processingActivities/direct/directOutDetails");
 
         directmessagesout directMessageDetails = transactionOutManager.getDirectAPIMessagesById(directMessageId);
 	mav.addObject("directMessageDetails",directMessageDetails);
@@ -3863,7 +4098,7 @@ public class adminProcessingActivity {
     public @ResponseBody ModelAndView loadDroppedValues(@RequestParam Integer batchId,@RequestParam Integer totalErrors,@RequestParam String type) throws Exception {
 
 	ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activities/auditReportDroppedValues");
+        mav.setViewName("/administrator/processingActivities/auditReportDroppedValues");
 	
 	List<String> customCols = new ArrayList<>();
 	
@@ -3885,27 +4120,27 @@ public class adminProcessingActivity {
 	customCols.add("Field Value");
 	
 	if("inbound".equals(type)) {
-	    sql = "select fromOutboundConfig, a.transactionInRecordsId as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,"
-	    + "a.fieldValue as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+	    sql = "select fromOutboundConfig, a.transactionInRecordsId as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name, '' as error_type,"
+	    + "a.fieldValue as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, '' as errorId "
 	    + "from batchuploaddroppedvalues a "
 	    + "where a.batchUploadId = " + batchId + " order by a.id asc limit 50 ";
 	}
 	else {
 	    sql = "select 'false' as fromOutboundConfig,a.transactionOutRecordsId as rownumber, "
-	    + " a.fieldNo as fieldNumber,a.fieldName as column_name, a.fieldValue as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+	    + " a.fieldNo as fieldNumber,a.fieldName as column_name,  '' as error_type,a.fieldValue as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, '' as errorId "
 	    + "from batchdownloaddroppedvalues a "
 	    + "where a.batchDownloadId = " + batchId + " order by a.id asc limit 50 ";
 	}
-	
+        
 	if(reportableFields != null) {
 	    Iterator reportableFieldsIt = reportableFields.iterator();
 	
 	    while (reportableFieldsIt.hasNext()) {
 		Object rptFieldrow[] = (Object[]) reportableFieldsIt.next();
-		customCols.add(rptFieldrow[0].toString());
 		customCols.add(rptFieldrow[1].toString());
 		customCols.add(rptFieldrow[2].toString());
 		customCols.add(rptFieldrow[3].toString());
+		customCols.add(rptFieldrow[4].toString());
 	    }
 	}
 		
@@ -3913,6 +4148,18 @@ public class adminProcessingActivity {
 	mav.addObject("totalErrors",totalErrors);
 	
 	List errors = transactionInManager.getErrorDataBySQLStmt(sql);
+        
+        Integer hasOutboundError = 0;
+        
+        if(!errors.isEmpty()) {
+            for(Object droppedError : errors) {
+                Object errorsRow[] = (Object[]) droppedError; 
+                if(hasOutboundError == 0 && errorsRow[0].toString().equals("true")) {
+                    hasOutboundError = 1;
+                }
+            }
+        }
+        mav.addObject("hasOutboundError", hasOutboundError);
 	
 	mav.addObject("errors", errors);
         
@@ -4017,7 +4264,7 @@ public class adminProcessingActivity {
 		if(!inboundDroppedValues.isEmpty()) {
 		    errorType = "Dropped Crosswalk Values";
 		    
-		    sql = "select 'source' as fromOutboundConfig, a.transactionInRecordsId as rownumber, a.fieldNo as fieldNumber, a.fieldName as column_name,a.translatedReportField1Data as clientIdentifier,a.fieldValue as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+		    sql = "select 'source' as fromOutboundConfig, a.transactionInRecordsId as rownumber, a.fieldNo as fieldNumber, a.fieldName as column_name,a.translatedReportField1Data as error_type,a.fieldValue as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, '' as errorId "
 		    + "from batchuploaddroppedvalues a "
 		    + "where a.batchUploadId = " + batchId + " order by a.id asc";
 		    
@@ -4042,13 +4289,13 @@ public class adminProcessingActivity {
 			while (reportableFieldsIt.hasNext()) {
 			    Object rptFieldrow[] = (Object[]) reportableFieldsIt.next();
 			    cellNum++;
-			    currentRow.createCell(cellNum).setCellValue(rptFieldrow[0].toString());
-			    cellNum++;
 			    currentRow.createCell(cellNum).setCellValue(rptFieldrow[1].toString());
 			    cellNum++;
 			    currentRow.createCell(cellNum).setCellValue(rptFieldrow[2].toString());
 			    cellNum++;
 			    currentRow.createCell(cellNum).setCellValue(rptFieldrow[3].toString());
+			    cellNum++;
+			    currentRow.createCell(cellNum).setCellValue(rptFieldrow[4].toString());
 			}
 		    }
 
@@ -4067,8 +4314,6 @@ public class adminProcessingActivity {
 				    Object errorsRow[] = (Object[]) errorsIt.next();
 				    currentRow.createCell(cellNum).setCellValue(errorType);
 				    cellNum++;
-				    currentRow.createCell(cellNum).setCellValue(errorsRow[0].toString());
-				    cellNum++;
 				    currentRow.createCell(cellNum).setCellValue(errorsRow[1].toString());
 				    cellNum++;
 				    currentRow.createCell(cellNum).setCellValue(errorsRow[2].toString());
@@ -4077,9 +4322,11 @@ public class adminProcessingActivity {
 				    cellNum++;
 				    currentRow.createCell(cellNum).setCellValue(errorsRow[4].toString());
 				    cellNum++;
+				    currentRow.createCell(cellNum).setCellValue(errorsRow[5].toString());
+				    cellNum++;
 				     
 				    if(errorsRow[5] != null) {
-				       currentRow.createCell(cellNum).setCellValue(errorsRow[5].toString());
+				       currentRow.createCell(cellNum).setCellValue(errorsRow[6].toString());
 				    }
 				    else {
 				       currentRow.createCell(cellNum).setCellValue("");
@@ -4087,7 +4334,7 @@ public class adminProcessingActivity {
 				    cellNum++;
 				     
 				    if(errorsRow[6] != null) {
-				       currentRow.createCell(cellNum).setCellValue(errorsRow[6].toString());
+				       currentRow.createCell(cellNum).setCellValue(errorsRow[7].toString());
 				    }
 				    else {
 				       currentRow.createCell(cellNum).setCellValue("");
@@ -4095,14 +4342,6 @@ public class adminProcessingActivity {
 				    cellNum++;
 
 				    if(errorsRow[7] != null) {
-				       currentRow.createCell(cellNum).setCellValue(errorsRow[7].toString());
-				    }
-				    else {
-				       currentRow.createCell(cellNum).setCellValue("");
-				    }
-				    cellNum++;
-				     
-				    if(errorsRow[8] != null) {
 				       currentRow.createCell(cellNum).setCellValue(errorsRow[8].toString());
 				    }
 				    else {
@@ -4110,8 +4349,16 @@ public class adminProcessingActivity {
 				    }
 				    cellNum++;
 				     
-				    if(errorsRow[9] != null) {
+				    if(errorsRow[8] != null) {
 				       currentRow.createCell(cellNum).setCellValue(errorsRow[9].toString());
+				    }
+				    else {
+				       currentRow.createCell(cellNum).setCellValue("");
+				    }
+				    cellNum++;
+				     
+				    if(errorsRow[9] != null) {
+				       currentRow.createCell(cellNum).setCellValue(errorsRow[10].toString());
 				    }
 				    else {
 				       currentRow.createCell(cellNum).setCellValue("");
@@ -4131,7 +4378,7 @@ public class adminProcessingActivity {
 		if(!outboundDroppedValues.isEmpty()) {
 		    errorType = "Dropped Crosswalk Values";
 		    
-		    sql = "select 'target' as fromOutboundConfig, a.transactionInRecordsId as rownumber, a.fieldNo as fieldNumber, a.fieldName as column_name,a.translatedReportField1Data as clientIdentifier,a.fieldValue as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+		    sql = "select 'target' as fromOutboundConfig, a.transactionInRecordsId as rownumber, a.fieldNo as fieldNumber, a.fieldName as column_name,a.translatedReportField1Data as error_type,a.fieldValue as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, '' as errorId "
 		    + "from batchdownloaddroppedvalues a "
 		    + "where a.batchDownloadId = " + batchId + " order by a.id asc";
 		    
@@ -4156,13 +4403,13 @@ public class adminProcessingActivity {
 			while (reportableFieldsIt.hasNext()) {
 			    Object rptFieldrow[] = (Object[]) reportableFieldsIt.next();
 			    cellNum++;
-			    currentRow.createCell(cellNum).setCellValue(rptFieldrow[0].toString());
-			    cellNum++;
 			    currentRow.createCell(cellNum).setCellValue(rptFieldrow[1].toString());
 			    cellNum++;
 			    currentRow.createCell(cellNum).setCellValue(rptFieldrow[2].toString());
 			    cellNum++;
 			    currentRow.createCell(cellNum).setCellValue(rptFieldrow[3].toString());
+			    cellNum++;
+			    currentRow.createCell(cellNum).setCellValue(rptFieldrow[4].toString());
 			}
 		    }
 
@@ -4181,8 +4428,6 @@ public class adminProcessingActivity {
 				     Object errorsRow[] = (Object[]) errorsIt.next();
 				     currentRow.createCell(cellNum).setCellValue(errorType);
 				     cellNum++;
-				     currentRow.createCell(cellNum).setCellValue(errorsRow[0].toString());
-				     cellNum++;
 				     currentRow.createCell(cellNum).setCellValue(errorsRow[1].toString());
 				     cellNum++;
 				     currentRow.createCell(cellNum).setCellValue(errorsRow[2].toString());
@@ -4191,16 +4436,10 @@ public class adminProcessingActivity {
 				     cellNum++;
 				     currentRow.createCell(cellNum).setCellValue(errorsRow[4].toString());
 				     cellNum++;
-				     
-				     if(errorsRow[5] != null) {
-					currentRow.createCell(cellNum).setCellValue(errorsRow[5].toString());
-				     }
-				     else {
-					currentRow.createCell(cellNum).setCellValue("");
-				     }
+				     currentRow.createCell(cellNum).setCellValue(errorsRow[5].toString());
 				     cellNum++;
 				     
-				     if(errorsRow[6] != null) {
+				     if(errorsRow[5] != null) {
 					currentRow.createCell(cellNum).setCellValue(errorsRow[6].toString());
 				     }
 				     else {
@@ -4208,7 +4447,7 @@ public class adminProcessingActivity {
 				     }
 				     cellNum++;
 				     
-				     if(errorsRow[7] != null) {
+				     if(errorsRow[6] != null) {
 					currentRow.createCell(cellNum).setCellValue(errorsRow[7].toString());
 				     }
 				     else {
@@ -4216,7 +4455,7 @@ public class adminProcessingActivity {
 				     }
 				     cellNum++;
 				     
-				     if(errorsRow[8] != null) {
+				     if(errorsRow[7] != null) {
 					currentRow.createCell(cellNum).setCellValue(errorsRow[8].toString());
 				     }
 				     else {
@@ -4224,8 +4463,16 @@ public class adminProcessingActivity {
 				     }
 				     cellNum++;
 				     
-				     if(errorsRow[9] != null) {
+				     if(errorsRow[8] != null) {
 					currentRow.createCell(cellNum).setCellValue(errorsRow[9].toString());
+				     }
+				     else {
+					currentRow.createCell(cellNum).setCellValue("");
+				     }
+				     cellNum++;
+				     
+				     if(errorsRow[9] != null) {
+					currentRow.createCell(cellNum).setCellValue(errorsRow[10].toString());
 				     }
 				     else {
 					currentRow.createCell(cellNum).setCellValue("");
@@ -4308,13 +4555,13 @@ public class adminProcessingActivity {
 				    while (reportableFieldsIt.hasNext()) {
 					Object rptFieldrow[] = (Object[]) reportableFieldsIt.next();
 					cellNum++;
-					currentRow.createCell(cellNum).setCellValue(rptFieldrow[0].toString());
-					cellNum++;
 					currentRow.createCell(cellNum).setCellValue(rptFieldrow[1].toString());
 					cellNum++;
 					currentRow.createCell(cellNum).setCellValue(rptFieldrow[2].toString());
 					cellNum++;
 					currentRow.createCell(cellNum).setCellValue(rptFieldrow[3].toString());
+					cellNum++;
+					currentRow.createCell(cellNum).setCellValue(rptFieldrow[4].toString());
 				    }
 				}
 			    }
@@ -4326,16 +4573,16 @@ public class adminProcessingActivity {
 				errorType = "Required Field Error";
 
 				if("inbound".equals(type)) {
-				    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,'' as errorType, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+				    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,'' as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 				    + "from batchuploadauditerrors a left outer  join "
 				    + "configurationmessagespecs b on a.configId = b.configId "
-				    + "where a.batchUploadId = " + batchId + " and a.errorId = " + error.getErrorId() + " order by a.rownumber asc";
+				    + "where a.batchUploadId = " + batchId + " order by a.rownumber asc";
 				}
 				else {
-				    sql = "select 'true' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,'' as errorType,a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+				    sql = "select 'true' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,'' as error_type,a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 				    + "from batchdownloadauditerrors a left outer  join "
 				    + "configurationmessagespecs b on a.configId = b.configId "
-				    + "where a.batchDownloadId = " + batchId + " and a.errorId = " + error.getErrorId() + " order by a.rownumber asc";
+				    + "where a.batchDownloadId = " + batchId + " order by a.rownumber asc";
 				}
 				break;
 
@@ -4343,16 +4590,16 @@ public class adminProcessingActivity {
 				errorType = "Validation Error";
 				
 				if("inbound".equals(type)) {
-				    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber, a.fieldName as column_name, a.errorDetails as validation_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+				    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber, a.fieldName as column_name, a.errorDetails as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 				    + "from batchuploadauditerrors a left outer  join "
 				    + "configurationmessagespecs b on a.configId = b.configId "
-				    + "where a.batchUploadId = " + batchId + " and a.errorId = " + error.getErrorId() + " order by a.rownumber asc";
+				    + "where a.batchUploadId = " + batchId + " order by a.rownumber asc";
 				}
 				else {
-				    sql = "select 'true' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber, a.fieldName as column_name, a.errorDetails as validation_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+				    sql = "select 'true' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber, a.fieldName as column_name, a.errorDetails as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 				    + "from batchdownloadauditerrors a left outer  join "
 				    + "configurationmessagespecs b on a.configId = b.configId "
-				    + "where a.batchDownloadId = " + batchId + " and a.errorId = " + error.getErrorId() + " order by a.rownumber asc";
+				    + "where a.batchDownloadId = " + batchId + " order by a.rownumber asc";
 				}
 				break;
 
@@ -4360,16 +4607,16 @@ public class adminProcessingActivity {
 				errorType = "Crosswalk Error";
 
 				if("inbound".equals(type)) {	
-				    sql = "select fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name, a.errorDetails as crosswalk, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+				    sql = "select fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name, a.errorDetails as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 				    + "from batchuploadauditerrors a left outer join "
 				    + "configurationmessagespecs b on a.configId = b.configId "
-				    + "where a.batchUploadId = " + batchId + " and a.errorId = " + error.getErrorId() + " order by a.rownumber asc";
+				    + "where a.batchUploadId = " + batchId + " order by a.rownumber asc";
 				}
 				else {
-				    sql = "select 'true' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name, a.errorDetails as crosswalk, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+				    sql = "select 'true' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name, a.errorDetails as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 				    + "from batchdownloadauditerrors a left outer join "
 				    + "configurationmessagespecs b on a.configId = b.configId "
-				    + "where a.batchDownloadId = " + batchId + " and a.errorId = " + error.getErrorId() + " order by a.rownumber asc";
+				    + "where a.batchDownloadId = " + batchId + " order by a.rownumber asc";
 				}
 				break;
 
@@ -4377,16 +4624,16 @@ public class adminProcessingActivity {
 				errorType = "Macro Error";
 				
 				if("inbound".equals(type)) {
-				    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,a.errorDetails as macro, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+				    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,a.errorDetails as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 				    + "from batchuploadauditerrors a left outer  join "
 				    + "configurationmessagespecs b on a.configId = b.configId "
-				    + "where a.batchUploadId = " + batchId + " and a.errorId = " + error.getErrorId() + " order by a.rownumber asc";
+				    + "where a.batchUploadId = " + batchId + " order by a.rownumber asc";
 				}
 				else {
-				    sql = "select 'true' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,a.errorDetails as macro, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+				    sql = "select 'true' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,a.errorDetails as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 				    + "from batchdownloadauditerrors a left outer  join "
 				    + "configurationmessagespecs b on a.configId = b.configId "
-				    + "where a.batchDownloadId = " + batchId + " and a.errorId = " + error.getErrorId() + " order by a.rownumber asc";
+				    + "where a.batchDownloadId = " + batchId + " order by a.rownumber asc";
 				}
 				break;
 				
@@ -4394,16 +4641,16 @@ public class adminProcessingActivity {
 				errorType = "System Error";
 			    
 				if("inbound".equals(type)) {
-				    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,CASE WHEN a.fieldName IS NULL THEN (select fieldDesc from configurationformfields where configId = a.configId and fieldNo = a.fieldNo) ELSE a.fieldName END as column_name,'' as errorType, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+				    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,CASE WHEN a.fieldName IS NULL THEN (select fieldDesc from configurationformfields where configId = a.configId and fieldNo = a.fieldNo) ELSE a.fieldName END as column_name,'' as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 				    + "from batchuploadauditerrors a left outer join "
 				    + "configurationmessagespecs b on a.configId = b.configId "
-				    + "where a.batchUploadId = " + batchId + " and a.errorId = " + error.getErrorId() + " order by a.rownumber asc";
+				    + "where a.batchUploadId = " + batchId + " order by a.rownumber asc";
 				}
 				else {
-				    sql = "select 'true' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,CASE WHEN a.fieldName IS NULL THEN (select fieldDesc from configurationformfields where configId = a.configId and fieldNo = a.fieldNo) ELSE a.fieldName END as column_name,'' as errorType, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+				    sql = "select 'true' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,CASE WHEN a.fieldName IS NULL THEN (select fieldDesc from configurationformfields where configId = a.configId and fieldNo = a.fieldNo) ELSE a.fieldName END as column_name,'' as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 				    + "from batchdownloadauditerrors a left outer join "
 				    + "configurationmessagespecs b on a.configId = b.configId "
-				    + "where a.batchDownloadId = " + batchId + " and a.errorId = " + error.getErrorId() + " order by a.rownumber asc";
+				    + "where a.batchDownloadId = " + batchId + " order by a.rownumber asc";
 				}
 				break;
 				
@@ -4411,16 +4658,16 @@ public class adminProcessingActivity {
 				errorType = "Zip Code Check";
 
 				if("inbound".equals(type)) {
-				    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,'' as errorType, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+				    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,'' as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 				    + "from batchuploadauditerrors a left outer  join "
 				    + "configurationmessagespecs b on a.configId = b.configId "
-				    + "where a.batchUploadId = " + batchId + " and a.errorId = " + error.getErrorId() + " order by a.rownumber asc";
+				    + "where a.batchUploadId = " + batchId + " order by a.rownumber asc";
 				}
 				else {
-				    sql = "select 'true' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,'' as errorType,a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+				    sql = "select 'true' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,'' as error_type,a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 				    + "from batchdownloadauditerrors a left outer  join "
 				    + "configurationmessagespecs b on a.configId = b.configId "
-				    + "where a.batchDownloadId = " + batchId + " and a.errorId = " + error.getErrorId() + " order by a.rownumber asc";
+				    + "where a.batchDownloadId = " + batchId + " order by a.rownumber asc";
 				}
 				break;
 			
@@ -4428,16 +4675,16 @@ public class adminProcessingActivity {
 				errorType = "Invalid Date Format";
 
 				if("inbound".equals(type)) {
-				    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,'' as errorType, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+				    sql = "select fromOutboundConfig, a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,'' as error_type, a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 				    + "from batchuploadauditerrors a left outer  join "
 				    + "configurationmessagespecs b on a.configId = b.configId "
-				    + "where a.batchUploadId = " + batchId + " and a.errorId = " + error.getErrorId() + " order by a.rownumber asc";
+				    + "where a.batchUploadId = " + batchId + " order by a.rownumber asc";
 				}
 				else {
-				    sql = "select 'true' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,'' as errorType,a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data "
+				    sql = "select 'true' as fromOutboundConfig,a.rownumber as rownumber, a.fieldNo as fieldNumber,a.fieldName as column_name,'' as error_type,a.errorData as field_value,a.reportField1Data,a.reportField2Data,a.reportField3Data,a.reportField4Data, a.errorId "
 				    + "from batchdownloadauditerrors a left outer  join "
 				    + "configurationmessagespecs b on a.configId = b.configId "
-				    + "where a.batchDownloadId = " + batchId + " and a.errorId = " + error.getErrorId() + " order by a.rownumber asc";
+				    + "where a.batchDownloadId = " + batchId + " order by a.rownumber asc";
 				}
 				break;
 			}
@@ -4447,6 +4694,18 @@ public class adminProcessingActivity {
 			   
 			    if(errors != null) {
 				if(!errors.isEmpty()) {
+                                    
+                                    if(!errors.isEmpty()) {
+            
+                                        Iterator<Object> iterator = errors.iterator();
+                                        while (iterator.hasNext()) {
+                                            Object errorsRow[] = (Object[]) iterator.next(); 
+                                             
+                                            if(errorId != errorsRow[11]) {
+                                               iterator.remove();
+                                            }  
+                                         }
+                                    }
 				    
 				    Iterator errorsIt = errors.iterator();
 
@@ -4460,40 +4719,32 @@ public class adminProcessingActivity {
 					currentRow.createCell(cellNum).setCellValue(errorType);
 					cellNum++;
 					
-					if(errorsRow[0].toString().equals("true")) {
+					if(errorsRow[1].toString().equals("true")) {
 					    currentRow.createCell(cellNum).setCellValue("target");
 					}
 					else {
 					    currentRow.createCell(cellNum).setCellValue("source");
 					}
 					cellNum++;
-					if("0".equals(errorsRow[1].toString())) {
+					if("0".equals(errorsRow[2].toString())) {
 					    currentRow.createCell(cellNum).setCellValue("All Rows");
 					}
 					else {
-					    currentRow.createCell(cellNum).setCellValue(errorsRow[1].toString());
+					    currentRow.createCell(cellNum).setCellValue(errorsRow[2].toString());
 					}
-					cellNum++;
-					currentRow.createCell(cellNum).setCellValue(errorsRow[2].toString());
 					cellNum++;
 					currentRow.createCell(cellNum).setCellValue(errorsRow[3].toString());
 					cellNum++;
-					if(errorId != 1 && errorId != 5 && errorId != 41 && errorId != 46) {
-					    currentRow.createCell(cellNum).setCellValue(errorsRow[4].toString());
-					    cellNum++;
-					}
-					else {
-					    currentRow.createCell(cellNum).setCellValue("");
-					    cellNum++;
-					}
-					
-					if(errorsRow[5] != null) {
-					    currentRow.createCell(cellNum).setCellValue(errorsRow[5].toString());
-					}
-					else {
-					    currentRow.createCell(cellNum).setCellValue("");
-					}
+					currentRow.createCell(cellNum).setCellValue(errorsRow[4].toString());
 					cellNum++;
+					if(errorId != 1 && errorId != 5 && errorId != 41 && errorId != 46) {
+					    currentRow.createCell(cellNum).setCellValue(errorsRow[5].toString());
+					    cellNum++;
+					}
+					else {
+					    currentRow.createCell(cellNum).setCellValue("");
+					    cellNum++;
+					}
 					
 					if(errorsRow[6] != null) {
 					    currentRow.createCell(cellNum).setCellValue(errorsRow[6].toString());
@@ -4521,6 +4772,14 @@ public class adminProcessingActivity {
 					
 					if(errorsRow[9] != null) {
 					    currentRow.createCell(cellNum).setCellValue(errorsRow[9].toString());
+					}
+					else {
+					    currentRow.createCell(cellNum).setCellValue("");
+					}
+					cellNum++;
+					
+					if(errorsRow[10] != null) {
+					    currentRow.createCell(cellNum).setCellValue(errorsRow[10].toString());
 					}
 					else {
 					    currentRow.createCell(cellNum).setCellValue("");
@@ -5261,7 +5520,12 @@ public class adminProcessingActivity {
         Date toDate = getMonthDate("END-TODAY");
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activity/generateReport");
+        mav.addObject("pageId", "processing-activityReport");
+        mav.addObject("pageSection", "section-processing");
+        mav.addObject("sect","activity");
+        mav.addObject("actionPage","generateReport");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/processingActivities/reportBuilder/generateReport");
 	mav.addObject("pageRefreshRate",pageRefreshRate);
 
         mav.addObject("fromDate", fromDate);
@@ -5448,11 +5712,15 @@ public class adminProcessingActivity {
     
     @RequestMapping(value = "/printActivityReportToPDF/{file}", method = RequestMethod.GET)
     public void printActivityReportToPDF(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
+        
+        if(!file.contains(".pdf")) {
+            file = file += ".pdf";
+        }
 	
-	File activityReportPrintFile = new File (myProps.getProperty("ut.directory.utRootDir")+"/activityReports/" + file + ".pdf");
+	File activityReportPrintFile = new File (myProps.getProperty("ut.directory.utRootDir")+"/activityReports/" + file);
 	InputStream is = new FileInputStream(activityReportPrintFile);
 
-	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".pdf\"");
+	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + "\"");
 	FileCopyUtils.copy(is, response.getOutputStream());
 
 	// close stream and return to view
@@ -5461,11 +5729,15 @@ public class adminProcessingActivity {
     
     @RequestMapping(value = "/printActivityReportToExcel/{file}", method = RequestMethod.GET)
     public void printActivityReportToExcel(@PathVariable("file") String file,HttpServletResponse response) throws Exception {
+        
+        if(!file.contains(".xlsx")) {
+            file = file += ".xlsx";
+        }
 	
-	File activityReportPrintFile = new File (myProps.getProperty("ut.directory.utRootDir")+"/activityReports/" + file + ".xlsx");
+	File activityReportPrintFile = new File (myProps.getProperty("ut.directory.utRootDir")+"/activityReports/" + file);
 	InputStream is = new FileInputStream(activityReportPrintFile);
 
-	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + ".xlsx\"");
+	response.setHeader("Content-Disposition", "attachment; filename=\"" + file + "\"");
 	FileCopyUtils.copy(is, response.getOutputStream());
 
 	// close stream and return to view
@@ -5531,7 +5803,7 @@ public class adminProcessingActivity {
 	List<generatedActivityReportAgencies> reportAgencies = transactionInManager.getSavedActivityReportAgencies(activityReportId);
 	
 	ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activities/reportBuilder/selectedAgencyList");
+        mav.setViewName("/administrator/processingActivities/reportBuilder/selectedAgencyList");
 	mav.addObject("agencies",reportAgencies);
 	
 	return mav;

@@ -30,7 +30,7 @@ public class RestAPIMessagesIn {
     private Integer totalMessages = 0;
 
     @Transient
-    private String errorDisplayText = null, batchName = null, statusName = null, orgName = null;
+    private String errorDisplayText = null, batchName = null, statusName = null, orgName = null, configName = "";
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
@@ -173,5 +173,13 @@ public class RestAPIMessagesIn {
 
     public void setMessageTitle(String messageTitle) {
         this.messageTitle = messageTitle;
+    }
+
+    public String getConfigName() {
+        return configName;
+    }
+
+    public void setConfigName(String configName) {
+        this.configName = configName;
     }
 }

@@ -965,22 +965,28 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     public Integer getOrgIdForFileDropPath(configurationFileDropFields fileDropInfo) throws Exception {
-	
+        
         try {
-            String sql = ("select b.orgId "
-	    + "from configurationtransportdetails a inner join "
-	    + "configurations b on b.id = a.configId "
-	    + "where a.id = :transportId");
-	    
-            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
-            query.setParameter("transportId", fileDropInfo.getTransportId());
-	    
-            Integer orgId = (Integer) query.list().get(0);
+            
+            if(fileDropInfo != null) {
+                String sql = ("select b.orgId "
+                + "from configurationtransportdetails a inner join "
+                + "configurations b on b.id = a.configId "
+                + "where a.id = :transportId");
 
-            return orgId;
+                Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, Integer.class)
+                .setParameter("transportId", fileDropInfo.getTransportId());
+                
+                Integer orgId = (Integer) query.uniqueResult();
+
+                return orgId;
+            }
+            else {
+                return null;
+            }
 
         } catch (Exception ex) {
-            System.err.println("getOrgIdForFileDropPath  " + ex.getCause());
+            System.err.println("getOrgIdForFileDropPath " + ex.getMessage());
             return null;
         }
     }
@@ -1547,13 +1553,23 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = true)
     public List<configurationFTPFields> getFTPSourceConfigurations() {
         
-	String sql = "select a.id, a.transportId, a.IP as ip, a.directory, a.username, a.password, a.port, a.protocol "
+	String sql = "select a.id, a.transportId, a.IP as ip, a.directory, a.username, a.password, a.method, a.port, a.protocol, a.certification "
 	    + "from rel_transportftpdetails a "
 	    + "inner join configurationtransportdetails b on b.id = a.transportId "
 	    + "inner join configurations c on c.id = b.configId "
 	    + "where c.deleted = 0 and c.status = 1 and c.type = 1 order by a.id asc;";
 	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationFTPFields.class);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationFTPFields.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+	.addScalar("transportId", StandardBasicTypes.INTEGER)
+	.addScalar("ip", StandardBasicTypes.STRING)
+        .addScalar("directory", StandardBasicTypes.STRING)        
+	.addScalar("username", StandardBasicTypes.STRING)
+	.addScalar("password", StandardBasicTypes.STRING)
+        .addScalar("method", StandardBasicTypes.INTEGER)        
+	.addScalar("port", StandardBasicTypes.INTEGER)
+	.addScalar("protocol", StandardBasicTypes.STRING)
+        .addScalar("certification", StandardBasicTypes.STRING);        
            
         return query.list();
     }

@@ -824,7 +824,8 @@ public class adminConfigController {
             emptyFileDropFields.add(getRFields);
 
             transportDetails.setFileDropFields(emptyFileDropFields);
-        } else {
+        } 
+        else {
 	   
 	    //Check that the file drop location has the current configuration name
 	    String fileLocationConfigName = "";
@@ -1704,7 +1705,7 @@ public class adminConfigController {
         mav.setViewName("administrator/configurations/dataTranslations/dataTranslations");
         mav.addObject("pageId", "configuration-translations");
         mav.addObject("pageSection", "section-configurations");
-        mav.addObject("sect","translations");
+        mav.addObject("sect","config");
         mav.addObject("actionPage","translations");
         mav.addObject("id", configId);
         mav.addObject("mappings", session.getAttribute("configmappings"));
@@ -2287,7 +2288,7 @@ public class adminConfigController {
         mav.setViewName("administrator/configurations/schedule/schedule");
         mav.addObject("pageId", "configuration-schedule");
         mav.addObject("pageSection", "section-configurations");
-        mav.addObject("sect","schedule");
+        mav.addObject("sect","config");
         mav.addObject("actionPage","schedule");
         mav.addObject("eahUT", eahUT);
         
@@ -4365,7 +4366,7 @@ public class adminConfigController {
         mav.setViewName("administrator/configurations/notes/list");
         mav.addObject("pageId", "configuration-notes");
         mav.addObject("pageSection", "section-configurations");
-        mav.addObject("sect","notes");
+        mav.addObject("sect","config");
         mav.addObject("actionPage","notes");
 
         //Get the utConfiguration details for the selected config

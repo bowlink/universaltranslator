@@ -1,179 +1,121 @@
 
 
-require(['./main'], function () {
+
+jQuery(function ($) {
     
-    $(document).on('click', '.exportConfig', function() {
-            
-        var configId = $(this).attr('rel');
+    $(document).ready(function () {
+    
+        //Selected transport method
+        var transportMethod = $('#transportMethod').val();
+        var helRegistryId = $('#helRegistryId').val();
+        var helSchemaName = $('#helSchemaName').val();
+        var messageTypeId = $('#messageTypeId').val();
+        var fileType = $('#fileType').val();
 
-        if(confirm("Are you sure you want to export this configuration?")) {
+        showCorrectFieldsByTransportMethod(transportMethod);
+        showCorrectFileDetails(fileType,0);
 
-            $.ajax({
-                url: 'createConfigExportFile.do',
-                data: {
-                    'configId': configId
-                },
-                type: "GET",
-                dataType : 'text',
-                contentType : 'application/json;charset=UTF-8',
-                success: function(data) {
-                    if(data !== '') {
-                        window.location.href = '/administrator/configurations/printConfigExport/'+ data;
-                        //$('#dtDownloadModal').modal('toggle');
-                    }
-                    else {
-                        $('#exportErrorMsg').show();
-                    }
-                }
-            });
+        //if the selected transport method is From a Health-e-Link Registry or going to a Health-e-Link registry
+        //show the conifguration box
+        if(transportMethod == 13 && messageTypeId == 1 && helRegistryId > 0 && helSchemaName !== "") {
+            $('#helRegistryConfigDiv').show();
+            $('#ergFileDownloadDiv').show();
+            populateHELRegistryConfigs(helRegistryId,helSchemaName);
         }
-    });
-        
-    $(document).on('click','.printConfig',function() {
-        $('body').overlay({
-           glyphicon : 'print',
-           message : 'Gathering Details...'
+
+        $('#transportMethod').change(function () {
+            var methodId = $(this).val();
+            var currMethod = $(this).attr('rel');
+
+            if(methodId == 13 && messageTypeId == 1 && helRegistryId > 0 && helSchemaName !== "") {
+                $('#ergFileDownloadDiv').show();
+                $('#helRegistryConfigDiv').show();
+                populateHELRegistryConfigs(helRegistryId,helSchemaName);
+
+                //Set the file drop location
+                //$('#directory2').val('/HELProductSuite/registries/'+$('#helRegistryFolderName').val()+'/loadFiles/');
+                $('#directory2').val($('#helRegistryFolderName').val()+'/loadFiles/');
+
+                //If method == 10 (Coming from a HEL Registry online form preset the values
+                $('#fileType').val(2);
+                $('#fileExt').val('txt');
+            }
+            else {
+                $('#ergFileDownloadDiv').hide();
+                $('#helRegistryConfigDiv').hide();
+                $('#helRegistryConfigId').find('option').remove().end().append('<option value="">- Select Registry Configuration -</option>').val('');
+            }
+
+            showCorrectFieldsByTransportMethod(methodId);
         });
 
-        var configId = $(this).attr('rel');
 
-        $.ajax({
-            url: 'createConfigPrintPDF.do',
-            data: {
-                'configId': configId
-            },
-            type: "GET",
-            dataType : 'text',
-            contentType : 'application/json;charset=UTF-8',
-            success: function(data) {
-                if(data !== '') {
-                    window.location.href = '/administrator/configurations/printConfig/'+ data;
-                    $('.overlay').css('display','none');
-                }
-                else {
-                    $('#errorMsg').show();
-                }
+        $(document).on('change','#ergFileDownload',function() {
+            var fileDropDir = $('#directory2').val();
+            if($(this).val() == 1) {
+                $('#directory2').val(fileDropDir.replace('loadFiles','importFiles'));
+            }
+            else {
+                $('#directory2').val(fileDropDir.replace('importFiles','loadFiles'));
             }
         });
-    });
 
-    $("input:text,form").attr("autocomplete", "off");
+        $(document).on('change','#dmFindConfig',function() {
+            if($(this).val() == 1) {
+                $('.dmConfigKeywordDiv').show();
+            }
+            else {
+                $('#dmConfigKeyword').val("");
+                $('.dmConfigKeywordDiv').hide();
+            }
+        });
 
-    //Fade out the updated/created message after being displayed.
-    if ($('.alert').length > 0) {
-        $('.alert').delay(2000).fadeOut(1000);
-    }
+        $('#useSource').click(function () {
+            if ($('#useSource').is(":checked")) {
+                $('#targetFileName').val("USE SOURCE FILE");
+            } else {
+                $('#targetFileName').val("");
+            }
+        });
 
-    //Selected transport method
-    var transportMethod = $('#transportMethod').val();
-    var helRegistryId = $('#helRegistryId').val();
-    var helSchemaName = $('#helSchemaName').val();
-    var messageTypeId = $('#messageTypeId').val();
-    var fileType = $('#fileType').val();
+        //This function will save the messgae type field mappings
+        $('#saveDetails').click(function () {
+            $('#action').val('save');
 
-    showCorrectFieldsByTransportMethod(transportMethod);
-    showCorrectFileDetails(fileType,0);
+            //Need to make sure all required fields are marked if empty.
+            var hasErrors = 0;
+            hasErrors = checkFormFields();
 
-    //if the selected transport method is From a Health-e-Link Registry or going to a Health-e-Link registry
-    //show the conifguration box
-    if(transportMethod == 13 && messageTypeId == 1 && helRegistryId > 0 && helSchemaName !== "") {
-        $('#helRegistryConfigDiv').show();
-        $('#ergFileDownloadDiv').show();
-        populateHELRegistryConfigs(helRegistryId,helSchemaName);
-    }
+            if (hasErrors == 0) {
+                $('#transportDetails').submit();
+            }
+        });
 
-    $('#transportMethod').change(function () {
-        var methodId = $(this).val();
-        var currMethod = $(this).attr('rel');
+        $('#next').click(function (event) {
+            $('#action').val('next');
 
-        if(methodId == 13 && messageTypeId == 1 && helRegistryId > 0 && helSchemaName !== "") {
-            $('#ergFileDownloadDiv').show();
-            $('#helRegistryConfigDiv').show();
-            populateHELRegistryConfigs(helRegistryId,helSchemaName);
+            var hasErrors = 0;
+            hasErrors = checkFormFields();
 
-            //Set the file drop location
-            //$('#directory2').val('/HELProductSuite/registries/'+$('#helRegistryFolderName').val()+'/loadFiles/');
-            $('#directory2').val($('#helRegistryFolderName').val()+'/loadFiles/');
+            if (hasErrors == 0) {
+                $('#transportDetails').submit();
+            }
+        });
 
-            //If method == 10 (Coming from a HEL Registry online form preset the values
-            $('#fileType').val(2);
-            $('#fileExt').val('txt');
-        }
-        else {
-            $('#ergFileDownloadDiv').hide();
-            $('#helRegistryConfigDiv').hide();
-            $('#helRegistryConfigId').find('option').remove().end().append('<option value="">- Select Registry Configuration -</option>').val('');
-        }
-        
-        showCorrectFieldsByTransportMethod(methodId);
-    });
+        //Set the default file extension when the file type is selected
+        $('#fileType').change(function () {
+            var fileType = $(this).val();
+            showCorrectFileDetails(fileType,1);
+        });
 
-
-    $(document).on('change','#ergFileDownload',function() {
-        var fileDropDir = $('#directory2').val();
-        if($(this).val() == 1) {
-            $('#directory2').val(fileDropDir.replace('loadFiles','importFiles'));
-        }
-        else {
-            $('#directory2').val(fileDropDir.replace('importFiles','loadFiles'));
-        }
-    });
-
-    $(document).on('change','#dmFindConfig',function() {
-        if($(this).val() == 1) {
-            $('.dmConfigKeywordDiv').show();
-        }
-        else {
-            $('#dmConfigKeyword').val("");
-            $('.dmConfigKeywordDiv').hide();
-        }
-    });
-
-    $('#useSource').click(function () {
-        if ($('#useSource').is(":checked")) {
-            $('#targetFileName').val("USE SOURCE FILE");
-        } else {
-            $('#targetFileName').val("");
-        }
-    });
-
-    //This function will save the messgae type field mappings
-    $('#saveDetails').click(function () {
-        $('#action').val('save');
-
-        //Need to make sure all required fields are marked if empty.
-        var hasErrors = 0;
-        hasErrors = checkFormFields();
-
-        if (hasErrors == 0) {
-            $('#transportDetails').submit();
-        }
-    });
-
-    $('#next').click(function (event) {
-        $('#action').val('next');
-
-        var hasErrors = 0;
-        hasErrors = checkFormFields();
-
-        if (hasErrors == 0) {
-            $('#transportDetails').submit();
-        }
-    });
-
-    //Set the default file extension when the file type is selected
-    $('#fileType').change(function () {
-        var fileType = $(this).val();
-        showCorrectFileDetails(fileType,1);
-    });
-
-    $('.zipped').change(function () {
-       if($(this).val() == 1) {
-           $('#zipTypeTopDiv').show();
-       }
-       else {
-           $('#zipTypeTopDiv').hide();
-       }
+        $('.zipped').change(function () {
+           if($(this).val() == 1) {
+               $('#zipTypeTopDiv').show();
+           }
+           else {
+               $('#zipTypeTopDiv').hide();
+           }
+        });
     });
 });
 
@@ -209,7 +151,7 @@ function showCorrectFileDetails(fileType,fileTypeChanged) {
 
     $('#fileDelimiterDiv').show();
     $('#lineTerminatortDiv').show();
-
+    
     if (fileType == 2) {
         $('#fileExt').val('txt');
         if(fileTypeChanged === 1) {
@@ -220,7 +162,7 @@ function showCorrectFileDetails(fileType,fileTypeChanged) {
         $('#lineTerminatortDiv').show();
         $('#fileExtDiv').hide();
         $('#encodingDiv').show();
-		$('#addTargetFileHeaderRowDiv').show();
+        $('#addTargetFileHeaderRowDiv').show();
     } 
     else if (fileType == 3) {
         $('#fileExt').val('csv');

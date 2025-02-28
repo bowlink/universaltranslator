@@ -803,7 +803,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	+ "where (dateCreated >= '" + fromDate + "' and dateCreated < '" + toDate + "')  "
 	+ "and statusId = 41";
 
-	Query getRejectedCount = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
+	Query getRejectedCount = sessionFactory.getCurrentSession().createNativeQuery(sql, BigInteger.class);
 
 	return (BigInteger) getRejectedCount.uniqueResult();
     }
@@ -1421,7 +1421,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     
     @Override
     @Transactional(readOnly = true)
-    public List<batchDownloads> getAllSentBatchesPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
+    public List<Object> getAllSentBatchesPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
 	
 	String dateSQLString = "";
 	String dateSQLStringTotal = "";
@@ -1456,13 +1456,13 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	}
 	
 	String sqlQuery = "select id, orgId, utBatchName, transportMethodId, outputFileName, totalRecordCount, totalErrorCount, configName, threshold, statusId, dateCreated,"
-	+ "startDateTime, endDateTime, batchUploadId, deleted, lastDownloaded, userId, mergeable, configId, statusValue, endUserDisplayText, orgName, transportMethod, fromBatchName, fromBatchFile, totalMessages, srcOrgName "
+	+ "startDateTime, endDateTime, batchUploadId, deleted, lastDownloaded, userId, mergeable, configId, statusValue, endUserDisplayText, orgName, transportMethod, fromBatchName, fromBatchFile, totalMessages, srcOrgName, originalFileName "
 	+ "FROM ("
 	+ "select a.id, a.orgId, a.utBatchName, a.transportMethodId, a.outputFileName, a.totalRecordCount, a.totalErrorCount, b.configName, b.threshold,"
 	+ "a.statusId, a.dateCreated, a.startDateTime, a.deleted, a.userId, a.lastDownloaded, a.mergeable, a.endDateTime, a.configId, a.batchUploadId, c.displayCode as statusValue, c.endUserDisplayText as endUserDisplayText, d.orgName, e.transportMethod, f.utBatchName as fromBatchName,"
 	+ "case when f.transportMethodId = 5 THEN CONCAT(f.utBatchName,'.',SUBSTRING_INDEX(f.originalFileName,'.',-1)) "
 	+ "when f.transportMethodId = 1 THEN CONCAT(f.utBatchName,'.',SUBSTRING_INDEX(f.originalFileName,'.',-1)) "
-	+ "else '' end as fromBatchFile,"
+	+ "else '' end as fromBatchFile, f.originalFileName, "
 	+ "(select count(id) as total from batchdownloads where "+dateSQLStringTotal+") as totalMessages, g.orgName as srcOrgName "
 	+ "FROM batchdownloads a inner join "
 	+ "configurations b on b.id = a.configId inner join "
@@ -1495,15 +1495,20 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	}
 	
 	sqlQuery += "order by "+sortColumnName+" "+sortDirection;
-	
-	if(displayRecords > 0) {
+        
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,batchDownloads.class);
+        
+        List<Object> batchSentMessages = new ArrayList<>();
+        batchSentMessages.add(query.list().size());
+        
+        if(displayRecords > 0) {
 	    sqlQuery += " limit " + displayStart + ", " + displayRecords;
 	}
 	else {
 	    sqlQuery += " limit " + displayStart+ ", 1000000";
 	}
-	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,batchDownloads.class)
+        
+	query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,batchDownloads.class)
 	.addScalar("id", StandardBasicTypes.INTEGER)
 	.addScalar("orgId", StandardBasicTypes.INTEGER)
 	.addScalar("utBatchName", StandardBasicTypes.STRING)
@@ -1530,15 +1535,17 @@ public class transactionOutDAOImpl implements transactionOutDAO {
         .addScalar("deleted", StandardBasicTypes.BOOLEAN)
         .addScalar("mergeable", StandardBasicTypes.BOOLEAN)
         .addScalar("lastDownloaded", StandardBasicTypes.TIMESTAMP)
-        .addScalar("userId", StandardBasicTypes.INTEGER);        
+        .addScalar("userId", StandardBasicTypes.INTEGER)
+        .addScalar("originalFileName", StandardBasicTypes.STRING);
         
         List<Object[]> results = query.getResultList();
         
-        List<batchDownloads> batchSentMessages = new ArrayList<>();
+        List<batchDownloads> batchDownloads = new ArrayList<>();
         
         results.stream().forEach((record) -> {
             batchDownloads bDownload = new batchDownloads();
             bDownload.setId((Integer) record[1]);
+            bDownload.setOrgId((Integer) record[2]);
             bDownload.setDateSubmitted((Date) record[10]);
             bDownload.setStartDateTime((Date) record[11]);
             bDownload.setEndDateTime((Date) record[12]);
@@ -1552,9 +1559,18 @@ public class transactionOutDAOImpl implements transactionOutDAO {
             bDownload.setStatusId((Integer) record[9]);
             bDownload.setEndUserDisplayText((String) record[20]);
             bDownload.setThreshold((Integer) record[21]);
+            bDownload.setStatusValue((String) record[13]);
+            bDownload.setFromBatchName((String) record[16]);
+            bDownload.setSrcOrgName((String) record[19]);
+            bDownload.setConfigId((Integer) record[22]);
+            bDownload.setOriginalFileName((String) record[28]);
+            bDownload.setBatchUploadId((Integer) record[23]);
+            bDownload.setOutputFileName((String) record[5]);
             
-            batchSentMessages.add(bDownload);
+            batchDownloads.add(bDownload);
         });
+        
+        batchSentMessages.add(batchDownloads);
         
         return batchSentMessages;
     }
@@ -1716,7 +1732,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     
     @Override
     @Transactional(readOnly = true)
-    public List<directmessagesout> getDirectMessagesOutListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
+    public List<Object> getDirectMessagesOutListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
 	
 	String dateSQLString = "";
 	String dateSQLStringTotal = "";
@@ -1744,10 +1760,11 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    }
 	}
 	
-	String sqlQuery = "select id, statusName, orgName, dateCreated, configId, batchDownloadId, batchName, totalMessages "
+	String sqlQuery = "select id, hispId, fromDirectAddress, toDirectAddress, outputFileName, dateCreated, statusId, batchUploadId, batchDownloadId, configId, orgId, responseStatus, responseMessage,"
+        + "statusName, orgName, batchName, totalMessages "
 	+ "from ("
-	+ "select a.id, a.batchDownloadId, a.dateCreated, a.configId, IFNULL(b.orgName,\"\") as orgName,"
-	+ "CASE WHEN a.statusId = 1 THEN 'To be processed' WHEN a.statusId = 2 THEN 'Processed' ELSE 'Rejected' END as statusName,"
+	+ "select a.id, a.hispId, a.fromDirectAddress, a.toDirectAddress, a.outputFileName, a.dateCreated, a.statusId, a.batchUploadId, a.batchDownloadId, a.configId, a.orgId, a.responseStatus, a.responseMessage,"
+        + "CASE WHEN a.statusId = 1 THEN 'To be processed' WHEN a.statusId = 2 THEN 'Processed' ELSE 'Rejected' END as statusName, IFNULL(b.orgName,\"\") as orgName,"
 	+ "IFNULL(c.utBatchName,\"\") as batchName,"
 	+ "(select count(id) as total from directmessagesout where "+dateSQLStringTotal+") as totalMessages "
 	+ "FROM directmessagesout a left outer join  "
@@ -1767,27 +1784,67 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	}	
 	
 	sqlQuery += "order by "+sortColumnName+" "+sortDirection;
+        
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,directmessagesout.class);
 	
-	if(displayRecords > 0) {
+	List<Object> directOutMessages = new ArrayList<>();
+        directOutMessages.add(query.list().size());
+        
+        if(displayRecords > 0) {
 	    sqlQuery += " limit " + displayStart + ", " + displayRecords;
 	}
 	else {
 	    sqlQuery += " limit " + displayStart+ ", 1000000";
 	}
+        
+	query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,directmessagesout.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("hispId", StandardBasicTypes.INTEGER)
+        .addScalar("fromDirectAddress", StandardBasicTypes.STRING)
+        .addScalar("toDirectAddress", StandardBasicTypes.STRING)
+        .addScalar("outputFileName", StandardBasicTypes.STRING)
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)  
+        .addScalar("statusId", StandardBasicTypes.INTEGER)        
+        .addScalar("batchUploadId", StandardBasicTypes.INTEGER)
+        .addScalar("batchDownloadId", StandardBasicTypes.INTEGER)        
+        .addScalar("configId", StandardBasicTypes.INTEGER)       
+        .addScalar("orgId", StandardBasicTypes.INTEGER)      
+        .addScalar("responseStatus", StandardBasicTypes.INTEGER)
+        .addScalar("responseMessage", StandardBasicTypes.STRING)       
+        .addScalar("statusName", StandardBasicTypes.STRING)        
+        .addScalar("orgName", StandardBasicTypes.STRING)  
+        .addScalar("batchName", StandardBasicTypes.STRING)
+        .addScalar("totalMessages", StandardBasicTypes.INTEGER);
 	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,directmessagesout.class)
-	    .addScalar("id", StandardBasicTypes.INTEGER)
-	    .addScalar("statusName", StandardBasicTypes.STRING)
-	    .addScalar("orgName", StandardBasicTypes.STRING)
-	    .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
-	    .addScalar("batchDownloadId", StandardBasicTypes.INTEGER)
-	    .addScalar("configId", StandardBasicTypes.INTEGER)
-	    .addScalar("batchName", StandardBasicTypes.STRING)
-	    .addScalar("totalMessages", StandardBasicTypes.INTEGER);
+	List<Object[]> results = query.getResultList();
+        
+        List<directmessagesout> directmessages = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            directmessagesout directMessage = new directmessagesout();
+            directMessage.setId((Integer) record[1]);
+            directMessage.setHispId((Integer) record[2]);
+            directMessage.setFromDirectAddress((String) record[3]);
+            directMessage.setToDirectAddress((String) record[4]);
+            directMessage.setOutputFileName((String) record[5]);
+            directMessage.setDateCreated((Date) record[6]);
+            directMessage.setStatusId((Integer) record[7]);
+            directMessage.setBatchUploadId((Integer) record[8]);
+            directMessage.setBatchDownloadId((Integer) record[9]);
+            directMessage.setConfigId((Integer) record[10]);
+            directMessage.setOrgId((Integer) record[11]);
+            directMessage.setResponseStatus((Integer) record[12]);
+            directMessage.setResponseMessage((String) record[13]);
+            directMessage.setStatusName((String) record[14]);
+            directMessage.setOrgName((String) record[15]);
+            directMessage.setBatchName((String) record[16]);
+            directMessage.setTotalMessages((Integer) record[17]);
+            directmessages.add(directMessage);
+        });
+        
+        directOutMessages.add(directmessages);
 	
-	List<directmessagesout> directmessagesout = query.list();
-	
-        return directmessagesout;
+        return directOutMessages;
     }
     
     @Override
@@ -1844,8 +1901,12 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	+ ") rptField4 on rptField4.fieldNo = cs.rptField4 and rptField4.configId = e.configId "
 	+ "where e.batchDownloadId = :batchDownloadId limit 1";
 	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
-	query.setParameter("batchDownloadId", batchDownloadId);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
+        .addScalar("rptLabel1", StandardBasicTypes.STRING)
+        .addScalar("rptLabel2", StandardBasicTypes.STRING)     
+        .addScalar("rptLabel3", StandardBasicTypes.STRING)  
+        .addScalar("rptLabel4", StandardBasicTypes.STRING)          
+	.setParameter("batchDownloadId", batchDownloadId);
 
 	return query.list();
     }

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+    <head>
+        <title>Health-e-Link UT Bad File Paths</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/systemAdmin/actionBar :: actionBar}"></div>
+            <div th:insert="~{administrator/systemAdmin/menuBar :: menuBar}"></div>
+            <div class="main clearfix" role="main">
+                <div class="col-md-12">
+                    <div class="alert alert-success" role="alert" th:if="${param.msg != null}">
+                        <strong>Success!</strong> 
+                        <p>The invalid file path has been successfully removed!</p>
+                    </div>
+                    <section class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Bad File Paths</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="scrollable">
+                                <div class="col-md-12">
+                                    <table class="table table-striped table-hover table-default" th:id="${not #lists.isEmpty(pathList) ? 'badfilepathtable' : ''}">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">File Path</th>
+                                                <th scope="col" class="center-text">Start Date Time</th>
+                                                <th scope="col" class="center-text">End Date Time</th>
+                                                <th scope="col"></th>
+                                            </tr>
+                                        </thead>
+                                        <div th:if="${not #lists.isEmpty(pathList)}">
+                                            <tr style="cursor: pointer" th:each="filePath : ${pathList}">
+                                                <td scope="row" th:text="${filePath.folderPath}"></td>
+                                                <td class="center-text" th:text="${#dates.format(filePath.startDateTime, 'M/dd/yy h:mm a')}"></td>
+                                                <td class="center-text" th:text="${#dates.format(filePath.endDateTime, 'M/dd/yy h:mm a')}"></td>
+                                                <td class="center-text">
+                                                    <a href="#" class="btn btn-link deleteFilePath" title="Delete  this file path" th:rel="${filePath.id}">
+                                                        <span class="glyphicon glyphicon-edit"></span>
+                                                        Delete Bad Path Log
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </div>
+                                        <div th:unless="${not #lists.isEmpty(pathList)}">
+                                             <tr><td colspan="4" class="center-text">There are currently no invalid file paths.</td></tr>
+                                        </div>
+                                    </table>
+                                </div>    
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>		
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
+            <script th:src="@{/dspResources/js/overlay.js}"></script>    
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.min.js}"></script>
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.bootstrap.min.js}"></script>
+            <script th:src="@{/dspResources/js/admin/sysadmin/badFilePaths/badFilePaths.js}"></script>
+            <script th:src="@{/dspResources/js/admin/sysadmin/mainAdminFunctions.js}"></script>
+        </th:block>
+    </body>
+</html>

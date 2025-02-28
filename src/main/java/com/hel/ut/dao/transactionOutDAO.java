@@ -115,7 +115,7 @@ public interface transactionOutDAO {
     
     boolean chechForTransactionInTable(Integer batchUploadId) throws Exception;
     
-    List<batchDownloads> getAllSentBatchesPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
+    List<Object> getAllSentBatchesPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
     
     void insertDMMessage(directmessagesout newDirectMessageOut) throws Exception;
     
@@ -129,7 +129,7 @@ public interface transactionOutDAO {
     
     Integer getTotalErrors(Integer batchId) throws Exception;
     
-    List<directmessagesout> getDirectMessagesOutListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
+    List<Object> getDirectMessagesOutListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
     
     directmessagesout getDirectAPIMessagesById(Integer directMessageId);
     

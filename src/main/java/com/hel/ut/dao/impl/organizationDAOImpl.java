@@ -461,9 +461,9 @@ public class organizationDAOImpl implements organizationDAO {
 	    query += " and ("
             + "id like '%"+searchTerm+"%' "       
 	    + "OR dateCreated like '%"+searchTerm+"%' "
-	    + "OR orgName like '%"+searchTerm+"%'"
+	    + "OR orgName like '%"+searchTerm.toLowerCase()+"%'"
 	    + "OR organizationType like '%"+searchTerm+"%'"
-	    + "OR helRegistry like '%"+searchTerm+"%'"
+	    + "OR helRegistry like '%"+searchTerm.toLowerCase()+"%'"
 	    + ") ";
 	}	
         	
@@ -488,13 +488,79 @@ public class organizationDAOImpl implements organizationDAO {
     @Transactional(readOnly = true)
     public List<Organization> getAgenciesForReport(Integer registryType) throws Exception {
 	
-	String sqlQuery = "select distinct a.id, a.orgName from organizations a inner join configurations b on b.orgId = a.id ";
-	sqlQuery += "where b.messageTypeId = :registryType and b.status = 1 order by a.orgName asc";
+	String sqlQuery = "select distinct a.id, a.orgName, a.address,a.address2, a.city, a.state, a.postalCode, a.fax, a.phone, a.dateCreated, a.status, a.cleanURL, a.orgType, a.helRegistryId,"
+        + "a.parsingTemplate, a.orgDesc, a.town, a.county, a.infoURL, a.country, a.helRegistryOrgId, a.helRegistrySchemaName, a.primaryContactEmail, a.parentOrgId, a.primaryContactName,"
+        + "a.primaryTechContactEmail, a.primaryTechContactName "        
+        + "from organizations a inner join configurations b on b.orgId = a.id "
+	+ "where b.messageTypeId = :registryType and b.status = 1 order by a.orgName asc";
 	
 	Query q1 = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,Organization.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("orgName", StandardBasicTypes.STRING)  
+        .addScalar("address", StandardBasicTypes.STRING)  
+        .addScalar("address2", StandardBasicTypes.STRING)
+        .addScalar("city", StandardBasicTypes.STRING)
+        .addScalar("state", StandardBasicTypes.STRING)
+        .addScalar("postalCode", StandardBasicTypes.STRING)
+        .addScalar("fax", StandardBasicTypes.STRING)
+        .addScalar("phone", StandardBasicTypes.STRING)
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
+        .addScalar("status", StandardBasicTypes.BOOLEAN)
+        .addScalar("cleanURL", StandardBasicTypes.STRING)
+        .addScalar("orgType", StandardBasicTypes.INTEGER)
+        .addScalar("helRegistryId", StandardBasicTypes.INTEGER)
+        .addScalar("parsingTemplate", StandardBasicTypes.STRING)
+        .addScalar("orgDesc", StandardBasicTypes.STRING)
+        .addScalar("town", StandardBasicTypes.STRING)
+        .addScalar("county", StandardBasicTypes.STRING)
+        .addScalar("infoURL", StandardBasicTypes.STRING)
+        .addScalar("country", StandardBasicTypes.STRING)
+        .addScalar("helRegistryOrgId", StandardBasicTypes.INTEGER)
+        .addScalar("helRegistrySchemaName", StandardBasicTypes.STRING)
+        .addScalar("primaryContactEmail", StandardBasicTypes.STRING)
+        .addScalar("parentOrgId", StandardBasicTypes.INTEGER)
+        .addScalar("primaryContactName", StandardBasicTypes.STRING)
+        .addScalar("primaryTechContactEmail", StandardBasicTypes.STRING)
+        .addScalar("primaryTechContactName", StandardBasicTypes.STRING)        
         .setParameter("registryType", registryType);
-
-	return q1.list();
+        
+        List<Object[]> results = q1.getResultList();
+        
+        List<Organization> orgs = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            Organization org = new Organization();
+            org.setId((Integer) record[1]);
+            org.setOrgName((String) record[2]);
+            org.setAddress((String) record[3]);
+            org.setAddress2((String) record[4]);
+            org.setCity((String) record[5]);
+            org.setState((String) record[6]);
+            org.setPostalCode((String) record[7]);
+            org.setFax((String) record[8]);
+            org.setPhone((String) record[9]);
+            org.setDateCreated((Date) record[10]);
+            org.setStatus((Boolean) record[11]);
+            org.setCleanURL((String) record[12]);
+            org.setOrgType((Integer) record[13]);
+            org.setHelRegistryId((Integer) record[14]);
+            org.setParsingTemplate((String) record[15]);
+            org.setOrgDesc((String) record[16]);
+            org.setTown((String) record[17]);
+            org.setCounty((String) record[18]);
+            org.setInfoURL((String) record[19]);
+            org.setCountry((String) record[20]);
+            org.setHelRegistryOrgId((Integer) record[21]);
+            org.setHelRegistrySchemaName((String) record[22]);
+            org.setPrimaryContactEmail((String) record[23]);
+            org.setParentOrgId((Integer) record[24]);
+            org.setPrimaryContactName((String) record[25]);
+            org.setPrimaryTechContactEmail((String) record[26]);
+            org.setPrimaryTechContactName((String) record[27]);
+            orgs.add(org);
+        });
+        
+        return orgs;
     }
     
     @Override

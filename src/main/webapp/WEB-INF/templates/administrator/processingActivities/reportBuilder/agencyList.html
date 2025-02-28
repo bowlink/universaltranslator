@@ -1,0 +1,33 @@
+<div class="row">
+    <div class="col-md-12">
+        <div th:if="${not #lists.isEmpty(agencies)}">
+            <table class="table table-hover table-default" style="border-bottom:1px solid;margin: 0px; padding:0px;">
+                <thead>
+                    <tr>
+                        <th style="width:10%; text-align: center;">
+                            <input type="checkbox" id="checkAll" > Check All
+                        </th>
+                        <th style="width:90%">Agency</th>
+                    </tr>
+                </thead>
+            </table>
+            <div style="height:350px; overflow-y: scroll">
+                <table class="table table-hover" style="border-collapse: collapse; width:100%">
+                    <tbody>
+                        <th:block th:each="agency : ${agencies}">
+                            <tr>
+                                <td style="width:15%; text-align: center;">
+                                    <input type="checkBox" id="selAgency" name="selAgency" th:value="${agency.id}" />
+                                </td>
+                                <td style="width:85%" th:text="${agency.orgName}"></td>
+                            </tr>
+                        </th:block>
+                    </tbody>
+                </table>
+           </div> 
+        </div>
+        <div th:unless="${not #lists.isEmpty(agencies)}">
+            <p>No agencies were found based on the selected activity report.</p>
+        </div>
+    </div>
+</div>

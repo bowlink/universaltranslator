@@ -16,6 +16,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.util.ArrayList;
 import org.hibernate.query.Query;
 import org.hibernate.type.StandardBasicTypes;
 
@@ -208,7 +209,7 @@ public class RestAPIDAOImpl implements RestAPIDAO {
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
-    public List<RestAPIMessagesIn> getRestAPIMessagesInListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
+    public List<Object> getRestAPIMessagesInListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
 	
 	String dateSQLString = "";
 	String dateSQLStringTotal = "";
@@ -237,17 +238,19 @@ public class RestAPIDAOImpl implements RestAPIDAO {
 	}
 	
 	
-	String sqlQuery = "select id, statusName, errorDisplayText, orgName, dateCreated, configId, batchUploadId, batchName, totalMessages "
-		+ "from ("
-		+ "select a.id, a.batchUploadId, a.dateCreated, a.configId, c.orgName,"
-		+ "CASE WHEN a.statusId = 1 THEN 'To be processed' WHEN a.statusId = 2 THEN 'Processed' ELSE 'Rejected' END as statusName,"
-		+ "IFNULL(b.displayText, \"N/A\") as errorDisplayText, IFNULL(d.utBatchName,\"\") as batchName,"
-		+ "(select count(id) as total from restapimessagesin where "+dateSQLStringTotal+") as totalMessages "
-		+ "FROM restapimessagesin a left outer join "
-		+ "lu_errorCodes b on b.id = a.errorId inner join "
-		+ "organizations c on c.id = a.orgId left outer join  "
-		+ "batchuploads d on d.id = a.batchUploadId "
-		+ "where " + dateSQLString + ") as messagesIn ";
+	String sqlQuery = "select id, orgId, archiveFileName, statusId, errorId, dateCreated, batchUploadId, configId, messageTitle, orgName, statusName, errorDisplayText, "
+        + "batchName, totalMessages, configName "
+        + "from ("
+        + "select a.id, a.orgId, a.archiveFileName, a.statusId, a.errorId, a.dateCreated, a.batchUploadId, a.configId, a.messageTitle, c.orgName,"
+        + "CASE WHEN a.statusId = 1 THEN 'To be processed' WHEN a.statusId = 2 THEN 'Processed' ELSE 'Rejected' END as statusName,"
+        + "IFNULL(b.displayText, \"N/A\") as errorDisplayText, IFNULL(d.utBatchName,\"\") as batchName,"
+        + "(select count(id) as total from restapimessagesin where "+dateSQLStringTotal+") as totalMessages, e.configName "
+        + "FROM restapimessagesin a left outer join "
+        + "lu_errorCodes b on b.id = a.errorId inner join "
+        + "organizations c on c.id = a.orgId inner join "
+        + "configurations e on e.id = a.configId left outer join  "
+        + "batchuploads d on d.id = a.batchUploadId "
+        + "where " + dateSQLString + ") as messagesIn ";
 	
 	if(!"".equals(searchTerm)){
 	    sqlQuery += " where ("
@@ -258,38 +261,74 @@ public class RestAPIDAOImpl implements RestAPIDAO {
 	    + "OR statusName like '%"+searchTerm+"%' "
 	    + "OR dateCreated like '%"+searchTerm+"%' "
 	    + "OR errorDisplayText like '%"+searchTerm+"%'"
+            + "OR configName like '%"+searchTerm+"%'"        
 	    + ") ";
 	}	
 	
 	sqlQuery += "order by "+sortColumnName+" "+sortDirection;
-	if(displayRecords > 0) {
+        
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,RestAPIMessagesIn.class);
+        
+        List<Object> restInMessages = new ArrayList<>();
+        restInMessages.add(query.list().size());
+        
+        if(displayRecords > 0) {
 	    sqlQuery += " limit " + displayStart + ", " + displayRecords;
 	}
 	else {
 	    sqlQuery += " limit " + displayStart+ ", 1000000";
 	}
-	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,RestAPIMessagesIn.class)
+        
+	query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,RestAPIMessagesIn.class)
         .addScalar("id", StandardBasicTypes.INTEGER)
-        .addScalar("statusName", StandardBasicTypes.STRING)
-        .addScalar("errorDisplayText", StandardBasicTypes.STRING)
-        .addScalar("orgName", StandardBasicTypes.STRING)
+        .addScalar("orgId", StandardBasicTypes.INTEGER)
+        .addScalar("archiveFileName", StandardBasicTypes.STRING)  
+        .addScalar("statusId", StandardBasicTypes.INTEGER)    
+        .addScalar("errorId", StandardBasicTypes.INTEGER) 
         .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
         .addScalar("batchUploadId", StandardBasicTypes.INTEGER)
-        .addScalar("configId", StandardBasicTypes.INTEGER)
+        .addScalar("configId", StandardBasicTypes.INTEGER)        
+        .addScalar("messageTitle", StandardBasicTypes.STRING)        
+        .addScalar("orgName", StandardBasicTypes.STRING)       
+        .addScalar("statusName", StandardBasicTypes.STRING)
+        .addScalar("errorDisplayText", StandardBasicTypes.STRING)
         .addScalar("batchName", StandardBasicTypes.STRING)
-        .addScalar("totalMessages", StandardBasicTypes.INTEGER);
+        .addScalar("totalMessages", StandardBasicTypes.INTEGER)
+        .addScalar("configName", StandardBasicTypes.STRING);
+        
+        List<Object[]> results = query.getResultList();
+        
+        List<RestAPIMessagesIn> apimessagesin = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            RestAPIMessagesIn restMessage = new RestAPIMessagesIn();
+            restMessage.setId((Integer) record[1]);
+            restMessage.setOrgId((Integer) record[2]);
+            restMessage.setArchiveFileName((String) record[3]);
+            restMessage.setStatusId((Integer) record[4]);
+            restMessage.setErrorId((Integer) record[5]);
+            restMessage.setDateCreated((Date) record[6]);
+            restMessage.setBatchUploadId((Integer) record[7]);
+            restMessage.setConfigId((Integer) record[8]);
+            restMessage.setMessageTitle((String) record[9]);
+            restMessage.setOrgName((String) record[10]);
+            restMessage.setStatusName((String) record[11]);
+            restMessage.setErrorDisplayText((String) record[12]);
+            restMessage.setBatchName((String) record[13]);
+            restMessage.setTotalMessages((Integer) record[14]);
+            restMessage.setConfigName((String) record[15]);
+            apimessagesin.add(restMessage);
+        });
+        
+        restInMessages.add(apimessagesin);
 	
-	List<RestAPIMessagesIn> apimessagesin = query.list();
-	
-        return apimessagesin;
-
+        return restInMessages;
     }
     
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
-    public List<RestAPIMessagesOut> getRestAPIMessagesOutListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
+    public List<Object> getRestAPIMessagesOutListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
 	
 	String dateSQLString = "";
 	String dateSQLStringTotal = "";
@@ -317,18 +356,19 @@ public class RestAPIDAOImpl implements RestAPIDAO {
 	    }
 	}
 	
-	
-	String sqlQuery = "select id, statusName, errorDisplayText, orgName, dateCreated, configId, batchDownloadId, batchName, totalMessages "
-		+ "from ("
-		+ "select a.id, a.batchDownloadId, a.dateCreated, a.configId, c.orgName,"
-		+ "CASE WHEN a.statusId = 1 THEN 'To be processed' WHEN a.statusId = 2 THEN 'Processed' ELSE 'Rejected' END as statusName,"
-		+ "IFNULL(b.displayText, \"N/A\") as errorDisplayText, IFNULL(d.utBatchName,\"\") as batchName,"
-		+ "(select count(id) as total from restapimessagesout where "+dateSQLStringTotal+") as totalMessages "
-		+ "FROM restapimessagesout a left outer join "
-		+ "lu_errorCodes b on b.id = a.errorId inner join "
-		+ "organizations c on c.id = a.orgId left outer join  "
-		+ "batchdownloads d on d.id = a.batchDownloadId "
-		+ "where " + dateSQLString + ") as messagesIn ";
+	String sqlQuery = "select id, orgId, payload, statusId, errorId, dateCreated, batchDownloadId, configId, responseStatus, responseMessage, statusName, "
+        + "errorDisplayText, orgName, batchName, totalMessages, configName "
+        + "from ("
+        + "select a.id, a.orgId, a.payload, a.statusId, a.errorId, a.dateCreated, a.batchDownloadId, a.configId, a.responseStatus, a.responseMessage, "
+        + "CASE WHEN a.statusId = 1 THEN 'To be processed' WHEN a.statusId = 2 THEN 'Processed' ELSE 'Rejected' END as statusName,"
+        + "IFNULL(b.displayText, \"N/A\") as errorDisplayText, c.orgName, IFNULL(d.utBatchName,\"\") as batchName,"
+        + "(select count(id) as total from restapimessagesout where "+dateSQLStringTotal+") as totalMessages, e.configName "
+        + "FROM restapimessagesout a left outer join "
+        + "lu_errorCodes b on b.id = a.errorId inner join "
+        + "organizations c on c.id = a.orgId inner join "
+        + "configurations e on e.id = a.configId left outer join  "
+        + "batchdownloads d on d.id = a.batchDownloadId "
+        + "where " + dateSQLString + ") as messagesIn ";
 	
 	if(!"".equals(searchTerm)){
 	    sqlQuery += " where ("
@@ -343,28 +383,65 @@ public class RestAPIDAOImpl implements RestAPIDAO {
 	}	
 	
 	sqlQuery += "order by "+sortColumnName+" "+sortDirection;
-	if(displayRecords > 0) {
+	
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,RestAPIMessagesOut.class);
+        
+        List<Object> restOutMessages = new ArrayList<>();
+        restOutMessages.add(query.list().size());
+        
+        if(displayRecords > 0) {
 	    sqlQuery += " limit " + displayStart + ", " + displayRecords;
 	}
 	else {
 	    sqlQuery += " limit " + displayStart+ ", 1000000";
 	}
 	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,RestAPIMessagesOut.class)
+	query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,RestAPIMessagesOut.class)
         .addScalar("id", StandardBasicTypes.INTEGER)
-        .addScalar("statusName", StandardBasicTypes.STRING)
-        .addScalar("errorDisplayText", StandardBasicTypes.STRING)
-        .addScalar("orgName", StandardBasicTypes.STRING)
+        .addScalar("orgId", StandardBasicTypes.INTEGER)
+        .addScalar("payload", StandardBasicTypes.STRING)  
+        .addScalar("statusId", StandardBasicTypes.INTEGER)    
+        .addScalar("errorId", StandardBasicTypes.INTEGER) 
         .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
         .addScalar("batchDownloadId", StandardBasicTypes.INTEGER)
-        .addScalar("configId", StandardBasicTypes.INTEGER)
+        .addScalar("configId", StandardBasicTypes.INTEGER)        
+        .addScalar("responseStatus", StandardBasicTypes.STRING)        
+        .addScalar("responseMessage", StandardBasicTypes.STRING)       
+        .addScalar("statusName", StandardBasicTypes.STRING)
+        .addScalar("errorDisplayText", StandardBasicTypes.STRING)
+        .addScalar("orgName", StandardBasicTypes.STRING)        
         .addScalar("batchName", StandardBasicTypes.STRING)
-        .addScalar("totalMessages", StandardBasicTypes.INTEGER);
+        .addScalar("totalMessages", StandardBasicTypes.INTEGER)
+        .addScalar("configName", StandardBasicTypes.STRING);
 	
-	List<RestAPIMessagesOut> apimessagesout = query.list();
+	List<Object[]> results = query.getResultList();
+        
+        List<RestAPIMessagesOut> apimessagesout = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            RestAPIMessagesOut restMessage = new RestAPIMessagesOut();
+            restMessage.setId((Integer) record[1]);
+            restMessage.setOrgId((Integer) record[2]);
+            restMessage.setPayload((String) record[3]);
+            restMessage.setStatusId((Integer) record[4]);
+            restMessage.setErrorId((Integer) record[5]);
+            restMessage.setDateCreated((Date) record[6]);
+            restMessage.setBatchDownloadId((Integer) record[7]);
+            restMessage.setConfigId((Integer) record[8]);
+            restMessage.setResponseStatus((Integer) record[9]);
+            restMessage.setResponseMessage((String) record[10]);
+            restMessage.setStatusName((String) record[11]);
+            restMessage.setErrorDisplayText((String) record[12]);
+            restMessage.setOrgName((String) record[13]);
+            restMessage.setBatchName((String) record[13]);
+            restMessage.setTotalMessages((Integer) record[14]);
+            restMessage.setConfigName((String) record[15]);
+            apimessagesout.add(restMessage);
+        });
+        
+        restOutMessages.add(apimessagesout);
 	
-        return apimessagesout;
-
+        return restOutMessages;
     }
 
     @SuppressWarnings("unchecked")

@@ -1,0 +1,61 @@
+
+
+<nav class="navbar navbar-default actions-nav" role="navigation"  th:fragment="actionBar">
+    <div class="contain">
+        <div class="navbar-header">
+            <h1 class="section-title navbar-brand">
+                <span th:if="${actionPage == 'badFilePaths'}">Bad File Paths</span>
+                <span th:if="${actionPage == 'macros'}">Standard System Macros</span>
+                <span th:if="${actionPage == 'crosswalks'}">Standard System Crosswalks</span>
+                <span th:if="${actionPage == 'hisps'}">Manage HISPS</span>
+                <span th:if="${actionPage == 'systemadmins'}">Manage System Administrators</span>
+            </h1>
+        </div>
+        <ul class="nav navbar-nav navbar-right navbar-actions" role="menu">
+            <th:block th:if="${actionPage == 'macros'}">
+                <li>
+                    <a href="#!" class="runTestMacroFile" title="Run Test Macro File" role="button">
+                        <span class="glyphicon glyphicon-play icon-stacked"></span> 
+                        Run Test Macro File
+                    </a>
+                </li>
+                <li>
+                    <a href="#!" class="printMacros" title="Print Full Macro List" role="button">
+                        <span class="glyphicon glyphicon-print icon-stacked"></span> 
+                        Print Macros
+                    </a>
+                </li>
+                <li>
+                    <a href="#macroModal" data-bs-toggle="modal" class="createNewMacro" title="Create New Macro" role="button">
+                        <span class="glyphicon glyphicon-plus icon-stacked"></span> 
+                        New Macro
+                    </a>
+                </li>
+            </th:block>
+            <th:block th:if="${actionPage == 'crosswalks'}">
+                <li>
+                    <a href="#crosswalkModal" data-bs-toggle="modal" class="createNewCrosswalk" title="Create New Crosswalk" role="button">
+                        <span class="glyphicon glyphicon-plus icon-stacked"></span> 
+                        New Crosswalk
+                    </a>
+                </li>
+            </th:block>
+            <th:block th:if="${actionPage == 'hisps'}">
+                <li>
+                    <a href="#hispModal" data-bs-toggle="modal" class="createNewHisp" title="Create New HISP" role="button">
+                        <span class="glyphicon glyphicon-plus icon-stacked"></span> 
+                        New HISP
+                    </a>
+                </li>
+            </th:block>
+            <th:block th:if="${actionPage == 'systemadmins'}">
+                <li>
+                    <a href="#adminModal" data-bs-toggle="modal" class="createNewSystemAdministrator" title="Create New System Administrator" role="button">
+                        <span class="glyphicon glyphicon-plus icon-stacked"></span> 
+                        New System Administrator
+                    </a>
+                </li>
+            </th:block>
+        </ul>
+    </div>
+</nav>

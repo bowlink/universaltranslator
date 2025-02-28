@@ -22,7 +22,7 @@
                         <input type="hidden" th:field="*{dateCreated}"/>
                         <input type="hidden" th:field="*{stepsCompleted}"/>
 
-                        <section class="panel panel-default">
+                        <section class="panel panel-info">
                             <div class="panel-heading">
                                 <h3 class="panel-title">Details</h3>
                             </div>
@@ -40,7 +40,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="type">Configuration Type * <span class="badge badge-help" data-placement="top" title="" data-original-title="Select &quot;For Source&quot; if this is for sending a message and &quot;For Target&quot; if this is for receiving a message">?</span></label>
+                                        <label for="type">Configuration Type * <span class="badge badge-help" id="toolTipBTN" data-bs-toggle="tooltip" data-bs-placement="top" title="Select &quot;For Source&quot; if this is for sending a message and &quot;For Target&quot; if this is for receiving a message">?</span></label>
                                         <div>
                                             <label class="radio-inline">
                                                 <input type="radio" th:field="*{type}" value="1" th:disabled="${id > 0}" /> For Source Organization 
@@ -73,7 +73,7 @@
                                     <div class="form-group" th:unless="${!eahUT}">
                                         <input type="hidden" th:field="*{messageTypeId}"/>
                                     </div>
-                                    <div id="configurationTypeDiv" class="form-group" th:style="${type == 1 ? 'block' : 'none'}">
+                                    <div id="configurationTypeDiv" class="form-group" th:style="'display: ' + ${configurationDetails.type == 1 ? 'block' : 'none'}">
                                         <label for="configurationType">Processing Type * </label>
                                         <div>
                                             <label class="radio-inline">

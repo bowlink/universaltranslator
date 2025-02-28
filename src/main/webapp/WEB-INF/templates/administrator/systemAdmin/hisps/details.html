@@ -1,0 +1,72 @@
+<div class="modal-header">
+    <div class="col-md-12">
+        <div class="col-md-6" style="padding-left:0px;">
+            <h3 class="panel-title" style="margin-top:15px;margin-bottom:10px">HISP Details <span th:if="${success != ''}" th:text="${success}"></span></h3>
+        </div>
+        <div class="col-md-6" style="padding-right:0px;">
+            <button class="btn btn-success btn-sm pull-right" data-bs-dismiss="modal" title="Close Window" style="margin-top:10px;margin-bottom:10px">Close Window</button>
+        </div>
+    </div>
+</div>
+<div class="modal-body" style="max-height:800px; overflow: auto">
+    <form id="hispform" th:action="${hispDetails.id > 0 ? '/administrator/sysadmin/hisps/update' : '/administrator/sysadmin/hisps/create'}" th:object="${hispDetails}" method="post" role="form">
+        <input type="hidden" id="id" th:field="*{id}"/>
+        <input type="hidden" th:field="*{status}"/>
+        <input type="hidden" th:field="*{dateCreated}"/>
+        
+        <div class="form-container">
+            <div class="row col-lg-12">
+                <div class="form-group" th:classappend="${#fields.hasErrors('hispName') ? 'has-error' : ''}">
+                    <label class="control-label" for="hispName">HISP Name *</label>
+                    <input th:field="*{hispName}" id="hispName" class="form-control" type="text" maxLength="45" />
+                    <span class="control-label" th:if="${#fields.hasErrors('hispName')}" th:errors="*{hispName}"></span>
+                </div>
+                <div class="form-group" th:classappend="${#fields.hasErrors('primaryContact') ? 'has-error' : ''}">
+                    <label class="control-label" for="primaryContact">HISP Primary Contact *</label>
+                    <input th:field="*{primaryContact}" id="primaryContact" class="form-control" type="text" maxLength="45" />
+                    <span class="control-label" th:if="${#fields.hasErrors('primaryContact')}" th:errors="*{primaryContact}"></span>
+                </div>
+                <div class="form-group" th:classappend="${#fields.hasErrors('primaryContactPhone') ? 'has-error' : ''}">
+                    <label class="control-label" for="primaryContactPhone">HISP Primary Contact Phone Number *</label>
+                    <input th:field="*{primaryContactPhone}" id="primaryContactPhone" class="form-control" type="text" maxLength="45" />
+                    <span class="control-label" th:if="${#fields.hasErrors('primaryContactPhone')}" th:errors="*{primaryContactPhone}"></span>
+                </div>
+                <div class="form-group" th:classappend="${#fields.hasErrors('primaryContactEmail') ? 'has-error' : ''}">
+                    <label class="control-label" for="primaryContactEmail">HISP Primary Contact Email Address *</label>
+                    <input th:field="*{primaryContactEmail}" id="primaryContactEmail" class="form-control" type="text" maxLength="45" />
+                    <span class="control-label" th:if="${#fields.hasErrors('primaryContactEmail')}" th:errors="*{primaryContactEmail}"></span>
+                </div>
+                <div class="form-group" th:classappend="${#fields.hasErrors('hispAPIURL') ? 'has-error' : ''}">
+                    <label class="control-label" for="hispAPIURL">HISP API URL *</label>
+                    <input th:field="*{hispAPIURL}" id="hispAPIURL" class="form-control" type="text" maxLength="255" />
+                    <span class="control-label" th:if="${#fields.hasErrors('hispAPIURL')}" th:errors="*{hispAPIURL}"></span>
+                </div> 
+                <div class="form-group" th:classappend="${#fields.hasErrors('hispAPIUsername') ? 'has-error' : ''}">
+                    <label class="control-label" for="hispAPIUsername">HISP API Username *</label>
+                    <input th:field="*{hispAPIUsername}" id="hispAPIUsername" class="form-control" type="text" maxLength="45" />
+                    <span class="control-label" th:if="${#fields.hasErrors('hispAPIUsername')}" th:errors="*{hispAPIUsername}"></span>
+                </div>
+                <div class="form-group" th:classappend="${#fields.hasErrors('hispAPIPassword') ? 'has-error' : ''}">
+                    <label class="control-label" for="hispAPIPassword">HISP API Password *</label>
+                    <input th:field="*{hispAPIPassword}" id="hispAPIPassword" class="form-control" type="text" maxLength="255" />
+                    <span class="control-label" th:if="${#fields.hasErrors('hispAPIPassword')}" th:errors="*{hispAPIPassword}"></span>
+                </div>
+                <div class="form-group" th:classappend="${#fields.hasErrors('utAPIUsername') ? 'has-error' : ''}">
+                    <label class="control-label" for="utAPIUsername">UT API Username *</label>
+                    <input th:field="*{utAPIUsername}" id="utAPIUsername" class="form-control" type="text" maxLength="45" />
+                    <span class="control-label" th:if="${#fields.hasErrors('utAPIUsername')}" th:errors="*{utAPIUsername}"></span>
+                </div>
+                <div class="form-group" th:classappend="${#fields.hasErrors('utAPIPassword') ? 'has-error' : ''}">
+                    <label class="control-label" for="utAPIPassword">UT API Password *</label>
+                    <input th:field="*{utAPIPassword}" id="utAPIPassword" class="form-control" type="text" maxLength="45" />
+                    <span class="control-label" th:if="${#fields.hasErrors('utAPIPassword')}" th:errors="*{utAPIPassword}"></span>
+                </div>
+            </div>  
+        </div>
+    </form:form>
+</div>
+<div class="modal-footer" style="background-color: #cccccc">
+    <div class="form-group">
+        <input type="button" id="submitButton" th:rel="${btnValue}" class="btn btn-primary" th:value="${btnValue}"/>
+    </div>
+</div>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+    <head>
+        <title>Health-e-Link UT Batch Audit Report</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/processingActivities/actionBar :: actionBar}"></div>
+            <div th:insert="~{administrator/processingActivities/menuBar :: menuBar}"></div>
+            <div class="main clearfix" role="main">
+                <div class="col-md-12">
+                    <th:block th:if="${error != null and error != ''}">
+                        <div class="alert alert-danger" role="alert">
+                            The selected file was not found.
+                        </div>
+                    </th:block>
+                    <section class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Batch Summary</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="scrollable">
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <p>
+                                            <strong>Internal UT ID:</strong>
+                                            <br />
+                                            <span th:text="${batchDetails.id}"></span>
+                                        </p>
+                                        <p>
+                                            <strong>Batch ID:</strong> 
+                                            <br />
+                                            <span th:text="${batchDetails.utBatchName}"></span>
+                                        </p>
+                                        <p th:if="${!batchDownload}">
+                                            <strong>Submitting Organization:</strong> <br />
+                                            <span th:text="${batchDetails.orgName}"></span>
+                                        </p>
+                                        <p th:unless="${!batchDownload}">
+                                            <strong class="text-success">Related Inbound Batch Details:</strong> <br />
+                                            <span th:utext="${'<strong>Sending Organization:</strong> ' + batchDetails.srcOrgName}"></span>
+                                            <span th:utext="${'</br> <strong>Inbound Internal UT ID:</strong> ' + internalInboundBatchId}"></span>
+                                            <span th:utext="${'</br> <strong>Inbound Batch ID:</strong> <a href=/administrator/processing-activity/inbound/'+batchDetails.fromBatchName+'>' + batchDetails.fromBatchName + '</a>'}"></span>
+                                        </p>
+                                        <p>
+                                            <strong>System Name:</strong> 
+                                            <br /><span th:text="${batchDetails.orgName}"></span>
+                                        </p>
+                                        <p>
+                                            <strong>Configuration Name:</strong> 
+                                            <br />
+                                            <span th:if="${batchDetails.configId > 0 and batchDetails.configName == 'bowlinkTest'}"> Macro Test Configuration</span>
+                                            <span th:if="${batchDetails.configId > 0 and batchDetails.configName == 'Bowlink Test Target'}"> Macro Test Configuration</span>
+                                            <span th:if="${batchDetails.configId > 0 and batchDetails.configName != 'bowlinkTest' and batchDetails.configName != 'Bowlink Test Target'}"><a th:href="${'/administrator/configurations/details?i='+batchDetails.configId}"><span th:text="${batchDetails.configName}"></span></a></span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p>
+                                            <strong>Date Submitted:</strong> 
+                                            <br />
+                                            <span th:text="${#dates.format(batchDetails.dateSubmitted, 'M/dd/yyyy h:mm:ss a')}"></span>
+                                        </p>
+                                        <th:block th:if="${batchDetails.startDateTime != '' and (batchDetails.dateSubmitted != batchDetails.startDateTime)}">
+                                           <p>
+                                               <strong>Date Reprocessed: </strong> 
+                                               <br />
+                                               <span th:text="${#dates.format(batchDetails.startDateTime, 'M/dd/yyyy h:mm:ss a')}"></span>
+                                           </p>
+                                        </th:block>
+                                        <th:block th:if="${batchDetails.startDateTime != ''}">
+                                           <p>
+                                               <strong>Processing Start: </strong>
+                                               <br />
+                                               <span th:text="${#dates.format(batchDetails.startDateTime, 'M/dd/yyyy h:mm:ss a')}"></span>
+                                           </p>
+                                        </th:block>
+                                        <th:block th:if="${batchDetails.endDateTime != ''}">
+                                           <p>
+                                               <strong>Processing End: </strong> 
+                                               <br />
+                                               <span th:text="${#dates.format(batchDetails.startDateTime, 'M/dd/yyyy h:mm:ss a')}"></span>
+                                           </p>
+                                        </th:block>
+                                        <th:block th:if="${batchDownload and batchDetails.utBatchName != ''}">
+                                            <p>
+                                                <strong>Associated File:</strong>
+                                                <br />
+                                                <a th:if="${batchDetails.statusId == 28}" th:href="${'/FileDownload/downloadFile.do?fromPage=outboundAudit&foldername=archivesOut&filename='+batchDetails.outputFileName+'&orgId='+batchDetails.orgId+'&utBatchName='+batchDetails.utBatchName}" title="View Generated Target File">Generated Target File - <span th:text="${batchDetails.outputFileName}"></span></a>
+                                                <span th:if="${batchDetails.statusId == 64}"> Outbound batch is ready to be processed</span>
+                                                <span th:if="${batchDetails.statusId == 32}">Outbound batch was cancelled</span>
+                                                <span th:if="${batchDetails.statusId == 59}">Outbound batch is scheduled to be processed</span>
+                                                <span th:if="${batchDetails.statusId != 59 and batchDetails.statusId != 32 and batchDetails.statusId != 64 and batchDetails.statusId != 28}">Outbound batch is processing</span>
+                                            </p>
+                                        </th:block>
+                                        <th:block th:unless="${batchDownload}">
+                                            <p>
+                                                <strong>Related Outbound Batches:</strong>
+                                                <th:block th:if="${batchDetails.relatedBatchDownloads != ''}">
+                                                    <th:block th:each="targetBatch : ${batchDetails.relatedBatchDownloads}">
+                                                        <br />
+                                                        <a th:href="${'/administrator/processing-activity/outbound/auditReport/'+targetBatch.utBatchName}"><span th:text="${targetBatch.utBatchName}"></span></a>
+                                                        <th:block th:if="${targetBatch.targetFileExists}">
+                                                            <br />
+                                                            <a th:href="${'/FileDownload/downloadFile.do?fromPage=inboundAudit&foldername=archivesOut&filename='+targetBatch.outputFileName+'&orgId='+targetBatch.orgId+'&utBatchId='+batchDetails.utBatchName}" title="View Generated Target File">Generated Target File - <span th:text="${targetBatch.outputFileName}"></span></a><br />
+                                                        </th:block>
+                                                    </th:block>
+                                                </th:block>
+                                                <th:block th:unless="${batchDetails.relatedBatchDownloads != ''}">
+                                                    <th:block th:if="${canSend}">
+                                                        <br />Batch is ready to be processed
+                                                   </th:block>
+                                                    <th:block th:unless="${canSend}">
+                                                         <br />Batch is ready to be processed
+                                                   </th:block>
+                                                </th:block>
+                                            </p>
+                                            <th:block th:if="${batchDetails.originalFileName != ''}" th:with="text=${#strings.arraySplit(batchDetails.originalFileName, '.')}">
+                                                <div th:with="ext=${text[#lists.size(text)-1]}, filename=${batchDetails.utBatchName}">
+                                                    <p>
+                                                        <strong>Associated File(s):</strong>
+                                                        <br />
+                                                        <a th:if="${batchDetails.transportMethodId == 9 or batchDetails.transportMethodId == 12}" th:href="'/FileDownload/downloadFile.do?fromPage=inboundAudit&foldername=archivesIn&utBatchId='+${batchDetails.utBatchName}+'&filename='+${batchDetails.utBatchName}+'.'+${ext}" title="View Original File">Submitted File - <span th:text="${batchDetails.originalFileName}"></span></a>
+                                                        <a th:if="${batchDetails.transportMethodId == 6}" th:href="'/FileDownload/downloadFile.do?fromPage=inboundAudit&foldername=archivesIn&orgId='+${batchDetails.orgId}+'&utBatchId='+${batchDetails.utBatchName}+'&filename='+${batchDetails.utBatchName}_dec+'.'+${ext}" title="View Original File">Submitted File - <span th:text="${batchDetails.originalFileName}"></span></a>
+                                                        <a th:if="${batchDetails.transportMethodId == 13}" th:href="'/FileDownload/downloadFile.do?fromPage=inboundAudit&foldername=archivesIn&orgId='+${batchDetails.orgId}+'&utBatchId='+${batchDetails.utBatchName}+'&filename=archive_'+${batchDetails.utBatchName}+'.'+${ext}" title="View Original File">Submitted File - <span th:text="${batchDetails.originalFileName}"></span></a>
+                                                        <a th:if="${batchDetails.transportMethodId != 13 and batchDetails.transportMethodId != 6 and batchDetails.transportMethodId != 9 and batchDetails.transportMethodId != 12}" th:href="'/FileDownload/downloadFile.do?fromPage=inboundAudit&foldername=input files&orgId='${batchDetails.orgId}+'&utBatchId='+${batchDetails.utBatchName}+'&filename=encoded_'+${batchDetails.utBatchName}+'.'+${ext}" title="View Original File">Submitted File - <span th:text="${batchDetails.originalFileName}"></span></a>
+                                                        
+                                                        <th:block th:if="${(batchDetails.transportMethodId == 9 or batchDetails.transportMethodId == 13) and (ext != 'txt' or fileDelimiter == 13) and filename != ''}">
+                                                            <br />
+                                                            <th:block th:if="${#strings.contains(transportMethod,'direct') or batchDetails.transportMethodId == 13}">
+                                                                <a th:href="'/FileDownload/downloadFile.do?fromPage=inboundAudit&foldername=loadFiles&utBatchId='+${batchDetails.utBatchName}+'&filename='+${batchDetails.utBatchName}+'.txt'" title="View Internal Processing File">Internal File - <span th:text="${filename}+'.txt'"></span></a>
+                                                            </th:block>
+                                                            <th:block th:unless="${#strings.contains(transportMethod,'direct') or batchDetails.transportMethodId == 13}">
+                                                                <a th:href="'/FileDownload/downloadFile.do?fromPage=inboundAudit&foldername=archivesIn+'&utBatchId='+${batchDetails.utBatchName}'+'&filename=archive_'+${batchDetails.utBatchName}+'.'+${ext}" title="View Internal Processing File">Internal File - <span th:text="'archive_'+${filename}+'.'+${ext}"></span></a>
+                                                            </th:block>
+                                                        </th:block>
+                                                    </p>
+                                                </div>
+                                            </th:block>
+                                        </th:block>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>  
+                </div>
+                <div class="col-md-12">
+                    <section class="panel panel-info">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <h3 class="panel-title col-md-6">Audit Summary</h3>
+                                <div class="col-md-6">
+                                    <div class="pull-right">
+                                        <div class="dropdown panel-right">
+                                            <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                <i class="fa fa-cog"></i> Batch Controls
+                                            </button>
+                                            <ul class="dropdown-menu pull-right">
+                                                <li th:if="${!batchDownload}">
+                                                    <a th:href="'/administrator/processing-activity/inbound/batchActivities/'+${batchDetails.utBatchName}" title="View Batch Activities">
+                                                        <span class="glyphicon glyphicon-edit"></span> View Batch Activities
+                                                    </a>
+                                                </li>
+                                                <li th:unless="${!batchDownload}">
+                                                    <a th:href="'/administrator/processing-activity/outbound/batchActivities/'+${batchDetails.utBatchName}" title="View Batch Activities">
+                                                        <span class="glyphicon glyphicon-edit"></span> View Batch Activities
+                                                    </a>
+                                                </li>
+                                                <li class="divider"></li> 
+                                                <li>
+                                                    <a th:href="'/administrator/configurations/details?i='+${batchDetails.configId}" title="View Source Configuration">
+                                                        <span class="glyphicon glyphicon-edit"></span> View <span th:text="${!batchDownload ? 'Source' : 'Target'}"></span> Configuration
+                                                    </a>
+                                                </li>
+                                                <th:block th:if="${canSend == true}">
+                                                    <th:block th:if="${batchDownload and (batchDetails.statusId == 64 or batchDetails.statusId == 59)}">
+                                                        <li>
+                                                            <a href="#!" id="release" class="releaseOutboundBatch" rel="releaseBatch" th:rel2="${batchDetails.id}">
+                                                                <span class="glyphicon glyphicon-ok-sign"></span>
+                                                                <strong>Process Outbound Batch</strong>
+                                                            </a>
+                                                        </li>
+                                                    </th:block>
+                                                    <th:block th:unless="${batchDownload and (batchDetails.statusId == 64 or batchDetails.statusId == 59)}">
+                                                        <li>
+                                                            <a href="#!" id="release" class="releaseBatch" rel="releaseBatch" th:rel2="${batchDetails.id}">
+                                                                <span class="glyphicon glyphicon-ok-sign"></span>
+                                                                <strong>Process Inbound Batch</strong>
+                                                            </a>
+                                                        </li>
+                                                    </th:block>
+                                                    <li class="divider"></li> 
+                                                </th:block>
+                                                <th:block th:if="${batchDetails.statusId == 2}"> 
+                                                    <li>
+                                                        <a href="#!" id="processBatch" class="processBatch" rel="processBatch" th:rel2="${batchDetails.id}">
+                                                            <span class="glyphicon glyphicon-upload"></span>
+                                                            <strong>Load Submitted Inbound Batch</strong>
+                                                        </a>
+                                                    </li>
+                                                    <li class="divider"></li> 
+                                                </th:block>
+                                                <th:block th:if="${batchDetails.statusId == 2 or batchDetails.statusId == 36}"> 
+                                                    <li>
+                                                        <a href="#!" id="processBatch" class="processBatch" rel="processBatch" th:rel2="${batchDetails.id}">
+                                                            <span class="glyphicon glyphicon-filter"></span>
+                                                            <strong>Process Submitted Inbound Batch</strong>
+                                                        </a>
+                                                    </li>
+                                                    <li class="divider"></li> 
+                                                </th:block> 
+                                                <th:block th:if="${canCancel && batchDetails.configId > 0 and batchDetails.statusId != 4 and batchDetails.statusId != 24}"> 
+                                                    <th:block th:if="${batchDownload}">
+                                                        <li>
+                                                            <a href="#!" id="cancel" class="cancelOutboundBatch" rel="cancel" th:rel2="${batchDetails.id}">
+                                                                <span class="glyphicon glyphicon-remove"></span>
+                                                                <strong>Cancel Outbound Batch</strong>
+                                                            </a>
+                                                        </li>
+                                                    </th:block>
+                                                    <th:block th:unless="${batchDownload}">
+                                                        <li>
+                                                            <a href="#!" id="cancel" class="cancelBatch" rel="cancel" th:rel2="${batchDetails.id}">
+                                                                <span class="glyphicon glyphicon-remove"></span>
+                                                                <strong>Cancel Inbound Batch</strong>
+                                                            </a>
+                                                        </li>
+                                                    </th:block>
+                                                </th:block> 
+                                                <th:block th:if="${canReset and batchDetails.configId > 0 and batchDetails.statusId != 64 and batchDetails.statusId != 42 and batchDetails.statusId != 43}">
+                                                    <th:block th:if="${batchDownload}">
+                                                        <li class="divider"></li> 
+                                                        <li>
+                                                            <a href="#!" id="reset" class="resetOutboundBatch" rel="reset" th:rel2="${batchDetails.id}">
+                                                                <span class="glyphicon glyphicon-refresh"></span>
+                                                                <strong>Reset Outbound Batch</strong>
+                                                            </a>
+                                                        </li>
+                                                    </th:block>
+                                                    <th:block th:unless="${batchDownload}">
+                                                        <li class="divider"></li> 
+                                                        <li>
+                                                            <a href="#!" id="reset" class="resetBatch" rel="reset" th:rel2="${batchDetails.id}">
+                                                                <span class="glyphicon glyphicon-refresh"></span>
+                                                                <strong>Reset Inbound Batch</strong>
+                                                            </a>
+                                                        </li>
+                                                    </th:block>
+                                                </th:block> 
+                                                <th:block th:if="${!canReset and configDetails.messageTypeId == 2}">
+                                                    <li class="divider"></li> 
+                                                    <li>
+                                                        <a href="#!">
+                                                            <span class="glyphicon glyphicon-refresh"></span>
+                                                            <strong>Please Reset batch from the family planning system.</strong>
+                                                        </a>
+                                                    </li>
+                                                </th:block>
+                                                <th:block th:if="${!batchDownload and canReset}">
+                                                    <li class="divider"></li>
+                                                    <li>
+                                                        <a href="#!" th:rel="${batchDetails.utBatchName}" class="deleteTransactions" title="Delete Batch">
+                                                            <span class="glyphicon glyphicon-remove"></span>
+                                                            <strong>Delete Batch</strong>
+                                                        </a>
+                                                    </li>
+                                                </th:block>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="scrollable">
+                                <div class="col-md-12">
+                                    <div th:class="${!batchDownload ? 'col-md-4' : 'col-md-6'}">
+                                        <section class="panel panel-default panel-stats" role="widget" aria-labelleby="Messages Received">
+                                            <div class="panel-body">
+                                                <span class="stat-number text-info" th:if="${batchDetails.totalRecordCount >= 0}" th:text="${#numbers.formatInteger(batchDetails.totalRecordCount, 0, 'COMMA')}"></span>
+                                                <span class="stat-number text-info" th:unless="${batchDetails.totalRecordCount >= 0}">0</span>
+                                                <h3 class="text-info">Total Transactions</h3>
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <div th:class="${!batchDownload ? 'col-md-4' : 'col-md-6'}">
+                                        <section class="panel panel-default panel-stats" role="widget" aria-labelleby="Messages Delivered">
+                                            <div class="panel-body">
+                                                <span class="stat-number text-info" th:if="${!batchDownload and batchDetails.errorRecordCount >= 0}" th:text="${#numbers.formatInteger(batchDetails.errorRecordCount, 0, 'COMMA')}"></span>
+                                                <span class="stat-number text-info" th:if="${batchDownload and batchDetails.totalErrorCount >= 0}" th:text="${#numbers.formatInteger(batchDetails.totalErrorCount, 0, 'COMMA')}"></span>
+                                                <span class="stat-number text-info" th:if="${(batchDownload and batchDetails.totalErrorCount == 0) or (!batchDownload and batchDetails.errorRecordCount == 0)}">0</span>
+                                                <h3 class="text-info">Total Errors in File</h3>
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <th:block th:if="${!batchDownload}">
+                                        <div class="col-md-4">
+                                            <section class="panel panel-default panel-stats" role="widget" aria-labelleby="Messages Delivered">
+                                                <div class="panel-body">
+                                                    <span class="stat-number text-info" th:text="${#numbers.formatInteger(totalErroredRows, 0, 'COMMA')}"></span>
+                                                    <h3 class="text-info">Total Rows with Errors</h3>
+                                                </div>
+                                            </section>
+                                        </div>
+                                    </th:block>
+                                </div>	
+                            </div>
+                        </div>
+                    </section>  
+                </div>
+                <th:block th:if="${batchDroppedValues != '' or batchErrorSummary != ''}">
+                    <div class="row-fluid clearfix" style="margin-bottom:10px;">
+                        <div class="col-md-12">
+                            <div class="pull-right">
+                                <button class="btn btn-success printErrorsToExcel" th:rel="${batchDetails.utBatchName}" th:rel2="${batchDownload ? 'outbound' : 'inbound'}" type="button">
+                                    <i class="fa fa-file-excel"></i> Print Errors to Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </th:block>
+                <th:block th:if="${batchDroppedValues != ''}">
+                    <div class="row-fluid">
+                        <div class="col-md-12">
+                            <section class="panel panel-info">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Dropped Values</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-md-12">
+                                        <section class="panel panel-default">
+                                            <div class="panel-heading">
+                                                <a data-bs-toggle="collapse" th:rel="${batchDetails.id}" th:total="${#lists.size(batchDroppedValues)}" th:rel3="${batchDownload ? 'outbound' : 'inbound'}" class="droppedValueCollapse" href="#collapse-droppedValues">
+                                                   <div class="clearfix">
+                                                        <div class="pull-left">
+                                                            <h3 class="panel-title">Error: Dropped Values</h3>
+                                                        </div>
+                                                        <div class="pull-right">
+                                                            <h3 class="panel-title" style="color:red">Total Found: <span th:text="${#numbers.formatInteger(#lists.size(batchDroppedValues), 0, 'COMMA')}"></span></h3>
+                                                        </div>
+                                                    </div>
+                                                </a>	
+                                            </div>
+                                            <div id="collapse-droppedValues" class="panel-collapse collapse">       
+                                                <div class="panel-body clearfix" style="height:300px;">
+                                                    <div class="col-md-12 clearfix">
+                                                        <div class="col-md-6 col-md-offset-6 spinner-droppedValues">
+                                                            <i class="fa fa-spinner fa-spin fa-4x"></i>
+                                                        </div>
+                                                        <div class="errorList-droppedValues" style=" overflow: auto; height:250px;"></div>
+                                                    </div>
+                                                </div>
+                                            </div>            
+                                        </section>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </th:block>
+                <th:block th:if="${batchSystemErrors != '' && batchErrorSummary == ''}">
+                    <div class="row-fluid">
+                        <div class="col-md-12">
+                            <section class="panel panel-info">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">System Errors</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-md-12" th:each="batchError, i : ${batchSystemErrors}">
+                                        <section class="panel panel-default">
+                                            <div class="panel-heading">
+                                                <div class="clearfix">
+                                                     <div class="pull-left">
+                                                         <h3 class="panel-title" th:text="${'Error: ' + batchError.errorDisplayText}"></h3>
+                                                     </div>
+                                                     <div class="pull-right">
+                                                         <h3 class="panel-title" style="color:red">Total Found: <span th:text="${#numbers.formatInteger(batchError.totalErrors, 0, 'COMMA')}"></span></h3>
+                                                     </div>
+                                                 </div>
+                                           </div>  
+                                        </section>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </th:block>
+                 <th:block th:if="${batchErrorSummary != ''}">
+                    <div class="row-fluid">
+                        <div class="col-md-12">
+                            <section class="panel panel-info">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Transaction Errors</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-md-12" th:each="batchError, i : ${batchErrorSummary}">
+                                        <section class="panel panel-default">
+                                            <div class="panel-heading">
+                                                <a data-bs-toggle="collapse" th:rel="${batchDetails.id}" th:error="${batchError.errorId}" th:total="${batchError.totalErrors}" th:rel2="${i.index}" th:rel3="${batchDownload ? 'outbound' : 'inbound'}" class="errorCollapse" th:href="${'#collapse-'+i.index}">
+                                                   <div class="clearfix">
+                                                        <div class="pull-left">
+                                                            <h3 class="panel-title">Error: <span th:text="${batchError.errorDisplayText}"></span></h3>
+                                                        </div>
+                                                        <div class="pull-right">
+                                                            <h3 class="panel-title" style="color:red">Total Found: <span th:text="${#numbers.formatInteger(batchError.totalErrors, 0, 'COMMA')}"></span></h3>
+                                                        </div>
+                                                    </div>
+                                                </a>	
+                                           </div>     
+                                            <div th:id="${'collapse-'+i.index}" class="panel-collapse collapse">       
+                                                <div class="panel-body clearfix" style="height:300px;">
+                                                    <div class="col-md-12 clearfix">
+                                                        <div class="col-md-6 col-md-offset-6" th:classappend="${'spinner-'+i.index}">
+                                                            <i class="fa fa-spinner fa-spin fa-4x"></i>
+                                                        </div>
+                                                        <div th:class="'errorList-'+${i.index}" style=" overflow: auto; height:250px;"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                 </th:block>
+            </div>
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
+            <script th:src="@{/dspResources/js/overlay.js}"></script>    
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.min.js}"></script>
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.bootstrap.min.js}"></script>
+            <script th:src="@{/dspResources/js/admin/processing-activities/auditReport.js}"></script>
+            <script th:src="@{/dspResources/js/admin/processing-activities/mainActivityFunctions.js}"></script>
+        </th:block>
+    </body>
+</html>
+        

@@ -71,6 +71,9 @@ public class fileDownloadController {
 	HttpServletResponse response, RedirectAttributes redirectAttr, HttpSession session) throws Exception {
 	
 	String desc = "";
+        
+        String urlUtBatchName = utBatchName;
+        String urlUtBatchId = utBatchId;
 	
 	//Check to see if foldername is Base64 encoded
 	if("config".equals(fromPage) && Base64.isBase64(foldername)) {
@@ -87,6 +90,7 @@ public class fileDownloadController {
 	    ua.setUserId(userDetails.getId());
 	    ua.setAccessMethod(request.getMethod());
 	    ua.setPageAccess("/downloadFile.do"); 
+            
 	    if(cwId != null) {
 		ua.setActivity("Downloaded Crosswalk");
 		desc = "Crowsswalk Id: " + cwId;
@@ -100,11 +104,12 @@ public class fileDownloadController {
 	    }
 	    ua.setActivityDesc(desc);
 	    usermanager.insertUserLog(ua);
-	} catch (Exception ex) {
+	} 
+        catch (Exception ex) {
 	    ex.printStackTrace();
 	    System.err.println("Error tracking file downloaded " + desc);
-
 	}
+        
 	OutputStream outputStream = null;
 	InputStream in = null;
 	ServletContext context = request.getServletContext();
@@ -126,261 +131,272 @@ public class fileDownloadController {
 	    else {
 		String directory;
 	    
-	    Organization organization = null;
-	    String cleanURL = "";
+                Organization organization = null;
+                String cleanURL = "";
 
-	    if (orgId != null && orgId > 0) {
-		organization = organizationManager.getOrganizationById(orgId);
-		cleanURL = organization.getcleanURL();
-		
-		if("archivesOut".equals(foldername)) {
-		    directory = myProps.getProperty("ut.directory.utRootDir") + cleanURL + "/output files/";
-		}
-		else if ("input files".equals(foldername)) {
-		     directory = myProps.getProperty("ut.directory.utRootDir") + cleanURL + "/input files/";
-		}
-		else {
-		    directory = myProps.getProperty("ut.directory.utRootDir") + foldername + "/";
-		}
-	    } else {
-		directory = myProps.getProperty("ut.directory.utRootDir") + foldername + "/";
-	    }
+                if (orgId != null && orgId > 0) {
+                    organization = organizationManager.getOrganizationById(orgId);
+                    cleanURL = organization.getcleanURL();
 
-	    String mimeType = "";
-	    String actualFileName = "";
+                    if("archivesOut".equals(foldername)) {
+                        directory = myProps.getProperty("ut.directory.utRootDir") + cleanURL + "/output files/";
+                    }
+                    else if ("input files".equals(foldername)) {
+                         directory = myProps.getProperty("ut.directory.utRootDir") + cleanURL + "/input files/";
+                    }
+                    else {
+                        directory = myProps.getProperty("ut.directory.utRootDir") + foldername + "/";
+                    }
+                } 
+                else {
+                    directory = myProps.getProperty("ut.directory.utRootDir") + foldername + "/";
+                }
 
-	    File f = new File(directory + filename);
-	   
-	    if(!f.exists() && "archivesIn".equals(foldername) && !"".equals(cleanURL)) {
-		directory = myProps.getProperty("ut.directory.utRootDir") + cleanURL + "/input files/";
-		filename = filename.replace("archive_","encoded_");
-		f = new File(directory + filename);
-	    }
-	    if(!f.exists() && "archivesOut".equals(foldername)) {
-		 directory = myProps.getProperty("ut.directory.utRootDir") + foldername + "/";
-		 f = new File(directory + filename);
-		 if(!f.exists()) {
-		    f = new File(directory + utBatchId + ".txt");
-		 }
-	    }
-	    else if(!f.exists() && foldername.contains("/crosswalks")) {
-		directory = myProps.getProperty("ut.directory.utRootDir") + "libraryFiles/crosswalks/";
-		f = new File(directory + filename);
-		
-		if(!f.exists()) {
-		    directory = myProps.getProperty("ut.directory.utRootDir") + "libraryFiles/";
-		    f = new File(directory + filename);
-		}
-	    }
+                String mimeType = "";
+                String actualFileName = "";
+
+                File f = new File(directory + filename);
+
+                if(!f.exists() && "archivesIn".equals(foldername) && !"".equals(cleanURL)) {
+                    directory = myProps.getProperty("ut.directory.utRootDir") + cleanURL + "/input files/";
+                    filename = filename.replace("archive_","encoded_");
+                    f = new File(directory + filename);
+                }
+                if(!f.exists() && "archivesOut".equals(foldername)) {
+                     directory = myProps.getProperty("ut.directory.utRootDir") + foldername + "/";
+                     f = new File(directory + filename);
+                     if(!f.exists()) {
+                        f = new File(directory + utBatchId + ".txt");
+                     }
+                }
+                else if(!f.exists() && foldername.contains("/crosswalks")) {
+                    directory = myProps.getProperty("ut.directory.utRootDir") + "libraryFiles/crosswalks/";
+                    f = new File(directory + filename);
+
+                    if(!f.exists()) {
+                        directory = myProps.getProperty("ut.directory.utRootDir") + "libraryFiles/";
+                        f = new File(directory + filename);
+                    }
+                }
 	    
-	    if (utBatchName != null || utBatchId != null) {
-		
-		if (!f.exists() && (utBatchName != null && !"".equals(utBatchName))) {
-		    
-		    f = new File(directory + utBatchName);
-		    
-		    if (f.exists()) {
-			fileExists = true;
-			mimeType = context.getMimeType(directory + utBatchName);
-			//we don't know when a file is encoding or decoding without having to do queries, it will be easy to try to decode first
-			in = new FileInputStream(directory + utBatchName);
-			
-			actualFileName = utBatchName;
-		    } 
-		    else if (!f.exists() && "txt".equals(FilenameUtils.getExtension(utBatchName))) {
-			utBatchName = utBatchName.replace("txt", FilenameUtils.getExtension(filename));
+                if (utBatchName != null || utBatchId != null) {
 
-			f = new File(directory + utBatchName);
-			if (f.exists()) {
-			    fileExists = true;
-			    mimeType = context.getMimeType(directory + utBatchName);
-			    in = new FileInputStream(directory + utBatchName);
-			    
-			    actualFileName = utBatchName;
-			}
-		    }
-		    else if (!f.exists() && "".equals(FilenameUtils.getExtension(utBatchName))) {
-			utBatchName = utBatchName + ".txt";
+                    if (!f.exists() && (utBatchName != null && !"".equals(utBatchName))) {
 
-			f = new File(directory + utBatchName);
-			if (f.exists()) {
-			    fileExists = true;
-			    mimeType = context.getMimeType(directory + utBatchName);
-			    in = new FileInputStream(directory + utBatchName);
-			    
-			    actualFileName = utBatchName;
-			}
-		    }
-		} 
-		else if (!f.exists() && (utBatchId != null && !"".equals(utBatchId))) {
-		    
-		    f = new File(directory + utBatchId);
-		    
-		    if (f.exists()) {
-			fileExists = true;
-			mimeType = context.getMimeType(directory + utBatchId);
-			//we don't know when a file is encoding or decoding without having to do queries, it will be easy to try to decode first
-			in = new FileInputStream(directory + utBatchId);
-			
-			actualFileName = utBatchId;
-		    } 
-		    else if (!f.exists() && "txt".equals(FilenameUtils.getExtension(utBatchName))) {
-			utBatchId = utBatchName.replace("txt", FilenameUtils.getExtension(filename));
+                        f = new File(directory + utBatchName);
 
-			f = new File(directory + utBatchId);
-			if (f.exists()) {
-			    fileExists = true;
-			    mimeType = context.getMimeType(directory + utBatchId);
-			    in = new FileInputStream(directory + utBatchId);
-			    
-			    actualFileName = utBatchId;
-			}
-		    }
-		    else if (!f.exists() && "".equals(FilenameUtils.getExtension(utBatchId))) {
-			utBatchId = utBatchId + ".txt";
+                        if (f.exists()) {
+                            fileExists = true;
+                            mimeType = context.getMimeType(directory + utBatchName);
+                            //we don't know when a file is encoding or decoding without having to do queries, it will be easy to try to decode first
+                            in = new FileInputStream(directory + utBatchName);
 
-			f = new File(directory + utBatchId);
-			if (f.exists()) {
-			    fileExists = true;
-			    mimeType = context.getMimeType(directory + utBatchId);
-			    in = new FileInputStream(directory + utBatchId);
-			    
-			    actualFileName = utBatchId;
-			}
-		    }
-		} 
-		else {
-		    if(f.exists()) {
-			fileExists = true;
-			mimeType = context.getMimeType(directory + filename);
-			in = new FileInputStream(directory + filename);
-		    
-			actualFileName = filename;
-		    }
-		}
-	    } 
-	    else {
-		if(f.exists()) {
-		    fileExists = true;
-		    mimeType = context.getMimeType(directory + filename);
-		    in = new FileInputStream(directory + filename);
+                            actualFileName = utBatchName;
+                        } 
+                        else if (!f.exists() && "txt".equals(FilenameUtils.getExtension(utBatchName))) {
+                            utBatchName = utBatchName.replace("txt", FilenameUtils.getExtension(filename));
 
-		    actualFileName = filename;
-		}
-	    }
-	    
-	    if(fileExists) {
-		downloadfile(f, in, mimeType, actualFileName, directory, response, outputStream);
-		return null;
+                            f = new File(directory + utBatchName);
+                            if (f.exists()) {
+                                fileExists = true;
+                                mimeType = context.getMimeType(directory + utBatchName);
+                                in = new FileInputStream(directory + utBatchName);
 
-	    }
-	    else {
-		
-		redirectAttr.addFlashAttribute("error", "missing");
-		ModelAndView mav = null;
-		if(fromPage != null) {
-		    if(!"".equals(fromPage)) {
-			if("inbound".equals(fromPage)) {
-			   searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters"); 
-			   searchParameters.setsearchTerm(FilenameUtils.removeExtension(f.getName()).replace("archive_", "").replace("encoded_", "").replace("_dec", ""));
-			   mav = new ModelAndView(new RedirectView("/administrator/processing-activity/inbound")); 
-			}
-			else if("outbound".equals(fromPage)) {
-			   searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters"); 
-			   searchParameters.setsearchTerm(FilenameUtils.removeExtension(f.getName()).replace("archive_", "").replace("encoded_", "").replace("_dec", ""));
-			   mav = new ModelAndView(new RedirectView("/administrator/processing-activity/outbound")); 
-			}
-			else if("invalidin".equals(fromPage)) {
-			   searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters"); 
-			   searchParameters.setsearchTerm(FilenameUtils.removeExtension(f.getName()).replace("archive_", "").replace("encoded_", "").replace("_dec", ""));
-			   mav = new ModelAndView(new RedirectView("/administrator/processing-activity/invalidIn")); 
-			}
-			else if("rejected".equals(fromPage)) {
-			   searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters"); 
-			   searchParameters.setsearchTerm(FilenameUtils.removeExtension(f.getName()).replace("archive_", "").replace("encoded_", "").replace("_dec", ""));
-			   mav = new ModelAndView(new RedirectView("/administrator/processing-activity/rejected")); 
-			}
-			else if("invalidOut".equals(fromPage)) {
-			   searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters"); 
-			   searchParameters.setsearchTerm(FilenameUtils.removeExtension(f.getName()).replace("archive_", "").replace("encoded_", "").replace("_dec", ""));
-			   mav = new ModelAndView(new RedirectView("/administrator/processing-activity/invalidOut")); 
-			}
-			else if("inboundAudit".equals(fromPage)) {
-			   mav = new ModelAndView(new RedirectView("/administrator/processing-activity/inbound/auditReport/"+utBatchId)); 
-			}
-			else if("outboundAudit".equals(fromPage)) {
-			   mav = new ModelAndView(new RedirectView("/administrator/processing-activity/outbound/auditReport/"+utBatchId)); 
-			}
-			else if("config".equals(fromPage)) {
-			   mav = new ModelAndView(new RedirectView("/administrator/configurations/translations"));
-			   
-			   //Check to see if the file is a crosswalk, if it is lets create the crosswalk
-			   if(foldername != null) {
-			       if(!"".equals(foldername)) {
-				   if(foldername.contains("crosswalks")) {
-					utconfigurationmanager.generateMissingCrosswalk(foldername.split("/")[0],filename);
-					
-					directory = myProps.getProperty("ut.directory.utRootDir") + foldername.split("/")[0] + "/crosswalks/";
-					
-					f = new File(directory + filename);
-					
-					mimeType = context.getMimeType(directory + filename);
-					in = new FileInputStream(directory + filename);
+                                actualFileName = utBatchName;
+                            }
+                        }
+                        else if (!f.exists() && "".equals(FilenameUtils.getExtension(utBatchName))) {
+                            utBatchName = utBatchName + ".txt";
 
-					actualFileName = filename;
-					
-					downloadfile(f, in, mimeType, actualFileName, directory, response, outputStream);
+                            f = new File(directory + utBatchName);
+                            if (f.exists()) {
+                                fileExists = true;
+                                mimeType = context.getMimeType(directory + utBatchName);
+                                in = new FileInputStream(directory + utBatchName);
 
-					return null;
-				   }
-			       }
-			   }
-			}
-			else if("messagespec".equals(fromPage)) {
-			   mav = new ModelAndView(new RedirectView("/administrator/configurations/messagespecs")); 
-			}
-			else if("transport".equals(fromPage)) {
-			   mav = new ModelAndView(new RedirectView("/administrator/configurations/transport")); 
-			}
-			else if("crosswalks".equals(fromPage)) {
-			   mav = new ModelAndView(new RedirectView("/administrator/sysadmin/crosswalks")); 
-			   
-			   //Check to see if the file is a crosswalk, if it is lets create the crosswalk
-			   if(foldername != null) {
-			       if(!"".equals(foldername)) {
-				    utconfigurationmanager.generateMissingCrosswalk(foldername,filename);
+                                actualFileName = utBatchName;
+                            }
+                        }
+                    } 
+                    else if (!f.exists() && (utBatchId != null && !"".equals(utBatchId))) {
 
-				    directory = myProps.getProperty("ut.directory.utRootDir") + foldername + "/crosswalks/";
+                        f = new File(directory + utBatchId);
 
-				    f = new File(directory + filename);
+                        if (f.exists()) {
+                            fileExists = true;
+                            mimeType = context.getMimeType(directory + utBatchId);
+                            //we don't know when a file is encoding or decoding without having to do queries, it will be easy to try to decode first
+                            in = new FileInputStream(directory + utBatchId);
 
-				    mimeType = context.getMimeType(directory + filename);
-				    in = new FileInputStream(directory + filename);
+                            actualFileName = utBatchId;
+                        } 
+                        else if (!f.exists() && "txt".equals(FilenameUtils.getExtension(utBatchName))) {
+                            utBatchId = utBatchName.replace("txt", FilenameUtils.getExtension(filename));
 
-				    actualFileName = filename;
+                            f = new File(directory + utBatchId);
+                            if (f.exists()) {
+                                fileExists = true;
+                                mimeType = context.getMimeType(directory + utBatchId);
+                                in = new FileInputStream(directory + utBatchId);
 
-				    downloadfile(f, in, mimeType, actualFileName, directory, response, outputStream);
+                                actualFileName = utBatchId;
+                            }
+                        }
+                        else if (!f.exists() && "".equals(FilenameUtils.getExtension(utBatchId))) {
+                            utBatchId = utBatchId + ".txt";
 
-					return null;
-				   }
-			       }
-			    }
-			}
-		    }
+                            f = new File(directory + utBatchId);
+                            if (f.exists()) {
+                                fileExists = true;
+                                mimeType = context.getMimeType(directory + utBatchId);
+                                in = new FileInputStream(directory + utBatchId);
 
-		    if(mav == null) {
-			mav = new ModelAndView(new RedirectView("/administrator/processing-activity/inbound/"));
-		    }
-		    return mav;
-		}
-	    }
-	    
-	} catch (FileNotFoundException e) {
+                                actualFileName = utBatchId;
+                            }
+                        }
+                    } 
+                    else {
+                        if(f.exists()) {
+                            fileExists = true;
+                            mimeType = context.getMimeType(directory + filename);
+                            in = new FileInputStream(directory + filename);
+
+                            actualFileName = filename;
+                        }
+                    }
+                } 
+                else {
+                    if(f.exists()) {
+                        fileExists = true;
+                        mimeType = context.getMimeType(directory + filename);
+                        in = new FileInputStream(directory + filename);
+
+                        actualFileName = filename;
+                    }
+                }
+
+                if(fileExists) {
+                    downloadfile(f, in, mimeType, actualFileName, directory, response, outputStream);
+                    return null;
+
+                }
+                else {
+
+                    redirectAttr.addFlashAttribute("error", "missing");
+                    ModelAndView mav = null;
+                    if(fromPage != null) {
+                        if(!"".equals(fromPage)) {
+                            if("inbound".equals(fromPage)) {
+                               searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters"); 
+                               searchParameters.setsearchTerm(FilenameUtils.removeExtension(f.getName()).replace("archive_", "").replace("encoded_", "").replace("_dec", ""));
+                               mav = new ModelAndView(new RedirectView("/administrator/processing-activity/inbound")); 
+                            }
+                            else if("outbound".equals(fromPage)) {
+                               searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters"); 
+                               searchParameters.setsearchTerm(FilenameUtils.removeExtension(f.getName()).replace("archive_", "").replace("encoded_", "").replace("_dec", ""));
+                               mav = new ModelAndView(new RedirectView("/administrator/processing-activity/outbound")); 
+                            }
+                            else if("invalidin".equals(fromPage)) {
+                               searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters"); 
+                               searchParameters.setsearchTerm(FilenameUtils.removeExtension(f.getName()).replace("archive_", "").replace("encoded_", "").replace("_dec", ""));
+                               mav = new ModelAndView(new RedirectView("/administrator/processing-activity/invalidIn")); 
+                            }
+                            else if("rejected".equals(fromPage)) {
+                               searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters"); 
+                               searchParameters.setsearchTerm(FilenameUtils.removeExtension(f.getName()).replace("archive_", "").replace("encoded_", "").replace("_dec", ""));
+                               mav = new ModelAndView(new RedirectView("/administrator/processing-activity/rejected")); 
+                            }
+                            else if("invalidOut".equals(fromPage)) {
+                               searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters"); 
+                               searchParameters.setsearchTerm(FilenameUtils.removeExtension(f.getName()).replace("archive_", "").replace("encoded_", "").replace("_dec", ""));
+                               mav = new ModelAndView(new RedirectView("/administrator/processing-activity/invalidOut")); 
+                            }
+                            else if("inboundAudit".equals(fromPage)) {
+                               mav = new ModelAndView(new RedirectView("/administrator/processing-activity/inbound/auditReport/"+urlUtBatchId)); 
+                            }
+                            else if("inboundActivity".equals(fromPage)) {
+                               mav = new ModelAndView(new RedirectView("/administrator/processing-activity/inbound/batchActivities/"+urlUtBatchId)); 
+                            }
+                            else if("outboundAudit".equals(fromPage)) {
+                               mav = new ModelAndView(new RedirectView("/administrator/processing-activity/outbound/auditReport/"+urlUtBatchName)); 
+                            }
+                            else if("outboundActivity".equals(fromPage)) {
+                               mav = new ModelAndView(new RedirectView("/administrator/processing-activity/outbound/batchActivities/"+urlUtBatchName)); 
+                            }
+                            else if("directmessages".equals(fromPage)) {
+                               mav = new ModelAndView(new RedirectView("/administrator/processing-activity/directmessages")); 
+                            }
+                            else if("config".equals(fromPage)) {
+                               mav = new ModelAndView(new RedirectView("/administrator/configurations/translations"));
+
+                               //Check to see if the file is a crosswalk, if it is lets create the crosswalk
+                               if(foldername != null) {
+                                   if(!"".equals(foldername)) {
+                                       if(foldername.contains("crosswalks")) {
+                                            utconfigurationmanager.generateMissingCrosswalk(foldername.split("/")[0],filename);
+
+                                            directory = myProps.getProperty("ut.directory.utRootDir") + foldername.split("/")[0] + "/crosswalks/";
+
+                                            f = new File(directory + filename);
+
+                                            mimeType = context.getMimeType(directory + filename);
+                                            in = new FileInputStream(directory + filename);
+
+                                            actualFileName = filename;
+
+                                            downloadfile(f, in, mimeType, actualFileName, directory, response, outputStream);
+
+                                            return null;
+                                       }
+                                   }
+                               }
+                            }
+                            else if("messagespec".equals(fromPage)) {
+                               mav = new ModelAndView(new RedirectView("/administrator/configurations/messagespecs")); 
+                            }
+                            else if("transport".equals(fromPage)) {
+                               mav = new ModelAndView(new RedirectView("/administrator/configurations/transport")); 
+                            }
+                            else if("crosswalks".equals(fromPage)) {
+                               mav = new ModelAndView(new RedirectView("/administrator/sysadmin/crosswalks")); 
+
+                               //Check to see if the file is a crosswalk, if it is lets create the crosswalk
+                               if(foldername != null) {
+                                   if(!"".equals(foldername)) {
+                                        utconfigurationmanager.generateMissingCrosswalk(foldername,filename);
+
+                                        directory = myProps.getProperty("ut.directory.utRootDir") + foldername + "/crosswalks/";
+
+                                        f = new File(directory + filename);
+
+                                        mimeType = context.getMimeType(directory + filename);
+                                        in = new FileInputStream(directory + filename);
+
+                                        actualFileName = filename;
+
+                                        downloadfile(f, in, mimeType, actualFileName, directory, response, outputStream);
+
+                                        return null;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if(mav == null) {
+                        mav = new ModelAndView(new RedirectView("/administrator/processing-activity/inbound/"));
+                    }
+                    return mav;
+                }
+            }
+	} 
+        catch (FileNotFoundException e) {
 	    errorMessage = errorMessage + "<br/>" + e.getMessage();
-
-	} catch (IOException e) {
+	} 
+        catch (IOException e) {
 	    errorMessage = e.getMessage();
-	} finally {
+	} 
+        finally {
 	    if (null != in) {
 		try {
 		    in.close();

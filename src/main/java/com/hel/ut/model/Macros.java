@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.*;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
@@ -19,6 +20,7 @@ public class Macros {
     @Column(name = "ID", nullable = false)
     private int id;
 
+    @NotBlank(message = "The Macro Name is a required field.")
     @Column(name = "MACRO_NAME", nullable = false)
     private String macroName;
 
@@ -33,6 +35,7 @@ public class Macros {
     private String dateDisplay;
 
     @NoHtml
+    @NotBlank(message = "The Stored Procedure is a required field.")
     @Column(name = "FORMULA", nullable = false)
     private String formula;
 

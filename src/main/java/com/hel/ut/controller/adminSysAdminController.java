@@ -4,9 +4,7 @@ import com.hel.ut.model.Crosswalks;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -65,6 +63,9 @@ public class adminSysAdminController {
     
     @Value("${siteTimeZone}")
     private String siteTimeZone; 
+    
+    @Value("${eahUT}")
+    private String eahUT;
 
     @Autowired
     private sysAdminManager sysAdminManager;
@@ -82,58 +83,65 @@ public class adminSysAdminController {
     private emailMessageManager emailMessageManager;
 
     @Autowired
-    private ServletContext servletContext;
-    
-    @Autowired
     private transactionInManager transactioninmanager;
     
     @Resource(name = "myProps")
     private Properties myProps;
+    
+    @RequestMapping(value = {"/", "/badFilePaths"}, method = RequestMethod.GET)
+    public ModelAndView moveFilePaths(HttpServletRequest request, HttpServletResponse response, HttpSession session, RedirectAttributes redirectAttr) throws Exception {
 
-    /**
-     * This shows a dashboard with info for sysadmin components. *
-     * @param request
-     * @param response
-     * @return 
-     * @throws java.lang.Exception 
-     */
-    @RequestMapping(value = "/", method = RequestMethod.GET)
-    public ModelAndView dashboard(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/dashboard");
-        /**
-         * set totals*
-         */
-        Long totalMacroRows = sysAdminManager.findTotalMacroRows();
-        Long totalHL7Entries = sysAdminManager.findtotalHL7Entries();
-        Long totalUsers = sysAdminManager.findTotalUsers();
-        Integer filePaths = sysAdminManager.getMoveFilesLog(1).size();
-	Integer totalHisps = hispsmanager.getAllActiveHisps().size();
-	Long totalStandardCrosswalks = sysAdminManager.findTotalStandardCrosswalks();
-	
-	//Get a list of system admin users
-	List<utUser> systemAdmins = usermanager.getAllUsersByOrganization(1);
-	mav.addObject("systemAdmins", systemAdmins.size());
+    	ModelAndView mav = new ModelAndView();
+        mav.addObject("pageId", "sysadmin-moveFilePaths");
+        mav.addObject("pageSection", "section-sysadmin");
+        mav.addObject("sect","sysadmin");
+        mav.addObject("actionPage","badFilePaths");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/systemAdmin/badFilePaths/badFilePaths");
         
-        mav.addObject("totalMacroRows", totalMacroRows);
-        mav.addObject("totalHL7Entries", totalHL7Entries);
-        mav.addObject("totalUsers", totalUsers);
-        mav.addObject("filePaths", filePaths);
-	mav.addObject("totalHisps", totalHisps);
-	mav.addObject("totalStandardCrosswalks", totalStandardCrosswalks);
+        //we get list of programs
+        List<MoveFilesLog> pathList = sysAdminManager.getMoveFilesLog(1);
+	
+	Calendar cal = Calendar.getInstance();
+	TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
+	DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	requiredFormat.setTimeZone(timeZone);
+	String dateinTZ = "";
+	
+	if(!pathList.isEmpty()) {
+	    for(MoveFilesLog path : pathList) {
+		path.setStartDateTime(dft.parse(requiredFormat.format(path.getStartDateTime())));
+		path.setEndDateTime(dft.parse(requiredFormat.format(path.getEndDateTime())));
+	    }
+	}
+        
+        mav.addObject("pathList", pathList);
         
         return mav;
     }
     
-    /**
-     * MACROS *
-     */
+    @RequestMapping(value = "/moveFilePaths", method = RequestMethod.POST)
+    @ResponseBody
+    public String moveFilePaths(@RequestParam(value = "pathId", required = true) Integer pathId) throws Exception {
+        
+    	MoveFilesLog moveFilesLog = new MoveFilesLog();
+    	moveFilesLog.setId(pathId);
+    	sysAdminManager.deleteMoveFilesLog(moveFilesLog);
+        
+        return "deleted";
+    }   
+
     @RequestMapping(value = "/macros", method = RequestMethod.GET)
     public ModelAndView listMacros() throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/macros");
+        mav.addObject("pageId", "sysadmin-moveFilePaths");
+        mav.addObject("pageSection", "section-sysadmin");
+        mav.addObject("sect","sysadmin");
+        mav.addObject("actionPage","macros");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/systemAdmin/macros/list");
 
         //Return a list of available macros
         List<Macros> macroList = sysAdminManager.getMarcoList("");
@@ -143,10 +151,10 @@ public class adminSysAdminController {
     }
 
     @RequestMapping(value = "/macros/delete", method = RequestMethod.GET)
-    public ModelAndView deleteMacro(@RequestParam(value = "i", required = true) int macroId,
-            RedirectAttributes redirectAttr) throws Exception {
-
+    public ModelAndView deleteMacro(@RequestParam(value = "i", required = true) Integer macroId,RedirectAttributes redirectAttr) throws Exception {
+        
         boolean suceeded = sysAdminManager.deleteMacro(macroId);
+        
         String returnMessage = "deleted";
 
         if (!suceeded) {
@@ -155,7 +163,7 @@ public class adminSysAdminController {
         //This variable will be used to display the message on the details form
         redirectAttr.addFlashAttribute("savedStatus", returnMessage);
 
-        ModelAndView mav = new ModelAndView(new RedirectView("../macros?msg=" + returnMessage));
+        ModelAndView mav = new ModelAndView(new RedirectView("/administrator/sysadmin/macros"));
         return mav;
     }
 
@@ -165,8 +173,9 @@ public class adminSysAdminController {
      */
     @RequestMapping(value = "/macros/create", method = RequestMethod.GET)
     public ModelAndView newMacroForm() throws Exception {
+        
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/macro/details");
+        mav.setViewName("administrator/systemAdmin/macros/details");
 
         //create a macro
         Macros macro = new Macros();
@@ -177,15 +186,11 @@ public class adminSysAdminController {
     }
 
     @RequestMapping(value = "/macros/create", method = RequestMethod.POST)
-    public ModelAndView createMacro(
-            @Valid @ModelAttribute(value = "macroDetails") Macros macroDetails,
-            BindingResult result) throws Exception {
+    public ModelAndView createMacro(@Valid @ModelAttribute(value = "macroDetails") Macros macroDetails,BindingResult result) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/macro/details");
-        /**
-         * check for error *
-         */
+        mav.setViewName("administrator/systemAdmin/macros/details");
+        
         if (result.hasErrors()) {
             mav.addObject("macroDetails", macroDetails);
             mav.addObject("btnValue", "Create");
@@ -201,12 +206,16 @@ public class adminSysAdminController {
     /**
      * The '/macros/view' GET request will be used to create a new data for selected table
      *
+     * @param i
+     * @return 
+     * @throws java.lang.Exception
      */
     @RequestMapping(value = "/macros/view", method = RequestMethod.GET)
     public ModelAndView viewMacroDetails(@RequestParam(value = "i", required = false) Integer i) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/macro/details");
+        mav.setViewName("administrator/systemAdmin/macros/details");
+        
         //get macro info here
         Macros macroDetails = configurationmanager.getMacroById(i);
         mav.addObject("macroDetails", macroDetails);
@@ -216,14 +225,16 @@ public class adminSysAdminController {
 
     /**
      * UPDATE macros *
+     * @param macroDetails
+     * @param result
+     * @return 
+     * @throws java.lang.Exception
      */
     @RequestMapping(value = "/macros/update", method = RequestMethod.POST)
-    public ModelAndView updateMacro(
-            @Valid @ModelAttribute(value = "macroDetails") Macros macroDetails,
-            BindingResult result) throws Exception {
+    public ModelAndView updateMacro(@Valid @ModelAttribute(value = "macroDetails") Macros macroDetails,BindingResult result) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/macro/details");
+        mav.setViewName("/administrator/systemAdmin/macros/details");
 
         if (result.hasErrors()) {
             mav.addObject("macroDetails", macroDetails);
@@ -243,11 +254,6 @@ public class adminSysAdminController {
         mav.addObject("btnValue", "Update");
         return mav;
     }
-
-    /**
-     * END MACROS *
-     */
-   
 
     /**
      * The '/{urlId}/data.create' GET request will be used to create a new data for selected table
@@ -405,9 +411,6 @@ public class adminSysAdminController {
     }
 
     /**
-     * End of Tests*
-     */
-    /**
      * Start of ProcessStatus *
      */
     @RequestMapping(value = "/data/nstd/lu_ProcessStatus/create", method = RequestMethod.GET)
@@ -502,7 +505,6 @@ public class adminSysAdminController {
         return mav;
     }
 
-
     /**
      * modify admin profile *
      * @param adminId
@@ -516,7 +518,7 @@ public class adminSysAdminController {
     ModelAndView displayAdminInfo(@RequestParam(value = "adminId", required = false) Integer adminId, HttpServletRequest request, Authentication authentication) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/adminInfo/profile");
+        mav.setViewName("administrator/systemAdmin/systemadmins/details");
 	
 	utUser userDetails;
 	
@@ -597,57 +599,11 @@ public class adminSysAdminController {
         return mav;
     }
 
-    /**
-     * login as portion *
-     */
-    @RequestMapping(value = "/loginAs", method = RequestMethod.GET)
-    public ModelAndView loginAs() throws Exception {
-
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/loginAs");
-
-        //get all active users
-        List<utUser> usersList = usermanager.getUsersByStatuRolesAndOrg(true, Arrays.asList(1), Arrays.asList(1), false);
-        mav.addObject("usersList", usersList);
-
-        return mav;
-    }
-
-    @RequestMapping(value = "/loginAs", method = RequestMethod.POST)
-    public @ResponseBody
-    ModelAndView checkAdminPW(HttpServletRequest request, Authentication authentication) throws Exception {
-
-        ModelAndView mav = new ModelAndView();
-        utUser user = usermanager.getUserByUserName(authentication.getName());
-
-        mav.setViewName("/administrator/sysadmin/loginAs");
-
-        boolean okToLoginAs = false;
-
-        /**
-         * we verify existing password *
-         */
-        if (user.getRoleId() == 1 || user.getRoleId() == 4) {
-            try {
-                okToLoginAs = usermanager.authenticate(request.getParameter("j_password"), user.getEncryptedPw(), user.getRandomSalt());
-            } catch (Exception ex) {
-                okToLoginAs = false;
-            }
-        }
-
-        if (!okToLoginAs) {
-            mav.addObject("msg", "Your credentials are invalid.");
-        } else {
-            mav.addObject("msg", "pwmatched");
-        }
-
-        return mav;
-    }
-
     @RequestMapping(value = "/getLog", method = {RequestMethod.GET})
     public void getLog(HttpSession session, HttpServletResponse response, Authentication authentication) throws Exception {
     	
     	utUser userInfo = usermanager.getUserByUserName(authentication.getName());
+        
     	//log user activity
 	utUserActivity ua = new utUserActivity();
 	ua.setUserId(userInfo.getId());
@@ -687,45 +643,6 @@ public class adminSysAdminController {
 	}
     } 
     
-    @RequestMapping(value = "/moveFilePaths", method = RequestMethod.GET)
-    public ModelAndView moveFilePaths(HttpServletRequest request, HttpServletResponse response, 
-    		HttpSession session, RedirectAttributes redirectAttr) throws Exception {
-
-    	ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/moveFilePaths");
-        //we get list of programs
-        List<MoveFilesLog> pathList = sysAdminManager.getMoveFilesLog(1);
-	
-	Calendar cal = Calendar.getInstance();
-	TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
-	DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	requiredFormat.setTimeZone(timeZone);
-	String dateinTZ = "";
-	
-	if(!pathList.isEmpty()) {
-	    for(MoveFilesLog path : pathList) {
-		path.setStartDateTime(dft.parse(requiredFormat.format(path.getStartDateTime())));
-		path.setEndDateTime(dft.parse(requiredFormat.format(path.getEndDateTime())));
-	    }
-	}
-        mav.addObject("pathList", pathList);
-        
-        return mav;
-    }
-    
-    @RequestMapping(value = "/moveFilePaths", method = RequestMethod.POST)
-    @ResponseBody
-    public String associateEntity(@RequestParam(value = "pathId", required = true) Integer pathId) throws Exception {
-        
-    	MoveFilesLog moveFilesLog = new MoveFilesLog();
-    	moveFilesLog.setId(pathId);
-    	sysAdminManager.deleteMoveFilesLog(moveFilesLog);
-        
-        return "deleted";
-    }   
-    
-    
     /**
      * systemAdmins *
      * @return 
@@ -735,7 +652,12 @@ public class adminSysAdminController {
     public ModelAndView listsystemAdmins() throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/systemadmins");
+        mav.addObject("pageId", "sysadmin-systemadmins");
+        mav.addObject("pageSection", "section-sysadmin");
+        mav.addObject("sect","sysadmin");
+        mav.addObject("actionPage","systemadmins");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/systemAdmin/systemadmins/list");
 
 	List<utUser> systemAdmins = usermanager.getUsersByOrganizationWithLogins(1);
 	
@@ -764,7 +686,6 @@ public class adminSysAdminController {
         return mav;
     }
 
- 
     /**
      * modify admin profile *
      * @param adminId
@@ -778,7 +699,7 @@ public class adminSysAdminController {
     ModelAndView displayAdminLogins(@RequestParam(value = "adminId", required = false) Integer adminId, HttpServletRequest request, Authentication authentication) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/adminInfo/logins");
+        mav.setViewName("/administrator/systemAdmin/systemadmins/logins");
 	
 	List<utUserLogin> systemAdminLogins = usermanager.getUserLogins(adminId);
 	
@@ -806,7 +727,12 @@ public class adminSysAdminController {
     public ModelAndView hisps(HttpServletRequest request, HttpServletResponse response, HttpSession session, RedirectAttributes redirectAttr) throws Exception {
 
     	ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/hisps");
+        mav.addObject("pageId", "sysadmin-moveFilePaths");
+        mav.addObject("pageSection", "section-sysadmin");
+        mav.addObject("sect","sysadmin");
+        mav.addObject("actionPage","hisps");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/systemAdmin/hisps/list");
 	
         //we get list of hisps
         List<hisps> hisps = hispsmanager.getAllActiveHisps();
@@ -821,8 +747,9 @@ public class adminSysAdminController {
      */
     @RequestMapping(value = "/hisps/create", method = RequestMethod.GET)
     public ModelAndView newHispForm() throws Exception {
+       
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/hisps/details");
+        mav.setViewName("administrator/systemAdmin/hisps/details");
 
         //create a macro
         hisps newHisp = new hisps();
@@ -833,15 +760,21 @@ public class adminSysAdminController {
     }
 
     @RequestMapping(value = "/hisps/create", method = RequestMethod.POST)
-    public ModelAndView creatHisp(@ModelAttribute(value = "hispDetails") hisps hispDetails,BindingResult result) throws Exception {
+    public ModelAndView creatHisp(@Valid @ModelAttribute(value = "hispDetails") hisps hispDetails,BindingResult result) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/hisps/details");
+        mav.setViewName("/administrator/systemAdmin/hisps/details");
+        
+        if (result.hasErrors()) {
+            mav.addObject("hispDetails", hispDetails);
+            mav.addObject("btnValue", "Create");
+            return mav;
+        }
         
         //now we save
 	hispsmanager.saveHisp(hispDetails);
         mav.addObject("success", "hispCreated");
-        mav.addObject("btnValue", "Update");
+        mav.addObject("btnValue", "Create");
         return mav;
     }
 
@@ -856,9 +789,8 @@ public class adminSysAdminController {
     public ModelAndView viewHispDetails(@RequestParam(value = "i", required = false) Integer i) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/hisps/details");
+        mav.setViewName("/administrator/systemAdmin/hisps/details");
 	
-       
         hisps hispDetails = hispsmanager.getHispById(i);
         mav.addObject("hispDetails", hispDetails);
         mav.addObject("btnValue", "Update");
@@ -872,10 +804,16 @@ public class adminSysAdminController {
      * @throws java.lang.Exception
      */
     @RequestMapping(value = "/hisps/update", method = RequestMethod.POST)
-    public ModelAndView updateHisp(@ModelAttribute(value = "hispDetails") hisps hispDetails,BindingResult result) throws Exception {
+    public ModelAndView updateHisp(@Valid @ModelAttribute(value = "hispDetails") hisps hispDetails,BindingResult result) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/hisps/details");
+        mav.setViewName("/administrator/systemAdmin/hisps/details");
+        
+        if (result.hasErrors()) {
+            mav.addObject("hispDetails", hispDetails);
+            mav.addObject("btnValue", "Update");
+            return mav;
+        }
 
         hispsmanager.saveHisp(hispDetails);
 	mav.addObject("success", "hispUpdated");
@@ -891,7 +829,12 @@ public class adminSysAdminController {
     public ModelAndView listCrosswalks() throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/sysadmin/crosswalks");
+        mav.addObject("pageId", "sysadmin-moveFilePaths");
+        mav.addObject("pageSection", "section-sysadmin");
+        mav.addObject("sect","sysadmin");
+        mav.addObject("actionPage","crosswalks");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/systemAdmin/crosswalks/list");
 
         //Return a list of available standard crosswalks
         List<Crosswalks> crosswalkList = sysAdminManager.getStandardCrosswalks();
@@ -1104,17 +1047,14 @@ public class adminSysAdminController {
     } 
     
     /**
-     * The '/submitConfigFileForProcessing' function will be used to upload a new file for an existing crosswalk.
+     * The '/runTestFile' function will be used to run a test file
      *
-     * @param configFile
-     * @param fileDropLocation
      * @return 
      * @throws java.lang.Exception 
      * @Return The function will either return the crosswalk form on error or redirect to the data translation page.
      */
     @RequestMapping(value = "/macros/runTestFile", method = RequestMethod.POST)
-    public @ResponseBody 
-    int runMacroTestFile() throws Exception {
+    public @ResponseBody int runMacroTestFile() throws Exception {
 
 	Integer returnVal = 1;
 	
@@ -1138,7 +1078,6 @@ public class adminSysAdminController {
 	    e.printStackTrace();
 	}
 	  
-	
 	return returnVal;
     }
 }

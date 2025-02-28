@@ -151,7 +151,6 @@ public class adminOrgContoller {
 	    }
 	}
        
-	
 	jsonResponse.addProperty("sEcho", sEcho);
         jsonResponse.addProperty("iTotalRecords", totalRecords);
         jsonResponse.addProperty("iTotalDisplayRecords", totalRecords);
@@ -710,7 +709,7 @@ public class adminOrgContoller {
     public @ResponseBody ModelAndView getAgenciesForReport(@RequestParam(value = "registryType", required = true) Integer registryType) throws Exception {
 	
 	ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activities/reportBuilder/agencyList");
+        mav.setViewName("/administrator/processingActivities/reportBuilder/agencyList");
 	
 	List<Organization> agencies = organizationManager.getAgenciesForReport(registryType);
 	

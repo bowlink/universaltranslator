@@ -1,0 +1,109 @@
+<div class="modal-header">
+    <div class="col-md-12">
+        <div class="col-md-6" style="padding-left:0px;">
+            <h3 class="panel-title" style="margin-top:15px;margin-bottom:10px">Macro Details <span th:if="${success != ''}" th:text="${success}"></span></h3>
+        </div>
+        <div class="col-md-6" style="padding-right:0px;">
+            <button class="btn btn-success btn-sm pull-right" data-bs-dismiss="modal" title="Close Window" style="margin-top:10px;margin-bottom:10px">Close Window</button>
+        </div>
+    </div>
+</div>
+<div class="modal-body" style="max-height:800px; overflow: auto">
+    <form id="macroform" th:action="${macroDetails.id > 0 ? '/administrator/sysadmin/macros/update' : '/administrator/sysadmin/macros/create'}" th:object="${macroDetails}" method="post" role="form">
+        <input type="hidden" id="id" th:field="*{id}"/>
+        <input type="hidden" id="populateFieldA" th:field="*{populateFieldA}"/>
+        <input type="hidden" id="macroShortName" th:field="*{macroShortName}"/>
+        <div class="form-container">
+            <div class="row col-lg-12">
+                <div class="col-lg-6">
+                    <div class="form-group" th:classappend="${#fields.hasErrors('categoryId') ? 'has-error' : ''}">
+                        <label class="control-label" for="categoryId">Category</label>
+                        <select th:field="*{categoryId}" class="form-control" id="categoryId">
+                            <option value="1">Data Manipulation</option>
+                            <option value="2">Processing</option> 
+                        </select>
+                        <span class="control-label" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></span>
+                    </div>
+                    <div class="form-group" th:classappend="${#fields.hasErrors('macroName') ? 'has-error' : ''}">
+                        <label class="control-label" for="macroName">Macro Name*</label>
+                        <input th:field="*{macroName}" id="macroName" class="form-control" type="text" maxLength="100" />
+                        <span class="control-label" th:if="${#fields.hasErrors('macroName')}" th:errors="*{macroName}"></span>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group" th:classappend="${#fields.hasErrors('formula') ? 'has-error' : ''}">
+                        <label class="control-label" for="formula">Stored Procedure Name*</label>
+                        <input th:field="*{formula}" id="formula" class="form-control" type="text" maxLength="255" />
+                        <span class="control-label" th:if="${#fields.hasErrors('formula')}" th:errors="*{formula}"></span>
+                    </div>
+                </div>
+            </div> 
+            <div class="row col-lg-12">
+                <div class="col-lg-6">
+                    <div class="form-group" th:classappend="${#fields.hasErrors('fieldAQuestion') ? 'has-error' : ''}">
+                        <label class="control-label" for="fieldAQuestion">Field A Question</label>
+                        <input th:field="*{fieldAQuestion}" id="fieldAQuestion" class="form-control" type="text" maxLength="255" />
+                        <span class="control-label" th:if="${#fields.hasErrors('fieldAQuestion')}" th:errors="*{fieldAQuestion}"></span>
+                    </div>
+                    <div class="form-group" th:classappend="${#fields.hasErrors('fieldBQuestion') ? 'has-error' : ''}">
+                        <label class="control-label" for="fieldBQuestion">Field B Question</label>
+                        <input th:field="*{fieldBQuestion}" id="fieldBQuestion" class="form-control" type="text" maxLength="255" />
+                        <span class="control-label" th:if="${#fields.hasErrors('fieldBQuestion')}" th:errors="*{fieldBQuestion}"></span>
+                    </div> 
+                </div>    
+                <div class="col-lg-6">
+                    <div class="form-group" th:classappend="${#fields.hasErrors('con1Question') ? 'has-error' : ''}">
+                        <label class="control-label" for="con1Question">Constant 1 Question</label>
+                        <input th:field="*{con1Question}" id="con1Question" class="form-control" type="text" maxLength="255" />
+                        <span class="control-label" th:if="${#fields.hasErrors('con1Question')}" th:errors="*{con1Question}"></span>
+                    </div>
+                    <div class="form-group" th:classappend="${#fields.hasErrors('con2Question') ? 'has-error' : ''}">
+                        <label class="control-label" for="con2Question">Constant 2 Question</label>
+                        <input th:field="*{con2Question}" id="con2Question" class="form-control" type="text" maxLength="255" />
+                        <span class="control-label" th:if="${#fields.hasErrors('con2Question')}" th:errors="*{con2Question}"></span>
+                    </div>
+                 </div>   
+            </div>   
+            <div class="row col-lg-12">  
+                <div class="col-lg-6">
+                    <div class="form-group" th:classappend="${#fields.hasErrors('errorCondition') ? 'has-error' : ''}">
+                        <label class="control-label" for="errorCondition">Error Condition</label>
+                        <textarea th:field="*{errorCondition}" id="errorCondition" class="form-control" rows="4" />
+                        <span class="control-label" th:if="${#fields.hasErrors('errorCondition')}" th:errors="*{errorCondition}"></span>
+                    </div>
+                    <div class="form-group" th:classappend="${#fields.hasErrors('passClearLogic') ? 'has-error' : ''}">
+                        <label class="control-label" for="passClearLogic">Pass/Clear Logic</label>
+                        <textarea th:field="*{passClearLogic}" id="passClearLogic" class="form-control" rows="4" />
+                        <span class="control-label" th:if="${#fields.hasErrors('passClearLogic')}" th:errors="*{passClearLogic}"></span>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group" th:classappend="${#fields.hasErrors('droppedValueLogging') ? 'has-error' : ''}">
+                        <label class="control-label" for="droppedValueLogging">Dropped Value Logging</label>
+                        <textarea th:field="*{droppedValueLogging}" id="droppedValueLogging" class="form-control" rows="4" />
+                        <span class="control-label" th:if="${#fields.hasErrors('droppedValueLogging')}" th:errors="*{droppedValueLogging}"></span>
+                    </div>
+                    <div class="form-group" th:classappend="${#fields.hasErrors('rejectRecordFile') ? 'has-error' : ''}">
+                        <label class="control-label" for="rejectRecordFile">Reject Record/File</label>
+                        <textarea th:field="*{rejectRecordFile}" id="rejectRecordFile" class="form-control" rows="4" />
+                        <span class="control-label" th:if="${#fields.hasErrors('rejectRecordFile')}" th:errors="*{rejectRecordFile}"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row col-lg-12">
+                <div class="col-lg-12">
+                    <div class="form-group" th:classappend="${#fields.hasErrors('macroDesc') ? 'has-error' : ''}">
+                        <label class="control-label" for="macroDesc">Macro Description</label>
+                        <textarea th:field="*{macroDesc}" id="macroDesc" class="form-control" rows="10" />
+                        <span class="control-label" th:if="${#fields.hasErrors('macroDesc')}" th:errors="*{macroDesc}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form:form>
+</div>
+<div class="modal-footer" style="background-color: #cccccc">
+    <div class="form-group">
+        <input type="button" id="submitButton" th:rel="${btnValue}" class="btn btn-primary" th:value="${btnValue}"/>
+    </div>
+</div>

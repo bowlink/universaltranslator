@@ -208,13 +208,20 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = true)
     public List<Macros> getMarcoList(String searchTerm) {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<Macros> criteria = builder.createQuery(Macros.class);
+        Root<Macros> root = criteria.from(Macros.class);
+        
+        Predicate[] predicates = new Predicate[2];
+        predicates[0] = builder.like(builder.lower(root.get("macroName")), "%" + searchTerm.toLowerCase() + "%");
+        predicates[1] = builder.like(builder.lower(root.get("macroShortName")), "%" + searchTerm.toLowerCase() + "%");
 
-        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from Macros where "
-                + "macro_short_name like :searchTerm OR macro_name like :searchTerm "
-                + "order by categoryId, macro_short_name asc");
-        query.setParameter("searchTerm", "%"+searchTerm+"%");
-
-        return query.list();
+        Predicate whereClause = builder.or(predicates);
+        
+        criteria.orderBy(builder.asc(root.get("categoryId")),builder.asc(root.get("macroShortName"))).where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList(); 
     }
 
     @Override
@@ -247,7 +254,7 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = false)
     public boolean deleteMacro(int id) {
-        MutationQuery deletMarco = sessionFactory.getCurrentSession().createMutationQuery("delete from Macros where id = :macroId)");
+        MutationQuery deletMarco = sessionFactory.getCurrentSession().createMutationQuery("delete from Macros where id = :macroId ");
         deletMarco.setParameter("macroId", id);
         deletMarco.executeUpdate();
         try {
@@ -565,7 +572,14 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = true)
     public List<Crosswalks> getStandardCrosswalks() throws Exception {
-        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from Crosswalks where orgId = 0 order by dateCreated desc");
-        return query.list();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<Crosswalks> criteria = builder.createQuery(Crosswalks.class);
+        Root<Crosswalks> root = criteria.from(Crosswalks.class);
+        
+        Predicate whereClause = builder.equal(root.get("orgId"), 0);
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 }

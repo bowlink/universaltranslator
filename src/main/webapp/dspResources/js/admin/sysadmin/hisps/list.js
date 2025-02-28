@@ -1,91 +1,63 @@
 
-require(['./main'], function () {
-
-    //Fade out the updated/created message after being displayed.
-    if ($('.alert').length > 0) {
-        $('.alert').delay(2000).fadeOut(5000);
-    }
-
-    $("input:text,form").attr("autocomplete", "off");
-
-    //This function will launch the new dataItem overlay with a blank screen
-    $(document).on('click', '#createNewHisp', function () {
-
-        $.ajax({
-            url: 'hisps/create',
-            type: "GET",
-            success: function (data) {
-                $("#hispModal").html(data);
-            }
+jQuery(function ($) {
+    
+    $(document).ready(function () {
+        
+        $('#hispsListtable').DataTable({
+            bAutoWidth: false,
+            bStateSave: false,
+            aaSorting: [[0,'asc']],
+            "oLanguage": {
+                "sSearch": "_INPUT_",
+                sSearchPlaceholder: 'Filter System Macros',
+                "sLengthMenu": '<select class="form-control" style="width:150px">' +
+                        '<option value="10">10 Records</option>' +
+                        '<option value="20">20 Records</option>' +
+                        '<option value="30">30 Records</option>' +
+                        '<option value="40">40 Records</option>' +
+                        '<option value="50">50 Records</option>' +
+                        '<option value="-1">All</option>' +
+                        '</select>'
+            },
+           "aoColumns" : [
+                { "sWidth": "30%" },
+                { "sWidth": "55%" },
+                { "sWidth": "10%" },
+                { "sWidth": "5%" },
+            ]
         });
-    });
 
-    //This function will launch the edit hisp item overlay populating the fields
-    $(document).on('click', '.hispEdit', function () {
+        //This function will launch the new HISP overlay with a blank screen
+        $(document).on('click', '.createNewHisp', function () {
 
-        var hispDetailsAction = "hisps/view?i=" + $(this).attr('rel');
-
-        $.ajax({
-            url: hispDetailsAction,
-            type: "GET",
-            success: function (data) {
-                $("#hispModal").html(data);
-            }
+            $.ajax({
+                url: '/administrator/sysadmin/hisps/create',
+                type: "GET",
+                success: function (data) {
+                    $("#hispModalContent").html(data);
+                }
+            });
         });
-    });
+
+        //This function will launch the edit HISP overlay populating the fields
+        $(document).on('click', '.hispEdit', function () {
+
+            var hispDetailsAction = "/administrator/sysadmin/hisps/view?i=" + $(this).attr('rel');
+
+            $.ajax({
+                url: hispDetailsAction,
+                type: "GET",
+                success: function (data) {
+                    $("#hispModalContent").html(data);
+                }
+            });
+        });
 
 
-    $(document).on('click', '#submitButton', function (event) {
-        var formData = $("#hispform").serialize();
-        var actionValue = "hisps/" + $(this).attr('rel').toLowerCase();
+        $(document).on('click', '#submitButton', function (event) {
+            var formData = $("#hispform").serialize();
+            var actionValue = "/administrator/sysadmin/hisps/" + $(this).attr('rel').toLowerCase();
 
-        var hasErrors = 0;
-
-        if($('#hispName').val() === '') {
-            $('#hispNameDiv').addClass("has-error");
-            $('#hispNameMsg').addClass("has-error");
-            $('#hispNameMsg').html('The HISP name is a required field.');
-            hasErrors = 1;
-        }
-
-        if($('#utAPIUsername').val() === '') {
-            $('#hispUTAPIUsernameDiv').addClass("has-error");
-            $('#hispUTAPIUsernameMsg').addClass("has-error");
-            $('#hispUTAPIUsernameMsg').html('The HISP UT API Username is a required field.');
-            hasErrors = 1;
-        }
-
-        if($('#utAPIPassword').val() === '') {
-            $('#hispUTAPIPasswordDiv').addClass("has-error");
-            $('#hispUTAPIPasswordMsg').addClass("has-error");
-            $('#hispUTAPIPasswordMsg').html('The HISP UT API Password is a required field.');
-            hasErrors = 1;
-        }
-
-        if($('#hispAPIUsername').val() === '') {
-            $('#hispAPIUsernameDiv').addClass("has-error");
-            $('#hispAPIUsernameMsg').addClass("has-error");
-            $('#hispAPIUsernameMsg').html('The HISP API Username is a required field.');
-            hasErrors = 1;
-        }
-
-        if($('#hispAPIPassword').val() === '') {
-            $('#hispAPIPasswordDiv').addClass("has-error");
-            $('#hispAPIPasswordMsg').addClass("has-error");
-            $('#hispAPIPasswordMsg').html('The HISP API Password is a required field.');
-            hasErrors = 1;
-        }
-
-        if($('#hispAPIURL').val() === '') {
-            $('#hispAPIURLDiv').addClass("has-error");
-            $('#hispAPIURLMsg').addClass("has-error");
-            $('#hispAPIURLMsg').html('The HISP API URL is a required field.');
-            hasErrors = 1;
-        }
-
-
-
-        if(hasErrors == 0) {
             $.ajax({
                 url: actionValue,
                 data: formData,
@@ -94,23 +66,16 @@ require(['./main'], function () {
                 success: function (data) {
 
                     if (data.indexOf('hispUpdated') != -1) {
-                        var goToUrl = "hisps?msg=updated";
+                        var goToUrl = "/administrator/sysadmin/hisps?msg=updated";
                         window.location.href = goToUrl;
                     } else if (data.indexOf('hispCreated') != -1) {
-                        var goToUrl = "hisps?msg=created";
+                        var goToUrl = "/administrator/sysadmin/hisps?msg=created";
                         window.location.href = goToUrl;
                     } else {
-                        $("#hispModal").html(data);
+                        $("#hispModalContent").html(data);
                     }
                 }
-
             });
-        }
-        event.preventDefault();
-        return false;
-
-    });
+        });
+     });    
 });
-
-
-

@@ -772,6 +772,8 @@ function populateExistingTranslations() {
     //Disable the save buttons (will be reactivated when the existing DTS are loaded)
     $('#saveDetails').addClass( "disabled" );
     $('#next').addClass( "disabled" );
+    
+    $("#existingTranslations").html("<span class='center-text'><h2>Loading Data Translations...</h2></span>");
    
     $.ajax({
         url: 'getTranslations.do',

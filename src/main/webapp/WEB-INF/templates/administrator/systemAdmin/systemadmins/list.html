@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+    <head>
+        <title>Health-e-Link UT System Administrators</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/systemAdmin/actionBar :: actionBar}"></div>
+            <div th:insert="~{administrator/systemAdmin/menuBar :: menuBar}"></div>
+            <div class="main clearfix" role="main">
+                <div class="col-md-12">
+                    <div class="alert alert-success" role="alert" th:if="${param.msg != null}">
+                        <strong>Success!</strong> 
+                        <p th:if="${param.msg[0] == 'updated'}">The administrator has been successfully updated!</p>
+                        <p th:if="${param.msg[0] == 'created'}">The administrator has been successfully added!</p>
+                        <p th:if="${param.msg[0] == 'deleted'}">The administrator has been successfully deleted!</p>
+                    </div>
+                    <section class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">System Administrators</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="scrollable">
+                                <div class="col-md-12">
+                                    <table class="table table-striped table-hover table-default" th:id="${not #lists.isEmpty(systemAdmins) ? 'sysadmindataTable' : ''}">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">User Role</th>
+                                                <th scope="col" class="center-text">Times Logged In</th>
+                                                <th scope="col" class="center-text">Date Last Logged In</th>
+                                                <th scope="col" class="center-text"></th>
+                                            </tr>
+                                        </thead>
+                                        <div th:if="${not #lists.isEmpty(systemAdmins)}">
+                                            <tr style="cursor: pointer" th:each="systemAdmin : ${systemAdmins}">
+                                                <td scope="row">
+                                                    <p th:text="${systemAdmin.firstName + ' ' +systemAdmin.lastName}"></p>
+                                                    <p th:if="${systemAdmin.status}">(Active)</p>
+                                                    <p th:unless="${systemAdmin.status}">(Inactive)</p>
+                                                </td>
+                                                <td>
+                                                    <p th:if="${systemAdmin.roleType == 'ROLE_ADMIN'}">System Admin</p>
+                                                    <p th:if="${systemAdmin.roleType == 'ROLE_OPERATIONSSTAFF'}">Operations</p>
+                                                </td>
+                                                <td class="center-text" th:text="${systemAdmin.totalLogins}"></td>
+                                                <td class="center-text" th:text="${#dates.format(systemAdmin.dateLastLoggedIn, 'M/dd/yy h:mm a')}"></td>
+                                                <td class="center-text">
+                                                    <div class="dropdown pull-left">
+                                                        <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                            <i class="fa fa-cog"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu pull-right">
+                                                            <li>
+                                                                 <a href="#adminModal" data-bs-toggle="modal" th:rel="${systemAdmin.id}" class="administratorEdit" title="Edit this Administrator">
+                                                                    <span class="glyphicon glyphicon-edit"></span>
+                                                                    Edit Administrator
+                                                                </a>
+                                                                <li class="divider"></li>
+                                                                <li>
+                                                                    <a href="#adminModal" data-bs-toggle="modal" th:rel="${systemAdmin.id}" class="administratorLogins" title="View All Logins">
+                                                                        <span class="glyphicon glyphicon-eye-open"></span>
+                                                                        View All Logins	
+                                                                    </a>
+                                                                </li>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </div>
+                                        <div th:unless="${not #lists.isEmpty(systemAdmins)}">
+                                             <tr><td colspan="5" class="center-text">There are currently no system administrators set up.</td></tr>
+                                        </div>
+                                    </table>
+                                </div>    
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>		
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
+            <script th:src="@{/dspResources/js/overlay.js}"></script>    
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.min.js}"></script>
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.bootstrap.min.js}"></script>
+            <script th:src="@{/dspResources/js/admin/sysadmin/adminInfo/list.js}"></script>
+            <script th:src="@{/dspResources/js/admin/sysadmin/mainAdminFunctions.js}"></script>
+        </th:block>
+    </body>
+</html>
+<div class="modal fade" id="adminModal" role="dialog" tabindex="-1" aria-labeledby="" aria-hidden="true" aria-describedby="">
+    <div class="modal-dialog modal-lg"><div class="modal-content" id="adminModalContent"></div></div>
+</div>

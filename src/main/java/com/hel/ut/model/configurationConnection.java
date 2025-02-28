@@ -29,7 +29,7 @@ public class configurationConnection {
     private utConfiguration srcConfigDetails = null, tgtConfigDetails = null;
 
     @Transient
-    private String targetOrgName = null, sourceConfigName = "", targetConfigName = "", sourceOrgName = "", sourceTransportMethod = "", targetTransportMethod = "";
+    private String targetOrgName = null, sourceConfigName = "", targetConfigName = "", sourceOrgName = "", sourceTransportMethod = "", targetTransportMethod = "", srcSystem = "", tgtSystem = "";
 
     @Transient
     private Integer targetOrgId = 0, messageTypeId = 0, sourceConfigType = 0, targetConfigType = 0, targetOrgCol = 0, sourceSubOrgCol = 0, transportMethodId = 0;
@@ -241,5 +241,21 @@ public class configurationConnection {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public String getSrcSystem() {
+        return srcSystem;
+    }
+
+    public void setSrcSystem(String srcSystem) {
+        this.srcSystem = srcSystem;
+    }
+
+    public String getTgtSystem() {
+        return tgtSystem;
+    }
+
+    public void setTgtSystem(String tgtSystem) {
+        this.tgtSystem = tgtSystem;
     }
 }

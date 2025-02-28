@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+    <head>
+        <title>Health-e-Link UT Outbound Batches</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/processingActivities/actionBar :: actionBar}"></div>
+            <div th:insert="~{administrator/processingActivities/menuBar :: menuBar}"></div>
+            <div class="main clearfix" role="main">
+                <input type="hidden" name="fromDate" id="fromDate" th:rel="${#dates.format(fromDate, 'MM/dd/yyyy')}" th:rel2="${#dates.format(originalDate, 'MM/dd/yyyy')}" th:value="${fromDate}" />
+                <input type="hidden" name="toDate" id="toDate" th:rel="${#dates.format(toDate, 'MM/dd/yyyy')}" th:value="${toDate}" />
+                <input type="hidden" name="page" id="page" th:value="${currentPage}" />
+                <input type="hidden" name="batchName" id="batchName" th:value="${batchName}" />
+                <input type="hidden" name="userRole" id="userRole" th:value="${userRole}" />
+                <input type="hidden" name="term" id="term" th:value="${searchFilter}" />
+                <div class="col-md-12">
+                    <section class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Outbound Batches</h3>
+                        </div>
+                        <div class="panel-body">
+                            <th:block th:if="${error != null and error != ''}">
+                                <div class="alert alert-danger" role="alert">
+                                    The selected file was not found.
+                                </div>
+                            </th:block>
+                            <div class="scrollable" style=" overflow-x: none">
+                                <div class="col-md-12">
+                                    <div class="date-range-picker-trigger form-control pull-right daterange" style="width:285px;">
+                                        <i class="glyphicon glyphicon-calendar"></i>
+                                        <span class="date-label" th:text="${#dates.format(fromDate, 'MMMM dd, yyyy') + ' - ' + #dates.format(toDate, 'MMMM dd, yyyy')}"></span> <b class="caret"></b>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-bottom:20px;"></div>
+                                <div class="col-md-12">
+                                    <table class="table table-striped table-hover table-default" id="batchdownloads-table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Organization Details</th>
+                                                <th scope="col" style="width:50px">Batch Details</th>
+                                                <th scope="col">Associated Inbound Batch</th>
+                                                <!-- <th scope="col" class="center-text">Transport Method</th>-->
+                                                <th scope="col" class="center-text">Status</th>
+                                                <th scope="col"># of Transactions</th>
+                                                <th scope="col" class="center-text">Date Delivered</th>
+                                                <th scope="col"></th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>    
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>		
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
+            <script th:src="@{/dspResources/js/overlay.js}"></script>    
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.min.js}"></script>
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.bootstrap.min.js}"></script>
+            <script th:src="@{/dspResources/js/admin/processing-activities/outbound.js}"></script>
+            <script th:src="@{/dspResources/js/admin/processing-activities/mainActivityFunctions.js}"></script>
+        </th:block>
+    </body>
+</html>
+<div class="modal fade" id="batchInfoModal" role="dialog" tabindex="-1" aria-labeledby="Configuration File Upload" aria-hidden="true" aria-describedby="">
+    <div class="modal-dialog modal-lg"><div class="modal-content" id="modalContent"></div></div>
+</div>

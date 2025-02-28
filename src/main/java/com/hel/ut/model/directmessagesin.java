@@ -25,10 +25,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class directmessagesin {
     
     @Transient
-    private String orgName = null, statusName = null, batchName = null;
+    private String orgName = null, statusName = null, batchName = null, configName = "", systemName = "";
 
     @Transient
-    private Integer totalMessages = 0;
+    private Integer totalMessages = 0, HelRegistryId = 0;
     
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
@@ -207,5 +207,29 @@ public class directmessagesin {
 
     public void setOriginalDirectMessage(String originalDirectMessage) {
         this.originalDirectMessage = originalDirectMessage;
+    }
+
+    public String getConfigName() {
+        return configName;
+    }
+
+    public void setConfigName(String configName) {
+        this.configName = configName;
+    }
+
+    public String getSystemName() {
+        return systemName;
+    }
+
+    public void setSystemName(String systemName) {
+        this.systemName = systemName;
+    }
+
+    public Integer getHelRegistryId() {
+        return HelRegistryId;
+    }
+
+    public void setHelRegistryId(Integer HelRegistryId) {
+        this.HelRegistryId = HelRegistryId;
     }
 }

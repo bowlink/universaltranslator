@@ -41,10 +41,6 @@
                         <a th:href="@{/administrator/sysadmin/}" title="System Administration">System Admin</a>
                         <span th:if="${sect == 'sysadmin'}" class="indicator-active arrow-up"></span>
                     </li>
-		    <li th:if="${session.userDetails.roleId == 4}" role="menuitem" th:class="${sect == 'org' ? 'active' : 'none'}">
-                        <a th:href="@{/administrator/organizations/list}" title="Organization Manager">Organizations</a>
-                        <span th:if="${sect == 'org'}" class="indicator-active arrow-up"></span>
-                    </li>
 		  </ul>
                 <ul class="nav navbar-nav navbar-right" id="secondary-nav">
                     <li><a class="logout" th:href="@{/userlogout}">Log out </a></li>

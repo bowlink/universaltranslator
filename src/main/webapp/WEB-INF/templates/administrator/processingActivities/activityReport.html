@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+    <head>
+        <title>Health-e-Link UT Activity Report</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/processingActivities/actionBar :: actionBar}"></div>
+            <div th:insert="~{administrator/processingActivities/menuBar :: menuBar}"></div>
+            <div class="main clearfix" role="main">
+                <div class="col-md-12">
+                    <div class="row-fluid contain basic-clearfix">
+                        <form class="form form-inline" id="searchForm" th:action="${'/administrator/processing-activity/activityReport'}" method="post">
+                            <div class="form-group">
+                                <input type="hidden" name="fromDate" id="fromDate" th:rel="${#dates.format(fromDate, 'MM/dd/yyyy')}" th:rel2="${#dates.format(originalDate, 'MM/dd/yyyy')}" th:value="${fromDate}" />
+                                <input type="hidden" name="toDate" id="toDate" th:rel="${#dates.format(toDate, 'MM/dd/yyyy')}" th:value="${toDate}" />
+                            </div>
+                        </form>
+                        <div class="form-container scrollable">
+                            <div class="date-range-picker-trigger form-control pull-right daterange" style="width:285px;">
+                                <i class="glyphicon glyphicon-calendar"></i>
+                                <span class="date-label" th:text="${#dates.format(fromDate, 'MMMM dd, yyyy') + ' - ' + #dates.format(toDate, 'MMMM dd, yyyy')}"></span> <b class="caret"></b>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row scrollable" style="padding-bottom:20px;"></div>
+                    <section class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Inbound Summary</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="scrollable">
+                                <div class="col-md-12">
+                                    <div class="col-md-3 col-sm-3 col-xs-6">
+                                        <section class="panel panel-default panel-stats" role="widget" aria-labelleby="Messages Received">
+                                            <div class="panel-body">
+                                                <span class="stat-number text-info" th:if="${totalMessagesReceived >= 0}" th:text="${#numbers.formatInteger(totalMessagesReceived, 0, 'COMMA')}"></span>
+                                                <span class="stat-number text-info" th:unless="${totalMessagesReceived >= 0}">0</span>
+                                                <h3 class="text-info">Inbound Files Received</h3>
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <div class="col-md-3 col-sm-3 col-xs-6">
+                                        <section class="panel panel-default panel-stats" role="widget" aria-labelleby="Messages Delivered">
+                                            <div class="panel-body">
+                                                <span class="stat-number text-info" th:if="${totalRejectedReceived >= 0}" th:text="${#numbers.formatInteger(totalRejectedReceived, 0, 'COMMA')}"></span>
+                                                <span class="stat-number text-info" th:unless="${totalRejectedReceived >= 0}">0</span>
+                                                <h3 class="text-info">Inbound Files Rejected</h3>
+                                            </div>
+                                        </section>
+                                    </div> 
+                                    <div class="col-md-3 col-sm-3 col-xs-6">
+                                        <section class="panel panel-default panel-stats" role="widget" aria-labelleby="Messages Delivered">
+                                            <div class="panel-body">
+                                                <span class="stat-number text-info" th:if="${totalRejected >= 0}" th:text="${#numbers.formatInteger(totalRejected, 0, 'COMMA')}"></span>
+                                                <span class="stat-number text-info" th:unless="${totalRejected >= 0}">0</span>
+                                                <h3 class="text-info">Total Record Errors</h3>
+                                            </div>
+                                        </section>
+                                    </div>  
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Outbond Summary</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="scrollable">
+                                <div class="col-md-12">
+                                    <div class="col-md-3 col-sm-3 col-xs-6">
+                                        <section class="panel panel-default panel-stats" role="widget" aria-labelleby="Messages Delivered">
+                                            <div class="panel-body">
+                                                <span class="stat-number text-info" th:if="${totalMessagesDelivered >= 0}" th:text="${#numbers.formatInteger(totalMessagesDelivered, 0, 'COMMA')}"></span>
+                                                <span class="stat-number text-info" th:unless="${totalMessagesDelivered >= 0}">0</span>
+                                                <h3 class="text-info">Outbound Files Delivered</h3>
+                                            </div>
+                                        </section>
+                                    </div>  
+                                    <div class="col-md-3 col-sm-3 col-xs-6">
+                                        <section class="panel panel-default panel-stats" role="widget" aria-labelleby="Messages Delivered">
+                                            <div class="panel-body">
+                                                <span class="stat-number text-info" th:if="${totalDeliveredRejected >= 0}" th:text="${#numbers.formatInteger(totalDeliveredRejected, 0, 'COMMA')}"></span>
+                                                <span class="stat-number text-info" th:unless="${totalDeliveredRejected == 0}">0</span>
+                                                <h3 class="text-info">Outbound Files Rejected</h3>
+                                            </div>
+                                        </section>
+                                    </div> 
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </section>
+                    <section class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Inbound Files Received By Organization</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-container scrollable">
+                                <table class="table table-striped table-hover table-default" th:id="${#lists.isEmpty(referralList) ? '' : 'receivedFilesdataTable'}">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" style="width:350px;">Organization Name</th>
+                                            <th scope="col" style="width:350px;">Configuration Name</th>
+                                            <th scope="col" class="center-text">Total Received</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <div th:if="${not #lists.isEmpty(referralList)}">
+                                            <th:block th:each="item : ${referralList}">
+                                                <tr>
+                                                    <td scope="row" th:text="${item.orgName}"></td>
+                                                    <td th:text="${item.messageType}"></td>
+                                                    <td class="center-text" th:text="${item.total}"></td>
+                                                </tr>
+                                            </th:block>
+                                        </div>
+                                        <div th:unless="${not #lists.isEmpty(referralList)}">
+                                            <tr>
+                                                <td colspan="3" class="center-text">
+                                                    No files were received in the selected date range.
+                                                </td>
+                                            </tr>
+                                        </div>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>		
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
+            <script th:src="@{/dspResources/js/overlay.js}"></script>  
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.min.js}"></script>
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.bootstrap.min.js}"></script>
+            <script th:src="@{/dspResources/js/admin/processing-activities/activityReport.js}"></script>
+            <script th:src="@{/dspResources/js/admin/processing-activities/mainActivityFunctions.js}"></script>
+        </th:block>
+    </body>
+</html>
+<div class="modal fade" id="batchInfoModal" role="dialog" tabindex="-1" aria-labeledby="Configuration File Upload" aria-hidden="true" aria-describedby="">
+    <div class="modal-dialog modal-lg"><div class="modal-content" id="modalContent"></div></div>
+</div>

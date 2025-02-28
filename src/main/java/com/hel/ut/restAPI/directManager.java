@@ -12,7 +12,6 @@ import com.hel.ut.model.batchDownloads;
 import com.hel.ut.model.batchUploads;
 import com.hel.ut.model.batchdownloadactivity;
 import com.hel.ut.model.configurationTransport;
-import com.hel.ut.model.directmessagesin;
 import com.hel.ut.model.directmessagesout;
 import com.hel.ut.model.hisps;
 import com.hel.ut.model.mailMessage;
@@ -665,11 +664,11 @@ public class directManager {
 	}
     }
    
-    public List<directmessagesin> getDirectMessagesInListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
+    public List<Object> getDirectMessagesInListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
 	return transactionInDAO.getDirectMessagesInListPaged(fromDate,toDate,displayStart,displayRecords,searchTerm,sortColumnName,sortDirection);
     }
 
-    public List<directmessagesout> getDirectMessagesOutListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
+    public List<Object> getDirectMessagesOutListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
 	return transactionOutDAO.getDirectMessagesOutListPaged(fromDate,toDate,displayStart,displayRecords,searchTerm,sortColumnName,sortDirection);
     }
 }

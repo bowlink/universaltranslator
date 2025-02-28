@@ -23,7 +23,7 @@
                             <p th:if="${param.msg == 'created'}">The configuration note has been successfully created!</p>
                             <p th:if="${param.msg == 'deleted'}">The configuration note has been successfully removed!</p>
                         </div>
-                        <section class="panel panel-default">
+                        <section class="panel panel-info">
                             <div class="panel-heading">
                                 <h3 class="panel-title">Configuration Summary</h3>
                             </div>
@@ -40,7 +40,7 @@
 
                 <div class="row-fluid">
                     <div class="col-md-12">
-                        <section class="panel panel-default">
+                        <section class="panel panel-info">
                             <div class="panel-heading">
                                 <div class="pull-right">
                                     <a href="#configNoteModal" data-bs-toggle="modal" th:rel="${configurationDetails.id}" class="btn btn-primary btn-xs btn-action" id="createNewNote" title="Add New Configuration Note">Add New Configuration Note</a>

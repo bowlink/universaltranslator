@@ -1,0 +1,41 @@
+
+
+<span><strong>Showing the first <span th:text="${#numbers.formatInteger(#lists.size(errors), 0, 'COMMA')}"></span> out of all <span th:text="${#numbers.formatInteger(totalErrors, 0, 'COMMA')}"></span> dropped values</strong></span>
+<div id="errorTable-droppedValues">
+    <span th:if="${hasOutboundError > 0}">
+        <span style="color:#ffe3a4;font-weight: bold;margin-top:5px;">Rows</span> = dropped values found from processing the outbound target file.
+    </span>
+    <table border="1" class="table table-bordered" id="errordatatable">
+        <thead>
+            <tr>
+                <th:block th:if="${customCols != ''}">
+                    <div th:each="colValue : ${customCols}">
+                        <th th:if="${colValue != 'From Outbound'}" scope="col" th:text="${colValue}"></th>
+                    </div>
+                </th:block>
+            </tr>
+        </thead>
+        <tbody>
+            <div th:if="${not #lists.isEmpty(errors)}">
+                <th:block th:each="errorRow : ${errors}">
+                    <tr th:style="${errorRow[0] == '1' ? 'background-color:#ffe3a4;' : ''}">
+                        <td th:text="${errorRow[2]}"></td>
+                        <td th:text="${errorRow[3]}"></td>
+                        <td th:text="${errorRow[4]}"></td>
+                        <td th:text="${errorRow[6]}"></td>
+                        <td th:text="${errorRow[7]}"></td>
+                        <td th:text="${errorRow[8]}"></td>
+                        <td th:text="${errorRow[9]}"></td>
+                        <td th:text="${errorRow[10]}"></td>
+                    </tr>
+                </th:block>
+            </div>
+            <div th:if="${#lists.isEmpty(errors)}">
+                <tr><td th:colspan="${#lists.size(customCols)-1}" class="center-text">There are currently no dropped values found.</td></tr>
+             </div>
+        </tbody>
+    </table>
+    <span th:if="${hasOutboundError > 0}">
+        <span style="color:#ffe3a4;font-weight: bold">Rows</span> = dropped values found from processing the outbound target file.
+    </span>
+</div>

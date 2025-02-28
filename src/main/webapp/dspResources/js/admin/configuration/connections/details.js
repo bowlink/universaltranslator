@@ -1,15 +1,53 @@
 
 
-require(['./main'], function () {
+jQuery(function ($) {
     
-    $(document).on('click', '.exportConnection', function() {
-            
-        var connectionId = $(this).attr('rel');
+    $(document).ready(function () {
+        
+        
+        
+         //Fade out the updated/created message after being displayed.
+        if ($('.alert').length > 0) {
+            $('.alert').delay(2000).fadeOut(1000);
+        }
+    
+        $(document).on('click', '.exportConnection', function() {
 
-        if(confirm("Are you sure you want to export this connection? The source and target configuration must first be exported and imported into the new system before you can import the connection.")) {
+            var connectionId = $(this).attr('rel');
+
+            if(confirm("Are you sure you want to export this connection? The source and target configuration must first be exported and imported into the new system before you can import the connection.")) {
+
+                $.ajax({
+                    url: '/administrator/configurations/connections/createConnectionExportFile.do',
+                    data: {
+                        'connectionId': connectionId
+                    },
+                    type: "GET",
+                    dataType : 'text',
+                    contentType : 'application/json;charset=UTF-8',
+                    success: function(data) {
+                        if(data !== '') {
+                            window.location.href = '/administrator/configurations/connections/printConnectionExport/'+ data;
+                        }
+                        else {
+                            $('#exportErrorMsg').show();
+                        }
+                    }
+                });
+            }
+        });
+
+        $(document).on('click','.printConfig',function() {
+
+           $('body').overlay({
+               glyphicon : 'print',
+               message : 'Gathering Details...'
+            });
+
+            var connectionId = $(this).attr('rel');
 
             $.ajax({
-                url: '/administrator/configurations/connections/createConnectionExportFile.do',
+                url: '/administrator/configurations/connections/createConnectionPrintPDF.do',
                 data: {
                     'connectionId': connectionId
                 },
@@ -18,312 +56,277 @@ require(['./main'], function () {
                 contentType : 'application/json;charset=UTF-8',
                 success: function(data) {
                     if(data !== '') {
-                        window.location.href = '/administrator/configurations/connections/printConnectionExport/'+ data;
+                       window.location.href = '/administrator/configurations/connections/printConfig/'+ data;
+                       $('.overlay').css('display','none');
                     }
                     else {
-                        $('#exportErrorMsg').show();
+                        $('#errorMsg').show();
                     }
                 }
             });
-        }
-    });
-        
-    $(document).on('click','.printConfig',function() {
-       
-       $('body').overlay({
-           glyphicon : 'print',
-           message : 'Gathering Details...'
         });
 
-        var connectionId = $(this).attr('rel');
+        var selSrcOrgId = $('.selSendingOrganization').val();
+        if(selSrcOrgId > 0) {
+             populateConfigurations(selSrcOrgId, 'srcConfig');
+        }
 
-        $.ajax({
-            url: '/administrator/configurations/connections/createConnectionPrintPDF.do',
-            data: {
-                'connectionId': connectionId
-            },
-            type: "GET",
-            dataType : 'text',
-            contentType : 'application/json;charset=UTF-8',
-            success: function(data) {
-                if(data !== '') {
-                   window.location.href = '/administrator/configurations/connections/printConfig/'+ data;
-                   $('.overlay').css('display','none');
-                }
-                else {
-                    $('#errorMsg').show();
+        var selTgtOrgId = $('.seltgtOrganization').val();
+        if(selTgtOrgId > 0) {
+             populateConfigurations(selTgtOrgId, 'tgtConfig');
+        }
+
+        $(document).on('change','.matchField', function() {
+            if($(this).attr('copyErrorField') === 'yes') {
+                if($(this).children("option:selected").text().indexOf('- Default ') == -1) {
+                    $('#errorFieldSel'+$(this).attr('fieldNo')).val($(this).val());
                 }
             }
         });
-    });
 
-    $('[data-toggle="tooltip"]').tooltip();   
+        //Go get the existing message types for the selected organization'
+        $(document).on('change', '.selSendingOrganization', function () {
+            var selOrg = $(this).val();
+            var connectionId = $('#connectionId').val();
 
-    //Fade out the updated/created message after being displayed.
-    if ($('.alert').length > 0) {
-        $('.alert').delay(2000).fadeOut(1000);
-    }
+            $('#srcorgDiv').removeClass('has-error');
+            $('#srcOrgMsg').html("");
 
-    var selSrcOrgId = $('.selSendingOrganization').val();
-    if(selSrcOrgId > 0) {
-         populateConfigurations(selSrcOrgId, 'srcConfig');
-    }
-
-    var selTgtOrgId = $('.seltgtOrganization').val();
-    if(selTgtOrgId > 0) {
-         populateConfigurations(selTgtOrgId, 'tgtConfig');
-    }
-
-    $(document).on('change','.matchField', function() {
-        if($(this).attr('copyErrorField') === 'yes') {
-            if($(this).children("option:selected").text().indexOf('- Default ') == -1) {
-                $('#errorFieldSel'+$(this).attr('fieldNo')).val($(this).val());
+            if (selOrg === '') {
+                $('#srcorgDiv').addClass("has-error");
+            } else {
+                populateConfigurations(selOrg, 'srcConfig');
+                //populateUsers(selOrg, 'srcContactsTable', connectionId);
             }
-        }
-    });
+        });
 
-    //Go get the existing message types for the selected organization'
-    $(document).on('change', '.selSendingOrganization', function () {
-        var selOrg = $(this).val();
-        var connectionId = $('#connectionId').val();
+        //Go get the existing message types for the selected organization
+        $(document).on('change', '.seltgtOrganization', function () {
+            var selOrg = $(this).val();
+            var connectionId = $('#connectionId').val();
 
-        $('#srcorgDiv').removeClass('has-error');
-        $('#srcOrgMsg').html("");
+            $('#tgtorgDiv').removeClass('has-error');
+            $('#tgtOrgMsg').html("");
 
-        if (selOrg === '') {
-            $('#srcorgDiv').addClass("has-error");
-        } else {
-            populateConfigurations(selOrg, 'srcConfig');
-            //populateUsers(selOrg, 'srcContactsTable', connectionId);
-        }
-    });
+            if (selOrg === '') {
+                $('#tgtorgDiv').addClass("has-error");
+            } else {
+                populateConfigurations(selOrg, 'tgtConfig');
+                //populateUsers(selOrg, 'tgtContactsTable', connectionId);
+            }
+        });
 
-    //Go get the existing message types for the selected organization
-    $(document).on('change', '.seltgtOrganization', function () {
-        var selOrg = $(this).val();
-        var connectionId = $('#connectionId').val();
+        //Go get the existing message types for the selected organization
+        $(document).on('change', '#srcConfig', function () {
+            var selConfigId = $(this).val();
 
-        $('#tgtorgDiv').removeClass('has-error');
-        $('#tgtOrgMsg').html("");
+            $('#srcConfigDiv').removeClass('has-error');
+            $('#srcConfigMsg').html("");
 
-        if (selOrg === '') {
-            $('#tgtorgDiv').addClass("has-error");
-        } else {
-            populateConfigurations(selOrg, 'tgtConfig');
-            //populateUsers(selOrg, 'tgtContactsTable', connectionId);
-        }
-    });
+            if(selConfigId !== '') {
+                populateConfigurationDataElements(selConfigId,'src');
+            }
+            else {
+                $('.').hide();
+            }
+        });
 
-    //Go get the existing message types for the selected organization
-    $(document).on('change', '#srcConfig', function () {
-        var selConfigId = $(this).val();
+        //Go get the existing message types for the selected organization
+        $(document).on('change', '#tgtConfig', function () {
+            var selConfigId = $(this).val();
 
-        $('#srcConfigDiv').removeClass('has-error');
-        $('#srcConfigMsg').html("");
+            $('#tgtConfigDiv').removeClass('has-error');
+            $('#tgtConfigMsg').html("");
 
-        if(selConfigId !== '') {
-            populateConfigurationDataElements(selConfigId,'src');
-        }
-        else {
-            $('.').hide();
-        }
-    });
-
-    //Go get the existing message types for the selected organization
-    $(document).on('change', '#tgtConfig', function () {
-        var selConfigId = $(this).val();
-
-        $('#tgtConfigDiv').removeClass('has-error');
-        $('#tgtConfigMsg').html("");
-
-        if(selConfigId !== '') {
-            populateConfigurationDataElements(selConfigId,'tgt');
-        }
-        else {
-            $('.').hide();
-        }
-    });
+            if(selConfigId !== '') {
+                populateConfigurationDataElements(selConfigId,'tgt');
+            }
+            else {
+                $('.').hide();
+            }
+        });
 
 
-    //This function will save the messgae type field mappings
-    $(document).on('click', '#saveDetails', function () {
+        //This function will save the messgae type field mappings
+        $(document).on('click', '#saveDetails', function () {
 
-        var selectedSourceConfig = $('#srcConfig').val();
-        var selectedTargetConfig = $('#tgtConfig').val();
-        var connectionId = $('#connectionId').val();
+            var selectedSourceConfig = $('#srcConfig').val();
+            var selectedTargetConfig = $('#tgtConfig').val();
+            var connectionId = $('#connectionId').val();
 
-        var mappingArray = [];
-        var mappingErrorArray = [];
+            var mappingArray = [];
+            var mappingErrorArray = [];
 
-        var errorFound = 0;
+            var errorFound = 0;
 
-        $('.matchField').each(function() {
-            var targetFieldNo = $(this).attr('fieldNo');
-            var targetFieldDesc = $(this).attr('fieldDesc');
-            var targetUseField = $('#useField'+targetFieldNo).is(':checked');
-            var matchingField = $(this).val();
+            $('.matchField').each(function() {
+                var targetFieldNo = $(this).attr('fieldNo');
+                var targetFieldDesc = $(this).attr('fieldDesc');
+                var targetUseField = $('#useField'+targetFieldNo).is(':checked');
+                var matchingField = $(this).val();
 
-            mappingArray.push(targetFieldNo+'|'+targetFieldDesc+'|'+targetUseField+'|'+matchingField);
+                mappingArray.push(targetFieldNo+'|'+targetFieldDesc+'|'+targetUseField+'|'+matchingField);
+
+            });
+
+            console.log(mappingArray);
+
+            $('.errorField').each(function() {
+                var errorField = $(this).val();
+
+                mappingErrorArray.push(errorField);
+
+            });
+
+            if($('.selSendingOrganization').val() === '') {
+                $('#srcorgDiv').addClass('has-error');
+                $('#srcOrgMsg').html("This is a required field.");
+                errorFound = 1;
+            }
+
+            if(selectedSourceConfig === '') {
+                $('#srcConfigDiv').addClass('has-error');
+                $('#srcConfigMsg').html("This is a required field.");
+                errorFound = 1;
+            }
+
+            if($('.seltgtOrganization').val() === '') {
+                $('#tgtorgDiv').addClass('has-error');
+                $('#tgtOrgMsg').html("This is a required field.");
+                errorFound = 1;
+            }
+
+            if(selectedTargetConfig === '') {
+                $('#tgtConfigDiv').addClass('has-error');
+                $('#tgtConfigMsg').html("This is a required field.");
+                errorFound = 1;
+            }
+
+            if(errorFound == 0) {
+                if(mappingArray.length > 0) {
+                    $.ajax({
+                        url: 'saveConnectionElementMappings',
+                        type: "POST",
+                        data: {
+                            'connectionId': connectionId,
+                            'sourceConfigId': selectedSourceConfig,
+                            'targetConfigId': selectedTargetConfig,
+                            'mappedFields': mappingArray,
+                            'mappedErrorFields':mappingErrorArray
+                        },
+                        success: function (data) {
+                            window.location.replace('/administrator/configurations/connections/details?i='+data+'&msg=saved');
+                        }
+                    });
+                }
+            }
 
         });
 
-        console.log(mappingArray);
+        //This function will save the messgae type field mappings
+        $(document).on('click', '#saveCloseDetails', function () {
 
-        $('.errorField').each(function() {
-            var errorField = $(this).val();
+            var selectedSourceConfig = $('#srcConfig').val();
+            var selectedTargetConfig = $('#tgtConfig').val();
+            var connectionId = $('#connectionId').val();
 
-            mappingErrorArray.push(errorField);
+            var mappingArray = [];
+            var mappingErrorArray = [];
+
+            var errorFound = 0;
+
+            $('.matchField').each(function() {
+                var targetFieldNo = $(this).attr('fieldNo');
+                var targetFieldDesc = $(this).attr('fieldDesc');
+                var targetUseField = $('#useField'+targetFieldNo).is(':checked');
+                var matchingField = $(this).val();
+
+                mappingArray.push(targetFieldNo+'|'+targetFieldDesc+'|'+targetUseField+'|'+matchingField);
+
+            });
+
+            console.log(mappingArray);
+
+            $('.errorField').each(function() {
+                var errorField = $(this).val();
+
+                mappingErrorArray.push(errorField);
+
+            });
+
+            if($('.selSendingOrganization').val() === '') {
+                $('#srcorgDiv').addClass('has-error');
+                $('#srcOrgMsg').html("This is a required field.");
+                errorFound = 1;
+            }
+
+            if(selectedSourceConfig === '') {
+                $('#srcConfigDiv').addClass('has-error');
+                $('#srcConfigMsg').html("This is a required field.");
+                errorFound = 1;
+            }
+
+            if($('.seltgtOrganization').val() === '') {
+                $('#tgtorgDiv').addClass('has-error');
+                $('#tgtOrgMsg').html("This is a required field.");
+                errorFound = 1;
+            }
+
+            if(selectedTargetConfig === '') {
+                $('#tgtConfigDiv').addClass('has-error');
+                $('#tgtConfigMsg').html("This is a required field.");
+                errorFound = 1;
+            }
+
+            if(errorFound == 0) {
+                if(mappingArray.length > 0) {
+                    $.ajax({
+                        url: 'saveConnectionElementMappings',
+                        type: "POST",
+                        data: {
+                            'connectionId': connectionId,
+                            'sourceConfigId': selectedSourceConfig,
+                            'targetConfigId': selectedTargetConfig,
+                            'mappedFields': mappingArray,
+                            'mappedErrorFields':mappingErrorArray
+                        },
+                        success: function (data) {
+                            window.location.replace('/administrator/configurations/connections?msg=saved');
+                        }
+                    });
+                }
+            }
 
         });
 
-        if($('.selSendingOrganization').val() === '') {
-            $('#srcorgDiv').addClass('has-error');
-            $('#srcOrgMsg').html("This is a required field.");
-            errorFound = 1;
-        }
+        $(document).on('change', '#sendAllSourceContacts', function () {
 
-        if(selectedSourceConfig === '') {
-            $('#srcConfigDiv').addClass('has-error');
-            $('#srcConfigMsg').html("This is a required field.");
-            errorFound = 1;
-        }
-
-        if($('.seltgtOrganization').val() === '') {
-            $('#tgtorgDiv').addClass('has-error');
-            $('#tgtOrgMsg').html("This is a required field.");
-            errorFound = 1;
-        }
-
-        if(selectedTargetConfig === '') {
-            $('#tgtConfigDiv').addClass('has-error');
-            $('#tgtConfigMsg').html("This is a required field.");
-            errorFound = 1;
-        }
-
-        if(errorFound == 0) {
-            if(mappingArray.length > 0) {
-                $.ajax({
-                    url: 'saveConnectionElementMappings',
-                    type: "POST",
-                    data: {
-                        'connectionId': connectionId,
-                        'sourceConfigId': selectedSourceConfig,
-                        'targetConfigId': selectedTargetConfig,
-                        'mappedFields': mappingArray,
-                        'mappedErrorFields':mappingErrorArray
-                    },
-                    success: function (data) {
-                        window.location.replace('/administrator/configurations/connections/details?i='+data+'&msg=saved');
-                    }
+            if ($(this).is(":checked")) {
+                $('.srcEmailNotifications').each(function () {
+                    $(this).prop('checked', true);
                 });
             }
-        }
-
-    });
-
-    //This function will save the messgae type field mappings
-    $(document).on('click', '#saveCloseDetails', function () {
-
-        var selectedSourceConfig = $('#srcConfig').val();
-        var selectedTargetConfig = $('#tgtConfig').val();
-        var connectionId = $('#connectionId').val();
-
-        var mappingArray = [];
-        var mappingErrorArray = [];
-
-        var errorFound = 0;
-
-        $('.matchField').each(function() {
-            var targetFieldNo = $(this).attr('fieldNo');
-            var targetFieldDesc = $(this).attr('fieldDesc');
-            var targetUseField = $('#useField'+targetFieldNo).is(':checked');
-            var matchingField = $(this).val();
-
-            mappingArray.push(targetFieldNo+'|'+targetFieldDesc+'|'+targetUseField+'|'+matchingField);
-
-        });
-
-        console.log(mappingArray);
-
-        $('.errorField').each(function() {
-            var errorField = $(this).val();
-
-            mappingErrorArray.push(errorField);
-
-        });
-
-        if($('.selSendingOrganization').val() === '') {
-            $('#srcorgDiv').addClass('has-error');
-            $('#srcOrgMsg').html("This is a required field.");
-            errorFound = 1;
-        }
-
-        if(selectedSourceConfig === '') {
-            $('#srcConfigDiv').addClass('has-error');
-            $('#srcConfigMsg').html("This is a required field.");
-            errorFound = 1;
-        }
-
-        if($('.seltgtOrganization').val() === '') {
-            $('#tgtorgDiv').addClass('has-error');
-            $('#tgtOrgMsg').html("This is a required field.");
-            errorFound = 1;
-        }
-
-        if(selectedTargetConfig === '') {
-            $('#tgtConfigDiv').addClass('has-error');
-            $('#tgtConfigMsg').html("This is a required field.");
-            errorFound = 1;
-        }
-
-        if(errorFound == 0) {
-            if(mappingArray.length > 0) {
-                $.ajax({
-                    url: 'saveConnectionElementMappings',
-                    type: "POST",
-                    data: {
-                        'connectionId': connectionId,
-                        'sourceConfigId': selectedSourceConfig,
-                        'targetConfigId': selectedTargetConfig,
-                        'mappedFields': mappingArray,
-                        'mappedErrorFields':mappingErrorArray
-                    },
-                    success: function (data) {
-                        window.location.replace('/administrator/configurations/connections?msg=saved');
-                    }
+            else {
+                $('.srcEmailNotifications').each(function () {
+                    $(this).prop('checked', false);
                 });
             }
-        }
-        
-    });
+        });
 
-    $(document).on('change', '#sendAllSourceContacts', function () {
+        $(document).on('change', '#sendAllTargetContacts', function () {
 
-        if ($(this).is(":checked")) {
-            $('.srcEmailNotifications').each(function () {
-                $(this).prop('checked', true);
-            });
-        }
-        else {
-            $('.srcEmailNotifications').each(function () {
-                $(this).prop('checked', false);
-            });
-        }
-    });
-
-    $(document).on('change', '#sendAllTargetContacts', function () {
-
-        if ($(this).is(":checked")) {
-            $('.tgtEmailNotifications').each(function () {
-                $(this).prop('checked', true);
-            });
-        } 
-        else {
-            $('.tgtEmailNotifications').each(function () {
-                $(this).prop('checked', false);
-            });
-        }
-    });
+            if ($(this).is(":checked")) {
+                $('.tgtEmailNotifications').each(function () {
+                    $(this).prop('checked', true);
+                });
+            } 
+            else {
+                $('.tgtEmailNotifications').each(function () {
+                    $(this).prop('checked', false);
+                });
+            }
+        });
+   });     
 });
 
 function populateConfigurations(orgId, selectBoxId) {
@@ -346,10 +349,10 @@ function populateConfigurations(orgId, selectBoxId) {
             for (var i = 0; i < len; i++) {
                 if (data[i].id == currConfigId) {
 		    found = 1;
-                    html += '<option value="' + data[i].id + '" selected>' + data[i].configName + '&nbsp;(ID: '+ data[i].id + ')&nbsp;&#149;&nbsp;' + data[i].transportMethod + '</option>';
+                    html += '<option value="' + data[i].id + '" selected>' + data[i].configname + '&nbsp;(ID: '+ data[i].id + ')&nbsp;&#149;&nbsp;' + data[i].transportMethod + '</option>';
 		    
                 } else {
-                    html += '<option value="' + data[i].id + '">' + data[i].configName + '&nbsp;(ID: '+ data[i].id +')&nbsp;&#149;&nbsp;' + data[i].transportMethod + '</option>';
+                    html += '<option value="' + data[i].id + '">' + data[i].configname + '&nbsp;(ID: '+ data[i].id +')&nbsp;&#149;&nbsp;' + data[i].transportMethod + '</option>';
                 }
             }
 	    
@@ -429,10 +432,16 @@ function populateConfigurationDataElements(configId, section) {
 		     $('.targetDataElements').html(data);
 		     $('.dataElementDivs').show();
 		     $('.targetDataElementDiv').show();
+                     
+                     var toolTipEl = document.getElementById('toolTipBTN');
+                    if(toolTipEl != null) {
+                        var tooltip = new bootstrap.Tooltip(toolTipEl, {
+                          boundary: document.body // or document.querySelector('#boundary')
+                        });
+                    }
 		}
 	    }
 	});
     }
-    
 }
 

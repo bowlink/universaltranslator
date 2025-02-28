@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+    <head>
+        <title>Health-e-Link UT Activity Report</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/processingActivities/actionBar :: actionBar}"></div>
+            <div th:insert="~{administrator/processingActivities/menuBar :: menuBar}"></div>
+            <div class="main clearfix" role="main">
+                <div class="col-md-12">
+                    <div class="col-md-6">
+                        <section class="panel panel-info">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Run New Activity Report</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-container scrollable">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6" style="padding-left:0px;">
+                                            <div class="form-group">
+                                                <label for="reportType">Report Type *</label>
+                                                <div>
+                                                    <label class="radio-inline">
+                                                        <input type="radio" name="reportType" id="reportType" value="1" class="type" checked /> PDF
+                                                    </label>
+                                                    <label class="radio-inline">
+                                                        <input type="radio" name="reportType" id="reportType" value="2" class="type" /> Excel
+                                                    </label>
+                                                </div>
+                                            </div> 
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="reportType">Activity Date Range *</label>
+                                                <input type="hidden" name="fromDate" id="fromDate" th:rel="${#dates.format(fromDate, 'MM/dd/yyyy')}" th:rel2="${#dates.format(originalDate, 'MM/dd/yyyy')}" th:value="${fromDate}" />
+                                                <input type="hidden" name="toDate" id="toDate" th:rel="${#dates.format(toDate, 'MM/dd/yyyy')}" th:value="${toDate}" />
+                                                <div class="date-range-picker-trigger form-control daterange" style="width:285px;">
+                                                    <i class="glyphicon glyphicon-calendar"></i>
+                                                    <span class="date-label" th:text="${#dates.format(fromDate, 'MMMM dd, yyyy') + ' - ' + #dates.format(toDate, 'MMMM dd, yyyy')}"></span> <b class="caret"></b>
+                                                </div>
+                                            </div> 
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="registryType">Registry Type *</label>
+                                            <div>
+                                                <label class="radio-inline" th:if="${!eahUT}">
+                                                    <input type="radio" name="registryType" id="registryType" value="1" class="type" /> eReferral
+                                                </label>
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="registryType" id="registryType" value="2" class="type" checked /> Family Planning
+                                                </label>
+                                            </div>
+                                        </div> 
+                                        <div id="agencyDiv" class="form-group">
+                                            <label class="control-label" for="messageTypeId">Select one or more agencies *</label>
+                                            <div id="agencyList"></div>
+                                            <span id="agencyMsg" class="control-label"></span>
+                                        </div> 
+                                        <div class="form-group">
+                                            <input type="button" id="generateReport" class="btn btn-primary" value="Generate Report"/>
+                                        </div>          
+                                    </div>  
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="col-md-6">
+                        <section class="panel panel-info">
+                            <div class="panel-heading">
+                                <div class="pull-right">
+                                    <th:block th:if="${reportLinkClicked != ''}">
+                                        <a th:href="'/advanced/DLReport?'+${reportLinkClicked}" class="reportLinkClicked" role="button" style="display:none">
+                                            <button class="btn btn-xs btn-success">
+                                                <i class="ace-icon fa fa-download bigger-120"></i>
+                                            </button>
+                                        </a>
+                                    </th:block>
+                                    <div class="dropdown pull-left refreshRate" th:rel="${pageRefreshRate}">
+                                        <button class="btn btn-xs btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="fa fa-refresh"></i> Refresh rate:
+                                            <span th:if="${pageRefreshRate == 15000}">Every 15 seconds</span>
+                                            <span th:if="${pageRefreshRate == 35000}">Every 35 seconds</span>
+                                            <span th:if="${pageRefreshRate == 60000}">Every minute</span>
+                                            <span th:if="${pageRefreshRate == 300000}">Every 5 minutes</span>
+                                            <span th:if="${pageRefreshRate == 0}">Off</span>
+                                        </button>
+                                        <ul class="dropdown-menu pull-right">
+                                            <li>
+                                                <a href="#" rel="15000" class="setRefreshRate" title="Refresh Page Every 15 Seconds" data-toggle="tooltip">
+                                                    Every 15 Seconds
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#" rel="35000" class="setRefreshRate" title="Refresh Page Every 15 Seconds" data-toggle="tooltip">
+                                                    Every 35 Seconds
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#" rel="60000" class="setRefreshRate" title="Refresh Page Every 15 Seconds" data-toggle="tooltip">
+                                                    Every Minute
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#" rel="300000" class="setRefreshRate" title="Refresh Page Every 15 Seconds" data-toggle="tooltip">
+                                                    Every 5 Minutes
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#" rel="0" class="setRefreshRate" title="Refresh Page Every 15 Seconds" data-toggle="tooltip">
+                                                    Turn off Auto Refresh
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <h3 class="panel-title">Past Activity Reports</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-container scrollable">
+                                    <table class="table table-striped table-hover table-default" id="reportDataTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Status</th>
+                                                <th>Report Type</th>
+                                                <th>Registry Type</th>
+                                                <th>Date Range</th>
+                                                <th>Date Created</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <div th:if="${not #lists.isEmpty(activityReports)}">
+                                                <th:block th:each="activityReport : ${activityReports}">
+                                                    <tr>
+                                                        <td>
+                                                            <span th:if="${activityReport.status == 1}">Processing...</span>
+                                                            <span th:if="${activityReport.status == 2}">Ready</span>
+                                                            <span th:if="${activityReport.status == 3}">Error</span>
+                                                        </td>
+                                                        <td>
+                                                            <span th:if="${activityReport.reportType == 1}">PDF</span>
+                                                            <span th:if="${activityReport.reportType == 2}">Excel</span>
+                                                        </td>
+                                                        <td>
+                                                            <span th:if="${activityReport.registryType == 1}">eReferral</span>
+                                                            <span th:if="${activityReport.registryType == 2}">Family Planning</span>
+                                                            <br />
+                                                            <a href="#activityReportModal" th:rel="${activityReport.id}" data-bs-toggle="modal" class="btn btn-primary btn-xs btn-action showAgencies" title="Selected Agencies">Selected Agencies</a>
+                                                        </td>
+                                                        <td th:text="${activityReport.dateRange}"></td>
+                                                        <td th:text="${#dates.format(activityReport.dateCreated, 'M/dd/yy h:mm a')}"></td>
+                                                        <td>
+                                                            <div class="dropdown pull-left">
+                                                                 <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                                     <i class="fa fa-cog"></i>
+                                                                 </button>
+                                                                 <ul class="dropdown-menu pull-right">
+                                                                    <li th:if="${activityReport.status == 2}">
+                                                                        <th:block th:if="${activityReport.reportType == 1}">
+                                                                             <a th:href="'/administrator/processing-activity/printActivityReportToPDF/'+${activityReport.fileName}" th:rel="${activityReport.id}" title="Download this activity report">
+                                                                                <span class="glyphicon glyphicon-download"></span>
+                                                                                Download
+                                                                            </a>
+                                                                        </th:block>
+                                                                        <th:block th:if="${activityReport.reportType == 2}">
+                                                                            <a th:href="'/administrator/processing-activity/printActivityReportToExcel/'+${activityReport.fileName}" th:rel="${activityReport.id}" title="Download this activity report">
+                                                                                <span class="glyphicon glyphicon-download"></span>
+                                                                                Download
+                                                                            </a>
+                                                                        </th:block>
+                                                                    </li>
+                                                                    <li th:if="${activityReport.status == 2}" class="divider"></li>
+                                                                    <li>
+                                                                        <a href="javascript:void(0);" class="rerunReport" th:rel="${activityReport.id}" title="Rerun this activity report">
+                                                                            <span class="glyphicon glyphicon-refresh"></span>
+                                                                            Rerun Report
+                                                                        </a>
+                                                                    </li>
+                                                                    <li class="divider"></li>    
+                                                                    <li>
+                                                                        <a href="javascript:void(0);" class="deleteReport" th:rel="${activityReport.id}" title="Delete this activity report">
+                                                                            <span class="glyphicon glyphicon-remove-circle"></span>
+                                                                            Delete
+                                                                        </a>
+                                                                    </li>
+                                                                 </ul>
+                                                             </div>
+                                                        </td>
+                                                    </tr>
+                                                </th:block>
+                                            </div>
+                                            <div th:unless="${not #lists.isEmpty(activityReports)}">
+                                                <tr><td colspan="6" class="text-center">There were no saved activity reports found.</td>
+                                            </div>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
+            <script th:src="@{/dspResources/js/overlay.js}"></script>  
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.min.js}"></script>
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.bootstrap.min.js}"></script>
+            <script th:src="@{/dspResources/js/admin/processing-activities/generateReport.js}"></script>
+            <script th:src="@{/dspResources/js/admin/processing-activities/mainActivityFunctions.js}"></script>
+        </th:block>
+    </body>
+</html>
+<div class="modal fade" id="activityReportModal" role="dialog" tabindex="-1" aria-labeledby="" aria-hidden="true" aria-describedby="">
+    <div class="modal-dialog modal-lg"><div class="modal-content" id="modalContent"></div></div>
+</div>

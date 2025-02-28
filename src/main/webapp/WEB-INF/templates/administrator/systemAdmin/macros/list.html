@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+    <head>
+        <title>Health-e-Link UT Standard System Macros</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/systemAdmin/actionBar :: actionBar}"></div>
+            <div th:insert="~{administrator/systemAdmin/menuBar :: menuBar}"></div>
+            <div class="main clearfix" role="main">
+                <div class="col-md-12">
+                    <div class="alert alert-success" role="alert" th:if="${param.msg != null}">
+                        <strong>Success!</strong> 
+                        <p th:if="${param.msg[0] == 'updated'}">The macro has been successfully updated!</p>
+                        <p th:if="${param.msg[0] == 'created'}">The macro has been successfully added!</p>
+                        <p th:if="${param.msg[0] == 'deleted'}">The macro has been successfully deleted!</p>
+                        <p th:if="${param.msg[0] == 'notDeleted'}">he macro was not deleted.  Please try again.</p>
+                    </div>
+                    <div class="alert alert-success" role="alert" th:if="${savedStatus != null}">
+                        <strong>Success!</strong> 
+                        <p th:if="${savedStatus == 'deleted'}">The macro has been successfully deleted!</p>
+                        <p th:if="${savedStatus == 'notDeleted'}">he macro was not deleted.  Please try again.</p>
+                    </div>
+                    <section class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Standard System Macros</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="scrollable">
+                                <div class="col-md-12">
+                                    <table class="table table-striped table-hover table-default" th:id="${not #lists.isEmpty(macroList) ? 'macroListtable' : ''}">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Category</th>
+                                                <th scope="col">Macro Name</th>
+                                                <th scope="col">Stored Procedure Name</th>
+                                                <th scope="col"></th>
+                                            </tr>
+                                        </thead>
+                                        <div th:if="${not #lists.isEmpty(macroList)}">
+                                            <tr style="cursor: pointer" th:each="macro : ${macroList}">
+                                                <td scope="row">
+                                                    <span th:if="${macro.categoryId == 1}">Data Manipulation</span>
+                                                    <span th:if="${macro.categoryId == 2}">Processing</span>
+                                                </td>
+                                                <td>
+                                                     <a href="#macroModal" data-bs-toggle="modal" th:rel="${macro.id}" class="macroEdit" title="Edit this macro">
+                                                        <span th:if="${#strings.length(macro.macroName) > 255}" th:text="${#strings.subscring(macro.macroName,0,254}+'...'"></span>
+                                                        <span th:unless="${#strings.length(macro.macroName) > 255}" th:text="${macro.macroName}"></span>
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <span th:if="${#strings.length(macro.formula) > 45}" th:text="${#strings.subscring(macro.formula,0,44}+'...'"></span>
+                                                    <span th:unless="${#strings.length(macro.formula) > 255}" th:text="${macro.formula}"></span>
+                                                </td>
+                                                <td class="center-text">
+                                                    <div class="dropdown pull-left">
+                                                        <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                            <i class="fa fa-cog"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu pull-right">
+                                                            <li>
+                                                                 <a href="#macroModal" data-bs-toggle="modal" th:rel="${macro.id}" class="macroEdit" title="Edit this macro">
+                                                                    <span class="glyphicon glyphicon-edit"></span>
+                                                                    Edit Macro	
+                                                                </a>
+                                                            </li>
+                                                            <li class="divider"></li>
+                                                            <li>
+                                                                <a href="#!" th:rel="${macro.id}" class="btn btn-link marcoDelete" title="Delete this row">
+                                                                    <span class="glyphicon glyphicon-remove"></span>
+                                                                    Delete Macro
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </div>
+                                        <div th:unless="${not #lists.isEmpty(macroList)}">
+                                             <tr><td colspan="4" class="center-text">There are currently no system macros set up.</td></tr>
+                                        </div>
+                                    </table>
+                                </div>    
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>		
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
+            <script th:src="@{/dspResources/js/overlay.js}"></script>    
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.min.js}"></script>
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.bootstrap.min.js}"></script>
+            <script th:src="@{/dspResources/js/admin/sysadmin/macro/list.js}"></script>
+            <script th:src="@{/dspResources/js/admin/sysadmin/mainAdminFunctions.js}"></script>
+        </th:block>
+    </body>
+</html>
+<div class="modal fade" id="macroModal" role="dialog" tabindex="-1" aria-labeledby="Configuration File Upload" aria-hidden="true" aria-describedby="Configuration File Upload">
+    <div class="modal-dialog modal-lg"><div class="modal-content" id="macroModalContent"></div></div>
+</div>

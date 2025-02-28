@@ -1,0 +1,36 @@
+<nav class="navbar navbar-default actions-nav" role="navigation"  th:fragment="actionBar">
+    <div class="contain">
+        <div class="navbar-header">
+            <h1 class="section-title navbar-brand">
+                <span th:if="${actionPage == 'activityReport'}">Activity Report</span>
+                <span th:if="${actionPage == 'generateReport'}">Generate Activity Report</span>
+                <span th:if="${actionPage == 'inbound'}">Inbound Batches</span>
+                <span th:if="${actionPage == 'inboundactivity'}">Inbound Batch Processing Activity</span>
+                <span th:if="${actionPage == 'inboundauditreport'}">Inbound Batch Audit Report</span>
+                <span th:if="${actionPage == 'outbound'}">Outbound Batches</span>
+                <span th:if="${actionPage == 'outboundactivity'}">Outbound Batch Processing Activity</span>
+                <span th:if="${actionPage == 'apimessages'}">Inbound Rest Batches</span>
+                <span th:if="${actionPage == 'apimessagesOut'}">Outbound Rest Batches</span>
+                <span th:if="${actionPage == 'directmessages'}">Inbound Direct Batches</span>
+                <span th:if="${actionPage == 'directmessagesout'}">Outbound Direct Batches</span>
+            </h1>
+        </div>
+        <ul class="nav navbar-nav navbar-right navbar-actions" role="menu">
+            <li th:if="${actionPage == 'activityReport'}" role="menuitem">
+               <a href="/administrator/processing-activity/generateReport" title="Generate Activity Report" role="button">
+                   <span class="glyphicon glyphicon-list-alt icon-stacked"></span>Generate Report
+               </a>
+            </li>
+            <li th:if="${actionPage == 'inboundactivity' or actionPage == 'inboundauditreport'}" role="menuitem">
+               <a href="/administrator/processing-activity/inbound" title="Inbound Batches" role="button">
+                   <span class="glyphicon glyphicon-list-alt icon-stacked"></span>Inbound Batches
+               </a>
+            </li>
+            <li th:if="${actionPage == 'outboundactivity' or actionPage == 'outboundauditreport'}" role="menuitem">
+               <a href="/administrator/processing-activity/outbound" title="Outbound Batches" role="button">
+                   <span class="glyphicon glyphicon-list-alt icon-stacked"></span>Outbound Batches
+               </a>
+            </li>
+        </ul>
+    </div>
+</nav>

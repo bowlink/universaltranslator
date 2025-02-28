@@ -17,125 +17,135 @@
             <section class="panel panel-default">
 		<div class="panel-heading clearfix" style="height: 50px">
 		    <h3 class="panel-title pull-left" style="padding-top: 7.5px;">Audit Summary</h3>
-		    <c:if test="${showButtons}">
-			<div class="pull-right">
-			    <div class="dropdown">
-				<button class="btn btn-sm btn-default dropdown-toggle" type="button" data-toggle="dropdown">
-				    <i class="fa fa-cog"></i> Batch Controls
-				</button>
-				<ul class="dropdown-menu pull-right">
-				    <c:if test="${canSend == true}">
-					<c:choose>
-					    <c:when test="${batchDownload && (batchDetails.statusId == 64 || batchDetails.statusId == 59)}">
-						<li>
-						    <a href="#!" id="release" class="releaseOutboundBatch" rel="releaseBatch" rel2="${batchDetails.id}">
-							<span class="glyphicon glyphicon-ok-sign"></span>
-							<strong>Process Outbound Batch</strong>
-						    </a>
-						</li>
-					    </c:when>
-					    <c:otherwise>
-						<li>
-						    <a href="#!" id="release" class="releaseBatch" rel="releaseBatch" rel2="${batchDetails.id}">
-							<span class="glyphicon glyphicon-ok-sign"></span>
-							<strong>Process Inbound Batch</strong>
-						    </a>
-						</li>
-					    </c:otherwise>
-					</c:choose>
-					<li class="divider"></li> 
-				    </c:if>
-				    <c:if test="${canEdit == true}">
-					<li>
-					    <a href="#!" id="rejectMessage" class="rejectMessages">
-						<span class="glyphicon glyphicon-stop"></span>
-						<strong>Reject Entire Inbound Batch</strong>
-					    </a>
-					</li>
-					<li class="divider"></li> 
-				    </c:if>
-				    <c:if test="${batchDetails.statusId == 2}">
-					<li>
-					    <a href="#!" id="processBatch" class="processBatch" rel="processBatch" rel2="${batchDetails.id}">
-						<span class="glyphicon glyphicon-upload"></span>
-						<strong>Load Submitted Inbound Batch</strong>
-					    </a>
-					</li>
-					<li class="divider"></li> 
-				    </c:if>    
-				    <c:if test="${batchDetails.statusId == 2 || batchDetails.statusId == 36}">
-					<li>
-					    <a href="#!" id="processBatch" class="processBatch" rel="processBatch" rel2="${batchDetails.id}">
-						<span class="glyphicon glyphicon-filter"></span>
-						<strong>Process Submitted Inbound Batch</strong>
-					    </a>
-					</li>
-					<li class="divider"></li> 
-				    </c:if>   
-				    <c:if test="${canCancel && batchDetails.configId > 0 && batchDetails.statusId != 4 && batchDetails.statusId != 24}">
-					<c:choose>
-					    <c:when test="${batchDownload}">
-						<li>
-						    <a href="#!" id="cancel" class="cancelOutboundBatch" rel="cancel" rel2="${batchDetails.id}">
-							<span class="glyphicon glyphicon-remove"></span>
-							<strong>Cancel Outbound Batch</strong>
-						    </a>
-						</li>
-					    </c:when>
-					    <c:otherwise>
-						<li>
-						    <a href="#!" id="cancel" class="cancelBatch" rel="cancel" rel2="${batchDetails.id}">
-							<span class="glyphicon glyphicon-remove"></span>
-							<strong>Cancel Inbound Batch</strong>
-						    </a>
-						</li>
-					    </c:otherwise>
-					</c:choose>
-				    </c:if> 
-				    <c:if test="${canReset && batchDetails.configId > 0 && batchDetails.statusId != 64 && batchDetails.statusId != 42 && batchDetails.statusId != 43}">
-					<c:choose>
-					    <c:when test="${batchDownload}">
-						<li class="divider"></li> 
-						<li>
-						    <a href="#!" id="reset" class="resetOutboundBatch" rel="reset" rel2="${batchDetails.id}">
-							<span class="glyphicon glyphicon-refresh"></span>
-							<strong>Reset Outbound Batch</strong>
-						    </a>
-						</li>
-					    </c:when>
-					    <c:otherwise>
-						<li class="divider"></li> 
-						<li>
-						    <a href="#!" id="reset" class="resetBatch" rel="reset" rel2="${batchDetails.id}">
-							<span class="glyphicon glyphicon-refresh"></span>
-							<strong>Reset Inbound Batch</strong>
-						    </a>
-						</li>
-					    </c:otherwise>
-					</c:choose>
-				    </c:if>
-				    <c:if test="${!canRest && configDetails.messageTypeId == 2}">
-					<li class="divider"></li> 
-					<li>
-					    <a href="#!">
-						<span class="glyphicon glyphicon-refresh"></span>
-						<strong>Please Reset batch from the family planning system.</strong>
-					    </a>
-					</li>
-				    </c:if>
-				    <c:if test="${!batchDownload && sessionScope.userDetails.roleId == 1 && canReset}">
-					<li class="divider"></li>
-					<li>
-					    <a href="#!" rel="${batchDetails.utBatchName}" class="deleteTransactions" title="Delete Batch">
-						<span class="glyphicon glyphicon-remove"></span>
-						<strong>Delete Batch</strong>
-					    </a>
-					</li>
-				    </c:if>	
-				</ul>
-			    </div>
-			</div>
-		    </c:if>
+                    <div class="pull-right">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fa fa-cog"></i> Batch Controls
+                            </button>
+                            <ul class="dropdown-menu pull-right">
+                                <li>
+                                    <a th:href="'/administrator/processing-activity/inbound/auditReport/'+${batchDetails.utBatchName}" title="View Audit Report">
+                                        <span class="glyphicon glyphicon-edit"></span> View Audit Report
+                                    </a>
+                                </li>
+                                <li class="divider"></li> 
+                                <li>
+                                    <a th:href="'/administrator/configurations/details?i='+${batchDetails.configId}" title="View Source Configuration">
+                                        <span class="glyphicon glyphicon-edit"></span> View Source Configuration
+                                    </a>
+                                </li>
+                                <c:if test="${canSend == true}">
+                                    <c:choose>
+                                        <c:when test="${batchDownload && (batchDetails.statusId == 64 || batchDetails.statusId == 59)}">
+                                            <li>
+                                                <a href="#!" id="release" class="releaseOutboundBatch" rel="releaseBatch" rel2="${batchDetails.id}">
+                                                    <span class="glyphicon glyphicon-ok-sign"></span>
+                                                    <strong>Process Outbound Batch</strong>
+                                                </a>
+                                            </li>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <li>
+                                                <a href="#!" id="release" class="releaseBatch" rel="releaseBatch" rel2="${batchDetails.id}">
+                                                    <span class="glyphicon glyphicon-ok-sign"></span>
+                                                    <strong>Process Inbound Batch</strong>
+                                                </a>
+                                            </li>
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <li class="divider"></li> 
+
+                                </c:if>
+                                <c:if test="${canEdit == true}">
+                                    <li>
+                                        <a href="#!" id="rejectMessage" class="rejectMessages">
+                                            <span class="glyphicon glyphicon-stop"></span>
+                                            <strong>Reject Entire Inbound Batch</strong>
+                                        </a>
+                                    </li>
+                                    <li class="divider"></li> 
+                                </c:if>
+                                <c:if test="${batchDetails.statusId == 2}">
+                                    <li>
+                                        <a href="#!" id="processBatch" class="processBatch" rel="processBatch" rel2="${batchDetails.id}">
+                                            <span class="glyphicon glyphicon-upload"></span>
+                                            <strong>Load Submitted Inbound Batch</strong>
+                                        </a>
+                                    </li>
+                                    <li class="divider"></li> 
+                                </c:if>    
+                                <c:if test="${batchDetails.statusId == 2 || batchDetails.statusId == 36}">
+                                    <li>
+                                        <a href="#!" id="processBatch" class="processBatch" rel="processBatch" rel2="${batchDetails.id}">
+                                            <span class="glyphicon glyphicon-filter"></span>
+                                            <strong>Process Submitted Inbound Batch</strong>
+                                        </a>
+                                    </li>
+                                    <li class="divider"></li> 
+                                </c:if>   
+                                <c:if test="${canCancel && batchDetails.configId > 0 && batchDetails.statusId != 4 && batchDetails.statusId != 24}">
+                                    <c:choose>
+                                        <c:when test="${batchDownload}">
+                                            <li>
+                                                <a href="#!" id="cancel" class="cancelOutboundBatch" rel="cancel" rel2="${batchDetails.id}">
+                                                    <span class="glyphicon glyphicon-remove"></span>
+                                                    <strong>Cancel Outbound Batch</strong>
+                                                </a>
+                                            </li>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <li>
+                                                <a href="#!" id="cancel" class="cancelBatch" rel="cancel" rel2="${batchDetails.id}">
+                                                    <span class="glyphicon glyphicon-remove"></span>
+                                                    <strong>Cancel Inbound Batch</strong>
+                                                </a>
+                                            </li>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:if> 
+                                <c:if test="${canReset && batchDetails.configId > 0 && batchDetails.statusId != 64 && batchDetails.statusId != 42 && batchDetails.statusId != 43}">
+                                    <c:choose>
+                                        <c:when test="${batchDownload}">
+                                            <li class="divider"></li> 
+                                            <li>
+                                                <a href="#!" id="reset" class="resetOutboundBatch" rel="reset" rel2="${batchDetails.id}">
+                                                    <span class="glyphicon glyphicon-refresh"></span>
+                                                    <strong>Reset Outbound Batch</strong>
+                                                </a>
+                                            </li>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <li class="divider"></li> 
+                                            <li>
+                                                <a href="#!" id="reset" class="resetBatch" rel="reset" rel2="${batchDetails.id}">
+                                                    <span class="glyphicon glyphicon-refresh"></span>
+                                                    <strong>Reset Inbound Batch</strong>
+                                                </a>
+                                            </li>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:if>
+                                <c:if test="${!canRest && configDetails.messageTypeId == 2}">
+                                    <li class="divider"></li> 
+                                    <li>
+                                        <a href="#!">
+                                            <span class="glyphicon glyphicon-refresh"></span>
+                                            <strong>Please Reset batch from the family planning system.</strong>
+                                        </a>
+                                    </li>
+                                </c:if>
+                                <c:if test="${!batchDownload && sessionScope.userDetails.roleId == 1 && canReset}">
+                                    <li class="divider"></li>
+                                    <li>
+                                        <a href="#!" rel="${batchDetails.utBatchName}" class="deleteTransactions" title="Delete Batch">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                            <strong>Delete Batch</strong>
+                                        </a>
+                                    </li>
+                                </c:if>	
+                            </ul>
+                        </div>
+                    </div>
 		</div>
                 <div class="panel-body">
                     <div class="row">

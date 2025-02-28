@@ -19,7 +19,6 @@ jQuery(function ($) {
             bStateSave: true,
             iCookieDuration: 60,
             aaSorting: [[4,'desc']],
-            
             "oLanguage": {
                 "sSearch": "_INPUT_",
                 sSearchPlaceholder: 'Filter Configurations',

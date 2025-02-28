@@ -358,7 +358,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     public String getFileTypesById(int id) {
         Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT fileType FROM ref_fileTypes where id = :id", String.class)
-                .setParameter("id", id);
+        .setParameter("id", id);
 
         String fileType = (String) query.uniqueResult();
 
@@ -376,7 +376,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     public String getFieldName(int fieldId) {
         Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT fieldDesc FROM configurationFormFields where id = :fieldId", String.class)
-                .setParameter("fieldId", fieldId);
+        .setParameter("fieldId", fieldId);
 
         String fieldName = (String) query.uniqueResult();
 
@@ -1208,7 +1208,9 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     public List getEncodings() {
         try {
-            Query query = sessionFactory.getCurrentSession().createNativeQuery("select id, encoding from ref_encoding order by id asc", String.class);
+            Query query = sessionFactory.getCurrentSession().createNativeQuery("select id, encoding from ref_encoding order by id asc", String.class)
+            .addScalar("id", StandardBasicTypes.INTEGER)
+            .addScalar("encoding", StandardBasicTypes.STRING);   
             return query.list();
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -2504,7 +2506,13 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         .addScalar("allowFTPLink", StandardBasicTypes.BOOLEAN)
         .addScalar("fileDropLocation", StandardBasicTypes.STRING)
         .addScalar("status", StandardBasicTypes.BOOLEAN)
-        .addScalar("type", StandardBasicTypes.INTEGER);
+        .addScalar("type", StandardBasicTypes.INTEGER)
+        .addScalar("orgId", StandardBasicTypes.INTEGER)
+        .addScalar("messageTypeId", StandardBasicTypes.INTEGER)
+        .addScalar("stepsCompleted", StandardBasicTypes.INTEGER)
+        .addScalar("threshold", StandardBasicTypes.INTEGER)
+        .addScalar("configurationType", StandardBasicTypes.INTEGER)
+        .addScalar("deleted", StandardBasicTypes.BOOLEAN);    
         
         List<Object[]> results = query.getResultList();
         
@@ -2524,6 +2532,12 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
             config.setTransportMethod((String) record[10]);
             config.setStatus((Boolean) record[14]);
             config.setType((Integer) record[15]);
+            config.setOrgId((Integer) record[16]);
+            config.setMessageTypeId((Integer) record[17]);
+            config.setStepsCompleted((Integer) record[18]);
+            config.setThreshold((Integer) record[19]);
+            config.setConfigurationType((Integer) record[20]);
+            config.setDeleted((Boolean) record[21]);
             configs.add(config);
         });
 	
@@ -2558,7 +2572,13 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         .addScalar("transportMethod", StandardBasicTypes.STRING)
         .addScalar("scheduleType", StandardBasicTypes.INTEGER)
         .addScalar("status", StandardBasicTypes.BOOLEAN)
-        .addScalar("type", StandardBasicTypes.INTEGER);
+        .addScalar("type", StandardBasicTypes.INTEGER)
+        .addScalar("orgId", StandardBasicTypes.INTEGER)
+        .addScalar("messageTypeId", StandardBasicTypes.INTEGER)
+        .addScalar("stepsCompleted", StandardBasicTypes.INTEGER)
+        .addScalar("threshold", StandardBasicTypes.INTEGER)
+        .addScalar("configurationType", StandardBasicTypes.INTEGER)
+        .addScalar("deleted", StandardBasicTypes.BOOLEAN);    
         
         List<Object[]> results = query.getResultList();
         
@@ -2577,6 +2597,12 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
             config.setTransportMethod((String) record[9]);
             config.setStatus((Boolean) record[11]);
             config.setType((Integer) record[12]);
+            config.setOrgId((Integer) record[13]);
+            config.setMessageTypeId((Integer) record[14]);
+            config.setStepsCompleted((Integer) record[15]);
+            config.setThreshold((Integer) record[16]);
+            config.setConfigurationType((Integer) record[17]);
+            config.setDeleted((Boolean) record[18]);
             configs.add(config);
         });
 	
@@ -2771,10 +2797,12 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     public List<configurationConnection> getAllConnectionsSingleQuery() {
         
-        String sqlStatement = "select a.*, b.configName as sourceConfigName, b.type as sourceConfigType, "
+        String sqlStatement = "select a.id, a.sourceConfigId, a.targetConfigId, a.status, a.dateCreated, b.configName as sourceConfigName, b.type as sourceConfigType, "
         + "c.configName as targetConfigName, c.type as targetConfigType,"
-        + "(select ifnull(concat(orgName,' - ',r.registryName),orgName) as orgName from organizations o left outer join registries.registries r on r.id = o.helRegistryId where o.id = (select orgId from configurations where id = a.sourceConfigId)) as sourceOrgName,"
+        + "(select orgName from organizations o left outer join registries.registries r on r.id = o.helRegistryId where o.id = (select orgId from configurations where id = a.sourceConfigId)) as sourceOrgName,"
+        + "(select r.registryName as srcSystem from organizations o left outer join registries.registries r on r.id = o.helRegistryId where o.id = (select orgId from configurations where id = a.sourceConfigId)) as srcSystem,"
         + "(select orgName from organizations o left outer join registries.registries r on r.id = o.helRegistryId where o.id = (select orgId from configurations where id = a.targetConfigId)) as targetOrgName,"
+        + "(select r.registryName as tgtSystem from organizations o left outer join registries.registries r on r.id = o.helRegistryId where o.id = (select orgId from configurations where id = a.targetConfigId)) as tgtSystem,"
         + "(select transportMethod from ref_transportmethods where id = (select transportMethodId from configurationtransportdetails where configId = a.sourceConfigId)) as sourceTransportMethod,"
         + "(select transportMethod from ref_transportmethods where id = (select transportMethodId from configurationtransportdetails where configId = a.targetConfigId)) as targetTransportMethod "
         + "from configurationconnections a inner join "
@@ -2783,9 +2811,47 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         + "where b.deleted = 0 and c.deleted = 0 "
         + "order by a.dateCreated desc";
         
-         Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlStatement,configurationConnection.class);
-         
-        List<configurationConnection> connections = query.list();
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlStatement,configurationConnection.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("sourceConfigId", StandardBasicTypes.INTEGER)        
+        .addScalar("targetConfigId", StandardBasicTypes.INTEGER)               
+        .addScalar("status", StandardBasicTypes.BOOLEAN)
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)        
+        .addScalar("sourceConfigName", StandardBasicTypes.STRING)
+        .addScalar("sourceConfigType", StandardBasicTypes.INTEGER)         
+        .addScalar("targetConfigName", StandardBasicTypes.STRING)   
+        .addScalar("targetConfigType", StandardBasicTypes.INTEGER)
+        .addScalar("sourceOrgName", StandardBasicTypes.STRING)
+        .addScalar("srcSystem", StandardBasicTypes.STRING)
+        .addScalar("targetOrgName", StandardBasicTypes.STRING)
+        .addScalar("tgtSystem", StandardBasicTypes.STRING)        
+        .addScalar("sourceTransportMethod", StandardBasicTypes.STRING)
+        .addScalar("targetTransportMethod", StandardBasicTypes.STRING);
+                
+        List<Object[]> results = query.getResultList();
+
+        List<configurationConnection> connections = new ArrayList<>();
+
+        results.stream().forEach((record) -> {
+            configurationConnection connection = new configurationConnection();
+            connection.setId((Integer) record[1]);
+            connection.setSourceConfigId((Integer) record[2]);
+            connection.setTargetConfigId((Integer) record[3]);
+            connection.setStatus((boolean) record[4]);
+            connection.setDateCreated((Date) record[5]);
+            connection.setSourceConfigName((String) record[6]);
+            connection.setSourceConfigType((Integer) record[7]);
+            connection.setTargetConfigName((String) record[8]);
+            connection.setTargetConfigType((Integer) record[9]);
+            connection.setSourceOrgName((String) record[10]);
+            connection.setSrcSystem((String) record[11]);
+            connection.setTargetOrgName((String) record[12]);
+            connection.setTgtSystem((String) record[13]);
+            connection.setSourceTransportMethod((String) record[14]);
+            connection.setTargetTransportMethod((String) record[15]);
+            connections.add(connection);
+        });
+
         return connections;
     }
     

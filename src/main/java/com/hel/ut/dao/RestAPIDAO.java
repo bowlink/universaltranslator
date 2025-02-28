@@ -19,7 +19,7 @@ public interface RestAPIDAO {
 
     RestAPIMessagesOut getRestAPIMessagesOut(Integer messageId) throws Exception;
 
-    List<RestAPIMessagesIn> getRestAPIMessagesInListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
+    List<Object> getRestAPIMessagesInListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
 
-    List<RestAPIMessagesOut> getRestAPIMessagesOutListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
+    List<Object> getRestAPIMessagesOutListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
 }

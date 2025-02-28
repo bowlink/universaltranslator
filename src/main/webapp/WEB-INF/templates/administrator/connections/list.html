@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+    <head>
+        <title>Health-e-Link UT Configuration Connections</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/connections/actionBar :: actionBar}"></div>
+            <div class="main clearfix full-width" role="main">
+                <div class="col-md-12">
+                    <div class="alert alert-danger" id="exportErrorMsg" style="display:none;">
+                        <strong>Export Error!</strong> 
+                        An error occurred while trying to export the connection.
+                    </div>
+                    <th:block th:if="${param.msg != null}">
+                        <div class="alert alert-success">
+                            <strong>Success!</strong> 
+                            <p th:if="${param.msg[0] == 'updated'}">The configuration connection has been successfully updated!</p>
+                            <p th:if="${param.msg[0] == 'saved'}">The configuration connection has been successfully saved!</p>
+                            <p th:if="${param.msg[0] == 'deleted'}">The configuration connection has been successfully removed!</p>
+                        </div>
+                    </th:block>
+                    <section class="panel panel-info container-fluid">
+                         <div class="panel-heading">
+                             <h3 class="panel-title">Configuration Connections</h3>
+                         </div>
+                      <div class="panel-body">
+                           <div class="form-container scrollable">
+                               <table class="table table-striped table-hover table-default" th:id="${not #lists.isEmpty(connections) ? 'connectiondataTable' : ''}" style="cursor:pointer;">
+                                   <thead>
+                                       <tr>
+                                            <th scope="col" class="center-text">Id</th>
+                                            <th scope="col">Source Details</th>
+                                            <th scope="col">Target Details</th>
+                                            <th scope="col" class="center-text">Date Created</th>
+                                            <th scope="col" class="center-text">Status</th>
+                                            <th scope="col" class="center-text"></th>
+                                        </tr>
+                                   </thead>
+                                   <tbody>
+                                       <div th:if="${not #lists.isEmpty(connections)}">
+                                           <th:block th:each="connection : ${connections}">
+                                               <tr>
+                                                    <td scope="row" class="center-text link" th:rel="${connection.id}" th:text="${connection.id}"></td>
+                                                    <td scope="row" class="link" th:rel="${connection.id}">
+                                                        <p>
+                                                            System Name: <strong><span th:text="${connection.srcSystem}"></span></strong>
+                                                            <br />
+                                                            Organization: <strong><span th:text="${connection.sourceOrgName}"></span></strong>
+                                                            <br /><br />
+                                                            Configuration: <strong><span th:text="${connection.sourceConfigName}"></span> (Id: <span th:text="${connection.sourceConfigId}"></span>)</strong>
+                                                        </p>
+                                                    </td>
+                                                    <td scope="row" class="link" th:rel="${connection.id}">
+                                                        <p>
+                                                            System Name: <strong><span th:text="${connection.tgtSystem}"></span></strong>
+                                                            <br />
+                                                            Organization: <strong><span th:text="${connection.targetOrgName}"></span></strong>
+                                                            <br /><br />
+                                                            Configuration: <strong><span th:text="${connection.targetConfigName}"></span> (Id: <span th:text="${connection.targetConfigId}"></span>)</strong>
+                                                        </p>
+                                                    </td>
+                                                    <td class="center-text" th:text="${#dates.format(connection.dateCreated, 'M/dd/yy h:mm a')}"></td>
+                                                    <td class="center-text actions-col">
+                                                        <a th:if="${connection.status == true}" href="#" class="changeStatus" th:rel="${connection.id}" rel2="0" title="Make this connection inactive">Active</a>
+                                                        <a th:unless="${connection.status == true}" href="#" class="changeStatus" th:rel="${connection.id}" rel2="1" title="Make this connection active">Inactive</a>
+                                                    </td>
+                                                    <td>
+                                                        <div class="dropdown pull-left">
+                                                            <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                                <i class="fa fa-cog"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu pull-right">
+                                                                <li>
+                                                                    <a href="#" class="printConfig" th:rel="${connection.id}" title="Print this Connection">
+                                                                        <span class="glyphicon glyphicon-print"></span>
+                                                                        Print
+                                                                    </a>
+                                                                </li>  
+                                                                <li class="divider"></li> 
+                                                                <li>
+                                                                    <a th:href="'/administrator/configurations/connections/details?i='+${connection.id}" th:rel="${id}" class="connectionEdit" title="Edit this connection">
+                                                                        <span class="glyphicon glyphicon-edit"></span>
+                                                                        Edit Connection
+                                                                    </a>
+                                                                </li>
+                                                                <th:block th:if="${allowExport}">
+                                                                    <li class="divider"></li>
+                                                                    <li>
+                                                                        <a href="#" class="exportConnection" th:rel="${connection.id}" title="Export this Connection">
+                                                                            <span class="glyphicon glyphicon-export"></span>
+                                                                            Export Connection
+                                                                        </a>
+                                                                     </li> 
+                                                                </th:block>
+                                                                <li class="divider"></li>
+                                                                <li>
+                                                                    <a href="#" class="deleteConnection" th:rel="${connection.id}" title="Delete this connection">
+                                                                        <span class="glyphicon glyphicon-remove-circle"></span>
+                                                                        Delete
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </th:block>
+                                        </div>
+                                        <div th:if="${#lists.isEmpty(connections)}">
+                                           <tr><td colspan="6" class="center-text">There are currently no source configurations set up.</td></tr>
+                                        </div>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>		
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
+            <script th:src="@{/dspResources/js/overlay.js}"></script>    
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.min.js}"></script>
+            <script th:src="@{/dspResources/js/vendor/dataTables/jquery.dataTables.bootstrap.min.js}"></script>
+            <script th:src="@{/dspResources/js/admin/configuration/connections/list.js}"></script>
+        </th:block>
+    </body>
+</html>
+<div class="modal fade" id="connectionImportUploadModal" role="dialog" tabindex="-1" aria-labeledby="Configuration File Upload" aria-hidden="true" aria-describedby="Configuration File Upload">
+    <div class="modal-dialog modal-lg"><div class="modal-content" id="UploadModalContent"></div></div>
+</div>

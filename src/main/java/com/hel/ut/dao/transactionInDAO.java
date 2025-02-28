@@ -98,9 +98,9 @@ public interface transactionInDAO {
 
     void updateRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing, String colNameToUpdate);
 
-    Integer getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing);
+    BigInteger getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing);
 
-    Integer getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing, boolean inStatusIds);
+    BigInteger getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing, boolean inStatusIds);
 
     Integer insertLoadData(Integer batchId, Integer configId, String delimChar, String fileWithPath, String tableName, boolean containsHeaderRow, Integer startRow, String lineTerminator);
 
@@ -282,13 +282,13 @@ public interface transactionInDAO {
     
     Integer updateDirectAPIMessage(directmessagesin directMessage);
     
-    List<batchUploads> getAllUploadBatchesPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
+    List<Object> getAllUploadBatchesPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
     
     void submitBatchActivityLog(batchuploadactivity ba);
     
     void updateRecordCountsFromAuditErrorTable(Integer batchUploadId) throws Exception;
     
-    List<directmessagesin> getDirectMessagesInListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
+    List<Object> getDirectMessagesInListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
     
     void insertCWDroppedValues(Integer configId, Integer batchId, configurationDataTranslations cdt, boolean foroutboundProcessing) throws Exception;
     

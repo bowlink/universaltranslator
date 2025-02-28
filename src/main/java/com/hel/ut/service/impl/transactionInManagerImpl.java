@@ -119,6 +119,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DecimalFormat;
+import java.util.Iterator;
 import java.util.Vector;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -682,12 +683,12 @@ public class transactionInManagerImpl implements transactionInManager {
     }
 
     @Override
-    public Integer getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing) {
+    public BigInteger getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing) {
 	return transactionInDAO.getRecordCounts(batchId, statusIds, foroutboundProcessing, true);
     }
     
     @Override
-    public Integer getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing, boolean inStatusIds) {
+    public BigInteger getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing, boolean inStatusIds) {
 	return transactionInDAO.getRecordCounts(batchId, statusIds, foroutboundProcessing, inStatusIds);
     }
 
@@ -1878,14 +1879,17 @@ public class transactionInManagerImpl implements transactionInManager {
 	String dateFrom = df.format(fromDate);
 	String dateTo = df.format(toDate);
 
-	List<Integer> batchIds = new ArrayList<Integer>();
+	List<Integer> batchIds = new ArrayList<>();
 
-	List<Integer> uploadedBatches = transactionInDAO.geBatchesIdsForReport(dateFrom, dateTo);
+	List uploadedBatches = transactionInDAO.geBatchesIdsForReport(dateFrom, dateTo);
 
 	if (!uploadedBatches.isEmpty()) {
-	    for (Integer batch : uploadedBatches) {
-		batchIds.add(batch);
-	    }
+            
+            Iterator<Object> iterator = uploadedBatches.iterator();
+            while (iterator.hasNext()) {
+                Object batchRow[] = (Object[]) iterator.next(); 
+                batchIds.add((Integer) batchRow[0]);
+             }
 	}
 
 	return batchIds;
@@ -3152,7 +3156,8 @@ public class transactionInManagerImpl implements transactionInManager {
 		    //reject submission on error
 		    if (batchHandling.get(0).getErrorHandling() == 3) {
 			// at this point we will only have invalid records
-			if (getRecordCounts(batchId, errorStatusIds, false) > 0) {
+                        BigInteger recordCount = getRecordCounts(batchId, errorStatusIds, false);
+                        if (recordCount.compareTo(BigInteger.ZERO) > 0) {
 			    updateBatchStatus(batchId, 7, "endDateTime");
 			    updateRecordCounts(batchId, errorStatusIds, false, "errorRecordCount");
 			}
@@ -3613,21 +3618,26 @@ public class transactionInManagerImpl implements transactionInManager {
 	    //1 = Post errors to ERG 
 	    //2 = Reject record on error 
 	    //3 = Reject submission on error 4 = Pass through errors
-	    if (getRecordCounts(batchUploadId, finalStatusIds, false, false) > 0 && batch.getStatusId() == 6) {
-		//we stop here as batch is not in final status and release batch was triggered
-		batch.setStatusId(5);
-		batchStatusId = 5;
-		updateRecordCounts(batchUploadId, new ArrayList<Integer>(), false, "totalRecordCount");
-		updateRecordCounts(batchUploadId, errorStatusIds, false, "errorRecordCount");
-		updateBatchStatus(batchUploadId, batchStatusId, "endDateTime");
-		return true;
-	    }
+            
+            if(batch.getStatusId() == 6) {
+                BigInteger recordCount = getRecordCounts(batchUploadId, finalStatusIds, false, false);
+                if (recordCount.compareTo(BigInteger.ZERO) > 0) {
+                    //we stop here as batch is not in final status and release batch was triggered
+                    batch.setStatusId(5);
+                    batchStatusId = 5;
+                    updateRecordCounts(batchUploadId, new ArrayList<Integer>(), false, "totalRecordCount");
+                    updateRecordCounts(batchUploadId, errorStatusIds, false, "errorRecordCount");
+                    updateBatchStatus(batchUploadId, batchStatusId, "endDateTime");
+                    return true;
+                }
+            }
 
 	    // if auto and batch contains transactions that are not final status
 	    if (batch.getStatusId() == 6 || (handlingDetails.get(0).isAutoRelease() && (handlingDetails.get(0).getErrorHandling() == 2 || handlingDetails.get(0).getErrorHandling() == 4 || handlingDetails.get(0).getErrorHandling() == 3))) {
 
 		//run check to make sure we have records 
-		if (getRecordCounts(batchUploadId, Arrays.asList(12), false, true) > 0) {
+                BigInteger recordCount = getRecordCounts(batchUploadId, Arrays.asList(12), false, true);
+                if (recordCount.compareTo(BigInteger.ZERO) > 0) {
 		    updateRecordCounts(batchUploadId, new ArrayList<Integer>(), false, "totalRecordCount");
 		    //do we count pass records as errors?
 		    updateRecordCounts(batchUploadId, errorStatusIds, false, "errorRecordCount");
@@ -3643,7 +3653,7 @@ public class transactionInManagerImpl implements transactionInManager {
 		//we leave status alone as we already set them
 	    } 
 
-	    updateRecordCounts(batchUploadId, new ArrayList<Integer>(), false, "totalRecordCount");
+	    updateRecordCounts(batchUploadId, new ArrayList<>(), false, "totalRecordCount");
 
 	    updateRecordCounts(batchUploadId, errorStatusIds, false, "errorRecordCount");
 	    
@@ -4873,7 +4883,7 @@ public class transactionInManagerImpl implements transactionInManager {
     }
     
     @Override
-    public List<batchUploads> getAllUploadBatchesPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
+    public List<Object> getAllUploadBatchesPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
 	return transactionInDAO.getAllUploadBatchesPaged(fromDate,toDate, displayStart, displayRecords, searchTerm, sortColumnName, sortDirection);
     }
     

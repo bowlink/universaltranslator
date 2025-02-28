@@ -373,15 +373,18 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Override
     @Transactional(readOnly = true)
     public batchUploads getBatchDetailsByBatchName(String batchName) throws Exception {
-	SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from batchUploads where utBatchName = :batchName");
-	query.setParameter("batchName", batchName);
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<batchUploads> criteria = builder.createQuery(batchUploads.class);
+        Root<batchUploads> root = criteria.from(batchUploads.class);
 
-	if (query.list().size() > 1) {
-	    return null;
-	} 
-        else {
-	    return (batchUploads) query.uniqueResult();
-	}
+        Predicate whereClause = builder.equal(root.get("utBatchName"), batchName);
+
+        criteria.where(whereClause);
+        
+        List<batchUploads> batchList = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        
+	return (batchUploads) batchList.get(0);
     }
 
     @Override
@@ -1243,19 +1246,22 @@ public class transactionInDAOImpl implements transactionInDAO {
     }
 
     @Override
-    public Integer getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing) {
+    public BigInteger getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing) {
 	return getRecordCounts(batchId, statusIds, foroutboundProcessing, true);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Integer getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing, boolean inStatusIds) {
+    public BigInteger getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing, boolean inStatusIds) {
 	
 	String tableName = "transactiontranslatedin_"+batchId;
-	if (foroutboundProcessing) {
+	
+        if (foroutboundProcessing) {
 	    tableName = "transactiontranslatedout_"+batchId;
 	}
-	String sql = "select count(id) as total from " + tableName;
+	
+        String sql = "select count(id) as total from " + tableName;
+        
 	if (statusIds.size() > 0) {
 	    sql += " where statusId ";
 	    if (!inStatusIds) {
@@ -1265,15 +1271,13 @@ public class transactionInDAOImpl implements transactionInDAO {
 	}
 
 	try {
-	    Query query = sessionFactory
-            .getCurrentSession()
-            .createNativeQuery(sql, String.class).addScalar("total", StandardBasicTypes.INTEGER);
+	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, BigInteger.class);
 
 	    if (!statusIds.isEmpty()) {
 		query.setParameterList("statusIds", statusIds);
 	    }
 
-	    return (Integer) query.list().get(0);
+	    return (BigInteger) query.uniqueResult();
 	    
 	} catch (Exception ex) {
 	    System.err.println("getRecordCounts " + ex.getCause());
@@ -2086,14 +2090,14 @@ public class transactionInDAOImpl implements transactionInDAO {
     public List<Integer> geBatchesIdsForReport(String fromDate, String toDate) throws Exception {
 
 	String sql = "select id from batchUploads a "
-		+ "where ((a.dateSubmitted >= '" + fromDate + " 00:00:00' and a.dateSubmitted < '" + toDate + " 23:59:59') OR ("
-		+ "a.startDateTime >= '" + fromDate + " 00:00:00' and a.startDateTime < '" + toDate + " 23:59:59')) "
-		+ "and statusId in (2,3,4,5,6,22,23,24,25,28,36,38,41,42,43,59,64) "
-		+ "order by dateSubmitted desc";
+        + "where ((a.dateSubmitted >= '" + fromDate + " 00:00:00' and a.dateSubmitted < '" + toDate + " 23:59:59') OR ("
+        + "a.startDateTime >= '" + fromDate + " 00:00:00' and a.startDateTime < '" + toDate + " 23:59:59')) "
+        + "and statusId in (2,3,4,5,6,22,23,24,25,28,36,38,41,42,43,59,64) "
+        + "order by dateSubmitted desc";
 
-	Query findBatches = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
-	List batches = findBatches.list();
-
+	Query findBatches = sessionFactory.getCurrentSession().createNativeQuery(sql, Integer.class)
+        .addScalar("id", StandardBasicTypes.INTEGER);
+       
 	List<Integer> batchIds = findBatches.list();
 
 	return batchIds;
@@ -2104,12 +2108,12 @@ public class transactionInDAOImpl implements transactionInDAO {
     public BigInteger getMessagesSent(String fromDate, String toDate) throws Exception {
 
 	String sql = "select count(a.id) as totalMessagesSent "
-	    + "from batchdownloads a inner join "
-	    + "batchUploads b on a.batchUploadId = b.id "
-	    + "where a.statusId = 28 and ((b.dateSubmitted >= '" + fromDate + " 00:00:00' and b.dateSubmitted < '" + toDate + " 23:59:59') OR ("
-	    + "b.startDateTime >= '" + fromDate + " 00:00:00' and b.startDateTime < '" + toDate + " 23:59:59'))";
+        + "from batchdownloads a inner join "
+        + "batchUploads b on a.batchUploadId = b.id "
+        + "where a.statusId = 28 and ((b.dateSubmitted >= '" + fromDate + " 00:00:00' and b.dateSubmitted < '" + toDate + " 23:59:59') OR ("
+        + "b.startDateTime >= '" + fromDate + " 00:00:00' and b.startDateTime < '" + toDate + " 23:59:59'))";
 
-	Query getMessagesSentCount = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
+	Query getMessagesSentCount = sessionFactory.getCurrentSession().createNativeQuery(sql, BigInteger.class);
 
 	return (BigInteger) getMessagesSentCount.uniqueResult();
     }
@@ -2124,8 +2128,8 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    + "where ((b.dateSubmitted >= '" + fromDate + " 00:00:00' and b.dateSubmitted < '" + toDate + " 23:59:59') OR ("
 	    + "b.startDateTime >= '" + fromDate + " 00:00:00' and b.startDateTime < '" + toDate + " 23:59:59'))";
 	
-	Query getRejectedCount = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
-
+	Query getRejectedCount = sessionFactory.getCurrentSession().createNativeQuery(sql, BigInteger.class);
+        
 	return (BigInteger) getRejectedCount.uniqueResult();
     }
     
@@ -2138,7 +2142,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    + "where statusId = 7 and ((dateSubmitted >= '" + fromDate + " 00:00:00' and dateSubmitted < '" + toDate + " 23:59:59') OR ("
 	    + "startDateTime >= '" + fromDate + " 00:00:00' and startDateTime < '" + toDate + " 23:59:59'))";
 	
-	Query getRejectedReceivedCount = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
+	Query getRejectedReceivedCount = sessionFactory.getCurrentSession().createNativeQuery(sql, BigInteger.class);
 
 	return (BigInteger) getRejectedReceivedCount.uniqueResult();
     }
@@ -2163,7 +2167,18 @@ public class transactionInDAOImpl implements transactionInDAO {
         .addScalar("messageType", StandardBasicTypes.STRING)
         .addScalar("total", StandardBasicTypes.BIG_INTEGER);
 
-	List<activityReportList> activityList = query.list();
+        List<Object[]> results = query.getResultList();
+        
+        List<activityReportList> activityList = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            activityReportList activity = new activityReportList();
+            activity.setConfigId((Integer) record[1]);
+            activity.setOrgName((String) record[2]);
+            activity.setMessageType((String) record[3]);
+            activity.setTotal((BigInteger) record[4]);
+            activityList.add(activity);
+        });
 
 	return activityList;
     }
@@ -2541,7 +2556,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 		+ "where id in (select connectionId from configurationconnectionsenders where userId = " + userId + "))) ";
 
 	Query getRejectedCount = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
-
+        
 	return (BigInteger) getRejectedCount.uniqueResult();
     }
 
@@ -2549,29 +2564,39 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Transactional(readOnly = true)
     public List<batchErrorSummary> getBatchErrorSummary(int batchId, String inboundOutbound) throws Exception {
 	
-	
 	try {
-	    String sql = "select count(e.id) as totalErrors, e.errorId, e.fromOutboundConfig, c.displayText as errorDisplayText "
-		    + "from batchuploadauditerrors e "
-		    + "inner join lu_errorcodes c on c.id = e.errorId "
-		    + "where e.batchUploadId = :batchId group by e.errorId";
+	    String sql = "select count(e.id) as totalErrors, e.errorId, e.fromOutboundConfig, "
+            + "(select displayText from lu_errorcodes where id = e.errorId) as errorDisplayText "
+            + "from batchuploadauditerrors e "
+            + "where e.batchUploadId = :batchId group by e.errorId";
 	    
 	    if("outbound".equals(inboundOutbound.toLowerCase())) {
-		sql = "select count(e.id) as totalErrors, e.errorId, 0 as fromOutboundConfig, c.displayText as errorDisplayText "
-		    + "from batchdownloadauditerrors e "
-		    + "inner join lu_errorcodes c on c.id = e.errorId "
-		    + "where e.batchDownloadId = :batchId group by e.errorId";
+		sql = "select count(e.id) as totalErrors, e.errorId, 0 as fromOutboundConfig, "
+                + "(select displayText from lu_errorcodes where id = e.errorId) as errorDisplayText "        
+                + "from batchdownloadauditerrors e "
+                + "where e.batchDownloadId = :batchId group by e.errorId";
 	    }
 
 	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,batchErrorSummary.class)
+            .addScalar("totalErrors", StandardBasicTypes.INTEGER) 
+            .addScalar("errorId", StandardBasicTypes.INTEGER)        
+            .addScalar("fromOutboundConfig", StandardBasicTypes.BOOLEAN)        
             .addScalar("errorDisplayText", StandardBasicTypes.STRING)
-            .addScalar("errorId", StandardBasicTypes.INTEGER)
-            .addScalar("totalErrors", StandardBasicTypes.INTEGER)
-            .addScalar("fromOutboundConfig", StandardBasicTypes.BOOLEAN)
 	    .setParameter("batchId", batchId);
 
-	    List<batchErrorSummary> batchErrorSummaries = query.list();
-
+            List<Object[]> results = query.getResultList();
+            
+            List<batchErrorSummary> batchErrorSummaries = new ArrayList<>();
+        
+            results.stream().forEach((record) -> {
+                batchErrorSummary errorSummary = new batchErrorSummary();
+                errorSummary.setErrorDisplayText((String) record[4]);
+                errorSummary.setErrorId((Integer) record[2]);
+                errorSummary.setFromOutboundConfig((boolean) record[3]);
+                errorSummary.setTotalErrors((Integer) record[1]);
+                batchErrorSummaries.add(errorSummary);
+            });
+            
 	    return batchErrorSummaries;
 
 	} catch (Exception ex) {
@@ -2584,9 +2609,20 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Override
     @Transactional(readOnly = true)
     public List getErrorDataBySQLStmt(String sqlStmt) throws Exception {
-
-	if (!"".equals(sqlStmt)) {
-	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlStmt, String.class);
+         
+        if (!"".equals(sqlStmt)) {
+	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlStmt, String.class)
+            .addScalar("fromOutboundConfig", StandardBasicTypes.STRING)
+            .addScalar("rownumber", StandardBasicTypes.INTEGER)     
+            .addScalar("fieldNumber", StandardBasicTypes.INTEGER)  
+            .addScalar("column_name", StandardBasicTypes.STRING)  
+            .addScalar("error_type", StandardBasicTypes.STRING) 
+            .addScalar("field_value", StandardBasicTypes.STRING)      
+            .addScalar("reportField1Data", StandardBasicTypes.STRING)     
+            .addScalar("reportField2Data", StandardBasicTypes.STRING)     
+            .addScalar("reportField3Data", StandardBasicTypes.STRING) 
+            .addScalar("reportField4Data", StandardBasicTypes.STRING)      
+            .addScalar("errorId", StandardBasicTypes.INTEGER);      
 
 	    return query.list();
 	} else {
@@ -2597,31 +2633,35 @@ public class transactionInDAOImpl implements transactionInDAO {
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly = true)
-    public List getErrorReportField(Integer batchUploadId)
-	    throws Exception {
+    public List getErrorReportField(Integer batchUploadId) throws Exception {
+        
 	String sql = "select rptField1.rptLabel1 ,rptField2.rptLabel2,rptField3.rptLabel3,rptField4.rptLabel4 "
-	    + "from batchuploadauditerrors e inner join "
-	    + "configurationmessagespecs cs on e.configId = cs.configId inner join "
-	    + "("
-	    + "select fieldDesc as rptLabel1, fieldNo, configId "
-	    + "from configurationformfields"
-	    + ") rptField1 on rptField1.fieldNo = cs.rptField1 and rptField1.configId = e.configId inner join "
-	    + "("
-	    + "select fieldDesc as rptLabel2, fieldNo, configId "
-	    + "from configurationformfields"
-	    + ") rptField2 on rptField2.fieldNo = cs.rptField2 and rptField2.configId = e.configId inner join "
-	    + "("
-	    + "select fieldDesc as rptLabel3, fieldNo, configId "
-	    + "from configurationformfields"
-	    + ") rptField3 on rptField3.fieldNo = cs.rptField3 and rptField3.configId = e.configId inner join "
-	    + "("
-	    + "select fieldDesc as rptLabel4, fieldNo, configId "
-	    + "from configurationformfields"
-	    + ") rptField4 on rptField4.fieldNo = cs.rptField4 and rptField4.configId = e.configId "
-	    + "where e.batchUploadId = :batchUploadId limit 1";
+        + "from batchuploadauditerrors e inner join "
+        + "configurationmessagespecs cs on e.configId = cs.configId inner join "
+        + "("
+        + "select fieldDesc as rptLabel1, fieldNo, configId "
+        + "from configurationformfields"
+        + ") rptField1 on rptField1.fieldNo = cs.rptField1 and rptField1.configId = e.configId inner join "
+        + "("
+        + "select fieldDesc as rptLabel2, fieldNo, configId "
+        + "from configurationformfields"
+        + ") rptField2 on rptField2.fieldNo = cs.rptField2 and rptField2.configId = e.configId inner join "
+        + "("
+        + "select fieldDesc as rptLabel3, fieldNo, configId "
+        + "from configurationformfields"
+        + ") rptField3 on rptField3.fieldNo = cs.rptField3 and rptField3.configId = e.configId inner join "
+        + "("
+        + "select fieldDesc as rptLabel4, fieldNo, configId "
+        + "from configurationformfields"
+        + ") rptField4 on rptField4.fieldNo = cs.rptField4 and rptField4.configId = e.configId "
+        + "where e.batchUploadId = :batchUploadId limit 1";
 	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
-	query.setParameter("batchUploadId", batchUploadId);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
+        .addScalar("rptLabel1", StandardBasicTypes.STRING)
+        .addScalar("rptLabel2", StandardBasicTypes.STRING)     
+        .addScalar("rptLabel3", StandardBasicTypes.STRING)  
+        .addScalar("rptLabel4", StandardBasicTypes.STRING)         
+	.setParameter("batchUploadId", batchUploadId);
 
 	return query.list();
     }
@@ -3508,7 +3548,7 @@ public class transactionInDAOImpl implements transactionInDAO {
     
     @Override
     @Transactional(readOnly = true)
-    public List<batchUploads> getAllUploadBatchesPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
+    public List<Object> getAllUploadBatchesPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
 	
 	String dateSQLString = "";
 	String dateSQLStringTotal = "";
@@ -3558,13 +3598,13 @@ public class transactionInDAOImpl implements transactionInDAO {
 	}
 	
 	String sqlQuery = "select id, orgId, configId, utBatchName, transportMethodId, originalFileName, totalRecordCount, errorRecordCount, totalErrorRows, configName, threshold, inboundBatchConfigurationType, statusId, dateSubmitted,"
-        + "startDateTime,endDateTime,statusValue, endUserDisplayText, orgName, case when dmConfigKeyWord != '' then 'File Drop (Direct)' when transportMethod != 'Online Form' && restAPIUsername != '' then 'File Drop (Rest)' else transportMethod end as transportMethod, totalMessages, 'On Demand' as uploadType, dmConfigKeyWord, fileDelimiter "
+        + "startDateTime,endDateTime,statusValue, endUserDisplayText, orgName, helRegistryId, case when dmConfigKeyWord != '' then 'File Drop (Direct)' when transportMethod != 'Online Form' && restAPIUsername != '' then 'File Drop (Rest)' else transportMethod end as transportMethod, totalMessages, 'On Demand' as uploadType, dmConfigKeyWord, fileDelimiter "
         + ",associatedBatchId,containsHeaderRow,deleted,delimChar,encodingId,fileLocation,originalFolder,recipientEmail,senderEmail,userId, utBatchConfName "
         + "FROM ("
         + "select a.id, a.orgId, a.configId, a.utBatchName, a.transportMethodId, a.originalFileName, a.totalRecordCount, a.errorRecordCount, b.configName, b.threshold, b.configurationType as inboundBatchConfigurationType,"
         + "a.statusId, a.dateSubmitted, a.associatedBatchId, a.containsHeaderRow,a.deleted,a.delimChar,a.encodingId,a.fileLocation, "
         + "a.originalFolder, a.recipientEmail, a.senderEmail,a.userId,a.utBatchConfName,"
-        + "a.startDateTime, a.endDateTime, c.displayCode as statusValue, c.endUserDisplayText as endUserDisplayText,d.orgName, e.transportMethod,"
+        + "a.startDateTime, a.endDateTime, c.displayCode as statusValue, c.endUserDisplayText as endUserDisplayText,d.orgName, d.helRegistryId, e.transportMethod,"
         + "(select count(id) as total from batchuploads where "+dateSQLStringTotal+") as totalMessages, "
         + "(select count(distinct rowNumber) as totalRows from batchuploadauditerrors where batchUploadId = a.id and rowNumber > 0) as totalErrorRows, "
         + "f.dmConfigKeyWord, f.restAPIUsername, f.fileDelimiter "
@@ -3579,11 +3619,11 @@ public class transactionInDAOImpl implements transactionInDAO {
 	if(!"".equals(searchTerm)){
 	    sqlQuery += " where ("
 	    + "id like '%"+searchTerm+"%' "
-	    + "OR orgName like '%"+searchTerm+"%' "
-	    + "OR configName like '%"+searchTerm+"%' "
+	    + "OR orgName like '%"+searchTerm.toLowerCase()+"%' "
+	    + "OR configName like '%"+searchTerm.toLowerCase()+"%' "
 	    + "OR utBatchName like '%"+searchTerm+"%' "
-	    + "OR statusValue like '%"+searchTerm+"%' "
-	    + "OR transportMethod like '%"+searchTerm+"%'"
+	    + "OR statusValue like '%"+searchTerm.toLowerCase()+"%' "
+	    + "OR transportMethod like '%"+searchTerm.toLowerCase()+"%'"
 	    + ") ";
 	}
 	
@@ -3596,15 +3636,20 @@ public class transactionInDAOImpl implements transactionInDAO {
         }
 	
 	sqlQuery += "order by "+sortColumnName+" "+sortDirection;
-	
-	if(displayRecords > 0) {
+        
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,batchUploads.class);
+        
+        List<Object> batchUploadMessages = new ArrayList<>();
+        batchUploadMessages.add(query.list().size());
+        
+        if(displayRecords > 0) {
 	    sqlQuery += " limit " + displayStart + ", " + displayRecords;
 	}
 	else {
 	    sqlQuery += " limit " + displayStart+ ", 1000000";
 	}
         
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,batchUploads.class)
+        query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,batchUploads.class)
         .addScalar("id", StandardBasicTypes.INTEGER)
         .addScalar("orgId", StandardBasicTypes.INTEGER)
         .addScalar("configId", StandardBasicTypes.INTEGER)
@@ -3639,14 +3684,17 @@ public class transactionInDAOImpl implements transactionInDAO {
         .addScalar("recipientEmail", StandardBasicTypes.STRING)
         .addScalar("senderEmail", StandardBasicTypes.STRING)
         .addScalar("userId", StandardBasicTypes.INTEGER)
-        .addScalar("utBatchConfName", StandardBasicTypes.STRING);
+        .addScalar("utBatchConfName", StandardBasicTypes.STRING)
+        .addScalar("helRegistryId", StandardBasicTypes.INTEGER);     
         
         List<Object[]> results = query.getResultList();
         
-        List<batchUploads> batchUploadMessages = new ArrayList<>();
+        List<batchUploads> batchUploads = new ArrayList<>();
         
         results.stream().forEach((record) -> {
             batchUploads bUpload = new batchUploads();
+            bUpload.setId((Integer) record[1]);
+            bUpload.setConfigId((Integer) record[3]);
             bUpload.setUploadType((String) record[21]);
             bUpload.setDateSubmitted((Date) record[14]);
             bUpload.setUtBatchName((String) record[4]);
@@ -3662,9 +3710,15 @@ public class transactionInDAOImpl implements transactionInDAO {
             bUpload.setStartDateTime((Date) record[15]);
             bUpload.setEndDateTime((Date) record[16]);
             bUpload.setTotalMessages((Integer) record[20]);
+            bUpload.setOriginalFileName((String) record[6]);
+            bUpload.setStatusValue((String) record[17]);
+            bUpload.setHelRegistryId((Integer) record[36]);
+            bUpload.setOrgId((Integer) record[2]);
             
-            batchUploadMessages.add(bUpload);
+            batchUploads.add(bUpload);
         });
+        
+        batchUploadMessages.add(batchUploads);
         
         return batchUploadMessages;
     }
@@ -3698,7 +3752,7 @@ public class transactionInDAOImpl implements transactionInDAO {
     
     @Override
     @Transactional(readOnly = true)
-    public List<directmessagesin> getDirectMessagesInListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
+    public List<Object> getDirectMessagesInListPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception {
 	
 	String dateSQLString = "";
 	String dateSQLStringTotal = "";
@@ -3727,17 +3781,20 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    }
 	}
 	
-	String sqlQuery = "select id, statusName, CASE WHEN orgName = '' THEN 'N/A' ELSE orgName END as orgName, dateCreated, configId, batchUploadId, "
-		+ "CASE WHEN batchUploadId = 0 THEN 'N/A' ELSE batchName END as batchName, totalMessages "
-		+ "from ("
-		+ "select a.id, a.batchUploadId, a.dateCreated, a.configId, IFNULL(b.orgName,\"\") as orgName,"
-		+ "CASE WHEN a.statusId = 1 THEN 'To be processed' WHEN a.statusId = 2 THEN 'Processed' ELSE 'Rejected' END as statusName,"
-		+ "IFNULL(c.utBatchName,\"\") as batchName,"
-		+ "(select count(id) as total from directmessagesin where "+dateSQLStringTotal+") as totalMessages "
-		+ "FROM directmessagesin a left outer join  "
-		+ "organizations b on b.id = a.orgId left outer join  "
-		+ "batchuploads c on c.id = a.batchUploadId "
-		+ "where " + dateSQLString + ") as messagesIn ";
+	String sqlQuery = "select id, hispId, fromDirectAddress, toDirectAddress, archiveFileName, referralFileName, dateCreated, statusId, batchUploadId, configId, orgId, sendingResponse, originalDirectMessage,"
+        + "CASE WHEN orgName = '' THEN 'N/A' ELSE orgName END as orgName, helRegistryId, statusName, "
+        + "CASE WHEN batchUploadId = 0 THEN 'N/A' ELSE batchName END as batchName, totalMessages, configName "
+        + "from ("
+        + "select a.id, a.hispId, a.fromDirectAddress, a.toDirectAddress, a.archiveFileName, a.referralFileName, a.dateCreated, a.statusId, a.batchUploadId, "
+        + "a.configId, a.orgId, a.sendingResponse, a.originalDirectMessage, IFNULL(b.orgName,\"\") as orgName, b.helRegistryId, "
+        + "CASE WHEN a.statusId = 1 THEN 'To be processed' WHEN a.statusId = 2 THEN 'Processed' ELSE 'Rejected' END as statusName,"
+        + "IFNULL(c.utBatchName,\"\") as batchName,"
+        + "(select count(id) as total from directmessagesin where "+dateSQLStringTotal+") as totalMessages, d.configName "
+        + "FROM directmessagesin a left outer join  "
+        + "organizations b on b.id = a.orgId inner join "
+        + "configurations d on d.id = a.configId left outer join  "
+        + "batchuploads c on c.id = a.batchUploadId "
+        + "where " + dateSQLString + ") as messagesIn ";
 	
 	if(!"".equals(searchTerm)){
 	    sqlQuery += " where ("
@@ -3747,31 +3804,76 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    + "OR batchName like '%"+searchTerm+"%' "
 	    + "OR statusName like '%"+searchTerm+"%' "
 	    + "OR dateCreated like '%"+searchTerm+"%' "
+            + "OR configName like '%"+searchTerm+"%' "        
 	    + ") ";
 	}	
 	
 	sqlQuery += "order by "+sortColumnName+" "+sortDirection;
-	
-	if(displayRecords > 0) {
+        
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,directmessagesin.class);
+        
+        List<Object> directInMessages = new ArrayList<>();
+        directInMessages.add(query.list().size());
+        
+        if(displayRecords > 0) {
 	    sqlQuery += " limit " + displayStart + ", " + displayRecords;
 	}
 	else {
 	    sqlQuery += " limit " + displayStart+ ", 1000000";
 	}
 	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,directmessagesin.class)
+	query = sessionFactory.getCurrentSession().createNativeQuery(sqlQuery,directmessagesin.class)
         .addScalar("id", StandardBasicTypes.INTEGER)
-        .addScalar("statusName", StandardBasicTypes.STRING)
-        .addScalar("orgName", StandardBasicTypes.STRING)
-        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
+        .addScalar("hispId", StandardBasicTypes.INTEGER)
+        .addScalar("fromDirectAddress", StandardBasicTypes.STRING)
+        .addScalar("toDirectAddress", StandardBasicTypes.STRING)
+        .addScalar("archiveFileName", StandardBasicTypes.STRING)
+        .addScalar("referralFileName", StandardBasicTypes.STRING)
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)  
+        .addScalar("statusId", StandardBasicTypes.INTEGER)        
         .addScalar("batchUploadId", StandardBasicTypes.INTEGER)
-        .addScalar("configId", StandardBasicTypes.INTEGER)
+        .addScalar("configId", StandardBasicTypes.INTEGER)       
+        .addScalar("orgId", StandardBasicTypes.INTEGER)      
+        .addScalar("sendingResponse", StandardBasicTypes.STRING)
+        .addScalar("originalDirectMessage", StandardBasicTypes.STRING)        
+        .addScalar("orgName", StandardBasicTypes.STRING)  
+        .addScalar("HelRegistryId", StandardBasicTypes.INTEGER)  
+        .addScalar("statusName", StandardBasicTypes.STRING)
         .addScalar("batchName", StandardBasicTypes.STRING)
-        .addScalar("totalMessages", StandardBasicTypes.INTEGER);
+        .addScalar("totalMessages", StandardBasicTypes.INTEGER)
+        .addScalar("configName", StandardBasicTypes.STRING);
 	
-	List<directmessagesin> directmessagesin = query.list();
+	List<Object[]> results = query.getResultList();
+        
+        List<directmessagesin> directmessages = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            directmessagesin directMessage = new directmessagesin();
+            directMessage.setId((Integer) record[1]);
+            directMessage.setHispId((Integer) record[2]);
+            directMessage.setFromDirectAddress((String) record[3]);
+            directMessage.setToDirectAddress((String) record[4]);
+            directMessage.setArchiveFileName((String) record[5]);
+            directMessage.setReferralFileName((String) record[6]);
+            directMessage.setDateCreated((Date) record[7]);
+            directMessage.setStatusId((Integer) record[8]);
+            directMessage.setBatchUploadId((Integer) record[9]);
+            directMessage.setConfigId((Integer) record[10]);
+            directMessage.setOrgId((Integer) record[11]);
+            directMessage.setSendingResponse((String) record[12]);
+            directMessage.setOriginalDirectMessage((String) record[13]);
+            directMessage.setOrgName((String) record[14]);
+            directMessage.setHelRegistryId((Integer) record[15]);
+            directMessage.setStatusName((String) record[16]);
+            directMessage.setBatchName((String) record[17]);
+            directMessage.setTotalMessages((Integer) record[18]);
+            directMessage.setConfigName((String) record[19]);
+            directmessages.add(directMessage);
+        });
+        
+        directInMessages.add(directmessages);
 	
-        return directmessagesin;
+        return directInMessages;
     }
 
     @Override
@@ -3824,10 +3926,16 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Override
     @Transactional(readOnly = true)
     public List<batchUploadDroppedValues> getBatchDroppedValues(Integer batchUploadId) throws Exception {
-	SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("from batchUploadDroppedValues where batchUploadId = :batchUploadId");
-	query.setParameter("batchUploadId", batchUploadId);
-	
-	return query.list();
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<batchUploadDroppedValues> criteria = builder.createQuery(batchUploadDroppedValues.class);
+        Root<batchUploadDroppedValues> root = criteria.from(batchUploadDroppedValues.class);
+
+        Predicate whereClause = builder.equal(root.get("batchUploadId"), batchUploadId);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
     
     @Override
@@ -3837,20 +3945,29 @@ public class transactionInDAOImpl implements transactionInDAO {
 	Query query = null;
 	Integer totalErrors = 0;
 	
-	try {
-	    sql = "select count(id) as totalErrorRows from transactiontranslatedin_" + batchUploadId + " where statusId = 14";
-	    query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class).addScalar("totalErrorRows", StandardBasicTypes.INTEGER);
-	    totalErrors = (Integer) query.list().get(0);
-	}
-	catch (Exception ex) {
-	    sql = "select count(distinct rowNumber) as totalErrorRows from batchuploadauditerrors where batchUploadId = :batchUploadId and rowNumber > 0";
-	    query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class).addScalar("totalErrorRows", StandardBasicTypes.INTEGER);
-	    query.setParameter("batchUploadId", batchUploadId);
-	    totalErrors = (Integer) query.list().get(0);
-	}
-	
-	return totalErrors;
+        sql = "select id from transactiontranslatedin_" + batchUploadId + " where statusId = 14";
+        query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 
+        List<Object> results = query.getResultList();
+
+        if(!results.isEmpty()) {
+            totalErrors = totalErrors + results.size();
+        }
+	
+        sql = "select count(distinct rowNumber) as totalErrorRows from batchuploadauditerrors where batchUploadId = :batchUploadId and rowNumber > 0";
+
+        query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
+        .addScalar("totalErrorRows", StandardBasicTypes.INTEGER)
+        .setParameter("batchUploadId", batchUploadId);
+
+        results = query.getResultList();
+
+        if(!results.isEmpty()) {
+            Object dtDatarow[] = (Object[]) results.get(0);
+            totalErrors = totalErrors + (Integer) dtDatarow[0];
+        }
+        
+	return totalErrors;
     }
     
     @Override
@@ -3858,16 +3975,16 @@ public class transactionInDAOImpl implements transactionInDAO {
     public List<batchErrorSummary> getBatchSystemErrorSummary(int batchId, String inboundOutbound) throws Exception {
 	
 	try {
-	    String sql = "select count(e.id) as totalErrors, e.errorId, 0 as fromOutboundConfig, c.displayText as errorDisplayText "
-		    + "from transactioninerrors_"+batchId+" e "
-		    + "inner join lu_errorcodes c on c.id = e.errorId "
-		    + "where e.batchUploadId = :batchId group by e.errorId";
+	    String sql = "select count(e.id) as totalErrors, e.errorId, 0 as fromOutboundConfig,"
+            + "(select displayText from lu_errorcodes where id = e.errorId) as errroDisplayText "               
+            + "from transactioninerrors_"+batchId+" e "
+            + "where e.batchUploadId = :batchId group by e.errorId";
 	    
 	    if("outbound".equals(inboundOutbound.toLowerCase())) {
-		sql = "select count(e.id) as totalErrors, e.errorId, 0 as fromOutboundConfig, c.displayText as errorDisplayText "
-		    + "from transactionouterrors_"+batchId+" e "
-		    + "inner join lu_errorcodes c on c.id = e.errorId "
-		    + "where e.batchDownloadId = :batchId group by e.errorId";
+		sql = "select count(e.id) as totalErrors, e.errorId, 0 as fromOutboundConfig, "
+                + "(select displayText from lu_errorcodes where id = e.errorId) as errroDisplayText "         
+                + "from transactionouterrors_"+batchId+" e "
+                + "where e.batchDownloadId = :batchId group by e.errorId";
 	    }
 
 	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,batchErrorSummary.class)
@@ -3975,8 +4092,16 @@ public class transactionInDAOImpl implements transactionInDAO {
         .addScalar("total", StandardBasicTypes.INTEGER)
 	.setParameter("configId", configId)
 	.setParameter("macroId", macroId);
-	
-	return (Integer) query.list().get(0);
+        
+        List<Object> results = query.getResultList();
+            
+        if(!results.isEmpty()) {
+            Object dtDatarow[] = (Object[]) results.get(0);
+            return (Integer) dtDatarow[0];
+        }
+        else {
+            return 0;
+        }
     }
     
     @Override
@@ -4111,17 +4236,31 @@ public class transactionInDAOImpl implements transactionInDAO {
     public List<generatedActivityReportAgencies> getSavedActivityReportAgencies(Integer activityReportId) throws Exception {
 	
 	String sqlStatement = "select a.*, b.orgName, b.helRegistrySchemaName from generatedActivityReportAgencies a inner join "
-	    + "organizations b on b.id = a.orgId where a.reportId = " + activityReportId
-	    + " order by b.orgName asc";
+        + "organizations b on b.id = a.orgId where a.reportId = " + activityReportId
+        + " order by b.orgName asc";
 	
 	Query query = sessionFactory.getCurrentSession().createNativeQuery(sqlStatement,generatedActivityReportAgencies.class)
 	.addScalar("id", StandardBasicTypes.INTEGER)
 	.addScalar("orgId", StandardBasicTypes.INTEGER)
 	.addScalar("reportId", StandardBasicTypes.INTEGER)
 	.addScalar("orgName", StandardBasicTypes.STRING)
-	.addScalar("helRegistrySchemaName", StandardBasicTypes.STRING)	;
-
-	return query.list();
+	.addScalar("helRegistrySchemaName", StandardBasicTypes.STRING);
+        
+        List<Object[]> results = query.getResultList();
+        
+        List<generatedActivityReportAgencies> orgs = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            generatedActivityReportAgencies org = new generatedActivityReportAgencies();
+            org.setId((Integer) record[1]);
+            org.setOrgId((Integer) record[2]);
+            org.setReportId((Integer) record[3]);
+            org.setOrgName((String) record[4]);
+            org.setHelRegistrySchemaName((String) record[5]);
+            orgs.add(org);
+        });
+        
+        return orgs;
     }
     
     @Override
@@ -4241,21 +4380,39 @@ public class transactionInDAOImpl implements transactionInDAO {
 		}
 	    }
 	}
-	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,batchUploads.class)
+        
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,String.class)
 	.addScalar("id", StandardBasicTypes.INTEGER)
 	.addScalar("utBatchName", StandardBasicTypes.STRING)
 	.addScalar("originalFileName", StandardBasicTypes.STRING)
 	.addScalar("statusId", StandardBasicTypes.INTEGER)
-	.addScalar("originalFileName", StandardBasicTypes.STRING)
+        .addScalar("dateSubmitted", StandardBasicTypes.TIMESTAMP)        
 	.addScalar("totalRecordCount", StandardBasicTypes.INTEGER)
 	.addScalar("errorRecordCount", StandardBasicTypes.INTEGER)
 	.addScalar("orgName", StandardBasicTypes.STRING)
-	.addScalar("dateSubmitted", StandardBasicTypes.TIMESTAMP)
 	.addScalar("fpTotalErrors", StandardBasicTypes.INTEGER)
 	.addScalar("acceptedVisits", StandardBasicTypes.STRING);
-	
-	return query.list();
+        
+        List<Object[]> results = query.getResultList();
+        
+        List<batchUploads> batchUploads = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            batchUploads batchUpload = new batchUploads();
+            batchUpload.setId((Integer) record[1]);
+            batchUpload.setUtBatchName((String) record[2]);
+            batchUpload.setOriginalFileName((String) record[3]);
+            batchUpload.setStatusId((Integer) record[4]);
+            batchUpload.setDateSubmitted((Date) record[5]);
+            batchUpload.setTotalRecordCount((Integer) record[6]);
+            batchUpload.setErrorRecordCount((Integer) record[7]);
+            batchUpload.setOrgName((String) record[8]);
+            batchUpload.setFpTotalErrors((Integer) record[9]);
+            batchUpload.setAcceptedVisits((String) record[10]);
+            batchUploads.add(batchUpload);
+        });
+        
+        return batchUploads;
     }
     
     @Override

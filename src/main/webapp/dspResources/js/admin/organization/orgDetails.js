@@ -23,11 +23,16 @@ jQuery(function ($) {
     $(document).on('change','#isHELRegistry', function() {
        populateHELRegistries($(this).val());
     });
+    
+    var iseahUT = $('#eahUT').val();
+            
+    if(iseahUT === 'false') {
 
-    var helRegistry = $('#helRegistry').attr('rel');
+        var helRegistry = $('#helRegistry').attr('rel');
 
-    if(helRegistry != 0 && helRegistry !== "0-") {
-        populateHELRegistryOrgs(helRegistry);
+        if(helRegistry != 0 && helRegistry !== "0-") {
+            populateHELRegistryOrgs(helRegistry);
+        }
     }
 
     //Registry is selected we need to go get the organizations set up for that organization
@@ -182,29 +187,40 @@ jQuery(function ($) {
             $('#orgDetails').hide();
 
             var selRegistry = $('#helRegistry').attr('rel');
+            
+            var iseahUT = $('#eahUT').val();
+            
+            if(iseahUT === 'true') {
+                $('#HELRegistryDetails').show();
+                var helRegistrySelect = $('#helRegistry');
+                helRegistrySelect.append($('<option selected></option>').val('38-eahfp-2').html('CDS Family Planning'));
 
-            $.ajax({
-                 url: 'getHELRegistries?tenantId=registries',
-                 type: "GET",
-                 data: {},
-                 dataType: 'json',
-                 success: function (data) {
-                     $('#HELRegistryDetails').show();
+                populateHELRegistryOrgs('38-eahfp-2');
+            }
+            else {
+                $.ajax({
+                    url: 'getHELRegistries?tenantId=registries',
+                    type: "GET",
+                    data: {},
+                    dataType: 'json',
+                    success: function (data) {
+                        $('#HELRegistryDetails').show();
 
-                     var selRegistryId = selRegistry.split("-")[0];
+                        var selRegistryId = selRegistry.split("-")[0];
 
-                     var helRegistrySelect = $('#helRegistry');
+                        var helRegistrySelect = $('#helRegistry');
 
-                     $.each(data, function(index) {
-                        if(data[index].id == selRegistryId) {
-                            helRegistrySelect.append($('<option selected></option>').val(data[index].id+'-'+data[index].dbschemaname+'-'+data[index].registryType).html(data[index].registryName));
-                        }
-                        else {
-                            helRegistrySelect.append($('<option></option>').val(data[index].id+'-'+data[index].dbschemaname+'-'+data[index].registryType).html(data[index].registryName));
-                        }
-                     });
-                 }
-             });
+                        $.each(data, function(index) {
+                           if(data[index].id == selRegistryId) {
+                               helRegistrySelect.append($('<option selected></option>').val(data[index].id+'-'+data[index].dbschemaname+'-'+data[index].registryType).html(data[index].registryName));
+                           }
+                           else {
+                               helRegistrySelect.append($('<option></option>').val(data[index].id+'-'+data[index].dbschemaname+'-'+data[index].registryType).html(data[index].registryName));
+                           }
+                        });
+                    }
+                });
+            }
         }
         else {
             $('#helRegistryId').val(0);
@@ -234,7 +250,7 @@ jQuery(function ($) {
                 if(selRegistryType == 2) {
                     tierLevel = 2;
                 }
-
+                
                 $.ajax({
                     url: 'getHELRegistryOrganizations?tenantId='+selRegistrySchemaName,
                     type: "GET",

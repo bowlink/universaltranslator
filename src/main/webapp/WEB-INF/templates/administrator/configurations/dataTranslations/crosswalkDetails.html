@@ -74,13 +74,13 @@
                     </table>
                     <div style="height:350px; overflow-y: scroll">
                         <table class="table table-hover" style="border-collapse: collapse; width:100%">
-                        <tbody>
-                            <tr th:each="cwalkData, dStatus : ${crosswalkData}">
-                                <td valign="top" scope="row" style="width: 250px;border-bottom:1px dashed; border-right:1px dashed;" th:text="${cwalkData.sourceValue}"></td>
-                                <td valign="top" style="width: 150px;border-bottom:1px dashed; border-right:1px dashed;" th:text="${cwalkData.targetValue}"></td>
-                                <td valign="top" style="width: 150px;border-bottom:1px dashed;"  th:text="${cwalkData.descValue}"></td>
-                            </tr>
-                        </tbody>
+                            <tbody>
+                                <tr th:each="cwalkData, dStatus : ${crosswalkData}">
+                                    <td valign="top" scope="row" style="width: 250px;border-bottom:1px dashed; border-right:1px dashed;" th:text="${cwalkData.sourceValue}"></td>
+                                    <td valign="top" style="width: 150px;border-bottom:1px dashed; border-right:1px dashed;" th:text="${cwalkData.targetValue}"></td>
+                                    <td valign="top" style="width: 150px;border-bottom:1px dashed;"  th:text="${cwalkData.descValue}"></td>
+                                </tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>

@@ -1,0 +1,29 @@
+<aside class="secondary"  th:fragment="menuBar">
+    <nav class="secondary-nav" role="navigation">
+        <ul class="nav nav-pills" role="menu">
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'activityReport' or actionPage == 'generateReport' ? 'active' : ''}">
+                <a class="nav-link" th:classappend="${actionPage == 'activityReport' or actionPage == 'generateReport' ? 'active' : ''}" th:href="@{/administrator/processing-activity/activityReport}" title="Activity Report">Activity Report</a>
+            </li>
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${#strings.contains(actionPage,'inbound') ? 'active' : ''}">
+                <a class="nav-link" th:classappend="${#strings.contains(actionPage,'inbound') ? 'active' : ''}" th:href="@{/administrator/processing-activity/inbound}" title="Inbound Batches">Inbound Batches</a>
+            </li>
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${#strings.contains(actionPage,'outbound') ? 'active' : ''}">
+                <a class="nav-link" th:classappend="${#strings.contains(actionPage,'outbound') ? 'active' : ''}" th:href="@{/administrator/processing-activity/outbound}" title="Outbound Batches">Outbound Batches</a>
+            </li>
+            <th:block th:if="${!eahUT}">
+                <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'apimessages' ? 'active' : ''}">
+                    <a class="nav-link" th:classappend="${actionPage == 'apimessages' ? 'active' : ''}" th:href="@{/administrator/processing-activity/apimessages}" title="Inbound Rest Batches">Inbound Rest Batches</a>
+                </li>
+                <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'apimessagesOut' ? 'active' : ''}">
+                    <a class="nav-link" th:classappend="${actionPage == 'apimessagesOut' ? 'active' : ''}" th:href="@{/administrator/processing-activity/apimessagesOut}" title="Rest API Messages Out">Outbound Rest Batches</a>
+                </li>
+                <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'directmessages' ? 'active' : ''}">
+                    <a class="nav-link" th:classappend="${actionPage == 'directmessages' ? 'active' : ''}" th:href="@{/administrator/processing-activity/directmessages}" title="Direct Messages In">Inbound Direct Batches</a>
+                </li>
+                <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'directmessagesout' ? 'active' : ''}">
+                    <a class="nav-link" th:classappend="${actionPage == 'directmessagesout' ? 'active' : ''}" th:href="@{/administrator/processing-activity/directmessagesOut}" title="Direct Messages Out">Outbound Direct Batches</a>
+                </li>
+            </th:block>
+        </ul>
+    </nav>
+</aside>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
     <head>
-        <title>Health-e-Link UT Organizations</title>
+        <title>Health-e-Link UT Configurations</title>
     </head>
     <body>
         <div layout:fragment="content">
@@ -16,11 +16,6 @@
                         <strong>Success!</strong> 
                         <p th:if="${savedStatus == 'updated'}">The configuration has been successfully updated!</p>
                         <p th:if="${savedStatus == 'created'}">The configuration has been successfully added!</p>
-                        <p th:if="${savedStatus == 'deleted'}">The configuration has been successfully removed!</p>
-                    </div>
-                    <div class="alert alert-success" role="alert" th:if="${savedStatus != null}">
-                        <strong>Success!</strong> 
-                        <p th:if="${savedStatus == 'updated'}">The configuration has been successfully updated!</p>
                         <p th:if="${savedStatus == 'deleted'}">The configuration has been successfully removed!</p>
                     </div>
                     <ul class="nav nav-pills" id="pills-tab" role="tablist" aria-orientation="hotizontal" style="margin-bottom:20px;">
@@ -157,21 +152,21 @@
                                                 <div th:if="${not #lists.isEmpty(targetconfigurations)}">
                                                     <th:block th:each="tgtConfigs : ${targetconfigurations}">
                                                         <tr>
-                                                            <td scope="row" class="center-text" th:text=" ${tgtConfigs.id}"></td>
-                                                            <td th:text="${tgtConfigs.orgName}"></td>
-                                                            <td>
+                                                            <td scope="row" class="center-text link" th:text="${tgtConfigs.id}"></td>
+                                                            <td class="link" th:rel="${tgtConfigs.id}" th:text="${tgtConfigs.orgName}"></td>
+                                                            <td class="link" th:rel="${tgtConfigs.id}">
                                                                 <a href="#" class="editConfig" th:rel="${tgtConfigs.id}" title="Edit this configuration" th:text="${tgtConfigs.configname}"></a>
                                                                 <br />
                                                                 <span class="text-success" th:if="${tgtConfigs.status}" th:text="Active"></span>
                                                                 <span class="text-danger" th:if="${!tgtConfigs.status}" th:text="Inactive"></span>
                                                             </td>
-                                                            <td class="center-text">
+                                                            <td class="center-text link" th:rel="${tgtConfigs.id}">
                                                                 <span th:if="${tgtConfigs.transportMethod  == 'File Upload' and tgtConfigs.type == 1}" th:text="File Upload"></span>
                                                                 <span th:if="${tgtConfigs.transportMethod  == 'File Upload' and tgtConfigs.type != 1}" th:text="File Download"></span>
                                                                 <span th:if="${tgtConfigs.transportMethod  != 'File Upload'}" th:text="${tgtConfigs.transportMethod}"></span>
                                                             </td>
-                                                            <td class="center-text" th:text="${#dates.format(tgtConfigs.dateCreated, 'M/dd/yy h:mm a')}"></td>
-                                                            <td class="center-text">
+                                                            <td class="center-text link" th:rel="${tgtConfigs.id}" th:text="${#dates.format(tgtConfigs.dateCreated, 'M/dd/yy h:mm a')}"></td>
+                                                            <td class="center-text link" th:rel="${tgtConfigs.id}">
                                                                 <span th:if="${tgtConfigs.dateUpdated == ''}" th:text="${#dates.format(tgtConfigs.dateCreated, 'M/dd/yy h:mm a')}"></span>
                                                                 <span th:if="${tgtConfigs.dateUpdated != ''}" th:text="${#dates.format(tgtConfigs.dateUpdated, 'M/dd/yy h:mm a')}"></span>
                                                             </td>
@@ -189,7 +184,7 @@
                                                                         </li>
                                                                         <li class="divider"></li>
                                                                         <li>
-                                                                            <a href="#" class="editConfig" th:rel="${tgtConfigs.id}" title="Edit this configuration">
+                                                                            <a th:href="${'/administrator/configurations/details?i='+tgtConfigs.id}" class="editConfig" th:rel="${tgtConfigs.id}" title="Edit this configuration">
                                                                                 <span class="glyphicon glyphicon-edit"></span>
                                                                                 Edit
                                                                             </a>

@@ -1,0 +1,42 @@
+
+<div th:id="${'errorTable-'+indexVal}">
+    <span th:if="${hasOutboundError > 0}">
+        <span style="color:#ffe3a4;font-weight: bold;margin-top:5px;">Rows</span> = dropped values found from processing the outbound target file.
+    </span>
+    <table border="1" class="table table-bordered" id="errordatatable">
+        <thead>
+            <tr>
+                <th:block th:if="${customCols != ''}">
+                    <div th:each="colValue : ${customCols}">
+                        <th th:if="${colValue != 'From Outbound'}" scope="col" th:text="${colValue}"></th>
+                    </div>
+                </th:block>
+            </tr>
+        </thead>
+        <tbody>
+            <div th:if="${not #lists.isEmpty(errors)}">
+                <th:block th:each="errorRow : ${errors}">
+                    <tr th:style="${errorRow[0] == '1' ? 'background-color:#ffe3a4;' : ''}">
+                        <td style="width:5%" th:text="${errorRow[2]}"></td>
+                        <td style="width:5%" th:text="${errorRow[3]}"></td>
+                        <td style="width:20%" th:text="${errorRow[4]}"></td>
+                        <th:block th:if="${errorId == 2 || errorId == 3 || errorId == 4}">
+                            <td style="width:20%" th:text="${errorRow[5]}"></td>
+                        </th:block>
+                        <td style="width:20%" th:text="${errorRow[6]}"></td>
+                        <td style="width:20%" th:text="${errorRow[7]}"></td>
+                        <td style="width:10%" th:text="${errorRow[8]}"></td>
+                        <td style="width:10%" th:text="${errorRow[9]}"></td>
+                        <td style="width:10%" th:text="${errorRow[10]}"></td>
+                    </tr>
+                </th:block>
+            </div>
+            <div th:if="${#lists.isEmpty(errors)}">
+                <tr><td th:colspan="${#lists.size(customCols)+1}" class="center-text">There are currently no processing errors found.</td></tr>
+             </div>
+        </tbody>
+    </table>
+    <span th:if="${hasOutboundError > 0}">
+        <span style="color:#ffe3a4;font-weight: bold">Rows</span> = dropped values found from processing the outbound target file.
+    </span>
+</div>

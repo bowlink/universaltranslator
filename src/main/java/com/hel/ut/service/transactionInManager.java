@@ -116,9 +116,9 @@ public interface transactionInManager {
 
     void updateRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing, String colNameToUpdate);
 
-    Integer getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing);
+    BigInteger getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing);
 
-    Integer getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing, boolean inStatusIds);
+    BigInteger getRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing, boolean inStatusIds);
 
     Integer insertLoadData(Integer batchId, Integer configId, String delimChar, String fileWithPath, String loadTableName, boolean containsHeaderRow, Integer totalHeaderRows, String lineTerminator);
 
@@ -328,7 +328,7 @@ public interface transactionInManager {
     
     Integer updateDirectAPIMessage(directmessagesin directMessage);
     
-    List<batchUploads> getAllUploadBatchesPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
+    List<Object> getAllUploadBatchesPaged(Date fromDate, Date toDate, Integer displayStart, Integer displayRecords, String searchTerm, String sortColumnName, String sortDirection) throws Exception;
     
     void updateRecordCountsFromAuditErrorTable(Integer batchUploadId) throws Exception;
     

@@ -28,10 +28,10 @@ public class batchUploads {
 
     @Transient
     private Integer totalTransactions = 0,transTotalNotFinal = 10, totalOpen = 0, totalClosed = 0, threshold = 100, watchListEntryId = 0, 
-    inboundBatchConfigurationType = 1, totalMessages = 0, totalErrorRows = 0, fpTotalErrors = 0, fileDelimiter = 0;
+    inboundBatchConfigurationType = 1, totalMessages = 0, totalErrorRows = 0, fpTotalErrors = 0, fileDelimiter = 0, helRegistryId = 0;
 
     @Transient
-    private String statusValue, usersName, endUserDisplayText = "", tgtorgName, orgName, transportMethod, configName, uploadType = "",
+    private String statusValue, usersName, endUserDisplayText = "", tgtorgName, orgName, transportMethod, configName, uploadType = "", systemName = "",
     referringBatch = "", dashboardRowColor = "table-secondary", entryMessage = "", relatedBatchDownloadIds, dmConfigKeyWord, acceptedVisits = "";
 
     @Transient
@@ -515,5 +515,21 @@ public class batchUploads {
 
     public void setAssociatedBatchId(Integer associatedBatchId) {
         this.associatedBatchId = associatedBatchId;
+    }
+
+    public String getSystemName() {
+        return systemName;
+    }
+
+    public void setSystemName(String systemName) {
+        this.systemName = systemName;
+    }
+
+    public Integer getHelRegistryId() {
+        return helRegistryId;
+    }
+
+    public void setHelRegistryId(Integer helRegistryId) {
+        this.helRegistryId = helRegistryId;
     }
 }

@@ -21,7 +21,7 @@
                         <div class="alert alert-danger" role="alert" th:if="${error != null}">
                             <span>The selected file was not found.</span>
                         </div>
-                        <section class="panel panel-default">
+                        <section class="panel panel-info">
                             <div class="panel-heading">
                                 <h3 class="panel-title">Configuration Summary</h3>
                             </div>
@@ -44,7 +44,7 @@
                             <input type="hidden" th:field="*{excelstartrow}" />
                             <input type="hidden" th:field="*{excelskiprows}" />
                             
-                            <section class="panel panel-default">
+                            <section class="panel panel-info">
                                 <div class="panel-heading">
                                     <h3 class="panel-title">Template Details</h3>
                                 </div>
@@ -86,7 +86,7 @@
                                 </div>
                             </section>
                             <th:block th:if="${configurationDetails.type == 1}">
-                                <section class="panel panel-default">
+                                <section class="panel panel-info">
                                     <div class="panel-heading">
                                         <h3 class="panel-title">Message Specs</h3>
                                     </div>
@@ -183,7 +183,7 @@
                                 </section>  
                             </th:block>
                             <th:block th:if="${availableFields != ''}">
-                                <section class="panel panel-default">
+                                <section class="panel panel-info">
                                     <div class="panel-heading">
                                         <h3 class="panel-title">Audit Report Reportable Fields</h3>
                                     </div>

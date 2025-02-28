@@ -1,0 +1,26 @@
+<aside class="secondary"  th:fragment="menuBar">
+    <nav class="secondary-nav" role="navigation">
+        <ul class="nav nav-pills" role="menu">
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${actionPage == 'badFilePaths' ? 'active' : ''}">
+                <a class="nav-link" th:classappend="${actionPage == 'badFilePaths' ? 'active' : ''}" href="/administrator/sysadmin/badFilePaths" title="Bad File Paths">Bad File Paths</a>
+            </li>
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'crosswalks' ? 'active' : '')}">
+                <a class="nav-link" th:classappend="${actionPage == 'crosswalks' ? 'active' : ''}" href="/administrator/sysadmin/crosswalks" title="Standard Crosswalks">Standard Crosswalks</a>
+            </li>
+	    <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'macros' ? 'active' : '')}">
+                <a class="nav-link" th:classappend="${actionPage == 'macros' ? 'active' : ''}" href="/administrator/sysadmin/macros" title="Standard Macros">Standard Macros</a>
+            </li>
+            <th:block th:if="${!eahUT}">
+                <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'hisps' ? 'active' : '')}">
+                    <a class="nav-link" th:classappend="${actionPage == 'hisps' ? 'active' : ''}" href="/administrator/sysadmin/hisps" title="View HISPS">View HISPS</a>
+                </li>
+                <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'tomCatLog' ? 'active' : '')}">
+                    <a class="nav-link" th:classappend="${actionPage == 'tomCatLog' ? 'active' : ''}" href="/administrator/sysadmin/getLog" title="Download Tomcat Log">Download Tomcat Log</a>
+                </li>
+            </th:block>
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'systemadmins' ? 'active' : '')}">
+                <a class="nav-link" th:classappend="${actionPage == 'systemadmins' ? 'active' : ''}" href="/administrator/sysadmin/systemAdmins" title="UT Admin Logins">UT Admin Logins</a>
+            </li>
+        </ul>
+    </nav>
+</aside>

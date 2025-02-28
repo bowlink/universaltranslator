@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -27,30 +28,39 @@ public class hisps {
     @Column(name = "status", nullable = false)
     private boolean status = true;
 
+    @NotBlank(message = "The HISP Name is a required field.")
     @Column(name = "hispName", nullable = false)
     private String hispName;
     
+    @NotBlank(message = "The UT API Username is a required field.")
     @Column(name = "utAPIUsername", nullable = true)
     private String utAPIUsername;
     
+    @NotBlank(message = "The UT API Password is a required field.")
     @Column(name = "utAPIPassword", nullable = true)
     private String utAPIPassword;
     
+    @NotBlank(message = "The HISP API Username is a required field.")
     @Column(name = "hispAPIUsername", nullable = true)
     private String hispAPIUsername;
     
+    @NotBlank(message = "The HISP API Password is a required field.")
     @Column(name = "hispAPIPassword", nullable = true)
     private String hispAPIPassword;
     
+    @NotBlank(message = "The HISP API URL is a required field.")
     @Column(name = "hispAPIURL", nullable = true)
     private String hispAPIURL;
     
+    @NotBlank(message = "The HISP Primary Contact Name is a required field.")
     @Column(name = "primaryContact", nullable = true)
     private String primaryContact;
     
+    @NotBlank(message = "The HISP Primary Contact Email Address is a required field.")
     @Column(name = "primaryContactEmail", nullable = true)
     private String primaryContactEmail;
     
+    @NotBlank(message = "The HISP Primary Contact Phone Number is a required field.")
     @Column(name = "primaryContactPhone", nullable = true)
     private String primaryContactPhone;
 

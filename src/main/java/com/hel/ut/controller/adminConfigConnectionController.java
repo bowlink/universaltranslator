@@ -138,7 +138,11 @@ public class adminConfigConnectionController {
 	Integer configId = 0;
 	
 	ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/connections");
+        mav.setViewName("administrator/connections/list");
+        mav.addObject("pageId", "configuration-connections");
+        mav.addObject("pageSection", "ssection-configurations");
+        mav.addObject("sect","connect");
+        mav.addObject("actionPage","connections");
         mav.addObject("id", configId);
         mav.addObject("mappings", session.getAttribute("configmappings"));
         mav.addObject("HL7", session.getAttribute("configHL7"));
@@ -202,7 +206,11 @@ public class adminConfigConnectionController {
         utUser userDetails = userManager.getUserByUserName(authentication.getName());
 	
 	ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/connections/details");
+        mav.setViewName("administrator/connections/details");
+        mav.addObject("pageId", "configuration-connections");
+        mav.addObject("pageSection", "ssection-configurations");
+        mav.addObject("sect","connect");
+        mav.addObject("actionPage","connectionDetails");
 	
 	Integer connectionId = 0;
 	Integer sourceOrgId = 0;
@@ -671,13 +679,13 @@ public class adminConfigConnectionController {
 	List<configurationFormFields> configurationDataElements = utconfigurationTransportManager.getConfigurationFields(selConfigId, 0);
 	
 	if("src".equals(section)) {
-	   mav.setViewName("/administrator/configurations/connections/sourceConfigurationDataElements"); 
+	   mav.setViewName("/administrator/connections/sourceConfigurationDataElements"); 
 	   mav.addObject("sourceConfigurationDataElements",configurationDataElements);
 	   
 	}
 	else {
 	    boolean showErrorField = false;
-	    mav.setViewName("/administrator/configurations/connections/targetConfigurationDataElements");
+	    mav.setViewName("/administrator/connections/targetConfigurationDataElements");
 	    List<configurationFormFields> sourceconfigurationDataElements = utconfigurationTransportManager.getConfigurationFields(sourceConfigId, 0);
 	    
 	    configurationTransport targetConfigTransportDetails = utconfigurationTransportManager.getTransportDetails(selConfigId);
@@ -973,7 +981,7 @@ public class adminConfigConnectionController {
     public ModelAndView connectionImportUpload(HttpSession session) throws Exception {
 	
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/configurations/connections/connectionImportFile");
+        mav.setViewName("/administrator/connections/connectionImportFile");
 	mav.addObject("expectedExt", "txt");
         return mav;
     }
