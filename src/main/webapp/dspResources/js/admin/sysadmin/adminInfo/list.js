@@ -39,12 +39,36 @@ jQuery(function ($) {
                 type: "GET",
                 success: function (data) {
                     $("#adminModalContent").html(data);
+                    
+                    $("#adminModalContent").find('#loginDataTable').dataTable({
+                        "bAutoWidth": false,
+                        "bStateSave": false,
+                        "bLengthChange": false,
+                        "sDom": '<"leftcolumn"><"rightcolumn"<"H"lfr>t><"bottombar"<"F"ip>>',
+                        "oLanguage": {
+                            "sSearch": "_INPUT_",
+                            sSearchPlaceholder: 'Filter Logins',
+                            "sLengthMenu": '<select class="form-control" style="width:150px">' +
+                                    '<option value="10">10 Records</option>' +
+                                    '<option value="20">20 Records</option>' +
+                                    '<option value="30">30 Records</option>' +
+                                    '<option value="40">40 Records</option>' +
+                                    '<option value="50">50 Records</option>' +
+                                    '<option value="-1">All</option>' +
+                                    '</select>'
+                        },
+                       "aoColumns" : [
+                            { "sWidth": "50%", "sType": "date" },
+                            { "sWidth": "50%"}
+                        ],
+                       "aaSorting" : [[0, "desc"]]
+                    });
                 }
             });
         });
 
         //This function will launch the new dataItem overlay with a blank screen
-        $(document).on('click', '#createNewSystemAdmin', function () {
+        $(document).on('click', '.createNewSystemAdministrator', function () {
 
             $.ajax({
                 url: '/administrator/sysadmin/adminInfo',
@@ -59,7 +83,7 @@ jQuery(function ($) {
         });
 
         //This function will launch the new dataItem overlay with a blank screen
-        $(document).on('click', '#profileButton', function () {
+        $(document).on('click', '.administratorEdit', function () {
 
             $.ajax({
                 url: '/administrator/sysadmin/adminInfo',
@@ -76,7 +100,7 @@ jQuery(function ($) {
         //Function to submit the changes to an admin user
         $(document).on('click', '#submitButton', function (event) {
             var buttonVal = $(this).attr('rel');
-
+            
             var passwordVal = $('#newPassword').val();
             var confirmPasswordVal = $('#confirmPassword').val();
             var firstName = $('#firstName').val();
@@ -130,18 +154,6 @@ jQuery(function ($) {
                 proceed = false;
             }
 
-            if (buttonVal === 'Update') {
-                var existingPasswordVal = $('#existingPassword').val();
-
-                if (existingPasswordVal.trim() === '') {
-                    $('#existingPasswordDiv').addClass("has-error");
-                    $('#existingPasswordMsg').addClass("has-error");
-                    $('#existingPasswordMsg').html('Existing password cannot be blank.');
-                    event.preventDefault();
-                    proceed = false;
-                }
-            } 
-
             if (proceed) {
                 var formData = $("#userdetailsform").serialize();
 
@@ -160,7 +172,6 @@ jQuery(function ($) {
                 return false;
             }
         });
-
 
         function isEmail(email) {
             var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;

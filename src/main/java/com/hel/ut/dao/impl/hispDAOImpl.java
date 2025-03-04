@@ -12,7 +12,6 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.List;
 import java.util.Objects;
-import org.hibernate.query.SelectionQuery;
 
 /**
  * The userDAOImpl class will implement the DAO access layer to handle updates for organization system users

@@ -46,7 +46,7 @@ public class BatchUploadTableCleanUp implements Job {
                     emailmanager.sendEmail(messageDetails);
                 	throw new Exception("Error occurred for BatchUploadTableCleanUp  - schedule task",ex);
                 } catch (Exception ex1) {
-                    Logger.getLogger(processMassBatches.class.getName()).log(Level.SEVERE, null, ex1);
+                    Logger.getLogger(BatchUploadTableCleanUp.class.getName()).log(Level.SEVERE, null, ex1);
                 }
             	
             	throw new Exception("Error occurred for BatchUploadTableCleanUp job  - new type schedule task",ex);

@@ -326,6 +326,11 @@ public class fileDownloadController {
                             else if("directmessages".equals(fromPage)) {
                                mav = new ModelAndView(new RedirectView("/administrator/processing-activity/directmessages")); 
                             }
+                            else if("dashboard".equals(fromPage)) {
+                               searchParameters searchParameters = (searchParameters) session.getAttribute("searchParameters"); 
+                               searchParameters.setsearchTerm(FilenameUtils.removeExtension(f.getName()).replace("archive_", "").replace("encoded_", "").replace("_dec", ""));
+                               mav = new ModelAndView(new RedirectView("/administrator")); 
+                            }
                             else if("config".equals(fromPage)) {
                                mav = new ModelAndView(new RedirectView("/administrator/configurations/translations"));
 

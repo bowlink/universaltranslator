@@ -43,8 +43,6 @@ public interface utConfigurationDAO {
 
     Long findTotalConfigs();
 
-    Long getTotalConnections(int configId);
-
     void updateCompletedSteps(int configId, int stepCompleted);
 
     @SuppressWarnings("rawtypes")
@@ -132,8 +130,6 @@ public interface utConfigurationDAO {
 
     void saveHL7Component(HL7ElementComponents newcomponent);
 
-    String getMessageTypeNameByConfigId(Integer configId);
-
     @SuppressWarnings("rawtypes")
     List getEncodings();
 
@@ -154,10 +150,6 @@ public interface utConfigurationDAO {
     void loadExcelContents(configurationMessageSpecs messageSpecs, int transportDetailId, String fileName, String dir, boolean hasHeader, Integer fileLayout, String currentTemplateFileName) throws Exception;
     
     void updateExcelConfigDetails(Integer orgId, configurationMessageSpecs messageSpecs) throws Exception;
-    
-    Integer getFieldCrosswalkIdByFieldName (int configId, String fieldName) throws Exception;
-    
-    List<utConfiguration> getActiveConfigurationsByTransportType(int userId, List<Integer> transportMethods) throws Exception;
     
     @SuppressWarnings("rawtypes")
     List getZipTypes();

@@ -52,8 +52,6 @@ public interface userDAO {
 
     void updateUserOnly(utUser user) throws Exception;
 
-    List<utUser> getUsersByStatuRolesAndOrg(boolean status, List<Integer> rolesToExclude, List<Integer> orgs, boolean include) throws Exception;
-
     List<Integer> getUserAllowedTargets(int userId, List<configurationConnectionSenders> connections) throws Exception;
 
     List<Integer> getUserAllowedMessageTypes(int userId, List<configurationConnectionSenders> connections) throws Exception;

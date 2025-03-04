@@ -10,15 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 public interface messageTypeManager {
 
     @SuppressWarnings("rawtypes")
-    List getInformationTables();
-
-    @SuppressWarnings("rawtypes")
-    List getAllTables();
-
-    @SuppressWarnings("rawtypes")
-    List getTableColumns(String tableName);
-
-    @SuppressWarnings("rawtypes")
     List getValidationTypes();
 
     @SuppressWarnings("rawtypes")
@@ -26,8 +17,6 @@ public interface messageTypeManager {
 
     @SuppressWarnings("rawtypes")
     List getDelimiters();
-
-    Long getTotalFields(int messageTypeId);
 
     List<Crosswalks> getCrosswalks(int page, int maxResults, int orgId);
 

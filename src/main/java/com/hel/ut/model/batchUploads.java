@@ -40,6 +40,9 @@ public class batchUploads {
     @Transient
     private List<batchDownloads> relatedBatchDownloads = null;
     
+    @Transient
+    private Long dateAsInteger;
+    
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO,generator="native")
     @GenericGenerator(name = "native",strategy = "native")
@@ -531,5 +534,13 @@ public class batchUploads {
 
     public void setHelRegistryId(Integer helRegistryId) {
         this.helRegistryId = helRegistryId;
+    }
+
+    public Long getDateAsInteger() {
+        return dateAsInteger;
+    }
+
+    public void setDateAsInteger(Long dateAsInteger) {
+        this.dateAsInteger = dateAsInteger;
     }
 }

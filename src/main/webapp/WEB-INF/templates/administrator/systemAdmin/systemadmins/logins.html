@@ -18,16 +18,16 @@
                 </tr>
             </thead>
             <tbody>
-                <div th:if="${not #lists.isEmpty(systemAdmins)}">
+                <div th:if="${not #lists.isEmpty(systemAdminLogins)}">
                     <tr style="cursor: pointer" th:each="systemAdminLogin : ${systemAdminLogins}">
-                        <td class="center-text" th:text="${#dates.format(systemAdminLogin.dateCreated, 'M/dd/yy h:mm a')}"></td>
+                        <td class="center-text" th:text="${#dates.format(systemAdminLogin.dateCreated, 'M/dd/yyyy h:mm a')}"></td>
                         <td class="center-text">
-                            <span th:if="${systemAdminLogin.totalTimeLoggedIn > 0}">${systemAdminLogin.totalTimeLoggedIn} min</span>
+                            <span th:if="${systemAdminLogin.totalTimeLoggedIn > 0}" th:text="${systemAdminLogin.totalTimeLoggedIn} + ' min'"></span>
                             <span th:unless="${systemAdminLogin.totalTimeLoggedIn > 0}">N/A</span>
                         </td>
                     </tr>
                 </div>
-                <div th:unless="${not #lists.isEmpty(systemAdmins)}">
+                <div th:unless="${not #lists.isEmpty(systemAdminLogins)}">
                     <tr><td colspan="2" class="center-text">There are currently no logins for this system administrator.</td></tr>
                </div>
             </tbody>

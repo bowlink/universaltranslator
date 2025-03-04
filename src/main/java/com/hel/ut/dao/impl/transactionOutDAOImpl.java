@@ -29,6 +29,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.query.MutationQuery;
 import org.hibernate.query.SelectionQuery;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  *
@@ -36,6 +37,9 @@ import org.hibernate.query.SelectionQuery;
  */
 @Repository
 public class transactionOutDAOImpl implements transactionOutDAO {
+    
+     @Value("${eahUT}")
+    private String eahUT;
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -454,8 +458,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 
 	String sql = "select max(fieldNo) as maxFieldNo from configurationFormFields where configId = :configId and useField = 1";
 
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
-        .addScalar("maxFieldNo", StandardBasicTypes.INTEGER)
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, Integer.class)
 	.setParameter("configId", configId);
 
 	return (Integer) query.list().get(0);
@@ -773,8 +776,8 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = false)
     public String getConfigFieldsForOutput(Integer configId) throws Exception {
-	String sql = ""
-	+ "select group_concat('REPLACE(REPLACE(ifnull(F', fieldNo, ',\"\") , ''\\n'', ''''), ''\\r'', '''')' order by fieldNo asc) as fieldNos "
+	
+        String sql = "select group_concat('REPLACE(REPLACE(ifnull(F', fieldNo, ',\"\") , ''\\n'', ''''), ''\\r'', '''')' order by fieldNo asc) as fieldNos "
 	+ " from configurationFormFields where configId = :configId";
 	
 	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
@@ -800,7 +803,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 
 	String sql = "select count(id) as totalReferrals "
 	+ "from batchdownloads "
-	+ "where (dateCreated >= '" + fromDate + "' and dateCreated < '" + toDate + "')  "
+	+ "where (dateCreated >= '" + fromDate + "' and dateCreated < '" + toDate + "') "
 	+ "and statusId = 41";
 
 	Query getRejectedCount = sessionFactory.getCurrentSession().createNativeQuery(sql, BigInteger.class);
@@ -812,7 +815,8 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = true)
     public String getCustomXMLFieldsForOutput(Integer configId) throws Exception {
-	String sql = "select group_concat('REPLACE(REPLACE(ifnull(F', fieldValue, ',\"\") , ''\\n'', ''''), ''\\r'', '''')' order by id asc) as fieldNos "
+	
+        String sql = "select group_concat('REPLACE(REPLACE(ifnull(F', fieldValue, ',\"\") , ''\\n'', ''''), ''\\r'', '''')' order by id asc) as fieldNos "
 	+ " from configurationccdelements where configId = :configId  and fieldValue != ''";
 	
 	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
@@ -1154,8 +1158,10 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	
 	//List<configurationFormFields> configFormFields = configurationTransportManager.getConfigurationFieldsToCopy(configId);
 	List<configurationconnectionfieldmappings> connectionFieldMappings = configurationTransportManager.getConnectionFieldMappings(configId,uploadConfigId);
+        
+        batchUploads batchUploadDetails = transactionInManager.getBatchDetails(batchUploadId);
 	
-	List<configurationTransport> handlingDetails = transactionInManager.getHandlingDetailsByBatch(batchUploadId);
+	List<configurationTransport> handlingDetails = transactionInManager.getHandlingDetailsByBatch(batchUploadDetails.getConfigId());
 
 	StringBuilder tableFields = new StringBuilder();
 	
@@ -1404,6 +1410,10 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	String tableNameToFind = "transactiontranslatedin_"+batchUploadId;
 	
 	String SQL_MASTER_TABLES = "SHOW TABLES IN universaltranslator";
+        
+        if(eahUT.equals("true")) {
+            SQL_MASTER_TABLES = "SHOW TABLES IN universaltranslatorca";
+        }
 	
 	Query query = sessionFactory.getCurrentSession().createNativeQuery(SQL_MASTER_TABLES, String.class);
 	List<String> tableNames = query.list();
@@ -1602,19 +1612,30 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Transactional(readOnly = true)
     public List<batchErrorSummary> getBatchErrorSummary(int batchId) throws Exception {
 	try {
-	    String sql = ("select count(e.id) as totalErrors, e.errorId, c.displayText as errorDisplayText "
-	    + "from batchdownloadauditerrors e "
-	    + "inner join lu_errorcodes c on c.id = e.errorId "
-	    + "where e.batchDownloadId = :batchId group by e.errorId");
+            
+            String sql = "select count(e.id) as totalErrors, e.errorId, "
+            + "(select displayText from lu_errorcodes where id = e.errorId) as errorDisplayText "        
+            + "from batchdownloadauditerrors e "
+            + "where e.batchDownloadId = :batchId group by e.errorId";
+            
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,batchErrorSummary.class)
+            .addScalar("totalErrors", StandardBasicTypes.INTEGER) 
+            .addScalar("errorId", StandardBasicTypes.INTEGER)    
+            .addScalar("errorDisplayText", StandardBasicTypes.STRING)
+	    .setParameter("batchId", batchId);
 
-	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,batchErrorSummary.class)
-	    .addScalar("errorDisplayText", StandardBasicTypes.STRING)
-	    .addScalar("errorId", StandardBasicTypes.INTEGER)
-	    .addScalar("totalErrors", StandardBasicTypes.INTEGER);
-	    query.setParameter("batchId", batchId);
-
-	    List<batchErrorSummary> batchErrorSummaries = query.list();
-
+            List<Object[]> results = query.getResultList();
+            
+            List<batchErrorSummary> batchErrorSummaries = new ArrayList<>();
+        
+            results.stream().forEach((record) -> {
+                batchErrorSummary errorSummary = new batchErrorSummary();
+                errorSummary.setErrorDisplayText((String) record[3]);
+                errorSummary.setErrorId((Integer) record[2]);
+                errorSummary.setTotalErrors((Integer) record[1]);
+                batchErrorSummaries.add(errorSummary);
+            });
+            
 	    return batchErrorSummaries;
 
 	} catch (Exception ex) {
@@ -1665,8 +1686,8 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = false)
     public Integer insertFailedRequiredFields(configurationFormFields cff, Integer batchDownloadId) {
-	
-	try {
+        
+       try {
 	    String sql = "insert into transactionouterrors_"+batchDownloadId
 	    + " (batchDownloadId, configId, transactionOutRecordsId, fieldNo, errorid, required) "
 	    + "select " + batchDownloadId + ", " + cff.getConfigId() + ", transactionOutRecordsId, " + cff.getFieldNo()
@@ -1683,7 +1704,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    insertData.executeUpdate();
 	    
 	    sql = "select count(id) as total from transactionouterrors_" + batchDownloadId + " where errorId = 1 and fieldNo = " + cff.getFieldNo();
-	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class).addScalar("total", StandardBasicTypes.INTEGER);
+	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, Integer.class);
 	    
 	    return (Integer) query.list().get(0);
 	    
@@ -1705,8 +1726,12 @@ public class transactionOutDAOImpl implements transactionOutDAO {
      */
     @Transactional(readOnly = true)
     public List getMissingRequiredField(Integer batchDownloadId,Integer configId,Integer fieldNo) {
+        
+        String sql = "SELECT id FROM transactionouterrors_"+batchDownloadId
+        +" where errorId = 1 and batchDownloadId = :batchDownloadId "
+        + "and configId = :configId and fieldNo = :fieldNo";
 	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT id FROM transactionouterrors_"+batchDownloadId+" where errorId = 1 and batchDownloadId = :batchDownloadId and configId = :configId and fieldNo = :fieldNo", String.class);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	query.setParameter("configId", configId);
 	query.setParameter("batchDownloadId", batchDownloadId);
 	query.setParameter("fieldNo", fieldNo);
@@ -1923,9 +1948,10 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = false)
     public void updateMissingRequiredFieldStatus(Integer batchDownloadId) throws Exception {
-	String sql = "update transactiontranslatedout_"+batchDownloadId + " set statusId = 14 where transactionOutRecordsId "
-			+ "in (select transactionOutRecordsId "
-		+ " from transactionouterrors_"+batchDownloadId + " where errorId = 1)";
+	
+        String sql = "update transactiontranslatedout_"+batchDownloadId + " set statusId = 14 where transactionOutRecordsId "
+        + "in (select transactionOutRecordsId "
+        + " from transactionouterrors_"+batchDownloadId + " where errorId = 1)";
 	
 	Query updateData = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	try {
@@ -1953,8 +1979,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    insertError.executeUpdate();
 	    
 	    sql = "select count(id) as total from transactionouterrors_" + batchDownloadId + " where errorId = 2 and fieldNo = " + cff.getFieldNo();
-	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
-            .addScalar("total", StandardBasicTypes.INTEGER);
+	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, Integer.class);
 	    
 	    return (Integer) query.list().get(0);
 	    
@@ -1978,12 +2003,14 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 
     @Transactional(readOnly = true)
     public String getConfigFieldHeadingsForOutput(Integer configId) {
-	String sql = "select group_concat(CONCAT(\"'\", fieldDesc, \"'\") order by fieldNo asc) as fieldHeadings "
+	
+        String sql = "select group_concat(CONCAT(\"'\", fieldDesc, \"'\") order by fieldNo asc) as fieldHeadings "
 	+ "from configurationFormFields where configId = " + configId;
 
 	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	List<String> fieldHeadings = query.list();
-	if (!fieldHeadings.isEmpty()) {
+	
+        if (!fieldHeadings.isEmpty()) {
 		return fieldHeadings.get(0);
 	} else {
 		return null;

@@ -115,6 +115,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.ParseException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -3542,7 +3544,8 @@ public class adminProcessingActivity {
         toDate = DateUtils.addDays(toDate, 1);
 	
 	List<Object> batchUploadList = transactionInManager.getAllUploadBatchesPaged(fromDate, toDate,iDisplayStart, iDisplayLength, searchTerm, sortColumnName, sortDirection);
-	
+	List<helRegistry> helRegistries = helregistrymanager.getAllActiveRegistries();
+        
 	List<batchUploads> batchUploadsToReturn = new ArrayList<>();
         
 	TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
@@ -3564,16 +3567,30 @@ public class adminProcessingActivity {
 		dateinTZ = requiredFormat.format(batchUpload.getDateSubmitted());
 	    
 		batchUpload.setDateSubmitted(dft.parse(dateinTZ));
+                batchUpload.setDateAsInteger(batchUpload.getDateSubmitted().getTime());
 
 		if(batchUpload.getStartDateTime()!= null) {
 		    dateinTZ = requiredFormat.format(batchUpload.getStartDateTime());
 		    batchUpload.setStartDateTime(dft.parse(dateinTZ));
+                    batchUpload.setDateAsInteger(batchUpload.getStartDateTime().getTime());
 		}
 
 		if(batchUpload.getEndDateTime()!= null) {
 		    dateinTZ = requiredFormat.format(batchUpload.getEndDateTime());
 		    batchUpload.setEndDateTime(dft.parse(dateinTZ));
+                    batchUpload.setDateAsInteger(batchUpload.getEndDateTime().getTime());
 		}
+                
+                if(batchUpload.getHelRegistryId() > 0) {
+                    if(helRegistries != null) {
+                        for(helRegistry reg : helRegistries) {
+                            if(reg.getId() == batchUpload.getHelRegistryId()) {
+                                batchUpload.setSystemName(reg.getRegistryName());
+                            }
+                        }
+                    }
+                }
+                
 		batchUploadsToReturn.add(batchUpload);
 	    }
 	}
@@ -3585,15 +3602,36 @@ public class adminProcessingActivity {
 	    
 	    for(watchlistEntry entry : watchListEntries) {
 		batchUploads watchlistEntry = new batchUploads();
+                watchlistEntry.setOrgId(entry.getOrgId());
+                watchlistEntry.setConfigId((entry.getConfigId()));
 		watchlistEntry.setOrgName(entry.getOrgName());
 		watchlistEntry.setTransportMethod(entry.getTransportMethod());
 		watchlistEntry.setConfigName(entry.getConfigName());
 		watchlistEntry.setDateSubmitted(entry.getDateCreated());
 		watchlistEntry.setUploadType("Watch List Entry");
+                watchlistEntry.setUtBatchName("N/A");
+                watchlistEntry.setStatusValue(("N/A"));
+                
+                watchlistEntry.setDateAsInteger(entry.getDateCreated().getTime());
 
 		batchUploadsToReturn.add(watchlistEntry);
 	    }
 	}
+        
+        if(sortDirection.equals("desc")) {
+            Collections.sort(batchUploadsToReturn, new Comparator<batchUploads>(){
+                public int compare(batchUploads o1, batchUploads o2) {
+                    return o2.getDateAsInteger().compareTo(o1.getDateAsInteger());
+                }
+            });
+        }
+        else {
+            Collections.sort(batchUploadsToReturn, new Comparator<batchUploads>(){
+                public int compare(batchUploads o1, batchUploads o2) {
+                    return o1.getDateAsInteger().compareTo(o2.getDateAsInteger());
+                }
+            });
+        }
         
 	jsonResponse.addProperty("sEcho", sEcho);
         jsonResponse.addProperty("iTotalRecords", totalRecords);
@@ -3699,7 +3737,7 @@ public class adminProcessingActivity {
      *
      * @throws Exception
      */
-    @RequestMapping(value = "/dashboardGenericBatches", method = RequestMethod.POST)
+    @RequestMapping(value = "/dashboardGenericBatches", method = RequestMethod.GET)
     public @ResponseBody ModelAndView dashboardGenericBatches(@RequestParam Date fromDate, @RequestParam Date toDate, HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
 
         ModelAndView mav = new ModelAndView();
@@ -3715,55 +3753,50 @@ public class adminProcessingActivity {
         //Get all inbound transactions
         toDate = DateUtils.addDays(toDate, 1);
 	
-	try {
-	    List<batchUploads> dashboardUploads = new ArrayList<>();
+        List<batchUploads> dashboardUploads = new ArrayList<>();
 
-	    //Need to get any watch list entries
-	    List<watchlistEntry> watchlistEntries = configurationManager.getGenericWatchListEntries(fromDate, toDate);
-            
-	    if(watchlistEntries != null) {
-		if(!watchlistEntries.isEmpty()) {
-		    watchlistEntries.stream().map((entry) -> {
-			batchUploads watchlistEntry = new batchUploads();
-			watchlistEntry.setDateSubmitted(entry.getDateCreated());
-			if(entry.isWatchListCompleted()) {
-			    watchlistEntry.setDashboardRowColor("table-success");
-			}
-			else {
-			    watchlistEntry.setDashboardRowColor("table-primary");
-			}
-                       
-			watchlistEntry.setId(entry.getId());
-			watchlistEntry.setUploadType("Watch List Entry");
-			watchlistEntry.setEntryMessage(entry.getEntryMessage());
-			watchlistEntry.setWatchListCompleted(entry.isWatchListCompleted());
-			watchlistEntry.setWatchListEntryId(entry.getWatchlistentryId());
-			return watchlistEntry;			
-		    }).forEachOrdered((watchlistEntry) -> {
-			dashboardUploads.add(watchlistEntry);
-		    });
-		}
-	    }
-	    
-	    if(!dashboardUploads.isEmpty()) {
-		TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
-		DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		requiredFormat.setTimeZone(timeZone);
-		String dateinTZ = "";
+        //Need to get any watch list entries
+        List<watchlistEntry> watchlistEntries = configurationManager.getGenericWatchListEntries(fromDate, toDate);
 
-		for(batchUploads watchListEntry : dashboardUploads) {
-		    dateinTZ = requiredFormat.format(watchListEntry.getDateSubmitted());
+        if(watchlistEntries != null) {
+            if(!watchlistEntries.isEmpty()) {
+                watchlistEntries.stream().map((entry) -> {
+                    batchUploads watchlistEntry = new batchUploads();
+                    watchlistEntry.setDateSubmitted(entry.getDateCreated());
+                    if(entry.isWatchListCompleted()) {
+                        watchlistEntry.setDashboardRowColor("table-success");
+                    }
+                    else {
+                        watchlistEntry.setDashboardRowColor("table-primary");
+                    }
 
-		    watchListEntry.setDateSubmitted(dft.parse(dateinTZ));
-		}
-	    }
-
-            mav.addObject("genericbatches", dashboardUploads);
-
-        } catch (Exception e) {
-            throw new Exception("Error occurred viewing the dashboard inbound messages.", e);
+                    watchlistEntry.setId(entry.getId());
+                    watchlistEntry.setUploadType("Watch List Entry");
+                    watchlistEntry.setEntryMessage(entry.getEntryMessage());
+                    watchlistEntry.setWatchListCompleted(entry.isWatchListCompleted());
+                    watchlistEntry.setWatchListEntryId(entry.getWatchlistentryId());
+                    return watchlistEntry;			
+                }).forEachOrdered((watchlistEntry) -> {
+                    dashboardUploads.add(watchlistEntry);
+                });
+            }
         }
+
+        if(!dashboardUploads.isEmpty()) {
+            TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
+            DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            requiredFormat.setTimeZone(timeZone);
+            String dateinTZ = "";
+
+            for(batchUploads watchListEntry : dashboardUploads) {
+                dateinTZ = requiredFormat.format(watchListEntry.getDateSubmitted());
+
+                watchListEntry.setDateSubmitted(dft.parse(dateinTZ));
+            }
+        }
+
+        mav.addObject("genericbatches", dashboardUploads);
 
         return mav;
     }

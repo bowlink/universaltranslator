@@ -56,22 +56,25 @@
                             <div class="row-fluid contain basic-clearfix">
                                 <div class="col-md-12">
                                    <section class="panel panel-info container-fluid">
+                                       <th:block th:if="${error != null and error != ''}">
+                                            <div class="alert alert-danger" role="alert">
+                                                The selected file was not found.
+                                            </div>
+                                        </th:block>
                                         <div class="panel-heading">
-                                            <h3 class="panel-title">Inbound Messages</h3>
+                                            <h3 class="panel-title">Inbound Batches</h3>
                                         </div>
                                        <div class="panel-body">
                                            <div class="form-container scrollable">
-                                               <table class="table table-bordered table-default" id="inbounddataTable">
+                                               <table class="table table-hover table-default" th:rel="${eahUT}" id="inbounddataTable">
                                                     <thead class="thead-light">
                                                         <tr>
                                                             <th scope="col" class="center-text">Type</th>
-                                                            <th scope="col" class="center-text">Date/Time</th>
-                                                            <th scope="col" class="center-text">Trans. ID</th>
-                                                            <th scope="col" class="center-text">Source</th>
-                                                            <th scope="col" class="center-text">Configuration</th>
-                                                            <th scope="col" class="center-text">Interface</th>
-                                                            <th scope="col" class="center-text">Transactions (Rows)</th>
-                                                            <th scope="col" class="center-text">Errors</th>
+                                                            <th scope="col">Organization Details</th>
+                                                            <th scope="col">Batch Details</th> 
+                                                            <th scope="col">Status</th> 
+                                                            <th scope="col"># of Transactions</th> 
+                                                            <th scope="col" class="center-text">Date Received</th>
                                                         </tr>
                                                     </thead>
                                                </table>
@@ -85,21 +88,19 @@
                                 <div class="col-md-12">
                                    <section class="panel panel-warning">
                                         <div class="panel-heading">
-                                            <h3 class="panel-title">Outbound Messages</h3>
+                                            <h3 class="panel-title">Outbound Batches</h3>
                                         </div>
                                         <div class="panel-body">
                                             <div class="form-container scrollable">
                                                 <table class="table table-bordered table-default" id="outbounddataTable">
                                                     <thead class="thead-light">
                                                         <tr>
-                                                            <th scope="col" class="center-text">Type</th>
-                                                            <th scope="col" class="center-text">Date/Time</th>
-                                                            <th scope="col" class="center-text">Trans. ID</th>
-                                                            <th scope="col" class="center-text">Target</th>
-                                                            <th scope="col" class="center-text">Configuration</th>
-                                                            <th scope="col" class="center-text">Interface</th>
-                                                            <th scope="col" class="center-text">Transactions (Rows)</th>
-                                                            <th scope="col" class="center-text">Errors</th>
+                                                            <th scope="col">Organization Details</th>
+                                                            <th scope="col">Batch Details</th> 
+                                                            <th scope="col">Associated Inbound Batch</th> 
+                                                            <th scope="col">Status</th> 
+                                                            <th scope="col"># of Transactions</th> 
+                                                            <th scope="col" class="center-text">Date Delivered</th>
                                                         </tr>
                                                     </thead>
                                                  </table>
@@ -121,3 +122,6 @@
         </th:block>
     </body>
 </html>
+<div class="modal fade" id="batchInfoModal" role="dialog" tabindex="-1" aria-labeledby="Configuration File Upload" aria-hidden="true" aria-describedby="">
+    <div class="modal-dialog modal-lg"><div class="modal-content" id="modalContent"></div></div>
+</div>

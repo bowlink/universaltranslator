@@ -538,12 +538,11 @@ public class adminSysAdminController {
 
     @RequestMapping(value = "/adminInfo", method = RequestMethod.POST)
     public @ResponseBody
-    ModelAndView updateAdminInfo(HttpServletRequest request, @ModelAttribute(value = "userdetails") utUser userdetails,
-            Authentication authentication, BindingResult result) throws Exception {
+    ModelAndView updateAdminInfo(HttpServletRequest request, @ModelAttribute(value = "userdetails") utUser userdetails, Authentication authentication, BindingResult result) throws Exception {
 
         ModelAndView mav = new ModelAndView();
 
-        mav.setViewName("/administrator/sysadmin/adminInfo/profile");
+        mav.setViewName("administrator/systemAdmin/systemadmins/details");
 
 	boolean usernameNotTaken = true;
 	

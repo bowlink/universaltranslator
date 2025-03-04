@@ -46,8 +46,6 @@ public interface utConfigurationManager {
 
     Long findTotalConfigs();
 
-    Long getTotalConnections(int configId);
-
     void updateCompletedSteps(int configId, int stepCompleted);
 
     @SuppressWarnings("rawtypes")
@@ -135,8 +133,6 @@ public interface utConfigurationManager {
 
     void saveHL7Component(HL7ElementComponents newcomponent);
 
-    String getMessageTypeNameByConfigId(Integer configId);
-
     @SuppressWarnings("rawtypes")
     List getEncodings();
 
@@ -155,10 +151,6 @@ public interface utConfigurationManager {
     configurationExcelDetails getExcelDetails(Integer configId, Integer orgId) throws Exception;
     
     void updateExcelConfigDetails(Integer orgId, configurationMessageSpecs messageSpecs) throws Exception;
-    
-    Integer getFieldCrosswalkIdByFieldName (int configId, String fieldName) throws Exception;
-    
-    List<utConfiguration> getActiveConfigurationsByTransportType(int userId, List<Integer> transportMethods) throws Exception;
     
     @SuppressWarnings("rawtypes")
     List getZipTypes();

@@ -10,23 +10,12 @@ import org.springframework.stereotype.Repository;
 public interface messageTypeDAO {
 
     @SuppressWarnings("rawtypes")
-    List getInformationTables();
-
-    @SuppressWarnings("rawtypes")
-    List getAllTables();
-
-    @SuppressWarnings("rawtypes")
-    List getTableColumns(String tableName);
-
-    @SuppressWarnings("rawtypes")
     List getValidationTypes();
 
     String getValidationById(int id);
 
     @SuppressWarnings("rawtypes")
     List getDelimiters();
-
-    Long getTotalFields(int messageTypeId);
 
     List<Crosswalks> getCrosswalks(int page, int maxResults, int orgId);
 

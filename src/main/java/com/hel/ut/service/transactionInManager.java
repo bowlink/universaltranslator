@@ -108,7 +108,7 @@ public interface transactionInManager {
 
     Integer flagMacroErrors(Integer configId, Integer batchId, configurationDataTranslations cdt, boolean foroutboundProcessing);
 
-    List<configurationTransport> getHandlingDetailsByBatch(int batchId);
+    List<configurationTransport> getHandlingDetailsByBatch(int configId);
 
     void insertProcessingError(Integer errorId, Integer configId, Integer batchId, Integer fieldNo, Integer macroId, Integer cwId, Integer validationTypeId, boolean required, boolean foroutboundProcessing, String errorCause);
 
@@ -293,8 +293,6 @@ public interface transactionInManager {
     boolean assignBatchDLId (Integer batchUploadId, Integer configId) throws Exception;
     
     List<Integer> getTargetConfigsForUploadBatch(Integer batchUploadId, Integer configId) throws Exception;
-    
-    Integer checkClearAfterDeliveryBatch (int batchUploadId) throws Exception;
     
     Integer removeLoadTableBlankRows(Integer batchUploadId, String loadTableName) throws Exception;
 

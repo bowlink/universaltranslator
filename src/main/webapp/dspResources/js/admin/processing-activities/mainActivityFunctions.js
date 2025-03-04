@@ -12,10 +12,8 @@ jQuery(function ($) {
             $('.alert').delay(2000).fadeOut(1000);
         }
         
-        
         //This function will launch the status detail overlay with the selected
         //status
-       
         $(document).on('click', '.viewStatus', function () {
             $.ajax({
                 url: '/administrator/processing-activity/viewStatus' + $(this).attr('rel'),

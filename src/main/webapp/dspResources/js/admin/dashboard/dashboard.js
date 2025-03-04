@@ -9,14 +9,31 @@ jQuery(function ($) {
     
     $(document).ready(function () {
         
+         $("input:text,form").attr("autocomplete", "off");
+        
+        //Fade out the updated/created message after being displayed.
+        if ($('.alert').length > 0) {
+            $('.alert').delay(2000).fadeOut(1000);
+        }
+        
+        //This function will launch the status detail overlay with the selected
+        //status
+        $(document).on('click', '.viewStatus', function () {
+            $.ajax({
+                url: '/administrator/processing-activity/viewStatus' + $(this).attr('rel'),
+                type: "GET",
+                success: function (data) {
+                    $("#modalContent").html(data);
+                }
+            });
+        });
+        
         getGenericMessages();
         getInboundMessages();
         getOutboundMessages();
-        setInterval(function(){getGenericMessages()}, 50000);
-        setInterval(function(){getInboundMessages()}, 50000);
-        setInterval(function(){getOutboundMessages()}, 50000);
-
-        $("input:text,form").attr("autocomplete", "off");
+        //setInterval(function(){getGenericMessages()}, 50000);
+        //setInterval(function(){getInboundMessages()}, 50000);
+        //setInterval(function(){getOutboundMessages()}, 50000);
 
         $('.date-range-picker-trigger').daterangepicker(
             {
@@ -62,10 +79,34 @@ jQuery(function ($) {
                 'fromDate': fromDate, 
                 'toDate': toDate
             },
-            type: "POST",
+            type: "GET",
             success: function(data) {
-               data = $(data);
+                
                $('.genericMessages').html(data);
+                
+               $('#genericdataTable').DataTable({
+                    "bAutoWidth": false,
+                    "bStateSave": true,
+                    "iCookieDuration": 60,
+                    "sPaginationType": "bootstrap",
+                    "oLanguage": {
+                        "sSearch": "_INPUT_",
+                        "sLengthMenu": '<select class="form-control" style="width:150px">' +
+                                '<option value="10">10 Records</option>' +
+                                '<option value="20">20 Records</option>' +
+                                '<option value="30">30 Records</option>' +
+                                '<option value="40">40 Records</option>' +
+                                '<option value="50">50 Records</option>' +
+                                '<option value="-1">All</option>' +
+                                '</select>'
+                    },
+                   "aoColumns" : [
+                        { "sWidth": "5%" },
+                        { "sWidth": "10%" },
+                        { "sWidth": "85%" }
+                    ],
+                   "aaSorting" : [[1, "desc"]]
+                });
             }
         });
     }
@@ -100,20 +141,23 @@ jQuery(function ($) {
             toDate = $('#toDate').attr('rel');
         }
         
+        var isEAH = $('#inbounddataTable').attr('rel');
+        
         $('#inbounddataTable').DataTable().destroy();
         
         $('#inbounddataTable').DataTable({
             bProcessing: true,
             bServerSide: true,
             deferRender: true,
-            aaSorting: [[1,'desc']],
+            aaSorting: [[5,'desc']],
             sPaginationType: "bootstrap", 
             fnDrawCallback: function() {
                 $('[data-bs-toggle="popover"]').popover();
             },
             oLanguage: {
-               sEmptyTable: "There were no files submitted for the selected date range.", 
-               sSearch: "Filter Results: ",
+               sEmptyTable: "There were no files received for the selected date range.", 
+               sSearch: "_INPUT_",
+               sSearchPlaceholder: 'Filter Inbound Batches',
                sLengthMenu: '<select class="form-control" style="width:150px">' +
                     '<option value="10">10 Records</option>' +
                     '<option value="20">20 Records</option>' +
@@ -203,10 +247,111 @@ jQuery(function ($) {
                     }
                 },
                 {
+                    "mData": "orgName", 
+                    "defaultContent": "",
+                    "bSortable":true,
+                    "sWidth": "25%",
+                    "render": function ( data, type, row, meta ) {
+                        var returnData = '<strong>' + data+'</strong><br />Org Id: '+row.orgId;
+                        
+                        if(row.systemName != '' && isEAH === 'false') {
+                            returnData += '<br />System: ' + row.systemName;
+                        }
+                        
+                        return returnData;
+                    }
+                },
+                {
+                    "mData": "configName", 
+                    "defaultContent": "",
+                    "bSortable":false,
+                    "sWidth": "25%",
+                    "render": function ( data, type, row, meta ) {
+                        
+                        if(data !== '') {
+                            
+                            var returnData = ''
+                            
+                            if(row.utBatchName != 'N/A') {
+                                returnData = '<a href="/administrator/processing-activity/inbound/'+row.utBatchName+'"><strong>Batch Name: ' + row.utBatchName + '</strong></a><br />';
+                                returnData += 'Batch Id: ' + row.id+ '<br />';
+                            }
+                            else {
+                                returnData = '<strong>Batch Name: ' + row.utBatchName + '</strong><br />';
+                            }
+                            
+                            if(row.transportMethodId != 2 && row.utBatchName != 'N/A') {
+
+                                if(row.transportMethodId == 9 || row.transportMethodId == 12 ) {
+                                   returnData += '<a href="/FileDownload/downloadFile.do?fromPage=dashboard&filename='+row.utBatchName+'.'+row.originalFileName.split('.')[1].toString().toLowerCase()+'&foldername=archivesIn" title="Download Submitted File">Submitted File - '+row.originalFileName+'</a><br />';
+                                }
+                                else if (row.transportMethodId == 6) {
+                                    returnData += '<a href="/FileDownload/downloadFile.do?fromPage=dashboard&filename='+row.utBatchName+'_dec.'+row.originalFileName.split('.')[1].toString().toLowerCase()+'&foldername=archivesIn" title="Download Submitted File">Submitted File - '+row.originalFileName+'</a><br />';
+                                }
+                                else if(row.transportMethodId == 13 ) {
+                                   returnData += '<a href="/FileDownload/downloadFile.do?fromPage=dashboard&filename=archive_'+row.utBatchName+'.'+row.originalFileName.split('.')[1].toString().toLowerCase()+'&foldername=archivesIn&orgId='+row.orgId+'" title="Download Submitted File">Submitted File - '+row.originalFileName+'</a><br />';
+                                }
+                                else {
+                                   returnData += '<a href="/FileDownload/downloadFile.do?fromPage=dashboard&filename=encoded_'+row.utBatchName+'.'+row.originalFileName.split('.')[1].toString().toLowerCase()+'&foldername=input files&orgId='+row.orgId+'" title="Download Submitted File">Submitted File - '+row.originalFileName+'</a><br />'; 
+                                }
+
+                                if(row.originalFileName.split('.')[1].toString().toLowerCase() != 'txt' || row.fileDelimiter == 13) {
+                                    if(row.inboundBatchConfigurationType == 1 && (row.transportMethodId == 10 || row.transportMethodId == 13)) {
+                                        if(row.transportMethod.indexOf("Direct") > 0 || row.transportMethod === 'File Drop') {
+                                            returnData += '<br /><a href="/FileDownload/downloadFile.do?fromPage=dashboard&filename='+row.utBatchName+'.txt&foldername=loadFiles" title="View Pipe File">Internal File - '+row.utBatchName+'.txt</a><br />';
+                                        }
+                                        else {
+                                            returnData += '<br /><a href="/FileDownload/downloadFile.do?fromPage=dashboard&filename=archive_'+row.utBatchName+'.'+row.originalFileName.split('.')[1].toString().toLowerCase()+'&foldername=archivesIn" title="Download Pipe File">Internal File - '+row.utBatchName+'</a><br />';
+                                        }
+                                    }
+                                }
+                            }
+
+                            returnData += '<br /><a href="/administrator/configurations/details?i='+row.configId+'" title="View Source Configuration">Config Name: '+data+'</a><br />Config Id: ' + row.configId;
+                            
+                            return returnData;
+                        }
+                        else {
+                            return '<strong>Invalid File</strong>';
+                        }
+                    }
+                },
+                {
+                    "mData": "statusValue", 
+                    "defaultContent": "",
+                    "bSortable":true,
+                    "sWidth": "10%",
+                    "className": "center-text",
+                    "render": function ( data, type, row, meta ) {
+                        if(data != 'N/A') {
+                            return '<a href="#batchInfoModal" data-bs-toggle="modal" class="viewStatus" rel="'+row.statusId+'" title="View this Status">'+data+'</a>'; 
+                        }
+                        else {
+                            return data;
+                        }
+                    }
+                },
+                {
+                    "mData": "totalRecordCount", 
+                    "defaultContent": "",
+                    "bSortable":false,
+                    "sWidth": "15%",
+                    "render": function ( data, type, row, meta ) {
+                        var returnData = 'Total Rows in File: <strong>';
+                        returnData += commaSeparateNumber(data) + '</strong><br />';
+                        returnData += 'Total Errors Found: <strong>'+ commaSeparateNumber(row.errorRecordCount) + '</strong>';
+                        if((row.totalErrorRows*1) > 0 && (row.errorRecordCount*1) > 0) {
+                            returnData += '<br />Total Rows with Errors: <strong>'+ commaSeparateNumber(row.totalErrorRows) + '</strong>';
+                        }
+                       return returnData;
+                    }
+                },
+                {
                     "mData": "dateSubmitted", 
                     "defaultContent": "",
                     "bSortable":true,
-                    "sWidth": "13%",
+                    "sWidth": "12%",
+                    "className": "center-text",
                     "render": function ( data, type, row, meta ) {
                         var dateC = new Date(data);
                         var minutes = dateC.getMinutes();
@@ -215,12 +360,14 @@ jQuery(function ($) {
                         hours = hours % 12;
                         hours = hours ? hours : 12;
                         minutes = minutes < 10 ? '0'+minutes : minutes;
-                        var myDateFormatted = 'Received: ' + ((dateC.getMonth()*1)+1)+'/'+dateC.getDate()+'/'+dateC.getFullYear() + ' ' + hours+':'+minutes+ ' ' + ampm;
-
+                        var myDateFormatted = ((dateC.getMonth()*1)+1)+'/'+dateC.getDate()+'/'+dateC.getFullYear() + ' ' + hours+':'+minutes+ ' ' + ampm;
+                        
                         if(row.startDateTime != null) {
+
                             var dateS = new Date(row.startDateTime);
                             minutes = dateS.getMinutes();
-                            if(isDST == 1) {
+
+                            /*if(isDST == 1) {
                                 hours = dateS.getHours()-1;
                                 if(hours < 0) {
                                     hours = 11;
@@ -231,12 +378,14 @@ jQuery(function ($) {
                             }
                             else {
                                 hours = dateS.getHours();
-                            }
+                            }*/
+                            hours = dateS.getHours();
+
                             ampm =  hours >= 12 ? 'pm' : 'am';
                             hours = hours % 12;
                             hours = hours ? hours : 12;
                             minutes = minutes < 10 ? '0'+minutes : minutes;
-
+                            
                             if((dateS.getMonth()*1)+1 != (dateC.getMonth()*1)+1 || (dateS.getDate() != dateC.getDate())) {
                                  myDateFormatted += '<br /><strong>Reprocessed: ' + ((dateS.getMonth()*1)+1)+'/'+dateS.getDate()+'/'+dateS.getFullYear() + '</strong>';
                             }
@@ -247,8 +396,7 @@ jQuery(function ($) {
                         if(row.endDateTime != null) {
                             dateC = new Date(row.endDateTime);
                             minutes = dateC.getMinutes();
-                            if(isDST == 1) {
-                                hours = dateC.getHours()-1;
+                            /*if(isDST == 1) {
                                 if(hours < 0) {
                                     hours = 11;
                                 }
@@ -258,102 +406,27 @@ jQuery(function ($) {
                             }
                             else {
                                 hours = dateC.getHours();
-                            }
+                            }*/
+                            hours = dateC.getHours();
                             ampm =  hours >= 12 ? 'pm' : 'am';
                             hours = hours % 12;
                             hours = hours ? hours : 12;
                             minutes = minutes < 10 ? '0'+minutes : minutes;
-
+                            
                             myDateFormatted += '<br />End: ' + ((dateC.getMonth()*1)+1)+'/'+dateC.getDate()+'/'+dateC.getFullYear() + ' ' + hours+':'+minutes+ ' ' + ampm;
                         }
+                        
+                        if (type === 'display') {
+                            return myDateFormatted;
+                        }
 
-                        return myDateFormatted;
-                    }
-                },
-                {
-                    "mData": "utBatchName", 
-                    "defaultContent": "",
-                    "bSortable":true,
-                    "sWidth": "10%",
-                    "render": function ( data, type, row, meta ) {
-                        var returnData = '';
-
-                        if(row.uploadType === 'Watch List Entry') {
-                            returnData = 'N/A';
-                        }
-                        else {
-                            returnData = '<a href="/administrator/processing-activity/inbound/'+data+'" class="dashboard-link" title="View Inbound Batch" role="button">'+data+'</a>';
-                        }
-                        return returnData;
-                    }
-                },
-                {
-                    "mData": "orgName", 
-                    "defaultContent": "",
-                    "bSortable":true,
-                    "sWidth": "15%",
-                    "render": function ( data, type, row, meta ) {
-                        return data;
-                    }
-                },
-                {
-                    "mData": "configName", 
-                    "defaultContent": "",
-                    "bSortable":true,
-                    "sWidth": "20%",
-                    "render": function ( data, type, row, meta ) {
-                       return data;
-                    }
-                },
-                {
-                    "mData": "transportMethod", 
-                    "defaultContent": "",
-                    "bSortable":true,
-                    "sWidth": "10%",
-                    "render": function ( data, type, row, meta ) {
-                        return data;
-                    }
-                },
-                {
-                    "mData": "totalRecordCount", 
-                    "defaultContent": "",
-                    "bSortable":true,
-                    "sWidth": "10%",
-                    "className": "center-text",
-                    "render": function ( data, type, row, meta ) {
-                        var returnData = '';
-
-                        if(row.uploadType === 'Watch List Entry') {
-                            returnData = 'N/A';
-                        }
-                        else {
-                            returnData = commaSeparateNumber(data);
-                        }
-                        return returnData;
-                    }
-                },
-                {
-                    "mData": "errorRecordCount", 
-                    "defaultContent": "",
-                    "bSortable":true,
-                    "sWidth": "10%",
-                    "className": "center-text",
-                    "render": function ( data, type, row, meta ) {
-                        var returnData = '';
-
-                        if(row.uploadType === 'Watch List Entry') {
-                            returnData = 'N/A';
-                        }
-                        else {
-                            returnData = commaSeparateNumber(data);
-                        }
-                        return returnData;
+                        return row.dateAsInteger;
                     }
                 }
              ]
         }); 
     }
-
+    
     function getOutboundMessages() {
 
         //CHeck if daylight savings time
@@ -390,14 +463,15 @@ jQuery(function ($) {
             bServerSide: true,
             bProcessing: true, 
             deferRender: true,
-            aaSorting: [[1,'desc']],
+            aaSorting: [[5,'desc']],
             sPaginationType: "bootstrap", 
              drawCallback: function() {
                 $('[data-bs-toggle="popover"]').popover();
             },
             oLanguage: {
                sEmptyTable: "There were no files sent out for the selected date range.", 
-               sSearch: "Filter Results: ",
+               sSearch: "_INPUT_",
+               sSearchPlaceholder: 'Filter Outbound Batches',
                sLengthMenu: '<select class="form-control" style="width:150px">' +
                     '<option value="10">10 Records</option>' +
                     '<option value="20">20 Records</option>' +
@@ -419,11 +493,11 @@ jQuery(function ($) {
                 $(row).attr('data-bs-title', 'File Status');
 
                 if(data.statusId == 28) {
-                    if(data.errorRecordCount == data.totalRecordCount) {
+                    if(data.totalErrorCount == data.totalRecordCount) {
                         $(row).addClass('table-danger');
                         $(row).attr('data-bs-content', data.endUserDisplayText + "<br />" + "<b>File Failed Threshold</b>");
                     }
-                    else if(data.errorRecordCount > 0) {
+                    else if(data.totalErrorCount > 0) {
                        //< .5 green .5 | threshold = yellow | >= threshold = red
                         var percent = Math.round((data.totalErrorRows / data.totalRecordCount) * 100);
                         var thresholdHalf = Math.round((data.threshold / 2));
@@ -466,21 +540,85 @@ jQuery(function ($) {
                 }
             },
             aoColumns: [
-                {
-                    "mData": "id", 
+                 {
+                    "mData": "orgName", 
                     "defaultContent": "",
                     "bSortable":true,
-                    "sWidth": "8%",
+                    "sWidth": "15%",
+                    "render": function ( data, type, row, meta ) {
+                        var returnData = '<strong>' + data+'</strong><br />Org Id: '+row.orgId;
+                        
+                        return returnData;
+                    }
+                },
+                {
+                    "mData": "configName", 
+                    "defaultContent": "",
+                    "bSortable":true,
+                    "sWidth": "26%",
+                    "render": function ( data, type, row, meta ) {
+                        var returnData = '';
+                        
+                        if(data !== '') {
+                            returnData = '<a href="/administrator/processing-activity/outbound/'+row.utBatchName+'"><strong>Batch Name: ' + row.utBatchName + '</strong></a><br />';
+                            returnData += 'Batch Id: ' + row.id + '</br>';
+
+                            if(row.outputFileName !== '' && (row.statusId == 28 || row.statusId == 58 || row.statusId == 30)) {
+                                returnData += '<a href="/FileDownload/downloadFile.do?fromPage=outbound&filename='+encodeURIComponent(row.outputFileName)+'&utBatchName='+row.utBatchName+'&foldername=archivesOut&orgId='+row.orgId+'" title="'+row.outputFileName+'">Download Outbound File</a></br>';
+                            }
+                            returnData += '</br><a href="/administrator/configurations/details?i='+row.configId+'" title="View Source Configuration">Config Name: '+data+'</a><br />Config Id: ' + row.configId + '<br />';
+                        }
+                        else {
+                            returnData = '<strong>Invalid File</strong><br />';
+                        }
+                       return returnData;
+                    }
+                },
+                {
+                    "mData": "fromBatchName", 
+                    "defaultContent": "",
+                    "bSortable":true,
+                    "sWidth": "21%",
+                    "render": function ( data, type, row, meta ) {
+                        var returnData = '<strong>'+row.srcOrgName + '</strong><br />';
+                        returnData += '<a href="/administrator/processing-activity/inbound/'+data+'" title="View Inbound Batch" role="button">Batch Name: '+data+'</a><br />';
+                        returnData += 'Batch Id: ' + row.batchUploadId +'<br />';
+
+                        if(row.originalFileName !== '') {
+                            returnData += '<a href="/FileDownload/downloadFile.do?fromPage=outbound&filename='+row.originalFileName+'&foldername=archivesIn&orgId=0" title="'+row.originalFileName+'">Download Submitted File</a>';
+                        }
+
+                       return returnData;
+                    }
+                },
+                 {
+                    "mData": "statusValue", 
+                    "defaultContent": "",
+                    "bSortable":true,
+                    "sWidth": "10%",
                     "className": "center-text",
                     "render": function ( data, type, row, meta ) {
-                        return "On Demand";
+                       return '<a href="#batchInfoModal" data-bs-toggle="modal" class="viewStatus" rel="'+row.statusId+'" title="View this Status">'+data+'</a>';
+                    }
+                },
+                {
+                    "mData": "totalRecordCount", 
+                    "defaultContent": "",
+                    "bSortable":false,
+                    "sWidth": "15%",
+                    "render": function ( data, type, row, meta ) {
+                        var returnData = 'Total Rows in File: <strong>';
+                        returnData += commaSeparateNumber(data) + '</strong><br />';
+                        returnData += 'Total Errors: <strong>'+ commaSeparateNumber(row.totalErrorCount) + '</strong>';
+                       return returnData;
                     }
                 },
                 {
                     "mData": "dateCreated", 
                     "defaultContent": "",
                     "bSortable":true,
-                    "sWidth": "12%",
+                    "sWidth": "18%",
+                    "className": "center-text",
                     "render": function ( data, type, row, meta ) {
                         var dateC = new Date(data);
                         var minutes = dateC.getMinutes();
@@ -489,49 +627,46 @@ jQuery(function ($) {
                         hours = hours % 12;
                         hours = hours ? hours : 12;
                         minutes = minutes < 10 ? '0'+minutes : minutes;
-
-                        var myDateFormatted = '';
-
-
+                        var myDateFormatted = ((dateC.getMonth()*1)+1)+'/'+dateC.getDate()+'/'+dateC.getFullYear() + ' ' + hours+':'+minutes+ ' ' + ampm;
 
                         if(row.startDateTime != null) {
                             dateC = new Date(row.startDateTime);
                             minutes = dateC.getMinutes();
-                            if(isDST == 1) {
-                                hours = dateC.getHours()-1;
-                                if(hours < 0) {
-                                    hours = 11;
-                                }
-                                else if(hours == 0) {
-                                    hours = 12;
-                                }
+                            /*if(isDST == 1) {
+                               if(hours < 0) {
+                                   hours = 11;
+                               }
+                               else if(hours == 0) {
+                                   hours = 12;
+                               }
                             }
                             else {
                                 hours = dateC.getHours();
-                            }
+                            }*/
+                            hours = dateC.getHours();
                             ampm =  hours >= 12 ? 'pm' : 'am';
                             hours = hours % 12;
                             hours = hours ? hours : 12;
                             minutes = minutes < 10 ? '0'+minutes : minutes;
 
-                            myDateFormatted += 'Start: ' + ((dateC.getMonth()*1)+1)+'/'+dateC.getDate()+'/'+dateC.getFullYear() + ' ' + hours+':'+minutes+ ' ' + ampm;
+                            myDateFormatted += '<br />Start: ' + ((dateC.getMonth()*1)+1)+'/'+dateC.getDate()+'/'+dateC.getFullYear() + ' ' + hours+':'+minutes+ ' ' + ampm;
                         }
 
                         if(row.endDateTime != null) {
                             dateC = new Date(row.endDateTime);
                             minutes = dateC.getMinutes();
-                            if(isDST == 1) {
-                                hours = dateC.getHours()-1;
-                                if(hours < 0) {
-                                    hours = 11;
-                                }
-                                else if(hours == 0) {
-                                    hours = 12;
-                                }
+                            /*if(isDST == 1) {
+                               if(hours < 0) {
+                                   hours = 11;
+                               }
+                               else if(hours == 0) {
+                                   hours = 12;
+                               }
                             }
                             else {
                                 hours = dateC.getHours();
-                            }
+                            }*/
+                             hours = dateC.getHours();
                             ampm =  hours >= 12 ? 'pm' : 'am';
                             hours = hours % 12;
                             hours = hours ? hours : 12;
@@ -540,66 +675,7 @@ jQuery(function ($) {
                             myDateFormatted += '<br />End: ' + ((dateC.getMonth()*1)+1)+'/'+dateC.getDate()+'/'+dateC.getFullYear() + ' ' + hours+':'+minutes+ ' ' + ampm;
                         }
 
-                         myDateFormatted += '<br />Sent: ' + ((dateC.getMonth()*1)+1)+'/'+dateC.getDate()+'/'+dateC.getFullYear() + ' ' + hours+':'+minutes+ ' ' + ampm;
-
-
                         return myDateFormatted;
-                    }
-                },
-                {
-                    "mData": "utBatchName", 
-                    "defaultContent": "",
-                    "bSortable":true,
-                    "sWidth": "10%",
-                    "render": function ( data, type, row, meta ) {
-                        return '<a href="/administrator/processing-activity/outbound/'+row.utBatchName+'" class="dashboard-link" title="View Outbound Batch" role="button">'+row.utBatchName+'</a>';
-                    }
-                },
-                {
-                    "mData": "orgName", 
-                    "defaultContent": "",
-                    "bSortable":true,
-                    "sWidth": "15%",
-                    "render": function ( data, type, row, meta ) {
-                        return data;
-                    }
-                },
-                {
-                    "mData": "configName", 
-                    "defaultContent": "",
-                    "bSortable":true,
-                    "sWidth": "20%",
-                    "render": function ( data, type, row, meta ) {
-                       return data;
-                    }
-                },
-                {
-                    "mData": "transportMethod", 
-                    "defaultContent": "",
-                    "bSortable":true,
-                    "sWidth": "10%",
-                    "render": function ( data, type, row, meta ) {
-                        return data;
-                    }
-                },
-                {
-                    "mData": "totalRecordCount", 
-                    "defaultContent": "",
-                    "bSortable":true,
-                    "sWidth": "10%",
-                    "className": "center-text",
-                    "render": function ( data, type, row, meta ) {
-                        return commaSeparateNumber(data);
-                    }
-                },
-                {
-                    "mData": "errorRecordCount", 
-                    "defaultContent": "",
-                    "bSortable":true,
-                    "sWidth": "10%",
-                    "className": "center-text",
-                    "render": function ( data, type, row, meta ) {
-                         return commaSeparateNumber(data);
                     }
                 }
              ]

@@ -24,6 +24,8 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Objects;
 import org.hibernate.HibernateException;
 import org.hibernate.query.MutationQuery;
@@ -58,9 +60,8 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @SuppressWarnings("unchecked")
     public List<TableData> getDataList(String utTableName, String searchTerm) {
 
-        String sql = "select id, displayText, description, "
-        + " isCustom as custom, status as status, dateCreated as dateCreated from "
-        + utTableName + " where (displayText like :searchTerm or description like :searchTerm) order by id";
+        String sql = "select id, displayText, description, isCustom as custom, status as status, dateCreated as dateCreated "
+        + "from "+ utTableName + " where (displayText like :searchTerm or description like :searchTerm) order by id";
         
         Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,TableData.class)
         .addScalar("id", StandardBasicTypes.INTEGER)
@@ -68,10 +69,23 @@ public class sysAdminDAOImpl implements sysAdminDAO {
         .addScalar("description", StandardBasicTypes.STRING)
         .addScalar("custom", StandardBasicTypes.BOOLEAN)
         .addScalar("status", StandardBasicTypes.BOOLEAN)
-        .addScalar("dateCreated", StandardBasicTypes.DATE)
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
         .setParameter("searchTerm", searchTerm);
-
-        List<TableData> dataList = query.list();
+        
+        List<Object[]> results = query.getResultList();
+        
+        List<TableData> dataList = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            TableData tData = new TableData();
+            tData.setId((Integer) record[1]);
+            tData.setDisplayText((String) record[2]);
+            tData.setDescription((String) record[3]);
+            tData.setCustom((Boolean) record[4]);
+            tData.setStatus((Boolean) record[5]);
+            tData.setDateCreated((Date) record[6]);
+            dataList.add(tData);
+        });
         
         return dataList;
     }
@@ -303,11 +317,21 @@ public class sysAdminDAOImpl implements sysAdminDAO {
     @Override
     @Transactional(readOnly = true)
     public lu_ProcessStatus getProcessStatusById(int id) throws Exception {
-        try {
-            return (lu_ProcessStatus) sessionFactory.getCurrentSession().get(lu_ProcessStatus.class, id);
-        } catch (Throwable ex) {
-            System.err.println("get ProcessStatus failed." + ex);
+        
+         CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<lu_ProcessStatus> criteria = builder.createQuery(lu_ProcessStatus.class);
+        Root<lu_ProcessStatus> root = criteria.from(lu_ProcessStatus.class);
+
+        Predicate whereClause = builder.equal(root.get("id"), id);
+
+        criteria.where(whereClause);
+        
+        lu_ProcessStatus processDetails = (lu_ProcessStatus) sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
+
+        if (processDetails == null) {
             return null;
+        } else {
+            return processDetails;
         }
     }
 

@@ -78,46 +78,6 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     }
 
     /**
-     * The 'getInformationTables' function will return a list of all available information tables where we can associate fields to an actual table and column.
-     * @return 
-     */
-    @Override
-    @SuppressWarnings("rawtypes")
-    @Transactional(readOnly = true)
-    public List getInformationTables() {
-        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT distinct table_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" + myProps.getProperty("schemaNameIL") + "' and TABLE_NAME LIKE 'message\\_%'", String.class);
-        return query.list();
-    }
-
-    /**
-     * The 'getAllTables' function will return a list of all available tables where we can use to select which table to auto populate a form field.
-     * @return 
-     */
-    @Override
-    @SuppressWarnings("rawtypes")
-    @Transactional(readOnly = true)
-    public List getAllTables() {
-        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT distinct table_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" + myProps.getProperty("schemaNameIL") + "'", String.class);
-        return query.list();
-    }
-
-    /**
-     * The 'getTableColumns' function will return a list of columns from the passed in table name
-     *
-     * @param tableName
-     * @return 
-     */
-    @Override
-    @SuppressWarnings("rawtypes")
-    @Transactional(readOnly = true)
-    public List getTableColumns(String tableName) {
-        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" + myProps.getProperty("schemaNameIL") + "' AND TABLE_NAME = :tableName and COLUMN_NAME not in ('id', 'dateCreated', 'transactionInId') order by COLUMN_NAME", String.class)
-        .setParameter("tableName", tableName);
-
-        return query.list();
-    }
-
-    /**
      * The 'getValidationTypes' function will return a list of available field validation types
      *
      * @return 
@@ -183,26 +143,6 @@ public class messageTypeDAOImpl implements messageTypeDAO {
         String delimChar = (String) query.uniqueResult();
 
         return delimChar;
-    }
-
-    /**
-     * The 'getTotalFields' function will return the number of fields for a passed in message type.
-     *
-     * @param messageTypeId
-     * @return 
-     * @Param messageTypeId	The message type to search
-     *
-     * @Return	Long	The total number of fields for the message type
-     */
-    @Transactional(readOnly = true)
-    @Override
-    public Long getTotalFields(int messageTypeId) {
-        SelectionQuery query = sessionFactory.getCurrentSession().createSelectionQuery("select count(id) as totalFields from messageTypeFormFields where messageTypeId = :messageTypeId")
-	.setParameter("messageTypeId", messageTypeId);
-
-        Long totalFields = (Long) query.uniqueResult();
-
-        return totalFields;
     }
 
     /**

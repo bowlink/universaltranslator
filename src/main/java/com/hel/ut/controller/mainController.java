@@ -58,7 +58,7 @@ public class mainController {
     @Autowired
     private emailManager emailmanager;
     
-   
+    
     /**
      * The '/', '/login' request will serve up the login page.
      *
@@ -67,6 +67,7 @@ public class mainController {
      */
     @RequestMapping(value = {"/", "/login"}, method = RequestMethod.GET)
     public ModelAndView login() throws Exception {
+        
         ModelAndView mav = new ModelAndView();
         mav.addObject("pageId", "login");
         mav.addObject("pageSection", "section-login");
@@ -124,8 +125,6 @@ public class mainController {
     /**
      * The '/' head request
      *
-     * @param request
-     * @param response
      * @return	the login page
      * @throws Exception
      */
@@ -166,7 +165,7 @@ public class mainController {
     public @ResponseBody Integer findPassword(@RequestParam String identifier) throws Exception {
         
 	Integer userId = usermanager.getUserByIdentifier(identifier);
-
+        
 	if (userId == null) {
 	    return 0;
 	} 
@@ -195,14 +194,14 @@ public class mainController {
 	mailMessage messageDetails = new mailMessage();
 
 	messageDetails.setToEmailAddress(userDetails.getEmail());
-	messageDetails.setMessageSubject("Health-e-Link HDR Reset Password");
+	messageDetails.setMessageSubject("Health-e-Link Universal Translator Reset Password");
 
 	String resetURL = request.getRequestURL().toString().replace("sendPassword.do", "resetPassword?b=");
 
 	StringBuilder sb = new StringBuilder();
 
 	sb.append("Dear ").append(userDetails.getFirstName()).append(",<br />");
-	sb.append("You have recently asked to reset your Health-e-Link HDR password.<br /><br />");
+	sb.append("You have recently asked to reset your Health-e-Link Universal Translator password.<br /><br />");
 	sb.append("<a href='").append(resetURL).append(randomCode).append("'>Click here to reset your password.</a>");
 
 	messageDetails.setMessageBody(sb.toString());
@@ -305,12 +304,15 @@ public class mainController {
 	utUser systemUserDetails = (utUser) session.getAttribute("userDetails");
 	
         ModelAndView mav = new ModelAndView();
+        mav.addObject("pageId", "login");
+        mav.addObject("pageSection", "section-login");
 	
 	if(systemUserDetails != null) {
-	    mav.setViewName("/authenticate");
+            
+	    mav.setViewName("authenticate");
 	}
 	else {
-	    mav.setViewName("/login");
+	    mav.setViewName("login");
 	}
 
         return mav;

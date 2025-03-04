@@ -48,24 +48,6 @@ public class messageTypeManagerImpl implements messageTypeManager {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public List getInformationTables() {
-        return messageTypeDAO.getInformationTables();
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Override
-    public List getAllTables() {
-        return messageTypeDAO.getAllTables();
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Override
-    public List getTableColumns(String tableName) {
-        return messageTypeDAO.getTableColumns(tableName);
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Override
     public List getValidationTypes() {
         return messageTypeDAO.getValidationTypes();
     }
@@ -80,11 +62,6 @@ public class messageTypeManagerImpl implements messageTypeManager {
     @Override
     public List getDelimiters() {
         return messageTypeDAO.getDelimiters();
-    }
-
-    @Override
-    public Long getTotalFields(int messageTypeId) {
-        return messageTypeDAO.getTotalFields(messageTypeId);
     }
 
     @Override

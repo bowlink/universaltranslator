@@ -44,7 +44,6 @@
         </trigger>
     </schedule> 
     
-    
     <!-- Outbound Processing Jobs -->
     <schedule>
         <job>
@@ -102,24 +101,6 @@
     
     <schedule>
         <job>
-            <name>ProcessMassInBoundBatches</name>
-            <group>processGroup</group>
-            <description>This process will run every 3 mins </description>
-            <job-class>com.hel.ut.jobs.processMassBatches</job-class>
-        </job>
- 
-        <trigger>
-            <cron>
-                <name>ProcessMassInBoundBatchesTrigger</name>
-                <job-name>ProcessMassInBoundBatches</job-name>
-                 <job-group>processGroup</job-group>
-                 <cron-expression>0 0/1 * 1/1 * ? *</cron-expression>
-            </cron>
-        </trigger>
-    </schedule>
-    
-    <schedule>
-        <job>
             <name>BatchUploadTableCleanUp</name>
             <group>processGroup</group>
             <description>
@@ -157,24 +138,6 @@
             </cron>
         </trigger>
     </schedule>
-    
-    <!--<schedule>
-        <job>
-            <name>MoveSFTPFiles</name>
-            <group>processGroup</group>
-            <description>This process will run every 2 mins starting at 0 seconds of the minute to check if any SFTP files will need to be moved and logged</description>
-            <job-class>com.hel.ut.jobs.MoveSFTPFiles</job-class>
-        </job>
- 
-        <trigger>
-            <cron>
-                <name>moveSFTPTrigger</name>
-                <job-name>MoveSFTPFiles</job-name>
-                <job-group>processGroup</job-group>
-                <cron-expression>0 0/1 * 1/1 * ? *</cron-expression>
-            </cron>
-        </trigger>
-    </schedule>-->
     
     <!-- Check for unUsed folders -->
     <schedule>

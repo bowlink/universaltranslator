@@ -94,7 +94,7 @@ public interface transactionInDAO {
 
     void insertProcessingError(Integer errorId, Integer configId, Integer batchId, Integer fieldNo, Integer macroId, Integer cwId, Integer validationTypeId, boolean required, boolean foroutboundProcessing, String errorCause, Integer transactionId);
 
-    List<configurationTransport> getHandlingDetailsByBatch(int batchId) throws Exception;
+    List<configurationTransport> getHandlingDetailsByBatch(int configId) throws Exception;
 
     void updateRecordCounts(Integer batchId, List<Integer> statusIds, boolean foroutboundProcessing, String colNameToUpdate);
 
@@ -239,8 +239,6 @@ public interface transactionInDAO {
     Integer clearBatchClearAfterDeliveryByBatchUploadId(Integer batchUploadId) throws Exception;
 
     List<Integer> getTargetConfigsForUploadBatch(Integer batchUploadId, Integer configId) throws Exception;
-
-    Integer checkClearAfterDeliveryBatch(int batchUploadId) throws Exception;
 
     Integer removeLoadTableBlankRows(Integer batchUploadId, String loadTableName) throws Exception;
 

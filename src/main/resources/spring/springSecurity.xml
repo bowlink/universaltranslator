@@ -10,10 +10,10 @@
     
     <http auto-config="true">
         <intercept-url access="hasAnyRole('ROLE_VALIDATE')" pattern="/authenticate/**" />
-        <intercept-url access="hasAnyRole('ROLE_ADMIN')" pattern="/administrator/processing-activity/wsmessage/**" />
-        <intercept-url access="hasAnyRole('ROLE_ADMIN')" pattern="/administrator/processing-activity/wsmessageOut/**" />
+        <intercept-url access="hasAnyRole('ROLE_ADMIN')" pattern="/administrator/processing-activity/**" />
         <intercept-url access="hasAnyRole('ROLE_ADMIN','ROLE_OPERATIONSSTAFF','ROLE_SYSTEMADMIN')" pattern="/administrator/**" />
         <intercept-url access="hasAnyRole('ROLE_ADMIN', 'ROLE_USER','ROLE_OPERATIONSSTAFF','ROLE_SYSTEMADMIN')" pattern="/FileDownload/**" />
+        <intercept-url access="hasAnyRole('ROLE_ADMIN','ROLE_OPERATIONSSTAFF','ROLE_SYSTEMADMIN')" pattern="/watchlist/**" />
         <intercept-url pattern="/dspResources/**" access="permitAll" />
         <intercept-url pattern="/scheduleTask/*"  access="permitAll" />
         <intercept-url pattern="/login" access="permitAll" />
@@ -23,6 +23,9 @@
         <intercept-url pattern="/forgotPassword*" access="permitAll" />
         <intercept-url pattern="/sendPassword*" access="permitAll" />
         <intercept-url pattern="/resetPassword*" access="permitAll" />
+        <intercept-url pattern="/resendCode*" access="permitAll" />
+        <intercept-url pattern="/validateCode*" access="permitAll" />
+        <intercept-url pattern="/disableUser*" access="permitAll" />
         <logout invalidate-session="true" delete-cookies="JSESSIONID" logout-success-url="/login"></logout>
         <form-login 
             default-target-url="/"

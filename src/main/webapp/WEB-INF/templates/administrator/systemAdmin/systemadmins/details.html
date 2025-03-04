@@ -1,15 +1,111 @@
-<!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit this template
--->
-<html>
-    <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div>TODO write content</div>
-    </body>
-</html>
+<div class="modal-header">
+    <div class="col-md-12">
+        <div class="col-md-6" style="padding-left:0px;">
+            <h3 class="panel-title" style="margin-top:15px;margin-bottom:10px">System Administrator Details <span th:if="${success != ''}" th:text="${success}"></span></h3>
+        </div>
+        <div class="col-md-6" style="padding-right:0px;">
+            <button class="btn btn-success btn-sm pull-right" data-bs-dismiss="modal" title="Close Window" style="margin-top:10px;margin-bottom:10px">Close Window</button>
+        </div>
+    </div>
+</div>
+<div class="modal-body" style="max-height:800px; overflow: auto">
+    <form id="userdetailsform" th:action="${'/administrator/sysadmin/adminInfo'}" th:object="${userdetails}" method="post" role="form">
+        <input type="hidden" id="id" th:field="*{id}"/>
+        <input type="hidden" id="orgId" th:field="*{orgId}"/>
+        <input type="hidden" th:field="*{dateCreated}"/>
+        <div class="form-container">
+            <div class="row col-lg-12">
+                <div class="col-lg-6">
+                    <div class="form-group" th:classappend="${#fields.hasErrors('status') ? 'has-error' : ''}">
+                        <label class="control-label" for="status">Status *</label>
+                        <select th:field="*{status}" class="form-control" id="status">
+                            <option value="1">Active</option>
+                            <option value="0">Inactive</option> 
+                        </select>
+                        <span class="control-label" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></span>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group" th:classappend="${#fields.hasErrors('roleId') ? 'has-error' : ''}">
+                        <label class="control-label" for="roleId">Role *</label>
+                        <select th:field="*{roleId}" class="form-control" id="roleId">
+                            <option value="1">System Administrator</option>
+                            <option value="3">Operations Staff</option> 
+                        </select>
+                        <span class="control-label" th:if="${#fields.hasErrors('roleId')}" th:errors="*{roleId}"></span>
+                    </div>
+                </div>     
+            </div>   
+            <div class="row col-lg-12">
+                <div class="col-lg-6">
+                    <div id="firstNameDiv" class="form-group" th:classappend="${#fields.hasErrors('firstName') ? 'has-error' : ''}">
+                        <label class="control-label" for="firstName">First Name *</label>
+                        <input th:field="*{firstName}" id="firstName" class="form-control" type="text" maxLength="55" />
+                        <span class="control-label" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
+                        <span id="firstNameMsg" class="control-label"></span>
+                    </div>
+                     <div id="emailDiv" class="form-group" th:classappend="${#fields.hasErrors('email') ? 'has-error' : ''}">
+                        <label class="control-label" for="email">Email *</label>
+                        <input th:field="*{email}" id="email" class="form-control" type="text" maxLength="255" />
+                        <span class="control-label" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                        <span id="emailMsg" class="control-label"></span>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div id="lastNameDiv" class="form-group" th:classappend="${#fields.hasErrors('lastName') ? 'has-error' : ''}">
+                        <label class="control-label" for="lastName">Last Name *</label>
+                        <input th:field="*{lastName}" id="lastName" class="form-control" type="text" maxLength="55" />
+                        <span class="control-label" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
+                        <span id="lastNameMsg" class="control-label"></span>
+                    </div>
+                    <div id="usernameDiv" class="form-group" th:classappend="${#fields.hasErrors('username') ? 'has-error' : ''}">
+                        <label class="control-label" for="username">Username *</label>
+                        <input th:field="*{username}" id="username" class="form-control" type="text" maxLength="25" />
+                        <span class="control-label" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></span>
+                        <span id="usernameMsg" class="control-label"></span>
+                    </div>
+               </div>
+            </div> 
+            <div class="row col-lg-12" th:if="${userdetails.id > 0}">
+                <input type="hidden" th:field="*{password}"/>
+                <input type="hidden" th:field="*{randomSalt}"/>
+                <input type="hidden" th:field="*{encryptedPw}"/>
+                <div class="col-lg-6">
+                    <div id="newPasswordDiv" class="form-group">
+                        <label class="control-label" for="newPassword">New Password *<br/><i>Leave blank if not updating</i></label>
+                        <input name="newPassword" id="newPassword" class="form-control" type="password" maxLength="15" />
+                        <span class="control-label"></span>
+                    </div> 
+                </div> 
+                <div class="col-lg-6">
+                    <div id="confirmPasswordDiv" class="form-group">
+                        <label class="control-label" for="confirmPassword">Confirm New Password *<br/><i>Leave blank if not updating</i></label>
+                        <input name="confirmPassword" id="confirmPassword" class="form-control" type="password" maxLength="15" />
+                        <span id="confimPasswordMsg" class="control-label"></span>
+                    </div> 
+                </div>  
+            </div>   
+            <div class="row col-lg-12" th:unless="${userdetails.id > 0}">  
+                <div class="col-lg-6">
+                    <div id="newPasswordDiv" class="form-group">
+                        <label class="control-label" for="newPassword">New Password *</label>
+                        <input name="newPassword" id="newPassword" class="form-control" type="password" maxLength="15" />
+                        <span class="control-label"></span>
+                    </div> 
+                </div> 
+                <div class="col-lg-6">
+                    <div id="confirmPasswordDiv" class="form-group">
+                        <label class="control-label" for="confirmPassword">Confirm New Password *</label>
+                        <input name="confirmPassword" id="confirmPassword" class="form-control" type="password" maxLength="15" />
+                        <span id="confimPasswordMsg" class="control-label"></span>
+                    </div> 
+                </div>
+            </div>
+        </div>
+    </form:form>
+</div>
+<div class="modal-footer" style="background-color: #cccccc">
+    <div class="form-group">
+        <input type="button" id="submitButton" th:rel="${btnValue}" class="btn btn-primary" th:value="${btnValue}"/>
+    </div>
+</div>

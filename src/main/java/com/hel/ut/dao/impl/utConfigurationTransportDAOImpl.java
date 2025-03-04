@@ -530,61 +530,6 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
         return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    @SuppressWarnings("unchecked")
-    public List<configurationTransport> getDistinctConfigTransportForOrg(Integer orgId, Integer transportMethodId) {
-        try {
-            String sql = ("select distinct delimChar, errorHandling, autoRelease, fileLocation, fileType, containsHeaderRow, "
-	    + " transportMethodId, encodingId from configurationTransportDetails, ref_delimiters , configurationMessageSpecs "
-	    + " where ref_delimiters.id = configurationTransportDetails.fileDelimiter "
-	    + " and configurationMessageSpecs.configId = configurationTransportDetails.configId "
-	    + " and transportMethodId = :transportMethodId and configurationTransportDetails.configId in "
-	    + "(select id from configurations where orgId = :orgId and type = 1);");
-	    
-            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
-            .setParameter("orgId", orgId)
-            .setParameter("transportMethodId", transportMethodId);
-
-            List<configurationTransport> configurationTransports = query.list();
-
-            return configurationTransports;
-
-        } catch (Exception ex) {
-            System.err.println("getDistinctConfigTransportForOrg " + ex.getCause());
-            ex.printStackTrace();
-
-            return null;
-        }
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    @SuppressWarnings("unchecked")
-    public List<configurationMessageSpecs> getConfigurationMessageSpecsForUserTransport(Integer userId, Integer transportMethodId, boolean getZeroMessageTypeCol) {
-        try {
-
-            String sql = ("select * from configurationMessageSpecs where configId in (select configId from configurationTransportDetails where configId in "
-                    + "(select sourceconfigId from configurationconnectionsenders, configurationconnections where configurationconnectionsenders.connectionId = configurationconnections.id"
-                    + " and userId  = :userId) and transportmethodId = :transportMethodId)");
-            if (!getZeroMessageTypeCol) {
-                sql = sql + " and messageTypeCol != 0";
-            }
-            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationMessageSpecs.class)
-            .setParameter("userId", userId)
-            .setParameter("transportMethodId", transportMethodId);
-
-            List<configurationMessageSpecs> configurationMessageSpecs = query.list();
-
-            return configurationMessageSpecs;
-
-        } catch (Exception ex) {
-            System.err.println("getConfigurationMessageSpecsForUserTransport  " + ex.getCause());
-	    
-            return null;
-        }
-    }
-
     /**
      * The 'getConfigurationFieldsByFieldNo' function will return a list of form fields for the selected configuration and selected Field No
      *
@@ -616,8 +561,7 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Override
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
-    public List<configurationMessageSpecs> getConfigurationMessageSpecsForOrgTransport(
-            Integer orgId, Integer transportMethodId, boolean getZeroMessageTypeCol) {
+    public List<configurationMessageSpecs> getConfigurationMessageSpecsForOrgTransport(Integer orgId, Integer transportMethodId, boolean getZeroMessageTypeCol) {
         try {
 
             String sql = ("select * "

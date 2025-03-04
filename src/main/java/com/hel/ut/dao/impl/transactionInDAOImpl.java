@@ -40,6 +40,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.query.MutationQuery;
 import org.hibernate.query.SelectionQuery;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  *
@@ -50,6 +51,9 @@ public class transactionInDAOImpl implements transactionInDAO {
 
     @Autowired
     private SessionFactory sessionFactory;
+    
+    @Value("${eahUT}")
+    private String eahUT;
 
     @Autowired
     private userManager usermanager;
@@ -723,11 +727,7 @@ public class transactionInDAOImpl implements transactionInDAO {
             .setParameter("statusId", statusId)
             .setParameter("id", batchUploadId);
             
-	    try {
-		updateData.executeUpdate();
-	    } catch (Exception ex) {
-		System.err.println("updateBatchStatus " + ex.getCause());
-	    }
+	    updateData.executeUpdate();
 	}
 	else if(statusId == 0 && "endDateTime".equals(timeField)) {
 	    String sql = "update batchUploads set endDateTime = CURRENT_TIMESTAMP";
@@ -735,11 +735,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 
 	    Query updateData = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class).setParameter("id", batchUploadId);
             
-	    try {
-		updateData.executeUpdate();
-	    } catch (Exception ex) {
-		System.err.println("updateBatchStatus " + ex.getCause());
-	    }
+	    updateData.executeUpdate();
 	}
     }
 
@@ -817,7 +813,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    insertData.executeUpdate();
 	    
 	    sql = "select count(id) as total from transactioninerrors_" + batchUploadId + " where errorId = 1 and fieldNo = " + cff.getFieldNo();
-	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class).addScalar("total", StandardBasicTypes.INTEGER);
+	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, Integer.class);
 	    
 	    return (Integer) query.list().get(0);
 	    
@@ -1182,22 +1178,17 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Override
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
-    public List<configurationTransport> getHandlingDetailsByBatch(int batchId) throws Exception {
+    public List<configurationTransport> getHandlingDetailsByBatch(int configId) throws Exception {
         
-	try {
-	    String sql = ("select distinct clearRecords, autoRelease, errorHandling, errorEmailAddresses, fileDelimiter "
-	    + " from configurationtransportdetails where configId in "
-	    + "(select distinct configId from batchUploads where id = "+batchId+");");
-	    
-	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class);
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<configurationTransport> criteria = builder.createQuery(configurationTransport.class);
+        Root<configurationTransport> root = criteria.from(configurationTransport.class);
 
-	    List<configurationTransport> ct = query.list();
-	    return ct;
-	} 
-        catch (Exception ex) {
-	    System.err.println("getHandlingDetailsByBatch " + ex.getCause());
-	    return null;
-	}
+        Predicate whereClause = builder.equal(root.get("configId"), configId);
+
+        criteria.where(whereClause);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
     }
 
     @Override
@@ -1634,22 +1625,14 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Override
     @Transactional(readOnly = false)
     public Integer insertSFTPRun(MoveFilesLog sftpJob) {
-	try {
-            sessionFactory.getCurrentSession().persist(sftpJob);
-            return sftpJob.getId();
-	} 
-        catch (Exception ex) {
-	    return null;
-	}
+	sessionFactory.getCurrentSession().persist(sftpJob);
+        return sftpJob.getId();
     }
 
     @Override
     @Transactional(readOnly = false)
     public void updateSFTPRun(MoveFilesLog sftpJob) {
-	try {
-	    sessionFactory.getCurrentSession().merge(sftpJob);
-	} catch (Exception ex) {
-	}
+	sessionFactory.getCurrentSession().merge(sftpJob);
     }
 
     @Override
@@ -1688,7 +1671,7 @@ public class transactionInDAOImpl implements transactionInDAO {
             + " and configId in (select id from configurations where status = 1 and type = 1) and  "
             + " directory not in (select folderPath from moveFilesLog where statusId = 1 and method = :method) "
             + " group by directory order by configId;");
-
+            
 	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationFileDropFields.class)
             .setParameter("method", method);
 
@@ -2900,35 +2883,12 @@ public class transactionInDAOImpl implements transactionInDAO {
 	String sql = "select distinct targetconfigId from configurationconnections "
 	+ " where status = true and sourceConfigId = :configId order by id asc";
 	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class).setParameter("configId", configId);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
+        .setParameter("configId", configId);
 
 	List<Integer> configIds = query.list();
 	return configIds;
     }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    @Transactional(readOnly = true)
-    public Integer checkClearAfterDeliveryBatch(int batchUploadId) throws Exception {
-	
-	String sql = "select case when dlbatchIds = dlbatches then 1 else 0 end as doneDLBatch from ("
-	+ "select group_concat(distinct batchDLId order by batchDLId) as dlbatchIds from batchclearafterdelivery "
-	+ "where batchUploadId = :batchUploadId) bcad "
-	+ "inner join (select group_concat(distinct Id order by Id) as dlbatches from batchdownloads "
-	+ "where statusId = 28 and batchUploadId = :batchUploadId) batches ";
-	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
-        .addScalar("doneDLBatch", StandardBasicTypes.INTEGER)
-        .setParameter("batchUploadId", batchUploadId);
-
-	List<Integer> bcad = query.list();
-	if (bcad.size() == 0) {
-	    return 0;
-	} else {
-	    return bcad.get(0);
-	}
-    }
-
 
     @Override
     @Transactional
@@ -2956,10 +2916,14 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Override
     @Transactional
     public Integer getLoadTransactionCount(String loadTableName) throws Exception {
-	String sql = "select count(id) as rowCount from " + loadTableName + ";";
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class).addScalar("rowCount", StandardBasicTypes.INTEGER);
+	
+        String sql = "select count(id) as rowCount from " + loadTableName + ";";
+	
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, Integer.class);
+        
 	Integer rowCount = (Integer) query.list().get(0);
-	return rowCount;
+	
+        return rowCount;
     }
 
     @Override
@@ -2990,8 +2954,8 @@ public class transactionInDAOImpl implements transactionInDAO {
 		+ "where (statusId is null or statusId not in (:transRELId));";
 	  
 	    Query updateData = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
-		.setParameter("statusId", statusId)
-		.setParameterList("transRELId", transRELId);
+            .setParameter("statusId", statusId)
+            .setParameterList("transRELId", transRELId);
 
 	    updateData.executeUpdate();
 
@@ -3085,7 +3049,6 @@ public class transactionInDAOImpl implements transactionInDAO {
 	
 	deleteQuery = sessionFactory.getCurrentSession().createNativeQuery(deleteSQL, String.class);
 	deleteQuery.executeUpdate();
-
     }
  
     @Override
@@ -3094,7 +3057,7 @@ public class transactionInDAOImpl implements transactionInDAO {
 	
         String sql = "select count(id) as total from " + tableName + " where " + colName + " = :matchId limit 1";
         
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class).addScalar("total", StandardBasicTypes.INTEGER)
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, Integer.class)
 	.setParameter("matchId", matchId);
         
 	return (Integer) query.list().get(0);
@@ -3107,7 +3070,6 @@ public class transactionInDAOImpl implements transactionInDAO {
      *
      * @table batchUploads
      *
-     * @return This function returns the batchId for the newly inserted batch
      */
     @Override
     @Transactional(readOnly = false)
@@ -3315,9 +3277,7 @@ public class transactionInDAOImpl implements transactionInDAO {
         + "group by a.batchUploadId ) as batchesToClear "
         + "where totalBatchDownloads = totalDelivered";
 	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,batchDownloads.class)
-        .addScalar("batchUploadId", StandardBasicTypes.INTEGER)
-        .addScalar("totalBatchDownloads", StandardBasicTypes.INTEGER);
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,batchDownloads.class);
 	
 	return query.list();
     }
@@ -3358,23 +3318,24 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<configurationConnection> getPassThruBatchTargets(Integer batchId, boolean active) {
-	try {
-	    String sql = ("select sourceConfigId, targetConfigId, configurationconnections.id "
-		+ "from configurations, configurationconnections "
-		+ "where sourceconfigId in (select configId from batchUploads where id = :batchId) "
-		+ "and targetConfigId = configurations.id");
+	
+        try {
+	    String sql = "select * "
+            + "from configurationconnections "
+            + "where sourceconfigId in (select configId from batchUploads where id = :batchId) ";
 	    
 	    if (active) {
-		sql = sql + " and configurations.status = 1 and configurationconnections.status = 1";
+		sql = sql + "and status = 1 ";
 	    }
-	    sql = sql + " order by sourceConfigId;";
+	    sql = sql + "order by sourceConfigId";
 	    
 	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationConnection.class)
 	    .setParameter("batchId", batchId);
 
-	    List<configurationConnection> cc = query.list();
+	    List<configurationConnection> cc = query.getResultList();
 	    return cc;
-	} catch (Exception ex) {
+	} 
+        catch (Exception ex) {
 	    System.err.println("getBatchTargets " + ex.getCause());
 	    return null;
 	}
@@ -4513,12 +4474,18 @@ public class transactionInDAOImpl implements transactionInDAO {
     @Override
     @Transactional(readOnly = true) 
     public List<String> findTransacionTablesToCleanUp() throws Exception {
+        
+        String schemaName = "universaltranslator";
+        
+        if(eahUT.equals("true")) {
+            schemaName = "universaltranslatorca";
+        }
 	
 	String sql = "SELECT table_name FROM INFORMATION_SCHEMA.TABLES " 
-        +"where table_name like 'transaction%' and table_schema = 'universaltranslator' " 
+        +"where table_name like 'transaction%' and table_schema = '"+schemaName+"' " 
         +"and create_time > DATE_ADD(create_time, INTERVAL -3 DAY) " 
         +"order by create_time desc, table_schema, table_name desc;";
-	
+        
 	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class);
 	
 	return query.list();

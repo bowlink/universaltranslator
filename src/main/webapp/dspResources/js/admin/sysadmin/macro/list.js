@@ -21,8 +21,7 @@ jQuery(function ($) {
             },
            "aoColumns" : [
                 { "sWidth": "25%" },
-                { "sWidth": "20%" },
-                { "sWidth": "20%" },
+                { "sWidth": "30%" },
                 { "sWidth": "30%" },
                 { "sWidth": "5%" },
             ]

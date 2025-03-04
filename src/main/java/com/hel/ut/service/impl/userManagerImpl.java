@@ -192,11 +192,6 @@ public class userManagerImpl implements userManager {
     }
 
     @Override
-    public List<utUser> getUsersByStatuRolesAndOrg(boolean status, List<Integer> rolesToExclude, List<Integer> orgs, boolean include) throws Exception {
-        return userDAO.getUsersByStatuRolesAndOrg(status, rolesToExclude, orgs, include);
-    }
-
-    @Override
     public List<Integer> getUserAllowedTargets(int userId, List<configurationConnectionSenders> connections) throws Exception {
         return userDAO.getUserAllowedTargets(userId, connections);
     }

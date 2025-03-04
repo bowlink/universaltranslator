@@ -288,30 +288,6 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     }
 
     /**
-     * The 'getTotalConnections' function will return the total number of active connections set up for a utConfiguration.
-     *
-     * @Table configurationCrosswalks
-     *
-     * @param	configId The id of the utConfiguration to find connections for.
-     *
-     * @return	The total number of active connections set up for a configurations
-     *
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public Long getTotalConnections(int configId) {
-
-        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT count(id) FROM configurationConnections where deleted = 0 and configId = :configId and status = 1")
-                .setParameter("configId", configId);
-
-        BigInteger totalCount = (BigInteger) query.uniqueResult();
-
-        Long totalConnections = totalCount.longValue();
-
-        return totalConnections;
-    }
-
-    /**
      * The 'updateCompletedSteps' function will update the steps completed for a passe in configurations. This column will be used to determine when you can activate a utConfiguration and when you can access certain steps in the utConfiguration creation process.
      *
      * @param	configId	This will hold the id of the utConfiguration to update stepCompleted	This will hold the completed step number
@@ -1178,27 +1154,6 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         sessionFactory.getCurrentSession().persist(newcomponent);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public String getMessageTypeNameByConfigId(Integer configId) {
-        try {
-            String mtName = "N/A";
-	    String configSQL = ("select configName from configurations where id = :configId");
-            
-	    Query configQuery = sessionFactory.getCurrentSession().createNativeQuery(configSQL, String.class)
-            .addScalar("configName", StandardBasicTypes.STRING)
-	    .setParameter("configId", configId);
-
-	    mtName = (String) configQuery.list().get(0);
-	   
-            return mtName;
-        } catch (Exception ex) {
-            System.err.println("getMessageTypeNameByConfigId " + ex.getCause());
-            ex.printStackTrace();
-            return null;
-        }
-    }
-
     /**
      * The 'getEncodings' function will return a list of available encodings
      *
@@ -1212,7 +1167,8 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
             .addScalar("id", StandardBasicTypes.INTEGER)
             .addScalar("encoding", StandardBasicTypes.STRING);   
             return query.list();
-        } catch (Exception ex) {
+        } 
+        catch (Exception ex) {
             ex.printStackTrace();
             System.err.println("getEncodings - " + ex.getCause());
             return null;
@@ -2053,139 +2009,6 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     }
     
     /**
-     * The 'getFieldCrosswalkIdByFieldName' function will return the fieldId by the configId passed and a field name
-     *
-     * @param id The fileTypeId
-     *
-     * @table ref_fileTypes
-     *
-     * @return This function will return the file type
-     */
-    @SuppressWarnings("rawtypes")
-    @Override
-    @Transactional(readOnly = false)
-    public Integer getFieldCrosswalkIdByFieldName(int configId, String fieldName) {
-        Query query = sessionFactory.getCurrentSession().createNativeQuery("SELECT crosswalkId from configurationdatatranslations where fieldId in (select id FROM configurationformfields where configId = :configId and fieldDesc = :fieldName)", String.class)
-        .setParameter("configId", configId)
-        .setParameter("fieldName", fieldName);
-        
-        Integer crosswalkId = 0;
-        
-        if(query.list() != null && query.list().size() > 0) {
-            crosswalkId = (Integer) query.list().get(0);
-        } 
-
-        return crosswalkId;
-    }  
-    
-    /**
-     * The 'getActiveConfigurationsByTransportType' function will return a list of configurations set up the passed in userId and passed in transport method
-     *
-     * @param userId The id of the logged in user
-     * @param transportMethods
-     *
-     * @return This function will return a list of ERG configurations.
-     * @throws java.lang.Exception
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public List<utConfiguration> getActiveConfigurationsByTransportType(int userId, List<Integer> transportMethods) throws Exception {
-        
-        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
-        CriteriaQuery<configurationConnectionSenders> criteria = builder.createQuery(configurationConnectionSenders.class);
-        Root<configurationConnectionSenders> root = criteria.from(configurationConnectionSenders.class);
-
-        Predicate whereClause = builder.equal(root.get("userId"), userId);
-
-        criteria.where(whereClause);
-        
-        /* Find all SENDER connections for the passed in user */
-        List<configurationConnectionSenders> senderConnections = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
-
-        /* 
-         Create an emtpy array that will hold the list of configurations associated to the
-         found connections.
-         */
-        List<Integer> senderConfigList = new ArrayList<>();
-
-        if (senderConnections.isEmpty()) {
-            senderConfigList.add(0);
-        } 
-        else {
-            
-            CriteriaQuery<configurationConnection> connectionCriteria = builder.createQuery(configurationConnection.class);
-            Root<configurationConnection> connectionRoot = connectionCriteria.from(configurationConnection.class);
-            
-            configurationConnection connectionDetails = null;
-            
-            // Search the connections by connectionId to pull the sourceConfigId
-            for (configurationConnectionSenders connection : senderConnections) {
-                
-                whereClause = builder.equal(connectionRoot.get("id"), connection.getConnectionId());
-                
-                connectionCriteria.where(whereClause);
-                
-                connectionDetails = (configurationConnection) sessionFactory.getCurrentSession().createQuery(connectionCriteria).uniqueResult();
-                
-                if(connectionDetails != null) {
-                    // Add the sourceConfigId to the array
-                    senderConfigList.add(connectionDetails.getSourceConfigId());
-                }
-                
-                connectionDetails = null;
-            }
-        }
-
-        /* 
-         Query to get a list of all ERG configurations that the logged in
-         user is authorized to create
-         */
-        List<Integer> ergConfigList = new ArrayList<>();
-        
-        CriteriaQuery<configurationTransport> transportCriteria = builder.createQuery(configurationTransport.class);
-        Root<configurationTransport> transportRoot = transportCriteria.from(configurationTransport.class);
-        
-        Predicate[] predicates = new Predicate[2];
-        predicates[0] = transportRoot.get("transportMethodId").in(transportMethods);
-        predicates[1] = transportRoot.get("configId").in(senderConfigList);
-
-        whereClause = builder.and(predicates);
-        
-        transportCriteria.where(whereClause);
-        
-        List<configurationTransport> ergConfigs = sessionFactory.getCurrentSession().createQuery(transportCriteria).getResultList();
-        
-        if(!ergConfigs.isEmpty()) {
-            for (configurationTransport config : ergConfigs) {
-                ergConfigList.add(config.getConfigId());
-            }
-        }
-
-        if (ergConfigList.isEmpty()) {
-            ergConfigList.add(0);
-        }
-
-        /*
-         Finally query the utConfiguration table to get all configurations in the authorized list
-         of utConfiguration Ids.
-         */
-        CriteriaQuery<utConfiguration> configCriteria = builder.createQuery(utConfiguration.class);
-        Root<utConfiguration> configRoot = configCriteria.from(utConfiguration.class);
-        
-        predicates = new Predicate[4];
-        predicates[0] = builder.equal(root.get("status"), true);
-        predicates[1] = builder.equal(root.get("deleted"), false);
-        predicates[2] = builder.equal(root.get("sourceType"), 1);
-        predicates[3] = root.get("id").in(ergConfigList);
-
-        whereClause = builder.and(predicates);
-        
-        configCriteria.where(whereClause);
-        
-        return sessionFactory.getCurrentSession().createQuery(configCriteria).getResultList();
-    }
-    
-    /**
      * The 'getZipTypes' function will return a list of available zip types
      *
      */
@@ -2252,17 +2075,51 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     public List<watchlist> getDashboardWatchList() throws Exception {
 	
-	String sql = "select a.entryMessage, a.id, b.orgName, c.configName, e.transportMethod, a.expected, a.expectFirstFile, a.expectFirstFileTime "
+	String sql = "select a.id, a.orgId, a.configId, a.expected, a.expectFirstFile, a.dateCreated, a.expectFirstFileTime, a.nextInsertDate, a.entryMessage,"
+        + "b.orgName, c.configName, e.transportMethod "
         + "from dashboardwatchlist a left outer join "
         + "organizations b on a.orgId = b.id left outer join "
         + "configurations c on a.configId = c.id left outer join " 
         + "configurationtransportdetails d on a.configId = d.configId left outer join " 
         + "ref_transportmethods e on d.transportMethodId = e.id "
         + "order by a.dateCreated desc";
+        
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,watchlist.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("orgId", StandardBasicTypes.INTEGER)    
+        .addScalar("configId", StandardBasicTypes.INTEGER) 
+        .addScalar("expected", StandardBasicTypes.STRING)              
+        .addScalar("expectFirstFile", StandardBasicTypes.STRING)      
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)     
+        .addScalar("expectFirstFileTime", StandardBasicTypes.STRING)     
+        .addScalar("nextInsertDate", StandardBasicTypes.TIMESTAMP)   
+        .addScalar("orgName", StandardBasicTypes.STRING)                
+        .addScalar("entryMessage", StandardBasicTypes.STRING)        
+        .addScalar("configName", StandardBasicTypes.STRING)
+        .addScalar("transportMethod", StandardBasicTypes.STRING);
+        
+        List<Object[]> results = query.getResultList();
+        
+        List<watchlist> watchListEntries = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            watchlist watchListEntry = new watchlist();
+            watchListEntry.setId((Integer) record[1]);
+            watchListEntry.setOrgId((Integer) record[2]);
+            watchListEntry.setConfigId((Integer) record[3]);
+            watchListEntry.setExpected((String) record[4]);
+            watchListEntry.setExpectFirstFile((String) record[5]);
+            watchListEntry.setDateCreated((Date) record[6]);
+            watchListEntry.setExpectFirstFileTime((String) record[7]);
+            watchListEntry.setNextInsertDate((Date) record[8]);
+            watchListEntry.setOrgName((String) record[9]);
+            watchListEntry.setEntryMessage((String) record[10]);
+            watchListEntry.setConfigName((String) record[11]);
+            watchListEntry.setTransportMethod((String) record[12]);
+            watchListEntries.add(watchListEntry);
+        });
 	
-        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,watchlist.class);
-
-        return query.list();
+	return watchListEntries;
     }
     
     @Override
@@ -2311,7 +2168,10 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
     @Transactional(readOnly = true)
     public List<watchlist> getDashboardWatchListToInsert() throws Exception {
 	
-	String sql = "SELECT a.*, IFNULL(c.messageTypeId, 0) as messageTypeId FROM dashboardwatchlist a left outer join configurations c on c.id = a.configId where nextInsertDate <= now();";
+	String sql = "SELECT a.*, IFNULL(c.messageTypeId, 0) as messageTypeId "
+        + "FROM dashboardwatchlist a left outer join "
+        + "configurations c on c.id = a.configId "
+        + "where nextInsertDate <= now();";
 	
 	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,watchlist.class)
         .addScalar("id", StandardBasicTypes.INTEGER)
@@ -2319,14 +2179,32 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
         .addScalar("configId", StandardBasicTypes.INTEGER)
         .addScalar("expected", StandardBasicTypes.STRING)
         .addScalar("expectFirstFile", StandardBasicTypes.STRING)
-        .addScalar("dateCreated", StandardBasicTypes.DATE)
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
         .addScalar("expectFirstFileTime", StandardBasicTypes.STRING)
         .addScalar("nextInsertDate", StandardBasicTypes.DATE)
         .addScalar("entryMessage", StandardBasicTypes.STRING)
         .addScalar("messageTypeId", StandardBasicTypes.INTEGER);
+        
+        List<Object[]> results = query.getResultList();
+        
+        List<watchlist> watchlist = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            watchlist watchlistEntry = new watchlist();
+            watchlistEntry.setId((Integer) record[1]);
+            watchlistEntry.setOrgId((Integer) record[2]);
+            watchlistEntry.setConfigId((Integer) record[3]);
+            watchlistEntry.setExpected((String) record[4]);
+            watchlistEntry.setExpectFirstFile((String) record[5]);
+            watchlistEntry.setDateCreated((Date) record[6]);
+            watchlistEntry.setExpectFirstFileTime((String) record[7]);
+            watchlistEntry.setNextInsertDate((Date) record[8]);
+            watchlistEntry.setEntryMessage((String) record[9]);
+            watchlistEntry.setMessageTypeId((Integer) record[10]);
+            watchlist.add(watchlistEntry);
+        });
 
-        return query.list();
-	
+        return watchlist;
     }
     
     /**
@@ -2362,16 +2240,47 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 	
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	
-	String sql = "select a.*, b.transportMethodId, c.configName, o.orgName, e.transportMethod from dashboardwatchlistentries a "
+	String sql = "select a.*, b.transportMethodId, c.configName, o.orgName, e.transportMethod "
+        + "from dashboardwatchlistentries a "
         + "inner join configurationtransportdetails b on b.configId = a.configId "
         + "inner join configurations c on c.id = a.configId "
         + "inner join organizations o on o.id = c.orgId "
         + "inner join ref_transportmethods e on e.id = b.transportMethodId "
         + "where a.dateCreated >= '" + sdf.format(fromDate) + " 00:00:00' and a.dateCreated < '" + sdf.format(toDate) + " 23:59:59' order by dateCreated desc";
 	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,watchlistEntry.class);
-
-	return query.list();
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,watchlistEntry.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("watchlistentryId", StandardBasicTypes.INTEGER)
+        .addScalar("orgId", StandardBasicTypes.INTEGER)
+        .addScalar("configId", StandardBasicTypes.INTEGER)
+        .addScalar("messageTypeId", StandardBasicTypes.INTEGER)
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
+        .addScalar("watchListCompleted", StandardBasicTypes.BOOLEAN)
+        .addScalar("transportMethodId", StandardBasicTypes.INTEGER)        
+        .addScalar("configName", StandardBasicTypes.STRING)
+        .addScalar("orgName", StandardBasicTypes.STRING)
+        .addScalar("transportMethod", StandardBasicTypes.STRING);   
+        
+        List<Object[]> results = query.getResultList();
+        
+        List<watchlistEntry> watchlistEntries = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            watchlistEntry watchlist = new watchlistEntry();
+            watchlist.setId((Integer) record[1]);
+            watchlist.setOrgId((Integer) record[2]);
+            watchlist.setConfigId((Integer) record[3]);
+            watchlist.setMessageTypeId((Integer) record[4]);
+            watchlist.setDateCreated((Date) record[6]);
+            watchlist.setWatchListCompleted((Boolean) record[7]);
+            watchlist.setTransportMethodId((Integer) record[8]);
+            watchlist.setConfigName((String) record[9]);
+            watchlist.setOrgName((String) record[10]);
+            watchlist.setTransportMethod((String) record[11]);
+            watchlistEntries.add(watchlist);
+        });
+        
+        return watchlistEntries;
     }
     
     @Override
@@ -2400,12 +2309,41 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 	
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	
-	String sql = "select a.*, b.entryMessage from dashboardwatchlistentries a inner join dashboardwatchlist b on a.watchlistentryId = b.id "
-		+ "where a.orgId = 0 and a.configId = 0 and ((a.watchListCompleted = 0) or (a.dateCreated >= '" + sdf.format(fromDate) + " 00:00:00' and a.dateCreated < '" + sdf.format(toDate) + " 23:59:59')) order by dateCreated desc";
-	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,watchlistEntry.class);
-
-	return query.list();
+	String sql = "select a.*, b.entryMessage "
+        + "from dashboardwatchlistentries a inner join "
+        + "dashboardwatchlist b on a.watchlistentryId = b.id "
+        + "where a.orgId = 0 "
+        + "and a.configId = 0 "
+        + "and ((a.watchListCompleted = 0) or (a.dateCreated >= '" + sdf.format(fromDate) + " 00:00:00' and a.dateCreated < '" + sdf.format(toDate) + " 23:59:59')) "
+        + "order by dateCreated desc";
+        
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,watchlistEntry.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("watchlistentryId", StandardBasicTypes.INTEGER)
+        .addScalar("orgId", StandardBasicTypes.INTEGER)
+        .addScalar("configId", StandardBasicTypes.INTEGER)
+        .addScalar("messageTypeId", StandardBasicTypes.INTEGER)
+        .addScalar("dateCreated", StandardBasicTypes.DATE)
+        .addScalar("watchListCompleted", StandardBasicTypes.BOOLEAN)
+        .addScalar("entryMessage", StandardBasicTypes.STRING);
+        
+        List<Object[]> results = query.getResultList();
+        
+        List<watchlistEntry> watchlistEntries = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            watchlistEntry watchlist = new watchlistEntry();
+            watchlist.setId((Integer) record[1]);
+            watchlist.setOrgId((Integer) record[2]);
+            watchlist.setConfigId((Integer) record[3]);
+            watchlist.setMessageTypeId((Integer) record[4]);
+            watchlist.setDateCreated((Date) record[6]);
+            watchlist.setWatchListCompleted((Boolean) record[7]);
+            watchlist.setEntryMessage((String) record[8]);
+            watchlistEntries.add(watchlist);
+        });
+        
+        return watchlistEntries;
     }
     
     @Override

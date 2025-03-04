@@ -272,21 +272,10 @@ public class utConfigurationTransportManagerImpl implements utConfigurationTrans
     }
 
     @Override
-    public List<configurationTransport> getDistinctConfigTransportForOrg(Integer orgId, Integer transportMethodId) {
-        return configurationTransportDAO.getDistinctConfigTransportForOrg(orgId, transportMethodId);
-    }
-
-    @Override
-    public List<configurationMessageSpecs> getConfigurationMessageSpecsForUserTransport(Integer userId, Integer transportMethodId, boolean getZeroMessageTypeCol) {
-        return configurationTransportDAO.getConfigurationMessageSpecsForUserTransport(userId, transportMethodId, getZeroMessageTypeCol);
-    }
-
-    @Override
-    public configurationFormFields getCFFByFieldNo(int configId, int fieldNo)
-            throws Exception {
+    public configurationFormFields getCFFByFieldNo(int configId, int fieldNo) throws Exception {
         return configurationTransportDAO.getCFFByFieldNo(configId, fieldNo);
     }
-
+    
     @Override
     public List<configurationMessageSpecs> getConfigurationMessageSpecsForOrgTransport(Integer orgId, Integer transportMethodId, boolean getZeroMessageTypeCol) {
         return configurationTransportDAO.getConfigurationMessageSpecsForOrgTransport(orgId, transportMethodId, getZeroMessageTypeCol);

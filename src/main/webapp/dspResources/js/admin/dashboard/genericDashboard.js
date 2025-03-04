@@ -21,33 +21,11 @@ jQuery(function ($) {
                     'isChecked': this.checked
                 },
                 type: "POST",
-                success: function(data) {}
+                success: function(data) {
+                    window.location.reload();
+                }
             });
 
-        });
-
-        $('#genericdataTable').dataTable({
-            "bAutoWidth": false,
-            "bStateSave": true,
-            "iCookieDuration": 60,
-            "sPaginationType": "bootstrap",
-            "oLanguage": {
-                "sSearch": "_INPUT_",
-                "sLengthMenu": '<select class="form-control" style="width:150px">' +
-                        '<option value="10">10 Records</option>' +
-                        '<option value="20">20 Records</option>' +
-                        '<option value="30">30 Records</option>' +
-                        '<option value="40">40 Records</option>' +
-                        '<option value="50">50 Records</option>' +
-                        '<option value="-1">All</option>' +
-                        '</select>'
-            },
-           "aoColumns" : [
-                { "sWidth": "5%" },
-                { "sWidth": "10%" },
-                { "sWidth": "85%" }
-            ],
-           "aaSorting" : [[1, "desc"]]
         });
     });
 });

@@ -197,13 +197,17 @@ public class userDAOImpl implements userDAO {
     @Override
     @Transactional(readOnly = true)
     public Integer getUserByIdentifier(String identifier) {
-
+        
         String sql = ("select id from users where lower(email) = '" + identifier + "' or lower(username) = '" + identifier + "' or lower(concat(concat(firstName,' '),lastName)) = '" + identifier + "'");
+ 
+        if(identifier.contains("@")) {
+            sql = ("select id from users where lower(email) = '" + identifier + "'");
+        }
 
         Query findUser = sessionFactory.getCurrentSession().createNativeQuery(sql, Integer.class);
 
         if (findUser.list().size() > 1) {
-            return null;
+            return (Integer) findUser.getResultList().get(0);
         } 
         else {
             if (findUser.uniqueResult() == null) {
@@ -259,17 +263,23 @@ public class userDAOImpl implements userDAO {
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public utUserActivity getUAById(Integer uaId) {
-        try {
-            Query query = sessionFactory.getCurrentSession().createNativeQuery("select * from userActivity where id = :uaId",utUserActivity.class)
-            .setParameter("uaId", uaId);
-            List<utUserActivity> uaList = query.list();
-            if (!uaList.isEmpty()) {
-                return uaList.get(0);
-            }
-        } 
-        catch (HibernateException ex) {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<utUserActivity> criteria = builder.createQuery(utUserActivity.class);
+        Root<utUserActivity> root = criteria.from(utUserActivity.class);
+
+        Predicate whereClause = builder.equal(root.get("id"), uaId);
+
+        criteria.where(whereClause);
+        
+        List<utUserActivity> uaList = sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+        
+        if (!uaList.isEmpty()) {
+             return uaList.get(0);
         }
-        return null;
+        else {
+            return null;
+        }
     }
 
     @Override
@@ -410,39 +420,6 @@ public class userDAOImpl implements userDAO {
     @Transactional(readOnly = false)
     public void updateUserOnly(utUser user) throws Exception {
         sessionFactory.getCurrentSession().merge(user);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    @Transactional(readOnly = true)
-    public List<utUser> getUsersByStatuRolesAndOrg(boolean status, List<Integer> rolesToExclude, List<Integer> orgs, boolean include) throws Exception {
-        String sql = ("select users.*, orgName from users, organizations "
-                + " where users.status = :status and users.orgId = organizations.id");
-
-        if (!rolesToExclude.isEmpty()) {
-            sql = sql + " and roleId not in (:rolesToExclude)";
-        }
-        if (!orgs.isEmpty()) {
-            sql = sql + " and orgId ";
-            if (!include) {
-                sql = sql + " not ";
-            }
-            sql = sql + " in (:orgs)";
-        }
-        sql = sql + " order by orgName, username";
-        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
-        .setParameter("status", status);
-        
-        if (!rolesToExclude.isEmpty()) {
-            query.setParameterList("rolesToExclude", rolesToExclude);
-        }
-        if (!orgs.isEmpty()) {
-            query.setParameterList("orgs", orgs);
-        }
-
-        List<utUser> users = query.list();
-
-        return users;
     }
 
     @Override
@@ -633,14 +610,30 @@ public class userDAOImpl implements userDAO {
     @Transactional(readOnly = true)
     public List<utUserLogin> getUserLogins(int userId) {
 
-	String sql = "select dateCreated,IFNULL(TIMESTAMPDIFF(MINUTE,dateCreated,dateLoggedOut),0) as totalTimeLoggedIn " 
-        + "from rel_userlogins where userId = " + userId + " order by dateCreated desc";
+	String sql = "select id, userId, dateCreated, dateLoggedOut, IFNULL(TIMESTAMPDIFF(MINUTE,dateCreated,dateLoggedOut),0) as totalTimeLoggedIn " 
+        + "from rel_userlogins where userId = :userId order by dateCreated desc";
 	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUserLogin.class)
-       .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
-       .addScalar("totalTimeLoggedIn", StandardBasicTypes.INTEGER);
-
-        List<utUserLogin> userLogins = query.list();
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUserLogin.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)        
+        .addScalar("userId", StandardBasicTypes.INTEGER)                
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
+        .addScalar("dateLoggedOut", StandardBasicTypes.TIMESTAMP)        
+        .addScalar("totalTimeLoggedIn", StandardBasicTypes.INTEGER)
+        .setParameter("userId", userId);        
+        
+        List<Object[]> results = query.getResultList();
+        
+        List<utUserLogin> userLogins = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            utUserLogin userLogin = new utUserLogin();
+            userLogin.setId((Integer) record[1]);
+            userLogin.setUserId((Integer) record[2]);
+            userLogin.setDateCreated((Date) record[3]);
+            userLogin.setDateLoggedOut((Date) record[4]);
+            userLogin.setTotalTimeLoggedIn((Integer) record[5]);
+            userLogins.add(userLogin);
+        });
 
         return userLogins;
     }
@@ -680,21 +673,51 @@ public class userDAOImpl implements userDAO {
     @Override
     @Transactional(readOnly = true)
     public List<utUser> getSuccessEmailSendersForConfig(Integer targetConfigId) {
-        try {
-            String sql = ("select * from users where status = 1 and id in (select userId from configurationconnectionreceivers where sendEmailAlert = 1 and connectionId in "
-            + " (select id from configurationconnections "
-            + " where targetConfigId = :targetConfigId)) order by userType;");
+        
+         String sql = "select id, status, orgId, firstName, lastName, username, roleId, mainContact, sendEmailAlert,"
+        + "dateCreated, email, userType, deliverAuthority, editAuthority, createAuthority, cancelAuthority, resetCode, randomSalt, encryptedPw, receiveEmailAlert "
+        + "from users " 
+        + "where status = 1 "
+        + "and id in (select userId from configurationconnectionreceivers where sendEmailAlert = 1 and connectionId in (select id from configurationconnections where targetConfigId = :targetConfigId)) "
+	+ "order by userType";
+        
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("status", StandardBasicTypes.BOOLEAN)                
+        .addScalar("orgId", StandardBasicTypes.INTEGER)        
+        .addScalar("firstName", StandardBasicTypes.STRING)
+        .addScalar("lastName", StandardBasicTypes.STRING)
+        .addScalar("username", StandardBasicTypes.STRING)
+        .addScalar("roleId", StandardBasicTypes.INTEGER)       
+        .addScalar("mainContact", StandardBasicTypes.INTEGER) 
+        .addScalar("sendEmailAlert", StandardBasicTypes.BOOLEAN)            
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
+        .addScalar("email", StandardBasicTypes.STRING)
+        .addScalar("userType", StandardBasicTypes.INTEGER) 
+        .addScalar("deliverAuthority", StandardBasicTypes.BOOLEAN)  
+        .addScalar("editAuthority", StandardBasicTypes.BOOLEAN)  
+        .addScalar("createAuthority", StandardBasicTypes.BOOLEAN)  
+        .addScalar("cancelAuthority", StandardBasicTypes.BOOLEAN)   
+        .addScalar("resetCode", StandardBasicTypes.STRING)     
+        .addScalar("randomSalt", StandardBasicTypes.STRING)         
+        .addScalar("encryptedPw", StandardBasicTypes.STRING)      
+        .addScalar("receiveEmailAlert", StandardBasicTypes.BOOLEAN)            
+        .setParameter("targetConfigId", targetConfigId);         
 
-           Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
-           .setParameter("targetConfigId", targetConfigId);
-                   
-           List<utUser> users = query.list();
-
-           return users;
-
-        } catch (HibernateException ex) {
-            return null;
-        }
+        List<Object[]> results = query.getResultList();
+        
+        List<utUser> userList = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            utUser user = new utUser();
+            user.setId((Integer) record[1]);
+            user.setFirstName((String) record[4]);
+            user.setLastName((String) record[5]);
+            user.setEmail((String) record[11]);
+            userList.add(user);
+        });
+        
+        return userList;
     }
     
     /**
@@ -707,20 +730,50 @@ public class userDAOImpl implements userDAO {
     @Override
     @Transactional(readOnly = true)
     public List<utUser> getSuccessEmailReceiversForConfig(Integer targetConfigId) {
-        try {
-            String sql = ("select * from users where status = 1 and id in (select userId from configurationconnectionsenders where sendEmailAlert = 1 and connectionId in "
-            + " (select id from configurationconnections "
-            + " where targetConfigId = :targetConfigId)) order by userType;");
+        
+        String sql = "select id, status, orgId, firstName, lastName, username, roleId, mainContact, sendEmailAlert,"
+        + "dateCreated, email, userType, deliverAuthority, editAuthority, createAuthority, cancelAuthority, resetCode, randomSalt, encryptedPw, receiveEmailAlert "
+        + "from users " 
+        + "where status = 1 "
+        + "and id in (select userId from configurationconnectionsenders where sendEmailAlert = 1 and connectionId in (select id from configurationconnections where targetConfigId = :targetConfigId)) "
+	+ "order by userType";
+        
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
+        .addScalar("id", StandardBasicTypes.INTEGER)
+        .addScalar("status", StandardBasicTypes.BOOLEAN)                
+        .addScalar("orgId", StandardBasicTypes.INTEGER)        
+        .addScalar("firstName", StandardBasicTypes.STRING)
+        .addScalar("lastName", StandardBasicTypes.STRING)
+        .addScalar("username", StandardBasicTypes.STRING)
+        .addScalar("roleId", StandardBasicTypes.INTEGER)       
+        .addScalar("mainContact", StandardBasicTypes.INTEGER) 
+        .addScalar("sendEmailAlert", StandardBasicTypes.BOOLEAN)            
+        .addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
+        .addScalar("email", StandardBasicTypes.STRING)
+        .addScalar("userType", StandardBasicTypes.INTEGER) 
+        .addScalar("deliverAuthority", StandardBasicTypes.BOOLEAN)  
+        .addScalar("editAuthority", StandardBasicTypes.BOOLEAN)  
+        .addScalar("createAuthority", StandardBasicTypes.BOOLEAN)  
+        .addScalar("cancelAuthority", StandardBasicTypes.BOOLEAN)   
+        .addScalar("resetCode", StandardBasicTypes.STRING)     
+        .addScalar("randomSalt", StandardBasicTypes.STRING)         
+        .addScalar("encryptedPw", StandardBasicTypes.STRING)      
+        .addScalar("receiveEmailAlert", StandardBasicTypes.BOOLEAN)            
+        .setParameter("targetConfigId", targetConfigId);         
 
-           Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,utUser.class)
-           .setParameter("targetConfigId", targetConfigId);
-                   
-           List<utUser> users = query.list();
-
-           return users;
-
-        } catch (HibernateException ex) {
-            return null;
-        }
+        List<Object[]> results = query.getResultList();
+        
+        List<utUser> userList = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            utUser user = new utUser();
+            user.setId((Integer) record[1]);
+            user.setFirstName((String) record[4]);
+            user.setLastName((String) record[5]);
+            user.setEmail((String) record[11]);
+            userList.add(user);
+        });
+        
+        return userList;
     }
 }

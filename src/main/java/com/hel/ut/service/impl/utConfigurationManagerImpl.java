@@ -90,11 +90,6 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
     }
 
     @Override
-    public Long getTotalConnections(int configId) {
-	return utConfigurationDAO.getTotalConnections(configId);
-    }
-
-    @Override
     public void updateCompletedSteps(int configId, int stepCompleted) {
 	utConfigurationDAO.updateCompletedSteps(configId, stepCompleted);
     }
@@ -441,11 +436,6 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 	utConfigurationDAO.saveHL7Component(newcomponent);
     }
 
-    @Override
-    public String getMessageTypeNameByConfigId(Integer configId) {
-	return utConfigurationDAO.getMessageTypeNameByConfigId(configId);
-    }
-
     @SuppressWarnings("rawtypes")
     @Override
     public List getEncodings() {
@@ -490,16 +480,6 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
     @Override
     public void updateExcelConfigDetails(Integer orgId, configurationMessageSpecs messageSpecs) throws Exception {
 	utConfigurationDAO.updateExcelConfigDetails(orgId, messageSpecs);
-    }
-
-    @Override
-    public Integer getFieldCrosswalkIdByFieldName(int configId, String fieldName) throws Exception {
-	return utConfigurationDAO.getFieldCrosswalkIdByFieldName(configId, fieldName);
-    }
-
-    @Override
-    public List<utConfiguration> getActiveConfigurationsByTransportType(int userId, List<Integer> transportMethods) throws Exception {
-	return utConfigurationDAO.getActiveConfigurationsByTransportType(userId, transportMethods);
     }
 
     @SuppressWarnings("rawtypes")
@@ -552,7 +532,7 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
     public void CheckDashboardWatchList() throws Exception {
 	
 	List<watchlist> watchListEntries = utConfigurationDAO.getDashboardWatchListToInsert();
-	
+        
 	if(watchListEntries != null) {
 	    if(!watchListEntries.isEmpty()) {
 		

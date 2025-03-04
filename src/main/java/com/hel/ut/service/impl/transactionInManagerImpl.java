@@ -140,6 +140,7 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -151,6 +152,9 @@ public class transactionInManagerImpl implements transactionInManager {
 
     @Resource(name = "myProps")
     private Properties myProps;
+    
+    @Value("${eahUT}")
+    private String eahUT;
     
     @Autowired
     private transactionInDAO transactionInDAO;
@@ -656,9 +660,9 @@ public class transactionInManagerImpl implements transactionInManager {
     }
 
     @Override
-    public List<configurationTransport> getHandlingDetailsByBatch(int batchId) {
+    public List<configurationTransport> getHandlingDetailsByBatch(int configId) {
 	try {
-	    return transactionInDAO.getHandlingDetailsByBatch(batchId);
+	    return transactionInDAO.getHandlingDetailsByBatch(configId);
 	} catch (Exception e) {
 	    return null;
 	}
@@ -983,7 +987,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			if (sysErrors == 0) {
 			    //we look up org for this path
 			    Integer orgId = configurationtransportmanager.getOrgIdForFTPPath(ftpPath);
-			    sysErrors = sysErrors + moveFilesByPath(sftpHome, ftpPath.getDirectory(), 3, orgId, ftpPath.getTransportId());
+                            sysErrors = sysErrors + moveFilesByPath(sftpHome, ftpPath.getDirectory(), 3, orgId, ftpPath.getTransportId());
 			}
 			if (sysErrors == 0) {
 			    sftpJob.setStatusId(2);
@@ -1022,7 +1026,7 @@ public class transactionInManagerImpl implements transactionInManager {
     public Integer moveFilesByPath(String rootPath, String configDroppedPath, Integer transportMethodId, Integer orgId, Integer transportId) {
 	
 	Integer sysErrors = 0;
-
+        
 	try {
             if(orgId != null) {
 	    
@@ -1037,6 +1041,7 @@ public class transactionInManagerImpl implements transactionInManager {
                 Arrays.sort(listOfFiles, LastModifiedFileComparator.LASTMODIFIED_COMPARATOR);
 
                //too many variables that could come into play regarding file types, will check files with one method
+               
                if(listOfFiles != null) {
 
                     if(listOfFiles.length > 0) {
@@ -1679,12 +1684,12 @@ public class transactionInManagerImpl implements transactionInManager {
 	    //loop through the file drop paths found and check for any files
 	    
 	    String directoryHome = myProps.getProperty("ut.directory.utRootDir");
-	    
+            
 	    if(inputPaths != null) {
 		if(!inputPaths.isEmpty()) {
 		    
 		    for (configurationFileDropFields fileDropInfo : inputPaths) {
-			
+                        
 			sysErrors = 0;
 			
 			//we insert mvoe log entry, so if anything goes wrong or the scheduler overlaps, we won't check the same folder over and over
@@ -1692,10 +1697,11 @@ public class transactionInManagerImpl implements transactionInManager {
 			moveJob.setStatusId(1);
 			moveJob.setFolderPath(fileDropInfo.getDirectory());
 			moveJob.setTransportMethodId(10);
+                        moveJob.setTransportId(fileDropInfo.getTransportId());
 			moveJob.setMethod(1);
 			
 			Integer lastMoveLogEntryId = insertSFTPRun(moveJob);
-
+                        
 			// check if directory exists, if not throw error
 			fileSystem fileSystem = new fileSystem();
 			
@@ -1703,7 +1709,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			String inPath = directoryHome + fileDropInfo.getDirectory();
 			
 			File f = new File(inPath);
-			
+                        
 			if (!f.exists()) {
 			    moveJob.setNotes(("Directory " + directoryHome + fileDropInfo.getDirectory() + " does not exist"));
 			    updateSFTPRun(moveJob);
@@ -1715,12 +1721,11 @@ public class transactionInManagerImpl implements transactionInManager {
 			    
 			    //Find the organization for this transportId 
 			    Integer orgId = configurationtransportmanager.getOrgIdForFileDropPath(fileDropInfo);
-			    
 			    configurationTransport transportDetails = configurationtransportmanager.getTransportDetailsByTransportId(fileDropInfo.getTransportId());
-			    
+                            
 			    sysErrors = sysErrors + moveFilesByPath(directoryHome, fileDropInfo.getDirectory(), transportDetails.getTransportMethodId(), orgId, fileDropInfo.getTransportId());
 
-			    if (sysErrors == 0) {
+                            if (sysErrors == 0) {
 				moveJob.setStatusId(2);
 				moveJob.setEndDateTime(new Date());
 				updateSFTPRun(moveJob);
@@ -2027,7 +2032,7 @@ public class transactionInManagerImpl implements transactionInManager {
 	boolean run = true;
 	
 	List<batchUploads> batchInProcess = getBatchesByStatusIds(Arrays.asList(38));
-
+        
 	//we check time stamp to see how long that file has been processing
 	//get the details
 	if (!batchInProcess.isEmpty()) {
@@ -3106,8 +3111,8 @@ public class transactionInManagerImpl implements transactionInManager {
 		}
 
 		//we check handling here for rejecting entire batch
-		List<configurationTransport> batchHandling = getHandlingDetailsByBatch(batchId);
-		
+		List<configurationTransport> batchHandling = getHandlingDetailsByBatch(batch.getConfigId());
+                
 		// if entire batch failed and have no configIds, there will be no error handling found
 		if (getRecordCounts(batchId, Arrays.asList(11), false) == getRecordCounts(batchId, new ArrayList<>(), false)) {
 		    //entire batch failed, we reject entire batch
@@ -3346,7 +3351,7 @@ public class transactionInManagerImpl implements transactionInManager {
 	* batches get processed again when user hits release button, maybe have separate method call for those that are just going 
 	* from pending release to release, have to think about scenario when upload file is huge 
 	 */
-	List<configurationTransport> handlingDetails = getHandlingDetailsByBatch(batchUploadId);
+	List<configurationTransport> handlingDetails = getHandlingDetailsByBatch(batch.getConfigId());
 
 	// we should only insert for batches that are just loaded
 	if (batch.getStatusId() == 36 || batch.getStatusId() == 43) {
@@ -4418,11 +4423,6 @@ public class transactionInManagerImpl implements transactionInManager {
     }
 
     @Override
-    public Integer checkClearAfterDeliveryBatch(int batchUploadId) throws Exception {
-	return transactionInDAO.checkClearAfterDeliveryBatch(batchUploadId);
-    }
-
-    @Override
     public Integer removeLoadTableBlankRows(Integer batchUploadId, String loadTableName) throws Exception {
 	return transactionInDAO.removeLoadTableBlankRows(batchUploadId, loadTableName);
     }
@@ -4470,11 +4470,17 @@ public class transactionInManagerImpl implements transactionInManager {
         
         List<String> transactionTablesToRemove = transactionInDAO.findTransacionTablesToCleanUp();
         
+        String schemaName = "universaltranslator";
+        
+        if(eahUT.equals("true")) {
+            schemaName = "universaltranslatorca";
+        }
+        
         if (transactionTablesToRemove != null) {
             if (!transactionTablesToRemove.isEmpty()) {
                 String sqlString = "";
                 for(String tableName : transactionTablesToRemove) {
-                    sqlString += "DROP TABLE IF EXISTS universaltranslator."+tableName+";";
+                    sqlString += "DROP TABLE IF EXISTS "+schemaName + "."+tableName+";";
                 }
                 
                 if(!"".equals(sqlString)) {

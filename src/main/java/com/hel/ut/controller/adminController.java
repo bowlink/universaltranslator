@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import com.hel.ut.service.utConfigurationManager;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * The adminController class will handle administrator page requests that fall outside specific sections.
@@ -37,6 +38,9 @@ import com.hel.ut.service.utConfigurationManager;
  */
 @Controller
 public class adminController {
+    
+    @Value("${eahUT}")
+    private String eahUT;
 
     @Autowired
     private organizationManager organizationManager;
@@ -61,6 +65,7 @@ public class adminController {
         mav.addObject("pageId", "dashboard-details");
         mav.addObject("pageSection", "section-dashboard");
         mav.addObject("sect","dash");
+        mav.addObject("eahUT",eahUT);
         
 	mav.setViewName("administrator/dashboard/dashboard");
         
@@ -165,7 +170,11 @@ public class adminController {
     public ModelAndView watchlist(HttpSession session, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/watchlist");
+        mav.addObject("pageId", "dashboard-details");
+        mav.addObject("pageSection", "section-dashboard");
+        mav.addObject("sect","dash");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/dashboard/watchlist/list");
         
 	//Get all the dashboard watch list entries
 	List<watchlist> dashboardwatchlist = configurationmanager.getDashboardWatchList();
@@ -179,12 +188,12 @@ public class adminController {
      *
      * @return This function will display the new dashboard watch list entry screen overlay
      */
-    @RequestMapping(value = "/createWatchEntry", method = RequestMethod.GET)
+    @RequestMapping(value = "/watchlist/createWatchEntry", method = RequestMethod.GET)
     public @ResponseBody
     ModelAndView createNewWatchEntryForm() throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/watchlist/details");
+        mav.setViewName("administrator/dashboard/watchlist/details");
 
         watchlist watchlistEntry = new watchlist();
         mav.addObject("watchlistEntry", watchlistEntry);
@@ -199,16 +208,16 @@ public class adminController {
     /**
      * The '/editWatchEntry' function will handle displaying the edit utConfiguration connection screen.
      *
-     * @param connectionId The id of the clicked utConfiguration connection
-     *
+     * @param entryId
      * @return This function will display the edit connection overlay
+     * @throws java.lang.Exception
      */
-    @RequestMapping(value = "/editWatchEntry", method = RequestMethod.GET)
+    @RequestMapping(value = "/watchlist/editWatchEntry", method = RequestMethod.GET)
     public @ResponseBody
     ModelAndView editWatchEntryForm(@RequestParam(value = "entryId", required = true) int entryId) throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/watchlist/details");
+        mav.setViewName("administrator/dashboard/watchlist/details");
 
         watchlist watchlistEntry = configurationmanager.getDashboardWatchListById(entryId);
 	
@@ -233,17 +242,17 @@ public class adminController {
     
      /**
      * The '/addDashboardWatchList.do' POST request will create/edit the dashboard watch list entry.
-    
+     * @param watchlistEntry    
+     * @param redirectAttr    
      * @return	The method will return a 1 back to the calling ajax function which will handle the page load.
+     * @throws java.lang.Exception
      */
-    @RequestMapping(value = "/addDashboardWatchList.do", method = RequestMethod.POST)
-    public ModelAndView addDashboardWatchList(
-            @ModelAttribute(value = "watchlistEntry") watchlist watchlistEntry,
-            RedirectAttributes redirectAttr) throws Exception {
+    @RequestMapping(value = "/watchlist/addDashboardWatchList.do", method = RequestMethod.POST)
+    public ModelAndView addDashboardWatchList(@ModelAttribute(value = "watchlistEntry") watchlist watchlistEntry,RedirectAttributes redirectAttr) throws Exception {
 
-        Integer watchListEntryId;
+        Integer watchListEntryId = 0;
 	
-	String nextInsertDate;
+	String nextInsertDate = "";
 	
 	if(!"".equals(watchlistEntry.getExpectFirstFileTime())) {
 	    nextInsertDate = watchlistEntry.getExpectFirstFile() + " " + watchlistEntry.getExpectFirstFileTime();
@@ -257,6 +266,12 @@ public class adminController {
 	watchlistEntry.setNextInsertDate(date);
 
         if (watchlistEntry.getId() == 0) {
+            if(watchlistEntry.getOrgId() == null) {
+                watchlistEntry.setOrgId(0);
+            }
+            if(watchlistEntry.getConfigId() == null) {
+                watchlistEntry.setConfigId(0);
+            }
             watchListEntryId = configurationmanager.saveDashboardWatchListEntry(watchlistEntry);
             redirectAttr.addFlashAttribute("savedStatus", "created");
         } 
@@ -267,7 +282,7 @@ public class adminController {
             redirectAttr.addFlashAttribute("savedStatus", "updated");
         }
 
-        ModelAndView mav = new ModelAndView(new RedirectView("watchlist"));
+        ModelAndView mav = new ModelAndView(new RedirectView("/watchlist"));
 
         return mav;
 
@@ -279,7 +294,7 @@ public class adminController {
      *NjM2NjguMjYxLjE3OTk=
      *
      */
-    @RequestMapping(value = "/deleteWatchEntry", method = RequestMethod.POST)
+    @RequestMapping(value = "/watchlist/deleteWatchEntry", method = RequestMethod.POST)
     public @ResponseBody String deleteWatchEntry(@RequestParam(value = "watchId", required = true) Integer watchId) throws Exception {
         
 	if(watchId > 0) {
@@ -287,6 +302,5 @@ public class adminController {
 	}
 	
         return "1";
-        
     }
 }
