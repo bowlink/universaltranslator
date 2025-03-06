@@ -16,6 +16,7 @@ jQuery(function ($) {
            bProcessing: false, 
            aaSorting: [[2,'asc']],
            sPaginationType: "bootstrap", 
+           "pageLength": 50,
            oLanguage: {
               sEmptyTable: "There were no files submitted for the selected date range.", 
               sSearch: "Filter Results: ",

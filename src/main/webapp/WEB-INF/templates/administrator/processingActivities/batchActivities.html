@@ -50,6 +50,7 @@
                                             <br />
                                             <span th:if="${batchDetails.configId > 0 and batchDetails.configName == 'bowlinkTest'}"> Macro Test Configuration</span>
                                             <span th:if="${batchDetails.configId > 0 and batchDetails.configName == 'Bowlink Test Target'}"> Macro Test Configuration</span>
+                                            <span th:if="${batchDetails.configId == 0}"> Not Found</span>
                                             <span th:if="${batchDetails.configId > 0 and batchDetails.configName != 'bowlinkTest' and batchDetails.configName != 'Bowlink Test Target'}"><a th:href="${'/administrator/configurations/details?i='+batchDetails.configId}"><span th:text="${batchDetails.configName}"></span></a></span>
                                         </p>
                                     </div>
@@ -140,12 +141,12 @@
                     <section class="panel panel-info">
                         <div class="panel-heading clearfix" style="height: 50px">
                             <h3 class="panel-title pull-left" style="padding-top: 7.5px;">Batch Processing Logs</h3>
-                            <div class="pull-right">
+                            <div class="pull-right"  th:if="${!batchDownload and batchDetails.configId > 0}">
                                 <div class="dropdown">
                                     <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                         <i class="fa fa-cog"></i> Batch Controls
                                     </button>
-                                    <ul class="dropdown-menu pull-right" th:if="${!batchDownload}">
+                                    <ul class="dropdown-menu pull-right" th:if="${!batchDownload and batchDetails.configId > 0}">
                                         <li>
                                             <a th:href="'/administrator/processing-activity/inbound/auditReport/'+${batchDetails.utBatchName}" title="View Audit Report">
                                                 <span class="glyphicon glyphicon-edit"></span> View Audit Report

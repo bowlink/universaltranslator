@@ -306,8 +306,14 @@ jQuery(function ($) {
                                     }
                                 }
                             }
-
-                            returnData += '<br /><a href="/administrator/configurations/details?i='+row.configId+'" title="View Source Configuration">Config Name: '+data+'</a><br />Config Id: ' + row.configId;
+                            
+                            if(row.configId > 0) {
+                               returnData += '<br /><a href="/administrator/configurations/details?i='+row.configId+'" title="View Source Configuration">Config Name: '+data+'</a><br />Config Id: ' + row.configId;
+                            }
+                            else {
+                               returnData += '<br />Config Name: Not Found<br />Config Id: Not Found';
+                             
+                            }
                             
                             return returnData;
                         }

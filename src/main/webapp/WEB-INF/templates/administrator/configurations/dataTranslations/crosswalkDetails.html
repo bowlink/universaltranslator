@@ -55,10 +55,10 @@
                 <input th:field="*{file}" id="crosswalkFile" type="file"  />
                 <span id="crosswalkFileMsg" class="control-label"></span>
             </div>
-            <div class="form-group">
-                <input type="button" id="submitCrosswalkButton" th:rel="${actionValue}" class="btn btn-primary" th:value="${btnValue}"/>
-            </div>
             <th:block th:if="${crosswalkDetails.id > 0}">
+                <div class="form-group">
+                    <input type="button" id="submitCrosswalkButton" th:rel="${actionValue}" class="btn btn-primary" th:value="${btnValue}"/>
+                </div>
                 <div id="crosswalkNameDiv" class="form-group">
                     <label class="control-label" for="data" style="padding:10px; background-color: #cccccc; width:100%">Existing Crosswalk Data</label>
                     <br />
@@ -87,3 +87,10 @@
         </div>
     </form>
 </div>
+<th:block th:if="${crosswalkDetails.id == 0}">
+    <div class="modal-footer" style="background-color: #cccccc">
+        <div class="form-group">
+           <input type="button" id="submitCrosswalkButton" th:rel="${actionValue}" class="btn btn-primary" th:value="${btnValue}"/>
+        </div>
+    </div>
+</th:block>

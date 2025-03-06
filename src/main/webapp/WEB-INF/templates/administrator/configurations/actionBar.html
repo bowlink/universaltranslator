@@ -45,6 +45,11 @@
                     <span class="glyphicon glyphicon-forward icon-stacked" role="button"></span>Next Step
                 </a>
             </li>
+            <li role="menuitem" th:if="${actionPage != 'listConfigs'}">
+                <a th:href="@{/administrator/configurations/list}" title="Cancel" role="button">
+                    <span class="glyphicon icon-stacked  glyphicon-ban-circle"></span>Cancel
+                </a>
+             </li>
         </ul>
     </div>
 </nav>

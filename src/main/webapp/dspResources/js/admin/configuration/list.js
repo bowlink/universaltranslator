@@ -16,9 +16,8 @@ jQuery(function ($) {
 
         $('#sourceconfigdatatable').DataTable({
             bAutoWidth: false,
-            bStateSave: true,
-            iCookieDuration: 60,
-            aaSorting: [[4,'desc']],
+            bStateSave: false,
+            aaSorting: [[5,'desc']],
             "oLanguage": {
                 "sSearch": "_INPUT_",
                 sSearchPlaceholder: 'Filter Configurations',
@@ -38,7 +37,7 @@ jQuery(function ($) {
                 { "sWidth": "10%" },
                 { "sWidth": "15%" },
                 { "sWidth": "15%" },
-                { "sWidth": "5%" }
+                { "sWidth": "5%",  "bSortable":false, }
             ]
         });
         
@@ -48,9 +47,8 @@ jQuery(function ($) {
         
         $('#targetconfigdatatable').DataTable({
             bAutoWidth: false,
-            bStateSave: true,
-            iCookieDuration: 60,
-            aaSorting: [[4,'desc']],
+            bStateSave: false,
+            aaSorting: [[5,'desc']],
             
             "oLanguage": {
                 "sSearch": "_INPUT_",

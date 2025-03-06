@@ -35,7 +35,7 @@ jQuery(function ($) {
             bProcessing: true,
             bServerSide: true,
             deferRender: true,
-            aaSorting: [[0,'desc']],
+            aaSorting: [[4,'desc']],
             sPaginationType: "bootstrap", 
             oLanguage: {
                sSearch: "_INPUT_",
@@ -145,7 +145,7 @@ jQuery(function ($) {
                 {
                     "mData": "orgName", 
                     "defaultContent": "",
-                    "bSortable":true,
+                    "bSortable":false,
                     "sWidth": "10%",
                     "className": "center-text",
                     "render": function ( data, type, row, meta ) {

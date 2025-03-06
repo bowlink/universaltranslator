@@ -81,15 +81,27 @@ jQuery(function ($) {
 
         var userRole = $('#userRole').val();
 
-         var searchTerm = $('#batchdownloads-table').attr('term');
+        var searchTerm = $('#batchdownloads-table').attr('term');
 
         $('#batchdownloads-table').DataTable().destroy();
-
-         $('#batchdownloads-table').DataTable({
+        
+        var deferRender = false;
+        
+        var date1 = new Date(fromDate);
+        var date2 = new Date(toDate);
+        
+        const timeDiff = Math.abs(date2.getTime() - date1.getTime());
+        const daysDiff = Math.ceil(timeDiff / (1000*3600*24));
+        
+        if(daysDiff > 60) {
+            deferRender = true;
+        } 
+        
+        $('#batchdownloads-table').DataTable({
             bServerSide: true,
             bProcessing: true, 
-            deferRender: true,
-            aaSorting: [[6,'desc']],
+            deferRender: deferRender,
+            aaSorting: [[5,'desc']],
             "oSearch": {"sSearch": searchTerm },
             sPaginationType: "bootstrap", 
             oLanguage: {
@@ -272,7 +284,7 @@ jQuery(function ($) {
                 {
                     "mData": "transportMethodId", 
                     "defaultContent": "",
-                    "bSortable":true,
+                    "bSortable":false,
                     "sWidth": "5%",
                     "className": "center-text actions-col",
                     "render": function ( data, type, row, meta ) {

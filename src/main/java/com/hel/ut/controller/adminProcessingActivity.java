@@ -37,15 +37,12 @@ import com.hel.ut.model.generatedActivityReportAgencies;
 import com.hel.ut.model.generatedActivityReports;
 import com.hel.ut.model.lutables.lu_ProcessStatus;
 import com.hel.ut.model.mailMessage;
-import com.hel.ut.model.referralActivityExports;
 import com.hel.ut.model.systemSummary;
 import com.hel.ut.model.transactionOutRecords;
 import com.hel.ut.model.transactionRecords;
 import com.hel.ut.model.watchlistEntry;
 import com.hel.ut.restAPI.directManager;
 import com.hel.ut.restAPI.restfulManager;
-import com.hel.ut.security.decryptObject;
-import com.hel.ut.security.encryptObject;
 import com.hel.ut.service.emailMessageManager;
 import com.hel.ut.service.messageTypeManager;
 import com.hel.ut.service.organizationManager;
@@ -903,8 +900,14 @@ public class adminProcessingActivity {
 		batchDetails.setOrgName(orgDetails.getOrgName());
                 
                 utConfiguration configDetails = configurationManager.getConfigurationById(batchDetails.getConfigId());
-                batchDetails.setConfigName(configDetails.getConfigname());
-
+                
+                if(configDetails != null) {
+                    batchDetails.setConfigName(configDetails.getConfigname());
+                }
+                else {
+                    batchDetails.setConfigName("Not Found");
+                }
+                
 		mav.addObject("batchDetails", batchDetails);
                 
                 configurationTransport transportDetails = configurationTransportManager.getTransportDetails(batchDetails.getConfigId());
@@ -1110,7 +1113,13 @@ public class adminProcessingActivity {
 	    }
 	    
 	    mav.addObject("transportMethod",transportMethod);
-	    mav.addObject("fileDelimiter", transportDetails.getFileDelimiter());
+            
+            if(transportDetails != null) {
+                 mav.addObject("fileDelimiter", transportDetails.getFileDelimiter());
+            }
+            else {
+                 mav.addObject("fileDelimiter", "");
+            }
 	    
 	    Organization orgDetails = organizationmanager.getOrganizationById(batchDetails.getOrgId());
             batchDetails.setOrgName(orgDetails.getOrgName());
@@ -1145,13 +1154,15 @@ public class adminProcessingActivity {
             }
 
             List<Integer> resetStatusList = Arrays.asList(2, 22, 23, 1, 8, 35, 28); //DNP (21) is not a final status for admin
-            if(configDetails.getMessageTypeId() != 2) {
-                if (!resetStatusList.contains(batchDetails.getStatusId())) {
-                    canReset = true;
+            
+            if(configDetails != null) {
+                if(configDetails.getMessageTypeId() != 2) {
+                    if (!resetStatusList.contains(batchDetails.getStatusId())) {
+                        canReset = true;
+                    }
                 }
             }
             
-
            if (batchDetails.getStatusId() == 5 || batchDetails.getStatusId() == 64) {
                BigInteger recordCount = transactionInManager.getRecordCounts(batchDetails.getId(), Arrays.asList(11, 12, 13, 16), false, false);
                 if (recordCount.compareTo(BigInteger.ZERO) == 0) {
@@ -1622,80 +1633,6 @@ public class adminProcessingActivity {
 	ua.setBatchDownloadId(batchId);
         usermanager.insertUserLog(ua);
         return true;
-    }
-    
-    /**
-     * The '/referralActivityExport' GET request will return the latest export created
-     *
-     * @param session
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/referralActivityExport", method = RequestMethod.GET)
-    public ModelAndView referralActivityExport(HttpSession session) throws Exception {
-        int year = 114;
-        int month = 0;
-        int day = 1;
-        Date originalDate = new Date(year, month, day);
-
-        Date fromDate = getMonthDate("LAST30");
-        Date toDate = getMonthDate("END-TODAY");
-
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("/administrator/processing-activity/referralActivityExport");
-
-        mav.addObject("fromDate", fromDate);
-        mav.addObject("toDate", toDate);
-        mav.addObject("originalDate", originalDate);
-
-        List<referralActivityExports> exports = transactionInManager.getReferralActivityExportsWithUserNames(Arrays.asList(1, 2, 3, 4, 6));
-        encryptObject encrypt = new encryptObject();
-        Map<String, String> map;
-        for (referralActivityExports export : exports) {
-            //Encrypt the use id to pass in the url
-            map = new HashMap<String, String>();
-            map.put("id", Integer.toString(export.getId()));
-            map.put("topSecret", topSecret);
-
-            String[] encrypted = encrypt.encryptObject(map);
-            export.setEncryptedId(encrypted[0]);
-            export.setEncryptedSecret(encrypted[1]);
-        }
-        mav.addObject("exports", exports);
-
-        return mav;
-    }
-
-    /**
-     * The '/referralActivityExport' POST method will generate add an entry into the existing table.
-     *
-     * @param fromDate
-     * @param toDate
-     * @param session
-     * @param redirectAttr
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/referralActivityExport", method = RequestMethod.POST)
-    public ModelAndView referralActivityExport(@RequestParam Date fromDate, @RequestParam Date toDate, RedirectAttributes redirectAttr, HttpSession session) throws Exception {
-        int year = 114;
-        int month = 0;
-        int day = 1;
-        
-	utUser userInfo = (utUser) session.getAttribute("userDetails");
-
-        referralActivityExports export = new referralActivityExports();
-        export.setCreatedBy(userInfo.getId());
-        export.setToDate(toDate);
-        export.setFromDate(fromDate);
-
-        DateFormat selDateRangeFormat = new SimpleDateFormat("MM/dd/yyyy");
-        export.setSelDateRange(selDateRangeFormat.format(fromDate) + " - " + selDateRangeFormat.format(toDate));
-        export.setStatusId(1);
-        transactionInManager.saveReferralActivityExport(export);
-
-        ModelAndView mav = new ModelAndView(new RedirectView("referralActivityExport"));
-        return mav;
     }
 
     /**
@@ -2442,113 +2379,6 @@ public class adminProcessingActivity {
         return mav;
     }
 
-    @RequestMapping(value = "/dlExport", method = {RequestMethod.GET})
-    public void dlExport(@RequestParam String i, @RequestParam String v, HttpSession session, HttpServletResponse response) throws Exception {
-
-        utUser userDetails = new utUser();
-        Integer exportId = 0;
-
-        boolean canViewReport = false;
-        if (session.getAttribute("userDetails") != null) {
-            userDetails = (utUser) session.getAttribute("userDetails");
-            //1 decrpt and get the reportId
-            decryptObject decrypt = new decryptObject();
-            Object obj = decrypt.decryptObject(i, v);
-            String[] result = obj.toString().split((","));
-            exportId = Integer.parseInt(result[0].substring(4));
-
-            //now we get the report details
-            referralActivityExports export = transactionInManager.getReferralActivityExportById(exportId);
-
-            if (export != null) {
-                //we check permission and program
-                if (userDetails.getRoleId() != 2) {
-                    canViewReport = true;
-                }
-            }
-            //we log them, grab report for them to download
-            //if report doesn't exist we send them back to list with a message
-            utUserActivity ua = new utUserActivity();
-            ua.setUserId(userDetails.getId());
-            ua.setAccessMethod("POST");
-            ua.setPageAccess("/dlReport");
-
-            if (!canViewReport) {
-                //log user activity
-                ua.setActivity("Tried to View Export - " + exportId);
-                usermanager.insertUserLog(ua);
-            } else {
-                ua.setActivity("Viewed Export - " + exportId);
-                usermanager.insertUserLog(ua);
-            }
-
-        } else {
-            utUserActivity ua = new utUserActivity();
-            ua.setUserId(userDetails.getId());
-            ua.setAccessMethod("POST");
-            ua.setPageAccess("/dlReport");
-            ua.setActivity("Tried to view export - " + exportId);
-            usermanager.insertUserLog(ua);
-            throw new Exception("invalid export view - " + exportId);
-        }
-    }
-
-    @RequestMapping(value = "/delExport", method = {RequestMethod.GET})
-    public ModelAndView delExport(@RequestParam String i, @RequestParam String v,HttpSession session, HttpServletResponse response) throws Exception {
-
-        utUser userDetails = new utUser();
-        Integer exportId = 0;
-
-        boolean canDeleteReport = false;
-        if (session.getAttribute("userDetails") != null) {
-            userDetails = (utUser) session.getAttribute("userDetails");
-            //1 decrpt and get the reportId
-            decryptObject decrypt = new decryptObject();
-            Object obj = decrypt.decryptObject(i, v);
-            String[] result = obj.toString().split((","));
-            exportId = Integer.parseInt(result[0].substring(4));
-
-            //now we get the report details
-            referralActivityExports export = transactionInManager.getReferralActivityExportById(exportId);
-
-            if (export != null) {
-                //we check permission and program
-                if (userDetails.getRoleId() != 2) {
-                    canDeleteReport = true;
-                }
-            }
-            //we log them, grab report for them to download
-            //if report doesn't exist we send them back to list with a message
-            utUserActivity ua = new utUserActivity();
-            ua.setUserId(userDetails.getId());
-            ua.setAccessMethod("GET");
-            ua.setPageAccess("/delReport");
-
-            if (!canDeleteReport) {
-                //log user activity
-                ua.setActivity("Tried to Delete Export - " + exportId);
-                usermanager.insertUserLog(ua);
-            } else {
-                ua.setActivity("Deleted Export - " + exportId);
-                usermanager.insertUserLog(ua);
-                export.setStatusId(5);
-                transactionInManager.updateReferralActivityExport(export);
-            }
-
-        } else {
-            utUserActivity ua = new utUserActivity();
-            ua.setUserId(userDetails.getId());
-            ua.setAccessMethod("GET");
-            ua.setPageAccess("/dlReport");
-            ua.setActivity("Tried to delete export - " + exportId);
-            usermanager.insertUserLog(ua);
-            throw new Exception("invalid delete export view - " + exportId);
-        }
-
-        ModelAndView mav = new ModelAndView(new RedirectView("referralActivityExport"));
-        return mav;
-    }
-    
     /**
      * The '/deleteBatch' POST method will remove both the inbound and outbound transactions that are associated to the passed in
      * batchName
@@ -2616,7 +2446,7 @@ public class adminProcessingActivity {
 	}
         
 	customCols.add("Column Name");
-	
+        
 	//Set the custom columns based on the error selected
 	switch(errorId) {
 	    case 1:
@@ -2730,6 +2560,8 @@ public class adminProcessingActivity {
 	
 	if(reportableFields != null && errorId != 5) {
 	    Iterator reportableFieldsIt = reportableFields.iterator();
+            
+            System.out.println(customCols.size());
 	
 	    while (reportableFieldsIt.hasNext()) {
 		Object rptFieldrow[] = (Object[]) reportableFieldsIt.next();
@@ -2738,6 +2570,8 @@ public class adminProcessingActivity {
 		customCols.add(rptFieldrow[3].toString());
 		customCols.add(rptFieldrow[4].toString());
 	    }
+            
+             System.out.println(customCols.size());
 	}
 		
 	mav.addObject("customCols", customCols);
@@ -2750,15 +2584,15 @@ public class adminProcessingActivity {
         if(!errors.isEmpty()) {
             
             Iterator<Object> iterator = errors.iterator();
-             while (iterator.hasNext()) {
-                  Object errorsRow[] = (Object[]) iterator.next(); 
-                  if(hasOutboundError == 0 && errorsRow[0].toString().equals("true")) {
+            while (iterator.hasNext()) {
+                Object errorsRow[] = (Object[]) iterator.next(); 
+                if(hasOutboundError == 0 && errorsRow[0].toString().equals("true")) {
                     hasOutboundError = 1;
                 }
                 if(errorId != errorsRow[11]) {
-                   iterator.remove();
+                    iterator.remove();
                 }  
-             }
+            }
         }
         
         mav.addObject("hasOutboundError", hasOutboundError);

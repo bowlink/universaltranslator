@@ -33,7 +33,6 @@ import com.hel.ut.model.custom.batchErrorSummary;
 import com.hel.ut.model.directmessagesin;
 import com.hel.ut.model.generatedActivityReportAgencies;
 import com.hel.ut.model.generatedActivityReports;
-import com.hel.ut.model.referralActivityExports;
 import com.hel.ut.model.systemSummary;
 import java.math.BigInteger;
 import java.util.Date;
@@ -216,8 +215,6 @@ public interface transactionInManager {
 
     List<activityReportList> getReferralList(Date fromDate, Date toDate) throws Exception;
 
-    List<referralActivityExports> getReferralActivityExports() throws Exception;
-
     List<batchUploads> getAllRejectedBatches(Date fromDate, Date toDate, Integer fetchSize) throws Exception;
 
     void clearMultipleTargets(Integer batchId) throws Exception;
@@ -234,17 +231,7 @@ public interface transactionInManager {
 
     List<CrosswalkData> getCrosswalkDataForBatch(configurationDataTranslations cdt, Integer batchId, boolean foroutboundProcessing) throws Exception;
 
-    List<referralActivityExports> getReferralActivityExportsByStatus(List<Integer> statusIds, Integer howMany) throws Exception;
-
-    public void updateReferralActivityExport(referralActivityExports activityExport) throws Exception;
-
     void sendExportEmail(utUser userDetails) throws Exception;
-
-    public void saveReferralActivityExport(referralActivityExports activityExport) throws Exception;
-
-    List<referralActivityExports> getReferralActivityExportsWithUserNames(List<Integer> statusIds) throws Exception;
-
-    referralActivityExports getReferralActivityExportById(Integer exportId) throws Exception;
 
     void populateAuditReport(Integer batchUploadId, configurationMessageSpecs cms) throws Exception;
 
@@ -294,7 +281,7 @@ public interface transactionInManager {
     
     List<Integer> getTargetConfigsForUploadBatch(Integer batchUploadId, Integer configId) throws Exception;
     
-    Integer removeLoadTableBlankRows(Integer batchUploadId, String loadTableName) throws Exception;
+    Integer removeLoadTableBlankRows(Integer batchUploadId, String loadTableName, Integer totalFields) throws Exception;
 
     Integer getLoadTransactionCount(String loadTableName) throws Exception;
     

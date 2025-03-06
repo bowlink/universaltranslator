@@ -35,6 +35,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
                                                 <span class="glyphicon glyphicon-edit"></span> View
                                             </a>
                                         </li>  
+                                        <li class="divider" th:if="${crosswalk.orgId > 0}"></li>
                                         <li th:if="${crosswalk.orgId > 0}">
                                             <a href="#!" class="btn btn-link deleteCrosswalk" th:rel2="${crosswalk.dtsId}" th:rel="${crosswalk.id}" title="Delete this Crosswalk">
                                                 <span class="glyphicon glyphicon-remove"></span> Delete

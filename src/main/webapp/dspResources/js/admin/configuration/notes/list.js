@@ -25,7 +25,7 @@ jQuery(function ($) {
                 { "sWidth": "70%" },
                 { "sWidth": "10%" },
                 { "sWidth": "15%", "sType": "date" },
-                { "sWidth": "5%" }
+                { "sWidth": "5%", "bSortable":false}
             ],
            "aaSorting" : [[2, "desc"]]
         });

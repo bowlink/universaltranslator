@@ -19,12 +19,12 @@
                 </a>
             </li>
             <th:block th:if="${actionPage == 'connectionDetails'}">
-                <li th:if="${allowExport != ''}" role="menuitem" class="exportConnectionnBtn"> 
+                <li th:if="${allowExport != '' and connectionId > 0}" role="menuitem" class="exportConnectionnBtn"> 
                     <a href="#" class="exportConnection" th:rel="${connectionId}" title="Export this Connection">
                         <span class="glyphicon icon-stacked glyphicon glyphicon-export"></span>Export Connection
                     </a>
                 </li>
-                <li role="menuitem">
+                <li role="menuitem" th:if="${connectionId > 0}">
                     <a href="#" class="printConfig" title="Print this Connection" th:rel="${connectionId}" role="button">
                         <span class="glyphicon glyphicon-print icon-stacked"></span> Print 
                     </a>
@@ -38,6 +38,11 @@
                      <a href="#" id="saveCloseDetails" title="Save &amp; Close" role="button">
                          <span class="glyphicon glyphicon-floppy-disk icon-stacked"></span> Save &amp; Close
                      </a>
+                 </li>
+                 <li role="menuitem">
+                    <a th:href="@{/administrator/configurations/connections}" title="Cancel" role="button">
+                        <span class="glyphicon icon-stacked  glyphicon-ban-circle"></span>Cancel
+                    </a>
                  </li>
             </th:block>
         </ul>

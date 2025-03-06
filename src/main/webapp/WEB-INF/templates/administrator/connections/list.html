@@ -60,7 +60,7 @@
                                                             Configuration: <strong><span th:text="${connection.targetConfigName}"></span> (Id: <span th:text="${connection.targetConfigId}"></span>)</strong>
                                                         </p>
                                                     </td>
-                                                    <td class="center-text" th:text="${#dates.format(connection.dateCreated, 'M/dd/yy h:mm a')}"></td>
+                                                    <td class="center-text" th:text="${#dates.format(connection.dateCreated, 'M/dd/yy h:mm a')}" th:data-sort="${#dates.format(connection.dateCreated, 'yyyyMMddHHmm')}"></td>
                                                     <td class="center-text actions-col">
                                                         <a th:if="${connection.status == true}" href="#" class="changeStatus" th:rel="${connection.id}" rel2="0" title="Make this connection inactive">Active</a>
                                                         <a th:unless="${connection.status == true}" href="#" class="changeStatus" th:rel="${connection.id}" rel2="1" title="Make this connection active">Inactive</a>

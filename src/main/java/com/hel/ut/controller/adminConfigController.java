@@ -98,6 +98,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.util.Objects;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -1003,15 +1004,17 @@ public class adminConfigController {
         if(currTransportDetails != null) {
             if(configurationDetails.getMessageTypeId() == 2 && configurationDetails.getType() == 1 && 
                 (
-                    (transportDetails.getFileType() != currTransportDetails.getFileType())
+                    (!Objects.equals(transportDetails.getFileType(), currTransportDetails.getFileType()))
                     ||
-                    (transportDetails.getMaxFileSize() != currTransportDetails.getMaxFileSize())
+                    (!Objects.equals(transportDetails.getMaxFileSize(), currTransportDetails.getMaxFileSize()))
                     ||
-                    (transportDetails.getFileDelimiter() != currTransportDetails.getFileDelimiter())
+                    (!Objects.equals(transportDetails.getFileDelimiter(), currTransportDetails.getFileDelimiter()))
                 )) {
+                
                 //Need to get the FP system database 
                 String fpSchemaName = "";
                 fpSchemaName = organizationmanager.getOrganizationById(configurationDetails.getOrgId()).getHelRegistrySchemaName();
+                
                 if(!"".equals(fpSchemaName)) {
                     try {
                         utconfigurationTransportManager.updateFamilyPlanningAssociatedImport(fpSchemaName,configId,transportDetails.getFileType(),transportDetails.getFileDelimiter(),transportDetails.getMaxFileSize());

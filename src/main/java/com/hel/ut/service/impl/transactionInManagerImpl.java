@@ -44,7 +44,6 @@ import com.hel.ut.model.generatedActivityReportAgencies;
 import com.hel.ut.model.generatedActivityReports;
 import com.hel.ut.model.logftpconnectionerrors;
 import com.hel.ut.model.lutables.lu_ProcessStatus;
-import com.hel.ut.model.referralActivityExports;
 import com.hel.ut.model.systemSummary;
 import com.hel.ut.reference.fileSystem;
 import com.hel.ut.security.decryptObject;
@@ -111,6 +110,8 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.registryKit.registry.fileUploads.fileUploadManager;
 import com.registryKit.registry.fileUploads.uploadedFile;
+import com.registryKit.registry.helRegistry;
+import com.registryKit.registry.helRegistryManager;
 import com.registryKit.registry.submittedMessages.submittedMessage;
 import com.registryKit.registry.submittedMessages.submittedMessageManager;
 import java.io.BufferedWriter;
@@ -218,6 +219,9 @@ public class transactionInManagerImpl implements transactionInManager {
     
     @Autowired
     private fileUploadManager fileuploadmanager;
+    
+    @Autowired
+    private helRegistryManager helregistrymanager;
     
     @Autowired
     ThreadPoolTaskExecutor executor;
@@ -917,8 +921,8 @@ public class transactionInManagerImpl implements transactionInManager {
     }
 
     @Override
-    public void updateSFTPRun(MoveFilesLog sftpJob) throws Exception {
-	transactionInDAO.updateSFTPRun(sftpJob);
+    public void updateSFTPRun(MoveFilesLog moveFilesLog) throws Exception {
+	transactionInDAO.updateSFTPRun(moveFilesLog);
     }
 
     @Override
@@ -1263,6 +1267,7 @@ public class transactionInManagerImpl implements transactionInManager {
                                         } else {
 
                                             encodingId = encodings.get(0).getEncodingId();
+                                            
                                             for (configurationTransport ctdelim : delimList) {
                                                 fileSystem dir = new fileSystem();
                                                 int delimCount = (Integer) dir.checkFileDelimiter(file, ctdelim.getDelimChar());
@@ -1381,7 +1386,7 @@ public class transactionInManagerImpl implements transactionInManager {
 
                                     //we encoded the file if it is not
                                     File newFile = new File(rootPath + orgDetails.getcleanURL() + "/input files/encoded_"+batchName + fileName.substring(fileName.lastIndexOf(".")));
-
+                                    
                                     //log batch activity
                                     ba = new batchuploadactivity();
                                     ba.setActivity("Created the encoded file. File Location/Name:" + rootPath + orgDetails.getcleanURL() + "/input files/encoded_"+batchName + fileName.substring(fileName.lastIndexOf(".")));
@@ -1451,7 +1456,7 @@ public class transactionInManagerImpl implements transactionInManager {
                                             }
                                         }
                                     }
-
+                                    
                                     if (encodingId < 2 && !filemanager.isFileBase64Encoded(file, delimiter)) { 
                                         String encodedOldFile = filemanager.encodeFileToBase64Binary(file);
                                         filemanager.writeFile(newFile.getAbsolutePath(), encodedOldFile);
@@ -1470,7 +1475,7 @@ public class transactionInManagerImpl implements transactionInManager {
                                         }
 
                                     } else {
-
+                                        
                                         try {
                                             Files.move(source, target);
 
@@ -1511,7 +1516,7 @@ public class transactionInManagerImpl implements transactionInManager {
                                     ba.setActivity("Uploaded batchId:"+batchId+" status was set to " + statusId);
                                     ba.setBatchUploadId(batchId);
                                     transactionInDAO.submitBatchActivityLog(ba);
-
+                                    
                                     // Check to see if the batch needs to be submitted to a Healt-e-link Registry
                                     if (batchDetails.getConfigId() != null) {
                                         if (batchDetails.getConfigId() > 0) {
@@ -1668,7 +1673,7 @@ public class transactionInManagerImpl implements transactionInManager {
 	    //Find move files log by status Id and methodId
 	    //Delete the records found
 	    List<MoveFilesLog> existingMoveFileLogs = transactionInDAO.existingMoveFileLogs(2,10);
-	    
+            
 	    if(existingMoveFileLogs != null) {
 		if(!existingMoveFileLogs.isEmpty()) {
 		    existingMoveFileLogs.forEach(moveLog -> {
@@ -1692,7 +1697,7 @@ public class transactionInManagerImpl implements transactionInManager {
                         
 			sysErrors = 0;
 			
-			//we insert mvoe log entry, so if anything goes wrong or the scheduler overlaps, we won't check the same folder over and over
+			//we insert move log entry, so if anything goes wrong or the scheduler overlaps, we won't check the same folder over and over
 			MoveFilesLog moveJob = new MoveFilesLog();
 			moveJob.setStatusId(1);
 			moveJob.setFolderPath(fileDropInfo.getDirectory());
@@ -1941,11 +1946,6 @@ public class transactionInManagerImpl implements transactionInManager {
     }
 
     @Override
-    public List<referralActivityExports> getReferralActivityExports() throws Exception {
-	return transactionInDAO.getReferralActivityExports();
-    }
-
-    @Override
     public void clearMultipleTargets(Integer batchId) throws Exception {
 	transactionInDAO.clearMultipleTargets(batchId);
     }
@@ -1961,6 +1961,20 @@ public class transactionInManagerImpl implements transactionInManager {
 	ccAddresses.add(myProps.getProperty("admin.email"));
 	
 	Organization orgDetails = organizationmanager.getOrganizationById(batch.getOrgId());
+        
+        List<helRegistry> helRegistries = helregistrymanager.getAllActiveRegistries();
+        
+        String systemName = "";
+        
+        if(orgDetails.getHelRegistryId() > 0) {
+            if(helRegistries != null) {
+                for(helRegistry reg : helRegistries) {
+                    if(reg.getId() == orgDetails.getHelRegistryId()) {
+                        systemName = reg.getRegistryName();
+                    }
+                }
+            }
+        }
 	
 	//build message
 	String message = "Uploaded File (Batch Id:" + batch.getUtBatchName() + ") contains " + batch.getErrorRecordCount() + " error(s).";
@@ -1969,7 +1983,10 @@ public class transactionInManagerImpl implements transactionInManager {
 	message = message + "<br/><br/>Batch Id: " + batch.getUtBatchName();
 	message = message + "<br/><br/>Total Transactions: " + batch.getTotalRecordCount();
 	message = message + "<br/>Total Errors: " + batch.getErrorRecordCount();
-	message += "<br /><br />Sending Organization: " + orgDetails.getOrgName();
+        if(!"".equals(systemName)) {
+            message += "<br /><br />System Name: " + systemName;
+        }
+        message += "<br /><br />Sending Organization: " + orgDetails.getOrgName();
 
 	List<Transaction> transactions = getTransactionsByStatusId(batch.getId(), rejectIds, 5);
 	
@@ -2692,7 +2709,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			
 			if(messageSpecs.getParsingTemplate() != null) {
 			    if(!"".equals(messageSpecs.getParsingTemplate().trim()) && messageSpecs.getParsingTemplate().toLowerCase().contains("fixedlength")) {
-				
+                                
 				newfilename = fixedLengthFiletoTxt.translateFixedLengthFileToTxt(decodedFilePath,decodedFileName,batch);
 
 				if (newfilename.equals("ERRORERRORERROR")) {
@@ -2932,7 +2949,8 @@ public class transactionInManagerImpl implements transactionInManager {
 		    //3. we update batchId, loadRecordId
 		    //sysError = sysError + updateLoadTable(loadTableName, batch.getId());
 		    //3.5 we delete blank rows
-		    sysErrors = sysErrors + removeLoadTableBlankRows(batch.getId(), "transactionInRecords_" + batch.getId());
+                    List<configurationFormFields> formFields = configurationtransportmanager.getConfigurationFields(batch.getConfigId(), 0);
+		    sysErrors = sysErrors + removeLoadTableBlankRows(batch.getId(), "transactionInRecords_" + batch.getId(), formFields.size());
                     
                     //log batch activity
                     ba = new batchuploadactivity();
@@ -3032,7 +3050,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			    transactionInDAO.updateBatchUpload(batch);
 			}
 		    }
-		    
+                    
 		    if(batch.getConfigId() > 0) {
 
 			//we populate transactionTranslatedIn
@@ -3048,7 +3066,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			//now that we have our config, we will apply pre-processing cw and macros to manipulate our data
 			//1. find all configs for batch, loop and process
 			List<Integer> configIds = getConfigIdsForBatchOnly(batchId);
-
+                        
 			for (Integer configId : configIds) {
 			    //we need to run all checks before insert regardless 
 			    //we are reordering 1. cw/macro, 2. required and 3. validate 
@@ -3817,16 +3835,6 @@ public class transactionInManagerImpl implements transactionInManager {
     }
 
     @Override
-    public List<referralActivityExports> getReferralActivityExportsByStatus(List<Integer> statusIds, Integer howMany) throws Exception {
-	return transactionInDAO.getReferralActivityExportsByStatus(statusIds, howMany);
-    }
-
-    @Override
-    public void updateReferralActivityExport(referralActivityExports activityExport) throws Exception {
-	transactionInDAO.updateReferralActivityExport(activityExport);
-    }
-
-    @Override
     public void sendExportEmail(utUser userDetails) throws Exception {
 	String exportMessage = "Dear " + userDetails.getFirstName() + ", <br/>Please login to download your referral activity export.  Thank you.";
 	mailMessage mail = new mailMessage();
@@ -3835,21 +3843,6 @@ public class transactionInManagerImpl implements transactionInManager {
 	mail.setMessageSubject("Referral activity export is ready to be downloaded.");
 	mail.setToEmailAddress(userDetails.getEmail());
 	emailManager.sendEmail(mail);
-    }
-
-    @Override
-    public void saveReferralActivityExport(referralActivityExports activityExport) throws Exception {
-	transactionInDAO.saveReferralActivityExport(activityExport);
-    }
-
-    @Override
-    public List<referralActivityExports> getReferralActivityExportsWithUserNames(List<Integer> statusIds) throws Exception {
-	return transactionInDAO.getReferralActivityExportsWithUserNames(statusIds);
-    }
-
-    @Override
-    public referralActivityExports getReferralActivityExportById(Integer exportId) throws Exception {
-	return transactionInDAO.getReferralActivityExportById(exportId);
     }
 
     @Override
@@ -4423,8 +4416,8 @@ public class transactionInManagerImpl implements transactionInManager {
     }
 
     @Override
-    public Integer removeLoadTableBlankRows(Integer batchUploadId, String loadTableName) throws Exception {
-	return transactionInDAO.removeLoadTableBlankRows(batchUploadId, loadTableName);
+    public Integer removeLoadTableBlankRows(Integer batchUploadId, String loadTableName, Integer totalFields) throws Exception {
+	return transactionInDAO.removeLoadTableBlankRows(batchUploadId, loadTableName, totalFields);
     }
 
     @Override

@@ -119,11 +119,23 @@ jQuery(function ($) {
         var isEAH = $('#batchuploads-table').attr('rel');
 
         $('#batchuploads-table').DataTable().destroy();
+        
+        var deferRender = false;
+        
+        var date1 = new Date(fromDate);
+        var date2 = new Date(toDate);
+        
+        const timeDiff = Math.abs(date2.getTime() - date1.getTime());
+        const daysDiff = Math.ceil(timeDiff / (1000*3600*24));
+        
+        if(daysDiff > 60) {
+            deferRender = true;
+        } 
 
         $('#batchuploads-table').DataTable({
             bServerSide: true,
             bProcessing: true, 
-            deferRender: true,
+            deferRender: deferRender,
             aaSorting: [[4,'desc']],
             "oSearch": {"sSearch": searchTerm },
             sPaginationType: "bootstrap", 
@@ -197,9 +209,14 @@ jQuery(function ($) {
                                     }
                                 }
                             }
-
-                            returnData += '<br /><a href="/administrator/configurations/details?i='+row.configId+'" title="View Source Configuration">Config Name: '+data+'</a><br />Config Id: ' + row.configId;
                             
+                            if(row.configId > 0) {
+                                returnData += '<br /><a href="/administrator/configurations/details?i='+row.configId+'" title="View Source Configuration">Config Name: '+data+'</a><br />Config Id: ' + row.configId;
+                            }
+                            else {
+                                returnData += '<br />Config Name: Not Found<br />Config Id: Not Found';
+                            }
+
                             return returnData;
                         }
                         else {
@@ -322,16 +339,20 @@ jQuery(function ($) {
                         }
 
                         if(data != 2) {
-                           returnData += '<li><a href="/administrator/processing-activity/inbound/batchActivities/'+row.utBatchName+'" class="viewBatchActivities" title="View Batch Activities"><span class="glyphicon glyphicon-edit"></span> View Batch Activities</a></li>';
-                           returnData += '<li class="divider"></li>';
-                           returnData += '<li><a href="/administrator/processing-activity/inbound/auditReport/'+row.utBatchName+'" title="View Audit Report"><span class="glyphicon glyphicon-edit"></span> View Audit Report</a></li>';
-                       }
+                            returnData += '<li><a href="/administrator/processing-activity/inbound/batchActivities/'+row.utBatchName+'" class="viewBatchActivities" title="View Batch Activities"><span class="glyphicon glyphicon-edit"></span> View Batch Activities</a></li>';
+                            if(row.configId > 0) {
+                                returnData += '<li class="divider"></li>';
+                                returnData += '<li><a href="/administrator/processing-activity/inbound/auditReport/'+row.utBatchName+'" title="View Audit Report"><span class="glyphicon glyphicon-edit"></span> View Audit Report</a></li>';
+                            }
+                        }
 
                        if(userRole == 1) {
-                           returnData += '<li class="divider"></li>';
-                           returnData += '<li><a href="/administrator/configurations/details?i='+row.configId+'" title="View Source Configuration"><span class="glyphicon glyphicon-edit"></span> View Source Configuration</a></li>';
-                           returnData += '<li class="divider"></li>';
-                           returnData += '<li><a href="javascript:void(0);" rel="'+row.utBatchName+'" class="deleteTransactions" title="Delete Batch Transactions"><span class="glyphicon glyphicon-remove"></span> Delete Batch</a></li>';
+                            returnData += '<li class="divider"></li>';
+                            if(row.configId > 0) {
+                                returnData += '<li><a href="/administrator/configurations/details?i='+row.configId+'" title="View Source Configuration"><span class="glyphicon glyphicon-edit"></span> View Source Configuration</a></li>';
+                                returnData += '<li class="divider"></li>';
+                            }
+                            returnData += '<li><a href="javascript:void(0);" rel="'+row.utBatchName+'" class="deleteTransactions" title="Delete Batch Transactions"><span class="glyphicon glyphicon-remove"></span> Delete Batch</a></li>';
                        }
 
                        return returnData;

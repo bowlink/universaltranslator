@@ -66,23 +66,24 @@
                                                                 <span th:if="${srcConfigs.transportMethod  == 'File Upload' and srcConfigs.type != 1}" th:text="File Download"></span>
                                                                 <span th:if="${srcConfigs.transportMethod  != 'File Upload'}" th:text="${srcConfigs.transportMethod}"></span>
                                                             </td>
-                                                            <td class="center-text link" th:rel="${srcConfigs.id}" th:text="${#dates.format(srcConfigs.dateCreated, 'M/dd/yy h:mm a')}"></td>
-                                                            <td class="center-text link" th:rel="${srcConfigs.id}">
-                                                                <span th:if="${srcConfigs.dateUpdated == ''}" th:text="${#dates.format(srcConfigs.dateCreated, 'M/dd/yy h:mm a')}"></span>
-                                                                <span th:if="${srcConfigs.dateUpdated != ''}" th:text="${#dates.format(srcConfigs.dateUpdated, 'M/dd/yy h:mm a')}"></span>
+                                                            <td class="center-text link" th:rel="${srcConfigs.id}" th:text="${#dates.format(srcConfigs.dateCreated, 'M/dd/yyyy h:mm a')}"></td>
+                                                            <td class="center-text link" th:rel="${srcConfigs.id}" th:data-sort="${srcConfigs.dateUpdated != '' ? #dates.format(srcConfigs.dateUpdated, 'yyyyMMddHHmm') : #dates.format(srcConfigs.dateCreated, 'yyyyMMddHHmm')}">
+                                                                <span th:if="${srcConfigs.dateUpdated == ''}" th:text="${#dates.format(srcConfigs.dateCreated, 'M/dd/yyyy h:mm a')}"></span>
+                                                                <span th:if="${srcConfigs.dateUpdated != ''}" th:text="${#dates.format(srcConfigs.dateUpdated, 'M/dd/yyyy h:mm a')}"></span>
                                                             </td>
                                                             <td>
                                                                 <div class="dropdown pull-left">
                                                                     <button class="btn btn-sm btn-default dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                                                         <i class="fa fa-cog"></i>
                                                                     </button>
-                                                                    <ul class="dropdown-menu pull-right">
+                                                                    <ul class="dropdown-menu">
                                                                         <li th:if="${srcConfigs.type == 1 and srcConfigs.status}">
                                                                             <a href="#" class="copyConfig" th:rel="${srcConfigs.id}" title="Copy this Configuration">
                                                                                 <span class="glyphicon glyphicon-transfer"></span>
                                                                                 Copy
                                                                             </a>
                                                                         </li>
+                                                                        <li class="divider" th:if="${srcConfigs.type == 1 and srcConfigs.status and srcConfigs.allowFTPLink}"></li>
                                                                         <li th:if="${srcConfigs.type == 1 and srcConfigs.status and srcConfigs.allowFTPLink}">
                                                                             <a href="#" data-bs-target="#configFTPCheckdModal" data-bs-toggle="modal" class="checkFTP" th:rel="${srcConfigs.id}" th:rel2="${srcConfigs.transportDetailId}" title="Check FTP location for new file to process">
                                                                                 <span class="glyphicon glyphicon-play-circle"></span>
@@ -95,19 +96,22 @@
                                                                                 <span class="glyphicon glyphicon-edit"></span>
                                                                                 Edit
                                                                             </a>
-                                                                        </li>       
+                                                                        </li> 
+                                                                         <li class="divider"></li>
                                                                         <li>
                                                                            <a href="#" class="printConfig" th:rel="${srcConfigs.id}" title="Print this Configuration">
                                                                                <span class="glyphicon glyphicon-print"></span>
                                                                                Print
                                                                            </a>
                                                                         </li>
+                                                                        <li class="divider" th:if="${srcConfigs.allowExport}"></li> 
                                                                         <li th:if="${srcConfigs.allowExport}">
                                                                             <a href="#" class="exportConfig" th:rel="${srcConfigs.id}" title="Export this Configuration">
                                                                                 <span class="glyphicon glyphicon-export"></span>
                                                                                 Export
                                                                             </a>
                                                                          </li> 
+                                                                         <li class="divider"></li>
                                                                         <li>
                                                                             <a href="#" class="deleteConfig" th:rel="${srcConfigs.id}" title="Delete this configuration">
                                                                                 <span class="glyphicon glyphicon-remove-circle"></span>
@@ -165,10 +169,10 @@
                                                                 <span th:if="${tgtConfigs.transportMethod  == 'File Upload' and tgtConfigs.type != 1}" th:text="File Download"></span>
                                                                 <span th:if="${tgtConfigs.transportMethod  != 'File Upload'}" th:text="${tgtConfigs.transportMethod}"></span>
                                                             </td>
-                                                            <td class="center-text link" th:rel="${tgtConfigs.id}" th:text="${#dates.format(tgtConfigs.dateCreated, 'M/dd/yy h:mm a')}"></td>
-                                                            <td class="center-text link" th:rel="${tgtConfigs.id}">
-                                                                <span th:if="${tgtConfigs.dateUpdated == ''}" th:text="${#dates.format(tgtConfigs.dateCreated, 'M/dd/yy h:mm a')}"></span>
-                                                                <span th:if="${tgtConfigs.dateUpdated != ''}" th:text="${#dates.format(tgtConfigs.dateUpdated, 'M/dd/yy h:mm a')}"></span>
+                                                            <td class="center-text link" th:rel="${tgtConfigs.id}" th:text="${#dates.format(tgtConfigs.dateCreated, 'M/dd/yyyy h:mm a')}"></td>
+                                                            <td class="center-text link" th:rel="${tgtConfigs.id}" th:data-sort="${tgtConfigs.dateUpdated != '' ? #dates.format(tgtConfigs.dateUpdated, 'yyyyMMddHHmm') : #dates.format(tgtConfigs.dateCreated, 'yyyyMMddHHmm')}">
+                                                                <span th:if="${tgtConfigs.dateUpdated == ''}" th:text="${#dates.format(tgtConfigs.dateCreated, 'M/dd/yyyy h:mm a')}"></span>
+                                                                <span th:if="${tgtConfigs.dateUpdated != ''}" th:text="${#dates.format(tgtConfigs.dateUpdated, 'M/dd/yyyy h:mm a')}"></span>
                                                             </td>
                                                             <td>
                                                                 <div class="dropdown pull-left">

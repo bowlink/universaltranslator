@@ -1,11 +1,11 @@
 package com.hel.ut.controller;
 
+import com.hel.ut.dao.transactionOutDAO;
 import com.hel.ut.model.utUser;
 import com.hel.ut.model.mailMessage;
 import com.hel.ut.model.utUserActivity;
 import com.hel.ut.restAPI.directManager;
 import com.hel.ut.service.emailMessageManager;
-import com.hel.ut.service.transactionInManager;
 import com.hel.ut.service.userManager;
 import com.registryKit.messenger.emailManager;
 import java.math.BigInteger;
@@ -53,7 +53,7 @@ public class mainController {
     private directManager directManager;
     
     @Autowired
-    private transactionInManager transactionInManager;
+    private transactionOutDAO transactionOutDAO;
     
     @Autowired
     private emailManager emailmanager;
@@ -67,7 +67,7 @@ public class mainController {
      */
     @RequestMapping(value = {"/", "/login"}, method = RequestMethod.GET)
     public ModelAndView login() throws Exception {
-        
+         
         ModelAndView mav = new ModelAndView();
         mav.addObject("pageId", "login");
         mav.addObject("pageSection", "section-login");

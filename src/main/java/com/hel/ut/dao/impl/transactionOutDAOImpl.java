@@ -27,6 +27,10 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.query.MutationQuery;
 import org.hibernate.query.SelectionQuery;
 import org.springframework.beans.factory.annotation.Value;
@@ -360,19 +364,37 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = true)
     public List<transactionOutRecords> getTransactionRecords(Integer batchId, Integer configId, Integer totalFields) throws Exception {
-	
-	//totalFields = totalFields + 10;
-	
-	String sql = "select ";
+        
+        String sql = "select ";
 		
 	for (int i = 1; i <= totalFields; i++) {
-	    sql += "f" + i + ",";
+	    sql += "a.f" + i + ",";
 	}	
-	sql += "id FROM transactiontranslatedout_" + batchId + " order by id asc";
-	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, transactionOutRecords.class);
+	sql += "a.id from transactiontranslatedout_" + batchId + " a "
+	+ "order by a.id asc";
 
-	List<transactionOutRecords> records = query.list();
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql);
+
+	List<Object[]> results = query.getResultList();
+        
+        List<transactionOutRecords> records = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            transactionOutRecords recordDetails = new transactionOutRecords();
+            
+            for (int i = 1; i <= totalFields; i++) {
+                try {
+                    BeanUtils.setProperty(recordDetails, new StringBuilder().append("f").append(i).toString(), record[i-1]);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(transactionOutDAOImpl.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InvocationTargetException ex) {
+                    Logger.getLogger(transactionOutDAOImpl.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            recordDetails.setId(Integer.getInteger(record[totalFields-1].toString()));
+            
+            records.add(recordDetails);
+        });
 	
 	return records;
     }
@@ -1556,6 +1578,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
             batchDownloads bDownload = new batchDownloads();
             bDownload.setId((Integer) record[1]);
             bDownload.setOrgId((Integer) record[2]);
+            bDownload.setDateCreated((Date) record[10]);
             bDownload.setDateSubmitted((Date) record[10]);
             bDownload.setStartDateTime((Date) record[11]);
             bDownload.setEndDateTime((Date) record[12]);
@@ -1564,7 +1587,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
             bDownload.setConfigName((String) record[8]);
             bDownload.setTransportMethod((String) record[15]);
             bDownload.setTotalRecordCount((Integer) record[6]);
-            bDownload.setErrorRecordCount((Integer) record[7]);
+            bDownload.setTotalErrorCount((Integer) record[7]);
             bDownload.setTotalMessages((Integer) record[18]);
             bDownload.setStatusId((Integer) record[9]);
             bDownload.setEndUserDisplayText((String) record[20]);
@@ -1656,7 +1679,7 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	    Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,batchdownloadactivity.class)
 	    .setParameter("batchId", batchInfo.getId());
             
-	    List<batchdownloadactivity> batchActivities = query.list();
+	    List<batchdownloadactivity> batchActivities = query.getResultList();
 
 	    return batchActivities;
 
@@ -2041,13 +2064,13 @@ public class transactionOutDAOImpl implements transactionOutDAO {
             
 	} 
         catch (Exception ex) {
-	    System.err.println("/*** getBatchesByOrgId " + ex.getCause().getMessage());
+	    System.err.println("getBatchesByOrgId " + ex.getCause().getMessage());
 	    return null;
 	}
     }
     
     /**
-     * The 'getTransactionRecords' function will return the transaction TARGET records for the passed in transactionId.
+     * The 'getTransactionRecordsForFP' function will return the transaction TARGET records for the passed in transactionId.
      *
      * @param batchId
      * @param configId
@@ -2059,10 +2082,8 @@ public class transactionOutDAOImpl implements transactionOutDAO {
     @Override
     @Transactional(readOnly = true)
     public List<transactionOutRecords> getTransactionRecordsForFP(Integer batchId, Integer configId, Integer totalFields) throws Exception {
-	
-	//totalFields = totalFields + 10;
         
-	String sql = "select ";
+        String sql = "select ";
 		
 	for (int i = 1; i <= totalFields; i++) {
 	    sql += "a.f" + i + ",";
@@ -2070,10 +2091,30 @@ public class transactionOutDAOImpl implements transactionOutDAO {
 	sql += "a.id, b.transactionInRecordsId from transactiontranslatedout_" + batchId + " a inner join "
 	+ "transactionoutrecords_" + batchId + " b on b.id = a.transactionOutRecordsId "
 	+ "order by a.id asc";
-	
-	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,transactionOutRecords.class);
 
-	List<transactionOutRecords> records = query.list();
+	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql);
+
+	List<Object[]> results = query.getResultList();
+        
+        List<transactionOutRecords> records = new ArrayList<>();
+        
+        results.stream().forEach((record) -> {
+            transactionOutRecords recordDetails = new transactionOutRecords();
+            
+            for (int i = 1; i <= totalFields; i++) {
+                try {
+                    BeanUtils.setProperty(recordDetails, new StringBuilder().append("f").append(i).toString(), record[i-1]);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(transactionOutDAOImpl.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InvocationTargetException ex) {
+                    Logger.getLogger(transactionOutDAOImpl.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            recordDetails.setId(Integer.getInteger(record[totalFields-1].toString()));
+            recordDetails.setTransactionInRecordsId(Integer.getInteger(record[totalFields-2].toString()));
+            
+            records.add(recordDetails);
+        });
 	
 	return records;
     }

@@ -136,7 +136,7 @@ public class adminSysAdminController {
     public ModelAndView listMacros() throws Exception {
 
         ModelAndView mav = new ModelAndView();
-        mav.addObject("pageId", "sysadmin-moveFilePaths");
+        mav.addObject("pageId", "sysadmin-macros");
         mav.addObject("pageSection", "section-sysadmin");
         mav.addObject("sect","sysadmin");
         mav.addObject("actionPage","macros");
@@ -350,10 +350,7 @@ public class adminSysAdminController {
      *
      */
     @RequestMapping(value = "/data/std/update", method = RequestMethod.POST)
-    public ModelAndView updateTableData(
-            @Valid @ModelAttribute(value = "tableDataDetails") TableData tableData,
-            BindingResult result)
-            throws Exception {
+    public ModelAndView updateTableData(@Valid @ModelAttribute(value = "tableDataDetails") TableData tableData,BindingResult result) throws Exception {
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("/administrator/sysadmin/data/std/details");
@@ -433,9 +430,7 @@ public class adminSysAdminController {
     }
 
     @RequestMapping(value = "/data/nstd/lu_processstatus/create", method = RequestMethod.POST)
-    public ModelAndView createProcessStatus(
-            @Valid @ModelAttribute(value = "tableDataDetails") lu_ProcessStatus lu,
-            BindingResult result) throws Exception {
+    public ModelAndView createProcessStatus(@Valid @ModelAttribute(value = "tableDataDetails") lu_ProcessStatus lu, BindingResult result) throws Exception {
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("/administrator/sysadmin/data/std/details");
@@ -460,8 +455,7 @@ public class adminSysAdminController {
     }
 
     @RequestMapping(value = "/data/nstd/lu_ProcessStatus/tableData", method = RequestMethod.GET)
-    public ModelAndView viewProcessStatus(@RequestParam(value = "i", required = false) Integer i)
-            throws Exception {
+    public ModelAndView viewProcessStatus(@RequestParam(value = "i", required = false) Integer i) throws Exception {
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("/administrator/sysadmin/data/std/details");
@@ -478,9 +472,7 @@ public class adminSysAdminController {
     }
 
     @RequestMapping(value = "/data/nstd/lu_processstatus/update", method = RequestMethod.POST)
-    public ModelAndView updateProcessStatus(
-            @Valid @ModelAttribute(value = "tableDataDetails") lu_ProcessStatus lu,
-            BindingResult result) throws Exception {
+    public ModelAndView updateProcessStatus(@Valid @ModelAttribute(value = "tableDataDetails") lu_ProcessStatus lu,BindingResult result) throws Exception {
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("/administrator/sysadmin/data/std/details");
@@ -488,9 +480,7 @@ public class adminSysAdminController {
         mav.addObject("formId", "tabledataform");
         ProcessCategoryList categoryList = new ProcessCategoryList();
         mav.addObject("categoryList", categoryList.getCategories());
-        /**
-         * check for error *
-         */
+       
         if (result.hasErrors()) {
             mav.addObject("btnValue", "lu_ProcessStatus/update");
             mav.addObject("submitBtnValue", "Update");

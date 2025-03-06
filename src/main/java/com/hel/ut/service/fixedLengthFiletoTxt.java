@@ -131,11 +131,12 @@ public class fixedLengthFiletoTxt {
 		    newFile.createNewFile();
 		    newfileName = newFile.getName();
 		}
-
+                
 		try {
 		    FileWriter fw = new FileWriter(newFile, true);
 		    
 		    String fileRecords = (String) myMethod.invoke(CCDObj, new Object[]{directory + actualFileName + ".txt"});
+                    
 		    if (fileRecords.equalsIgnoreCase("")) {
 			newfileName = "FILE IS NOT TXT ERROR";
 		    }

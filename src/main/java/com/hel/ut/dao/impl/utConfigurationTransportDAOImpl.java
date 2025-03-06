@@ -25,6 +25,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.Objects;
 import org.hibernate.HibernateException;
 import org.hibernate.query.MutationQuery;
@@ -562,8 +563,8 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<configurationMessageSpecs> getConfigurationMessageSpecsForOrgTransport(Integer orgId, Integer transportMethodId, boolean getZeroMessageTypeCol) {
+       
         try {
-
             String sql = ("select * "
 		    + "from configurationMessageSpecs "
 		    + "where configId in ("
@@ -596,30 +597,44 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
     public List<configurationTransport> getConfigTransportForFileExtAndPath(String fileExt, Integer transportMethodId, Integer status, Integer transportDetailsId) {
-        try {
-	    
-	    String sql = "select b.delimChar, c.containsHeaderRow , a.fileDelimiter, a.fileLocation, a.encodingId "
-		    + "from configurationTransportDetails a inner join "
-		    + "ref_delimiters b on b.id = a.fileDelimiter inner join "
-		    + "configurationMessageSpecs c on c.configId = a.configId inner join "
-		    + "configurations d on d.id = a.configId "
-		    + "where a.id = :transportDetailId and a.fileExt = :fileExt and a.transportMethodId = :transportMethodId "
-		    + "and d.type = 1 and d.status = :status";
-	  
-            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
-            .setParameter("fileExt", fileExt)
-            .setParameter("transportMethodId", transportMethodId)
-            .setParameter("status", status)
-            .setParameter("transportDetailId", transportDetailsId);
+      
+         String sql = "select a.*,"      
+        + "b.delimChar, c.containsHeaderRow "
+        + "from configurationTransportDetails a inner join "
+        + "ref_delimiters b on b.id = a.fileDelimiter inner join "
+        + "configurationMessageSpecs c on c.configId = a.configId inner join "
+        + "configurations d on d.id = a.configId "
+        + "where a.id = :transportDetailId and a.fileExt = :fileExt and a.transportMethodId = :transportMethodId "
+        + "and d.type = 1 and d.status = :status";
 
-            List<configurationTransport> configurationTransports = query.list();
+        Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
+        .addScalar("delimChar", StandardBasicTypes.STRING)
+        .addScalar("containsHeaderRow", StandardBasicTypes.BOOLEAN)
+        .setParameter("fileExt", fileExt)
+        .setParameter("transportMethodId", transportMethodId)
+        .setParameter("status", status)
+        .setParameter("transportDetailId", transportDetailsId);
 
-            return configurationTransports;
+        List<Object[]> results = query.getResultList();
+        
+        List<configurationTransport> configurationTransports = new ArrayList<>();
 
-        } catch (Exception ex) {
-            System.err.println("getConfigTransportForConfigIds " + ex.getCause());
-            return null;
-        }
+        results.stream().forEach((record) -> {
+            
+           configurationTransport transport = new configurationTransport();
+           
+           configurationTransport transportDetails = (configurationTransport) record[0];
+           transport.setFileDelimiter(transportDetails.getFileDelimiter());
+           transport.setFileLocation(transportDetails.getFileLocation());
+           transport.setEncodingId(transportDetails.getEncodingId());
+           
+           transport.setDelimChar((String) record[1]);
+           transport.setContainsHeaderRow((Boolean) record[2]);
+           
+           configurationTransports.add(transport);
+        });
+
+        return configurationTransports;
     }
 
     @Override
@@ -736,9 +751,11 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
     @SuppressWarnings("unchecked")
     public List<Integer> getConfigCount(String fileExt, Integer transportMethodId, Integer fileDelimiter) {
         try {
+            
             String sql = (" select configId from configurationTransportDetails "
-                    + " where transportmethodid = :transportMethodId and fileext = :fileExt "
-                    + " and filedelimiter = :fileDelimiter");
+            + " where transportmethodid = :transportMethodId and fileext = :fileExt "
+            + " and filedelimiter = :fileDelimiter");
+            
             Query query = sessionFactory.getCurrentSession().createNativeQuery(sql, String.class)
             .setParameter("fileExt", fileExt)
             .setParameter("transportMethodId", transportMethodId)
@@ -767,12 +784,23 @@ public class utConfigurationTransportDAOImpl implements utConfigurationTransport
             + " and configurationTransportDetails.fileExt = :fileExt"
             + " and configurationTransportDetails.configId in (select id from configurations where type = 1)");
             
-            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,configurationTransport.class)
+            Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,String.class)
+            .addScalar("delimChar", StandardBasicTypes.STRING)
+            .addScalar("fileDelimiter", StandardBasicTypes.INTEGER)        
             .setParameter("transportMethodId", transportMethodId)
             .setParameter("fileExt", fileExt);
-
-            List<configurationTransport> configurationTransports = query.list();
-
+            
+            List<Object[]> results = query.getResultList();
+            
+            List<configurationTransport> configurationTransports = new ArrayList<>();
+            
+            results.stream().forEach((record) -> {
+                configurationTransport transport = new configurationTransport();
+                transport.setDelimChar((String) record[1]);
+                transport.setFileDelimiter((Integer) record[2]);
+                configurationTransports.add(transport);
+             });
+            
             return configurationTransports;
 
         } catch (HibernateException ex) {

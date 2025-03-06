@@ -1,8 +1,8 @@
 
 <div th:id="${'errorTable-'+indexVal}">
-    <span th:if="${hasOutboundError > 0}">
+    <th:block th:if="${hasOutboundError > 0}">
         <span style="color:#ffe3a4;font-weight: bold;margin-top:5px;">Rows</span> = dropped values found from processing the outbound target file.
-    </span>
+    </th:block>
     <table border="1" class="table table-bordered" id="errordatatable">
         <thead>
             <tr>

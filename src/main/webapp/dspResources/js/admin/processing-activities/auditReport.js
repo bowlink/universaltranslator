@@ -122,28 +122,31 @@ jQuery(function ($) {
                     success: function (data) {
                         
                         $(".spinner-"+indexVal).hide();
-
-                        data = $(data);
-
-                        data.find('#errordatatable').dataTable({
-                            "bStateSave": true,
-                            "iCookieDuration": 60,
-                            "sPaginationType": "bootstrap",
-                             "bSort": false,
-                             "pageLength": 100,
-                             "dom": 't<"bottom"p><"clear">' ,
-                            "oLanguage": {
-                                "sSearch": "_INPUT_",
-                                "sLengthMenu": '<select class="form-control" style="width:150px">' +
-                                        '<option value="10">10 Records</option>' +
-                                        '<option value="20">20 Records</option>' +
-                                        '<option value="30">30 Records</option>' +
-                                        '<option value="40">40 Records</option>' +
-                                        '<option value="50">50 Records</option>' +
-                                        '<option value="-1">All</option>' +
-                                        '</select>'
-                            }
-                        });
+                        
+                        try {
+                            data.find('#errordatatable').dataTable({
+                                "bStateSave": true,
+                                "iCookieDuration": 60,
+                                "sPaginationType": "bootstrap",
+                                 "bSort": false,
+                                 "pageLength": 100,
+                                 "dom": 't<"bottom"p><"clear">' ,
+                                "oLanguage": {
+                                    "sSearch": "_INPUT_",
+                                    "sLengthMenu": '<select class="form-control" style="width:150px">' +
+                                            '<option value="10">10 Records</option>' +
+                                            '<option value="20">20 Records</option>' +
+                                            '<option value="30">30 Records</option>' +
+                                            '<option value="40">40 Records</option>' +
+                                            '<option value="50">50 Records</option>' +
+                                            '<option value="-1">All</option>' +
+                                            '</select>'
+                                }
+                            });
+                        }
+                        catch (error) {
+                            
+                        }
 
                         $(".errorList-"+indexVal).html(data);
                     }

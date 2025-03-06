@@ -21,10 +21,10 @@ jQuery(function ($) {
             },
            "aoColumns" : [
                 { "sWidth": "5%" },
-                { "sWidth": "30%" },
-                { "sWidth": "30%" },
-                { "sWidth": "30%" },
-                { "sWidth": "5%" },
+                { "sWidth": "35%" },
+                { "sWidth": "40%" },
+                { "sWidth": "15" },
+                { "sWidth": "5%","bSortable":false }
             ]
         });
 

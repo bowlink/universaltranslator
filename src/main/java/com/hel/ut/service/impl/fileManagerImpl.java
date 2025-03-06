@@ -11,21 +11,21 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Service;
 import com.hel.ut.service.fileManager;
 import java.nio.charset.StandardCharsets;
-import org.apache.commons.io.FilenameUtils;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Base64;
 
 @Service
 public class fileManagerImpl implements fileManager {
 
     public String encodeFileToBase64Binary(File file) throws IOException {
         try {
-            byte[] bytes = fileToBytes(file);
-            byte[] encoded = Base64.encodeBase64(bytes);
-            String encodedString = new String(encoded);
+            byte[] fileBytes = fileToBytes(file);
+            String encodedString = Base64.getEncoder().encodeToString(fileBytes);
 
             return encodedString;
         } catch (Exception ex) {
@@ -38,7 +38,8 @@ public class fileManagerImpl implements fileManager {
     public String decodeFileToBase64Binary(File file) throws IOException {
         try {
             byte[] bytes = fileToBytes(file);
-            byte[] decoded = Base64.decodeBase64(bytes);
+            
+            byte[] decoded = Base64.getDecoder().decode(bytes);
             
             String decodedString = null;
             
@@ -63,24 +64,12 @@ public class fileManagerImpl implements fileManager {
     @SuppressWarnings("resource")
     public byte[] fileToBytes(File file) throws IOException {
         try {
-            InputStream is = new FileInputStream(file);
-
-            long length = file.length();
-            byte[] bytes = new byte[(int) length];
-
-            int offset = 0;
-            int numRead = 0;
-            while (offset < bytes.length
-                    && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
-                offset += numRead;
-            }
-
-            if (offset < bytes.length) {
-                throw new IOException("Could not completely read file " + file.getName());
-            }
-
-            is.close();
-            return bytes;
+            
+            Path path = Paths.get(file.getAbsolutePath());
+            
+            byte[] fileBytes = Files.readAllBytes(path);
+            
+            return fileBytes;
 
         } catch (Exception ex) {
             System.err.println("fileToBytes -" + ex.getLocalizedMessage());
@@ -134,16 +123,10 @@ public class fileManagerImpl implements fileManager {
 
     @Override
     public void decode(String sourceFile, String targetFile) throws Exception {
-	byte[] fileAsBytes = loadFileAsBytesArray(sourceFile);
-	byte[] decodedBytes;
 	
-	if(Base64.isArrayByteBase64(fileAsBytes)) {
-	    decodedBytes = Base64.decodeBase64(fileAsBytes);
-	}
-	else {
-	    decodedBytes = fileAsBytes;
-	}
-        
+        byte[] fileAsBytes = fileToBytes(new File(sourceFile));
+	byte[] decodedBytes = Base64.getDecoder().decode(fileAsBytes);
+	
         writeByteArraysToFile(targetFile, decodedBytes);
     }
     
@@ -178,100 +161,59 @@ public class fileManagerImpl implements fileManager {
     
     public boolean isFileBase64Encoded(File file, String delimiter) throws Exception {
 	
-	String fileExt = FilenameUtils.getExtension(file.getName());
-	
 	boolean isEncoded = false;
 	
-	if("txt".equals(fileExt) || "csv".equals(fileExt)) {
-	    try {
-		//Read the first line of the file
-		BufferedReader brTest = new BufferedReader(new FileReader(file));
-		String firstLineText = brTest.readLine().substring(0,10);
+	String fileContents = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+        
+        boolean base64DecoderTest = false;
+        boolean base64CommonsCodecTest = false;
+        boolean base64RegExTest = false;
+        
+        if(fileContents == null) {
+            return false;
+        }
+        else {
+            if("".equals(fileContents)) {
+                return false;
+            }
+            else {
                 
-                byte[] decodedBytes = Base64.decodeBase64(firstLineText);
-                
-                String test = "";
-                
-                if(firstLineText.startsWith("//")) {
-                    isEncoded = true;
+                try {
+                    Base64.getDecoder().decode(fileContents);
+                    base64DecoderTest =  true;
+                } catch (IllegalArgumentException e) {
+                    base64DecoderTest =  false;
                 }
-                else if(firstLineText.startsWith("/")) {
-                    isEncoded = true;
+                
+                try {
+                    base64CommonsCodecTest = org.apache.commons.codec.binary.Base64.isBase64(fileContents);
+                } catch (IllegalArgumentException e) {
+                    base64CommonsCodecTest =  false;
+                }
+                
+                base64RegExTest = fileContents.matches("^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$");
+                
+                Integer testWeight = 0;
+                
+                if(base64DecoderTest) {
+                    testWeight += 1;
+                }
+                
+                if(base64CommonsCodecTest) {
+                    testWeight += 1;
+                }
+                
+                if(base64RegExTest) {
+                    testWeight += 1;
+                }
+                
+                if(testWeight > 1) {
+                    return true;
                 }
                 else {
-                    test = new String(decodedBytes);
+                    return false;
                 }
-                
-                if(!isEncoded) {
-                    if(firstLineText.equals(Base64.encodeBase64String(test.getBytes()))) {
-                        isEncoded = true;
-                    }
-                    else {
-                        isEncoded = false;
-                    }
-                }
-		brTest.close();
-	    }
-	    catch(IOException ex) {
-		byte[] bytes = fileToBytes(file);
-		isEncoded = Base64.isBase64(bytes);
-	    }
-	    catch(Exception ex) {
-		byte[] bytes = fileToBytes(file);
-		isEncoded = Base64.isBase64(bytes);
-	    }
-	    
-	    //Try the full line and not a subset
-	    if(!isEncoded) {
-		try {
-		    //Read the first line of the file
-		    BufferedReader brTest = new BufferedReader(new FileReader(file));
-		    String firstLineText = brTest.readLine();
-
-		    String test = new String(Base64.decodeBase64(firstLineText));
-
-		    if(firstLineText.equals(Base64.encodeBase64String(test.getBytes()))) {
-			isEncoded = true;
-		    }
-		    else {
-			isEncoded = false;
-		    }
-		    brTest.close();
-		}
-		catch(IOException ex) {
-		    isEncoded = false;
-		}
-		catch(Exception ex) {
-		    isEncoded = false;
-		}
-	    }
-	    
-	    //If false make sure file contains correct delim
-	    if(!isEncoded && !"".equals(delimiter)) {
-		 BufferedReader delimTest = new BufferedReader(new FileReader(file));
-		 String firstLine = delimTest.readLine();
-		 
-		 if("tab".equals(delimiter)) {
-		    if(!firstLine.contains("\t")) {
-			isEncoded = true;
-		    }  
-		 }
-		 else if("f".equals(delimiter)) {
-		     isEncoded = true;
-		 }
-		 else {
-		    if(!firstLine.contains(delimiter)) {
-			isEncoded = true;
-		    } 
-		 }
-		 delimTest.close();
-	    }
-	    
-	    return isEncoded;
-	}
-	else {
-	  byte[] bytes = fileToBytes(file);
-	  return Base64.isBase64(bytes);
-	}
+            }
+        }
     }
 }

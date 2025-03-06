@@ -140,7 +140,7 @@ jQuery(function ($) {
                 {
                     "mData": "orgName", 
                     "defaultContent": "",
-                    "bSortable":true,
+                    "bSortable":false,
                     "sWidth": "10%",
                     "className": "center-text actions-col",
                     "render": function ( data, type, row, meta ) {

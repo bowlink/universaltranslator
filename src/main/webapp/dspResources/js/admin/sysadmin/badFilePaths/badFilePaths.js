@@ -29,7 +29,7 @@ jQuery(function ($) {
                 { "sWidth": "45%" },
                 { "sWidth": "20%" },
                 { "sWidth": "20%" },
-                { "sWidth": "15%" },
+                { "sWidth": "15%","bSortable":false }
             ]
         });
 
@@ -49,7 +49,7 @@ jQuery(function ($) {
                         'pathId': pathId
                     },
                     success: function(data) {
-                        window.location.href='/administrator/sysadmin/moveFilePaths?msg=deleted'
+                        window.location.href='/administrator/sysadmin/badFilePaths?msg=deleted'
                     }
                 });
             }

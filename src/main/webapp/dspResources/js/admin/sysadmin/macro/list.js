@@ -20,10 +20,10 @@ jQuery(function ($) {
                         '</select>'
             },
            "aoColumns" : [
-                { "sWidth": "25%" },
-                { "sWidth": "30%" },
-                { "sWidth": "30%" },
-                { "sWidth": "5%" },
+                { "sWidth": "20%" },
+                { "sWidth": "40%" },
+                { "sWidth": "35%" },
+                { "sWidth": "5%","bSortable":false }
             ]
         });
     

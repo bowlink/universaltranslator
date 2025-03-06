@@ -49,8 +49,9 @@
                                         <p>
                                             <strong>Configuration Name:</strong> 
                                             <br />
-                                            <span th:if="${batchDetails.configId > 0 and batchDetails.configName == 'bowlinkTest'}"> Macro Test Configuration</span>
-                                            <span th:if="${batchDetails.configId > 0 and batchDetails.configName == 'Bowlink Test Target'}"> Macro Test Configuration</span>
+                                            <span th:if="${batchDetails.configId > 0 and batchDetails.configName == 'bowlinkTest'}"><a th:href="${'/administrator/configurations/details?i='+batchDetails.configId}">Macro Test Configuration</a></span>
+                                            <span th:if="${batchDetails.configId > 0 and batchDetails.configName == 'Bowlink Test Target'}"><a th:href="${'/administrator/configurations/details?i='+batchDetails.configId}">Macro Test Configuration</a></span>
+                                            <span th:if="${batchDetails.configId == 0}"> Not Found</span>
                                             <span th:if="${batchDetails.configId > 0 and batchDetails.configName != 'bowlinkTest' and batchDetails.configName != 'Bowlink Test Target'}"><a th:href="${'/administrator/configurations/details?i='+batchDetails.configId}"><span th:text="${batchDetails.configName}"></span></a></span>
                                         </p>
                                     </div>
@@ -163,6 +164,12 @@
                                                 <li th:unless="${!batchDownload}">
                                                     <a th:href="'/administrator/processing-activity/outbound/batchActivities/'+${batchDetails.utBatchName}" title="View Batch Activities">
                                                         <span class="glyphicon glyphicon-edit"></span> View Batch Activities
+                                                    </a>
+                                                </li>
+                                                <li class="divider" th:if="${batchDownload}"></li> 
+                                                <li th:if="${batchDownload}">
+                                                    <a th:href="'/administrator/processing-activity/inbound/auditReport/'+${batchDetails.fromBatchName}" title="View Related Inbound Batch Audit Report">
+                                                        <span class="glyphicon glyphicon-edit"></span> View Related Inbound Batch Audit Report
                                                     </a>
                                                 </li>
                                                 <li class="divider"></li> 

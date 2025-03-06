@@ -23,7 +23,7 @@ jQuery(function ($) {
                 { "sWidth": "30%" },
                 { "sWidth": "55%" },
                 { "sWidth": "10%" },
-                { "sWidth": "5%" },
+                { "sWidth": "5%","bSortable":false }
             ]
         });
 

@@ -224,7 +224,7 @@
                                                        <option value="">- Select -</option>
                                                        <option th:each="hisp : ${hisps}" th:selected="${directMessageFields.hispId == hisp.id ? 'true' : 'false'}" th:value="${hisp.id}" th:text="${hisp.hispName}"></option>
                                                     </select>
-                                                   <span id="encodingMsg" class="control-label"></span>
+                                                   <span id="hispMsg" class="control-label"></span>
                                                </div>
                                                <th:block th:if="${configurationDetails.type == 1}">
                                                     <div class="form-group directDomainDiv">
@@ -329,8 +329,8 @@
                                         <div class="row">
                                             <th:block th:each="ftpDetails, field : ${transportDetails.FTPfields}">
                                                 <th:block th:if="${ftpDetails.method == 1}">
-                                                    <input th:name="${'FTPfields['+field.index+'].method'}" class="form-control" type="hidden" th:value="${ftpDetails.method}" />
-                                                    <input th:name="${'FTPfields['+field.index+'].id'}" th:id="${'id'+ftpDetails.method}" class="form-control ftpDetailId" type="text" th:value="${ftpDetails.id}" />
+                                                    <input type="hidden" th:name="${'FTPfields['+field.index+'].method'}" class="form-control" th:value="${ftpDetails.method}" />
+                                                    <input type="hidden" th:name="${'FTPfields['+field.index+'].id'}" th:id="${'id'+ftpDetails.method}" class="form-control ftpDetailId" th:value="${ftpDetails.id}" />
                                                     <div class="form-group col-md-6">
                                                         <div th:id="${'protocol'+ftpDetails.method+'Div'}" class="form-group">
                                                             <label class="control-label" th:for="${'protocol'+ftpDetails.method}">Protocol *</label>
