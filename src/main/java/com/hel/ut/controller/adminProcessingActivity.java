@@ -2561,8 +2561,6 @@ public class adminProcessingActivity {
 	if(reportableFields != null && errorId != 5) {
 	    Iterator reportableFieldsIt = reportableFields.iterator();
             
-            System.out.println(customCols.size());
-	
 	    while (reportableFieldsIt.hasNext()) {
 		Object rptFieldrow[] = (Object[]) reportableFieldsIt.next();
 		customCols.add(rptFieldrow[1].toString());
@@ -2570,8 +2568,6 @@ public class adminProcessingActivity {
 		customCols.add(rptFieldrow[3].toString());
 		customCols.add(rptFieldrow[4].toString());
 	    }
-            
-             System.out.println(customCols.size());
 	}
 		
 	mav.addObject("customCols", customCols);
