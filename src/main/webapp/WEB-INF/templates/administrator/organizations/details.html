@@ -70,7 +70,8 @@
                                             </div>  
                                             <div id="helRegistryId">
                                                 <div id="helRegistryIdDiv" class="form-group">
-                                                    <label for="orgType">Is this organization from a Health-e-Link Registry?</label>
+                                                    <label for="orgType" th:if="${eahUT == 'false'}">Is this organization from a Health-e-Link Registry?</label>
+                                                    <label for="orgType" th:unless="${eahUT == 'false'}">Associate this Organization to the front-end website?</label>
                                                     <select id="isHELRegistry" class="form-control">
                                                         <option value="">- Select -</option>
                                                         <option value="1" th:selected="*{helRegistryId > 0 ? 'true' : 'false'}">Yes</option>
