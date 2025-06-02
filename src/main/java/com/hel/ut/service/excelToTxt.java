@@ -13,21 +13,20 @@ import com.hel.ut.model.utConfiguration;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintStream;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.io.FileInputStream;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
+import jakarta.annotation.Resource;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.monitorjbl.xlsx.StreamingReader;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
-import jakarta.annotation.Resource;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -96,12 +95,10 @@ public class excelToTxt {
 
 	try {
 	    FileWriter fw = new FileWriter(newFile);
-	    InputStream is = new FileInputStream(inputFile);
-	    Workbook workbook = StreamingReader.builder()
-            .rowCacheSize(100)    // number of rows to keep in memory (defaults to 10)
-            .bufferSize(4096)     // buffer size to use when reading InputStream to file (defaults to 1024)
-            .open(is);            // InputStream or File for XLSX file (required)
-
+	    FileInputStream is = new FileInputStream(inputFile);
+            
+            Workbook workbook = new XSSFWorkbook(is);
+	    
 	    Sheet datatypeSheet = workbook.getSheetAt(0);
 	      
 	    DataFormatter formatter = new DataFormatter();

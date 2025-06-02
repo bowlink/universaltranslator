@@ -1326,7 +1326,7 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
 	    utConfiguration configDetails = getConfigurationById(messageSpecs.getConfigId());
            
             //Set the initial value of the field number (0);
-            Integer fieldNo = new Integer(0);
+            Integer fieldNo = 0;
 
             //Create Workbook instance holding reference to .xlsx file
             OPCPackage pkg = null;

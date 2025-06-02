@@ -81,8 +81,8 @@ public class restful {
      public void consumePostAPICall(HttpServletResponse response,HttpServletRequest request) throws Exception {
 	 
 	JSONObject obj = new JSONObject();
-	obj.put("status", new Integer(HttpServletResponse.SC_UNAUTHORIZED));
-	 obj.put("Message", "Invalid Credentials");
+	obj.put("status", Integer.valueOf(HttpServletResponse.SC_UNAUTHORIZED));
+	obj.put("Message", "Invalid Credentials");
 	    
 	response.setContentType("application/json");
 	response.setCharacterEncoding("UTF-8");
@@ -128,17 +128,17 @@ public class restful {
 			if (transportDetails != null) {
 			    if (!isUserAuthenticated(credvalues, request.getRequestURL().toString())) {
 				
-				obj.put("status", new Integer(HttpServletResponse.SC_UNAUTHORIZED));
+				obj.put("status", Integer.valueOf(HttpServletResponse.SC_UNAUTHORIZED));
 				obj.put("Message", "Invalid Credentials");
 			    } 
 			    else {
 				
 				if(jsonSent == null) {
-				    obj.put("status", new Integer(HttpServletResponse.SC_BAD_REQUEST));
+				    obj.put("status", Integer.valueOf(HttpServletResponse.SC_BAD_REQUEST));
 				    obj.put("Message", "Empty Message");
 				}
 				else if(jsonSent.isEmpty()) {
-				    obj.put("status", new Integer(HttpServletResponse.SC_BAD_REQUEST));
+				    obj.put("status", Integer.valueOf(HttpServletResponse.SC_BAD_REQUEST));
 				    obj.put("Message", "Empty Message");
 				}
 				else {
@@ -159,7 +159,7 @@ public class restful {
 					envelopeInfo = JsonPath.using(conf).parse(jsonSent).read("$", type);
 				    }
 				    catch (Exception ex) {
-					obj.put("status", new Integer(HttpServletResponse.SC_BAD_REQUEST));
+					obj.put("status", Integer.valueOf(HttpServletResponse.SC_BAD_REQUEST));
 					obj.put("Message", "Invalid JSON Payload!");
 				    }
 				    
@@ -171,7 +171,7 @@ public class restful {
 					    attachmentList = JsonPath.using(conf).parse(jsonSent).read("$.messageAttachmentList.*", type);    
 					}
 					catch (Exception ex) {
-					    obj.put("status", new Integer(HttpServletResponse.SC_BAD_REQUEST));
+                                            JSONObject put = obj.put("status", Integer.valueOf(HttpServletResponse.SC_BAD_REQUEST));
 					    obj.put("Message", "Invalid JSON Attachment List");
 					}
 				    }
@@ -182,9 +182,9 @@ public class restful {
 					String attachmentTitle = "";
 					Integer attachmentSize = 0;
 					for(eReferralAPIAttachmentList attachment : attachmentList) {
-					    if(Integer.parseInt(attachment.getAttachmentSize()) > attachmentSize) {
+					    if(Integer.valueOf(attachment.getAttachmentSize()) > attachmentSize) {
 						attachmentContent = attachment.getAttachmentContent();
-						attachmentSize = Integer.parseInt(attachment.getAttachmentSize());
+						attachmentSize = Integer.valueOf(attachment.getAttachmentSize());
 						attachmentTitle = attachment.getAttachmentTitle();
 					    }
 					}
@@ -233,58 +233,53 @@ public class restful {
 						Integer newRestAPIMessageID = transactionInManager.insertRestApiMessage(newRestAPIMessage);
 
 						if(newRestAPIMessageID > 0 && statusId == 1) {
-						    obj.put("status", new Integer(HttpServletResponse.SC_OK));
+						    obj.put("status", Integer.valueOf(HttpServletResponse.SC_OK));
 						    obj.put("Message", "Successfully received and processed your message.");
 						    
 						    //Call the method to start processing this message immediately
 						    transactionInManager.processRestAPIMessages();
 						}
 						else {
-						   obj.put("status", new Integer(HttpServletResponse.SC_EXPECTATION_FAILED));
+						   obj.put("status", Integer.valueOf(HttpServletResponse.SC_EXPECTATION_FAILED));
 						   obj.put("Message", "Failed to process your message.");
 						}
 
 					    }
 					    else {
-						obj.put("status", new Integer(HttpServletResponse.SC_BAD_REQUEST));
+						obj.put("status", Integer.valueOf(HttpServletResponse.SC_BAD_REQUEST));
 						obj.put("Message", "Received attachment extension (" + FilenameUtils.getExtension(attachmentTitle).toLowerCase()+ ") does not match the expected file extension - .");
 					    }
 					}
 					else {
-					    obj.put("status", new Integer(HttpServletResponse.SC_BAD_REQUEST));
+					    obj.put("status", Integer.valueOf(HttpServletResponse.SC_BAD_REQUEST));
 					    obj.put("Message", "Missing message attachments.");
 					}
 				    }
 				    else {
-					obj.put("status", new Integer(HttpServletResponse.SC_BAD_REQUEST));
+					obj.put("status", Integer.valueOf(HttpServletResponse.SC_BAD_REQUEST));
 					obj.put("Message", "sending rest message is invalid");
 				    }
 				}
 			    }
 			} else {
-			    obj.put("status", new Integer(HttpServletResponse.SC_BAD_REQUEST));
+			    obj.put("status", Integer.valueOf(HttpServletResponse.SC_BAD_REQUEST));
 			    obj.put("Message", "Bad Request");
-			    //response.setStatus((HttpServletResponse.SC_BAD_REQUEST));
 			}
 		    } else {
-			obj.put("status", new Integer(HttpServletResponse.SC_BAD_REQUEST));
+			obj.put("status", Integer.valueOf(HttpServletResponse.SC_BAD_REQUEST));
 			obj.put("Message", "Bad Request");
-			//response.setStatus((HttpServletResponse.SC_BAD_REQUEST));
 		    }
 		} else {
-		    obj.put("status", new Integer(HttpServletResponse.SC_UNAUTHORIZED));
+		    obj.put("status", Integer.valueOf(HttpServletResponse.SC_UNAUTHORIZED));
 		    obj.put("Message", "Invalid Credentials");
-		    //response.setStatus((HttpServletResponse.SC_UNAUTHORIZED));
 		}
 	    } else {
-		obj.put("status", new Integer(HttpServletResponse.SC_UNAUTHORIZED));
+		obj.put("status", Integer.valueOf(HttpServletResponse.SC_UNAUTHORIZED));
 		obj.put("Message", "Invalid Credentials");
-		//response.setStatus((HttpServletResponse.SC_UNAUTHORIZED));
 	    }
 	} else {
-	    obj.put("status", new Integer(HttpServletResponse.SC_UNAUTHORIZED));
+	    obj.put("status", Integer.valueOf(HttpServletResponse.SC_UNAUTHORIZED));
 	    obj.put("Message", "Invalid Credentials");
-	    //response.setStatus((HttpServletResponse.SC_UNAUTHORIZED));
 	}
 	
 	response.setContentType("application/json");
@@ -337,7 +332,5 @@ public class restful {
 	}
 	
 	return userAuthenticated;
-
     }
-
 }
