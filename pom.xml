@@ -21,15 +21,14 @@
 	<hibernate-core.version>6.1.7.Final</hibernate-core.version>
 	<hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
 	<junit.version>4.13.1</junit.version>
-	<mysql-connector.version>8.0.33</mysql-connector.version>
-        <commons-io.version>2.15.1</commons-io.version>
+        <mysql-connector.version>9.3.0</mysql-connector.version>
+        <commons-io.version>2.19.0</commons-io.version>
         <commons-net.version>3.10.0</commons-net.version>
 	<jackson-databind.version>2.18.2</jackson-databind.version>
 	<jackson-core.version>2.18.2</jackson-core.version>
 	<jackson-annotations.version>2.18.2</jackson-annotations.version>
-	<poi.version>4.1.2</poi.version>
-	<poi-ooxml.version>4.1.2</poi-ooxml.version>
-        <poi-ooxml-schemas.version>4.1.2</poi-ooxml-schemas.version>
+	<poi.version>5.4.1</poi.version>
+	<poi-ooxml.version>5.4.1</poi-ooxml.version>
 	<quartz.version>2.5.0</quartz.version>
 	<commons-validator.version>1.6</commons-validator.version>
         <tomcat-jdbc.version>9.0.6</tomcat-jdbc.version>
@@ -43,8 +42,8 @@
         <jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
         <jakarta.persistence-api.version>3.1.0</jakarta.persistence-api.version>
 	<jersey.version>1.19.4</jersey.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
   
     <dependencies>
@@ -190,8 +189,8 @@
 	</dependency>
 
 	<dependency>
-	    <groupId>mysql</groupId>
-	    <artifactId>mysql-connector-java</artifactId>
+	    <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
 	    <version>${mysql-connector.version}</version>
 	</dependency>
        
@@ -257,13 +256,8 @@
 	</dependency>
 	<dependency>
 	    <groupId>org.apache.poi</groupId>
-	    <artifactId>poi-ooxml</artifactId>
+	    <artifactId>poi-ooxml-full</artifactId>
 	    <version>${poi-ooxml.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.apache.poi</groupId>
-	    <artifactId>poi-ooxml-schemas</artifactId>
-	    <version>${poi-ooxml-schemas.version}</version>
 	</dependency>
         
 	<!-- quartz dependencies -->
