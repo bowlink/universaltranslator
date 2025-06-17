@@ -25,11 +25,11 @@
                 <fieldset name="login-fields" form="form-admin-login" class="basic-clearfix">
                     <div class="form-group" th:classappend="${error} ? 'has-error' : ''">
                         <label class="control-label" for="username">Username</label>
-                        <input id="username" name='username' class="form-control" type="text" value="cmccue" autofocus="true" placeholder="Username" required />
+                        <input id="username" name='username' class="form-control" type="text" value="" autofocus="true" placeholder="Username" required />
                     </div>
                     <div class="form-group" th:classappend="${error} ? 'has-error' : ''">
                         <label class="control-label" for="password">Password</label>
-                        <input id="password" name='password' class="form-control" type="password" value="cmccue" placeholder="Password" required />
+                        <input id="password" name='password' class="form-control" type="password" value="" placeholder="Password" required />
                     </div>
                     <input type="submit" value="Login" class="btn btn-primary pull-right" role="button"/>
                 </fieldset>
