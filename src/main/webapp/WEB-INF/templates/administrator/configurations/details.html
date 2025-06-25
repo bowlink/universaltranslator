@@ -16,7 +16,7 @@
                         <p th:if="${savedStatus != 'updated'}">The configuration has been successfully added!</p>
                     </div>
                     
-                    <form id="configuration" th:action="${configurationDetails.id > 0 ? '/administrator/configurations/details' : '/administrator/configurations/create'}" th:object="${configurationDetails}" method="post" role="form" enctype="multipart/form-data">
+                    <form id="configuration" th:action="${configurationDetails.id > 0 ? '/administrator/configurations/details' : '/administrator/configurations/create'}" th:object="${configurationDetails}" method="post" role="form">
                         <input type="hidden" id="action" name="action" value="save" />
                         <input type="hidden" th:field="*{id}"/>
                         <input type="hidden" th:field="*{dateCreated}"/>
