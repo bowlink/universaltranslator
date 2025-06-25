@@ -617,32 +617,9 @@ public class adminConfigController {
         
         //If the "Save" button was pressed 
         if (action.equals("save")) {
-            ModelAndView mav = new ModelAndView(); 
-            mav.addObject("pageId", "configuration-details");
-            mav.addObject("pageSection", "section-configurations");
-            mav.addObject("sect","config");
-            mav.addObject("actionPage","configDetails");
-
-            mav.setViewName("administrator/configurations/details");
             
-            configurationSchedules scheduleDetails = utconfigurationmanager.getScheduleDetails(configurationDetails.getId());
-        
-            if(scheduleDetails != null && !configurationDetails.isDeleted() && configurationDetails.isStatus() && ("admin".equalsIgnoreCase(userDetails.getFirstName()) || "grace".equalsIgnoreCase(userDetails.getFirstName()) || "chad".equalsIgnoreCase(userDetails.getFirstName()))) {
-                configurationDetails.setAllowExport(true);
-            }
-
-            mav.addObject("organizations", organizations);
-            mav.addObject("users", users);
-            mav.addObject("id", configurationDetails.getId());
-            mav.addObject("mappings", session.getAttribute("configmappings"));
-            mav.addObject("savedStatus", "updated");
-            mav.addObject("stepsCompleted", session.getAttribute("configStepsCompleted"));
-	    
-	    //Get a list of other active sourceconfigurations
-	    //These will show only for a target configuration
-	    List<utConfiguration> sourceConfigurations = utconfigurationmanager.getAllActiveSourceConfigurations();
-	    mav.addObject("sourceConfigurations", sourceConfigurations);
-	    
+            redirectAttr.addFlashAttribute("savedStatus", "updated");
+            ModelAndView mav = new ModelAndView(new RedirectView("/administrator/configurations/details?i="+configurationDetails.getId()));
             return mav;
         } 
         else {
