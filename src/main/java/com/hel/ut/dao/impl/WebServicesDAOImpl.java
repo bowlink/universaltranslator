@@ -95,7 +95,11 @@ public class WebServicesDAOImpl implements WebServicesDAO {
     @Override
     @Transactional(readOnly = false)
     public void saveWSMessagesOut(wsMessagesOut wsMessagesOut) throws Exception {
-        sessionFactory.getCurrentSession().saveOrUpdate(wsMessagesOut);
+        if (Objects.isNull(sessionFactory.getCurrentSession().find(wsMessagesOut.class, wsMessagesOut.getId()))) {
+            sessionFactory.getCurrentSession().persist(wsMessagesOut);
+        } else {
+            sessionFactory.getCurrentSession().merge(wsMessagesOut);
+        }
     }
 
     /**

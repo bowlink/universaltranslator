@@ -30,9 +30,7 @@ public class CrossScriptingFilter implements Filter {
         this.filterConfig = null;
     }
 
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         chain.doFilter(new RequestWrapper((HttpServletRequest) request), response);
     }
-
 }

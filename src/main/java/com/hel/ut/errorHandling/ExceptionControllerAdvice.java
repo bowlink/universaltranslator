@@ -38,14 +38,10 @@ public class ExceptionControllerAdvice {
     private userManager usermanager;
 
     @ExceptionHandler(Exception.class)
-    public ModelAndView exception(HttpSession session, Exception e, HttpServletRequest request,
-            Authentication authentication) throws Exception {
+    public ModelAndView exception(HttpSession session, Exception e, HttpServletRequest request,Authentication authentication) throws Exception {
+        
+        e.printStackTrace();
 	
-	
-	System.out.println(e.getMessage());
-
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("/exception");
         try {
             mailMessage messageDetails = new mailMessage();
 
@@ -58,10 +54,10 @@ public class ExceptionControllerAdvice {
             //we log page with error and ip of remote client if possible
             try {
                 if (request.getHeader("HTTP_X_FORWARDED_FOR") != null) {
-                    sb.append("HTTP_X_FORWARDED_FOR: " + request.getHeader("HTTP_X_FORWARDED_FOR") + "<br/>");
+                    sb.append("HTTP_X_FORWARDED_FOR: ").append(request.getHeader("HTTP_X_FORWARDED_FOR")).append("<br/>");
                 }
-                sb.append("Remote Address: " + request.getRemoteAddr() + "<br/>");
-                sb.append("Web Page: " + request.getRequestURL() + "<br/>");
+                sb.append("Remote Address: ").append(request.getRemoteAddr()).append("<br/>");
+                sb.append("Web Page: ").append(request.getRequestURL()).append("<br/>");
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -75,20 +71,20 @@ public class ExceptionControllerAdvice {
                     userInfo = usermanager.getUserByUserName(authentication.getName());
                 }
                 if (userInfo != null) {
-                    sb.append("Logged in User: " + userInfo.getFirstName() + " " + userInfo.getLastName() + " (ID: " + userInfo.getId() + ")");
+                    sb.append("Logged in User: ").append(userInfo.getFirstName()).append(" ").append(userInfo.getLastName()).append(" (ID: ").append(userInfo.getId()).append(")");
                     sb.append(System.getProperty("line.separator"));
-                    sb.append("User OrgId: " + userInfo.getOrgId());
+                    sb.append("User OrgId: ").append(userInfo.getOrgId());
                     sb.append(System.getProperty("line.separator"));
                 }
             }
 
-            sb.append("Error: " + e);
+            sb.append("Error: ").append(e);
             sb.append("<br /><br />");
-            sb.append("Time: " + new Date());
+            sb.append("Time: ").append(new Date());
             sb.append("<br /><br />");
-            sb.append("Message: " + e.getMessage());
+            sb.append("Message: ").append(e.getMessage());
             sb.append("<br /><br />");
-            sb.append("Stack Trace: " + Arrays.toString(e.getStackTrace()));
+            sb.append("Stack Trace: ").append(Arrays.toString(e.getStackTrace()));
 
             messageDetails.setMessageBody(sb.toString());
             emailMessageManager.sendEmail(messageDetails);
@@ -97,6 +93,9 @@ public class ExceptionControllerAdvice {
             ex.printStackTrace();
             System.err.println(ex.toString() + " error at exception");
         }
+        
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("/exception");
 
         return mav;
     }

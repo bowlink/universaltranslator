@@ -5,6 +5,7 @@
  */
 package com.hel.ut.service.impl;
 
+import com.hel.ut.model.emailMessage;
 import com.hel.ut.model.mailMessage;
 import com.hel.ut.service.emailMessageManager;
 import jakarta.annotation.Resource;
@@ -29,30 +30,66 @@ public class emailMessageManagerImpl implements emailMessageManager {
     @Async
     public void sendEmail(mailMessage messageDetails) throws Exception {
         
-        Properties props = new Properties();
-        props.put("mail.smtp.host", myProps.getProperty("mailserver.host"));
-        props.put("mail.smtp.port", myProps.getProperty("mailserver.port"));
-        props.put("mail.smtp.starttls.enable", "true");
-	props.put("mail.smtp.ssl.protocols", myProps.getProperty("mailserver.protocols"));
+        Properties properties = System.getProperties();
+        properties.put("mail.smtp.host", myProps.getProperty("mailserver.host"));
+        properties.put("mail.smtp.port", "" + myProps.getProperty("mailserver.port"));
+        properties.put("mail.smtp.starttls.enable", "true");
+        properties.put("mail.smtp.sendpartial", "true");
+	properties.put("mail.smtp.ssl.protocols", myProps.getProperty("mailserver.protocols"));
+	properties.put("mail.smtp.auth", "true");
         
-        Session session = Session.getInstance(props);
+        try {
+            Session session = Session.getInstance(properties);
         
-        Transport transport = session.getTransport("smtp");
+            Transport transport = session.getTransport("smtp");
+            transport.connect(myProps.getProperty("mailserver.host"), myProps.getProperty("mailserver.username"), myProps.getProperty("mailserver.password"));
 
-        transport.connect(myProps.getProperty("mailserver.host"), myProps.getProperty("mailserver.username"), myProps.getProperty("mailserver.password"));
+            emailMessage emailmessage = new emailMessage();
+            emailmessage.settoEmailAddress(myProps.getProperty("admin.email"));
+            emailmessage.setfromEmailAddress("helpdesk@health-e-link.net");
+            
+            if(!messageDetails.getMessageSubject().equals("")) {
+                emailmessage.setmessageSubject(messageDetails.getMessageSubject() + " - " + myProps.getProperty("server.identity"));
+            }
+            else {
+                emailmessage.setmessageSubject("Exception Error - " + myProps.getProperty("server.identity"));
+            }
+            emailmessage.setmessageBody(messageDetails.getMessageBody());
 
-        Message message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(messageDetails.getFromEmailAddress()));
-        InternetAddress[] address = {new InternetAddress(messageDetails.getToEmailAddress())};
-        message.setRecipients(Message.RecipientType.TO, address);
-        message.setReplyTo(InternetAddress.parse(messageDetails.getFromEmailAddress()));
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(emailmessage.getfromEmailAddress()));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailmessage.gettoEmailAddress()));
 
-        message.setSubject(messageDetails.getMessageSubject());
-        message.setSentDate(new Date());
-        
-        message.setContent(messageDetails.getMessageBody(), "text/html");
-        message.saveChanges();
-        transport.sendMessage(message, address);
-        transport.close();
+            InternetAddress[] replyToAddress = {new InternetAddress(emailmessage.getfromEmailAddress())};
+            message.setReplyTo(replyToAddress);
+            message.setSubject(emailmessage.getmessageSubject());
+            message.setSentDate(new Date());
+
+            message.setContent(emailmessage.getmessageBody(), "text/html; charset=utf-8");
+
+            message.saveChanges();
+
+            try {
+                transport.sendMessage(message, message.getAllRecipients());
+            }
+            catch (jakarta.mail.SendFailedException ex) {
+                if(ex.getInvalidAddresses() != null) {
+                    if(ex.getInvalidAddresses().length > 0) {
+                        Address[] invalidAddresses = ex.getInvalidAddresses();
+                        StringBuilder addressStr = new StringBuilder();
+                        for (Address address : invalidAddresses) {
+                                addressStr.append(address.toString()).append("; ");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex2) {
+                System.out.println("Exception Error: " + ex2.getMessage());
+            }
+             transport.close();
+        }
+        catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }  
     }
 }
