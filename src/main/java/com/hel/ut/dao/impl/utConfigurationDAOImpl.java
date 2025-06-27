@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
-import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -45,6 +44,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.io.FileInputStream;
 import java.util.Objects;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -1329,12 +1329,12 @@ public class utConfigurationDAOImpl implements utConfigurationDAO {
             Integer fieldNo = 0;
 
             //Create Workbook instance holding reference to .xlsx file
-            OPCPackage pkg = null;
             XSSFWorkbook workbook = null;
 
             try {
-                pkg = OPCPackage.open(new File(dir + fileName));
-                workbook = new XSSFWorkbook(pkg);
+                File inputFile = new File(dir + fileName);
+                FileInputStream is = new FileInputStream(inputFile);
+                workbook = new XSSFWorkbook(is);
             } 
             catch (Exception e1) {
                 e1.printStackTrace();

@@ -443,7 +443,7 @@ public class messageTypeDAOImpl implements messageTypeDAO {
     @Override
     @Transactional(readOnly = false)
     public void saveCrosswalkData(CrosswalkData cwData) {
-	 sessionFactory.getCurrentSession().save(cwData);
+	 sessionFactory.getCurrentSession().persist(cwData);
     }
     
     /**
