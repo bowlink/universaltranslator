@@ -2582,7 +2582,7 @@ public class adminProcessingActivity {
             Iterator<Object> iterator = errors.iterator();
             while (iterator.hasNext()) {
                 Object errorsRow[] = (Object[]) iterator.next(); 
-                if(hasOutboundError == 0 && errorsRow[0].toString().equals("true")) {
+                if(hasOutboundError == 0 && (errorsRow[0].toString().equals("true") || errorsRow[0].toString().equals("1"))) {
                     hasOutboundError = 1;
                 }
                 if(errorId != errorsRow[11]) {
