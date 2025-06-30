@@ -15,7 +15,7 @@
         </div>
     </div>
     <form id="importConfigFileForm"  enctype="multipart/form-data" method="post" role="form">
-        <input type="hidden" id="expectedExt" value="${expectedExt}" />
+        <input type="hidden" id="expectedExt" th:value="${expectedExt}" />
 
         <p style="font-weight: bold" class="text-danger">
            The importing of a configuration could take a few minutes. 

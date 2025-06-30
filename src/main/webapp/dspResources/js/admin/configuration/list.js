@@ -187,7 +187,7 @@ jQuery(function ($) {
         else if (uploadedFileExt != expectedExtension) {
             $('#importConfigFileDiv').addClass("has-error");
             $('#importConfigFileMsg').addClass("has-error");
-            $('#importConfigFileMsg').html('The configruation import file must have a .' + $('#expectedExt').val() + ' extension.');
+            $('#importConfigFileMsg').html('The configuration import file must have a .' + expectedExtension + ' extension.');
             errorFound = 1;
         }
 
@@ -270,7 +270,7 @@ jQuery(function ($) {
         else if (uploadedFileExt != expectedExtension) {
             $('#configFileDiv').addClass("has-error");
             $('#configFileMsg').addClass("has-error");
-            $('#configFileMsg').html('According to the configruation the file must have a .' + $('#expectedExt').val() + ' extension.');
+            $('#configFileMsg').html('According to the configuration the file must have a .' + expectedExtension + ' extension.');
             errorFound = 1;
         }
 
