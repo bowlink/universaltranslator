@@ -5504,7 +5504,7 @@ public class adminProcessingActivity {
 		}
 	    }
 	});
-	
+        
 	return activityReport.getFileName();
     }
     
@@ -5516,7 +5516,7 @@ public class adminProcessingActivity {
     private void generateActivityReport(Integer activityReportId) throws Exception {
 	
 	generatedActivityReports activityReport = transactionInManager.getSavedActivityReportById(activityReportId);
-
+        
 	if (activityReport != null) {
 
 	    //Get a list of agencies for the selected report
@@ -5533,7 +5533,7 @@ public class adminProcessingActivity {
 	    String fromDate = activityReport.getDateRange().split(" to ")[0];
 	    String endDate = activityReport.getDateRange().split(" to ")[1];
 	    List<batchUploads> activityReportBatches = transactionInManager.getActivityReportBatches(agencyIdList,fromDate,endDate, activityReport.getRegistryType());
-	    
+            
 	    if(!activityReportBatches.isEmpty()) {
 		File activityReportDir = new File(myProps.getProperty("ut.directory.utRootDir")+"/activityReports");
 		
@@ -5570,6 +5570,10 @@ public class adminProcessingActivity {
 		    transactionInManager.updateActivityReport(activityReport);
 		}
 	    }
+            else {
+                activityReport.setStatus(4);
+                transactionInManager.updateActivityReport(activityReport);
+            }
 	}
     }
     
