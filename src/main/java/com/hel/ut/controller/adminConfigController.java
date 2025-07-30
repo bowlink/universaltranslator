@@ -4995,108 +4995,110 @@ public class adminConfigController {
 	    boolean configImportSuccessful = true;
 	    
 	    while (((strLine = reader.readLine()) != null)){
-		//strLine = strLine.replace("[", "").replace("]", "");
-		strLine = strLine.substring(1,strLine.length()-1);
-		strArrayValues = strLine.split("\\|", -1);
-		
-		if(strArrayValues[0].equals("orgDetails")) {
-		    orgId = processImportOrgDetails(strArrayValues);
-		}
-		else if(strArrayValues[0].equals("configDetails")) {
-		    configName = strArrayValues[6];
-		    try {
-			configId = processImportConfigDetails(strArrayValues,orgId);
-		    }
-		    catch (Exception ex) {
-			processImportConfigError("Adding Config Details",configId,0,orgId,configName,ex);
-			configImportSuccessful = false;
-			break;
-		    }
-		    
-		    if(configId == 0) {
-			break;
-		    }
-		}
-		else if(strArrayValues[0].equals("transportDetails")) {
-		    try {
-			configTransportId = processImportConfigTransportDetails(strArrayValues,configId);
-		    }
-		    catch (Exception ex) {
-			processImportConfigError("Adding Transport Details",configId,0,orgId,configName,ex);
-			configImportSuccessful = false;
-			break;
-		    }
-		}
-		else if(strArrayValues[0].equals("fileDropDetails") && strArrayValues.length > 1) {
-		    try {
-			processImportConfigFileDropDetails(strArrayValues,configTransportId);
-		    }
-		    catch (Exception ex) {
-			processImportConfigError("Adding File Drop Details",configId,configTransportId,orgId,configName,ex);
-			configImportSuccessful = false;
-			break;
-		    }
-		}
-		else if(strArrayValues[0].equals("ftpDropDetails") && strArrayValues.length > 1) {
-		    try {
-			processImportConfigFTPDetails(strArrayValues,configTransportId);
-		    }
-		    catch (Exception ex) {
-			processImportConfigError("Adding FTP Details",configId,configTransportId,orgId,configName,ex);
-			configImportSuccessful = false;
-			break;
-		    }
-		}
-		else if(strArrayValues[0].equals("messageSpecDetails")) {
-		    try {
-			processImportConfigMessageSpecs(strArrayValues,configId);
-		    }
-		    catch (Exception ex) {
-			processImportConfigError("Adding Messpace Specs",configId,configTransportId,orgId,configName,ex);
-			configImportSuccessful = false;
-			break;
-		    }
-		}
-		else if(strArrayValues[0].equals("fields")) {
-		    try {
-			fieldId = processImportConfigFields(strArrayValues,configId,configTransportId);
-		    }
-		    catch (Exception ex) {
-			processImportConfigError("Adding Fields",configId,configTransportId,orgId,configName,ex);
-			configImportSuccessful = false;
-			break;
-		    }
-		}
-		else if(strArrayValues[0].equals("fieldDTS")) {
-		    try {
-			processImportConfigFieldDTS(strArrayValues,configId,fieldId);
-		    }
-		    catch (Exception ex) {
-			processImportConfigError("Adding Data Translations",configId,configTransportId,orgId,configName,ex);
-			configImportSuccessful = false;
-			break;
-		    }
-		}
-		else if(strArrayValues[0].equals("scheduleDetails")) {
-		    try {
-			processImportConfigSchedule(strArrayValues,configId);
-		    }
-		    catch (Exception ex) {
-			processImportConfigError("Adding Schedule",configId,configTransportId,orgId,configName,ex);
-			configImportSuccessful = false;
-			break;
-		    }
-		}
-		else if(strArrayValues[0].equals("crosswalks")) {
-		    try {
-			cwIds = processImportConfigCrosswalks(strArrayValues,configId, orgId, cwIds);
-		    }
-		    catch (Exception ex) {
-			processImportConfigError("Adding Croswalks",configId,configTransportId,orgId,configName,ex);
-			configImportSuccessful = false;
-			break;
-		    }
-		}
+                if(strLine.length() > 0) {
+                    //strLine = strLine.replace("[", "").replace("]", "");
+                    strLine = strLine.substring(1,strLine.length()-1);
+                    strArrayValues = strLine.split("\\|", -1);
+
+                    if(strArrayValues[0].equals("orgDetails")) {
+                        orgId = processImportOrgDetails(strArrayValues);
+                    }
+                    else if(strArrayValues[0].equals("configDetails")) {
+                        configName = strArrayValues[6];
+                        try {
+                            configId = processImportConfigDetails(strArrayValues,orgId);
+                        }
+                        catch (Exception ex) {
+                            processImportConfigError("Adding Config Details",configId,0,orgId,configName,ex);
+                            configImportSuccessful = false;
+                            break;
+                        }
+
+                        if(configId == 0) {
+                            break;
+                        }
+                    }
+                    else if(strArrayValues[0].equals("transportDetails")) {
+                        try {
+                            configTransportId = processImportConfigTransportDetails(strArrayValues,configId);
+                        }
+                        catch (Exception ex) {
+                            processImportConfigError("Adding Transport Details",configId,0,orgId,configName,ex);
+                            configImportSuccessful = false;
+                            break;
+                        }
+                    }
+                    else if(strArrayValues[0].equals("fileDropDetails") && strArrayValues.length > 1) {
+                        try {
+                            processImportConfigFileDropDetails(strArrayValues,configTransportId);
+                        }
+                        catch (Exception ex) {
+                            processImportConfigError("Adding File Drop Details",configId,configTransportId,orgId,configName,ex);
+                            configImportSuccessful = false;
+                            break;
+                        }
+                    }
+                    else if(strArrayValues[0].equals("ftpDropDetails") && strArrayValues.length > 1) {
+                        try {
+                            processImportConfigFTPDetails(strArrayValues,configTransportId);
+                        }
+                        catch (Exception ex) {
+                            processImportConfigError("Adding FTP Details",configId,configTransportId,orgId,configName,ex);
+                            configImportSuccessful = false;
+                            break;
+                        }
+                    }
+                    else if(strArrayValues[0].equals("messageSpecDetails")) {
+                        try {
+                            processImportConfigMessageSpecs(strArrayValues,configId);
+                        }
+                        catch (Exception ex) {
+                            processImportConfigError("Adding Messpace Specs",configId,configTransportId,orgId,configName,ex);
+                            configImportSuccessful = false;
+                            break;
+                        }
+                    }
+                    else if(strArrayValues[0].equals("fields")) {
+                        try {
+                            fieldId = processImportConfigFields(strArrayValues,configId,configTransportId);
+                        }
+                        catch (Exception ex) {
+                            processImportConfigError("Adding Fields",configId,configTransportId,orgId,configName,ex);
+                            configImportSuccessful = false;
+                            break;
+                        }
+                    }
+                    else if(strArrayValues[0].equals("fieldDTS")) {
+                        try {
+                            processImportConfigFieldDTS(strArrayValues,configId,fieldId);
+                        }
+                        catch (Exception ex) {
+                            processImportConfigError("Adding Data Translations",configId,configTransportId,orgId,configName,ex);
+                            configImportSuccessful = false;
+                            break;
+                        }
+                    }
+                    else if(strArrayValues[0].equals("scheduleDetails")) {
+                        try {
+                            processImportConfigSchedule(strArrayValues,configId);
+                        }
+                        catch (Exception ex) {
+                            processImportConfigError("Adding Schedule",configId,configTransportId,orgId,configName,ex);
+                            configImportSuccessful = false;
+                            break;
+                        }
+                    }
+                    else if(strArrayValues[0].equals("crosswalks")) {
+                        try {
+                            cwIds = processImportConfigCrosswalks(strArrayValues,configId, orgId, cwIds);
+                        }
+                        catch (Exception ex) {
+                            processImportConfigError("Adding Croswalks",configId,configTransportId,orgId,configName,ex);
+                            configImportSuccessful = false;
+                            break;
+                        }
+                    }
+                }
 	    }
 	    reader.close();
 	    
@@ -5628,116 +5630,120 @@ public class adminConfigController {
      */
     public String processImportConfigCrosswalks(String[] strArrayValues, Integer configId, Integer orgId, String cwIds) {
 	
-	String returnCWids = "";
-	boolean addNewCW = false;
-	
-	if("".equals(cwIds)) {
-	    addNewCW = true;
-	}
-	else {
-	    
-	    String oldCWId = cwIds.split("\\-")[0];
-	    Integer newCWId = Integer.parseInt(cwIds.split("\\-")[1]);
-	    
-	    if(oldCWId.equals(strArrayValues[1])) {
-		CrosswalkData cwData = new CrosswalkData();
-		cwData.setCrosswalkId(newCWId);
-		cwData.setSourceValue(strArrayValues[6]);
-		cwData.setTargetValue(strArrayValues[7]);
-		cwData.setDescValue(strArrayValues[8]);
-		messagetypemanager.saveCrosswalkData(cwData);
-		
-		returnCWids = strArrayValues[1] + "-" + newCWId;
-	    }
-	    else {
-		addNewCW = true;
-	    }
-	}
-	
-	if(addNewCW) {
-	    Crosswalks cw = new Crosswalks();
-	    
-	    String cwName = strArrayValues[2].trim();
-	    Integer cwId = 0;
-	    boolean newCW = false;
-            boolean checkForExistingCW = true;
-	    
-	    cw.setFileDelimiter(Integer.parseInt(strArrayValues[3]));
-	    cw.setFileName(strArrayValues[4]);
-	    
-	    if(Integer.parseInt(strArrayValues[5]) > 0) {
-		if(cwName.contains("_")) {
-		    String[] cwNameArray = cwName.split("\\_");
-		    cw.setName(configId+"_"+cwNameArray[1]);
-                    checkForExistingCW = false;
-		}
-		else {
-		    cw.setName(configId+"_"+cwName);
-                    cwName = configId+"_"+cwName;
-		}
-		cw.setOrgId(orgId);
-	    }
-	    else {
-		orgId = 0;
-		cw.setOrgId(orgId);
-		cw.setName(cwName);
-	    }
-	    
-            if(checkForExistingCW) {
-                //Need to check if the generic CW already exists
-                Crosswalks cwDetails = messagetypemanager.getCrosswalkByNameAndOrg(cwName,orgId,strArrayValues[4].trim());
+        String returnCWids = "";
+         
+        if(strArrayValues.length > 1) {
+            
+            boolean addNewCW = false;
 
-                if(cwDetails != null) {
-                    if(cwDetails.getId() > 0) {
-                        cwId = cwDetails.getId();
-                    }
+            if("".equals(cwIds)) {
+                addNewCW = true;
+            }
+            else {
+
+                String oldCWId = cwIds.split("\\-")[0];
+                Integer newCWId = Integer.parseInt(cwIds.split("\\-")[1]);
+
+                if(oldCWId.equals(strArrayValues[1])) {
+                    CrosswalkData cwData = new CrosswalkData();
+                    cwData.setCrosswalkId(newCWId);
+                    cwData.setSourceValue(strArrayValues[6]);
+                    cwData.setTargetValue(strArrayValues[7]);
+                    cwData.setDescValue(strArrayValues[8]);
+                    messagetypemanager.saveCrosswalkData(cwData);
+
+                    returnCWids = strArrayValues[1] + "-" + newCWId;
+                }
+                else {
+                    addNewCW = true;
                 }
             }
-	
-	    if(cwId == 0) {
-		newCW = true;
-		try {
-		    cwId = messagetypemanager.createCrosswalk(cw);
-		    returnCWids = strArrayValues[1] + "-" + cwId;
-		}
-		catch (Exception cwEx) {
-		    cwEx.printStackTrace();
-		}
-	    }
-	    
-	    if(newCW) {
-		CrosswalkData cwData = new CrosswalkData();
-		cwData.setCrosswalkId(cwId);
-		cwData.setSourceValue(strArrayValues[6]);
-		cwData.setTargetValue(strArrayValues[7]);
-		cwData.setDescValue(strArrayValues[8]);
-		messagetypemanager.saveCrosswalkData(cwData);
-	    }
-	    
-	    if(cwId > 0) {
-		//Update all DTS that has the old crosswalk id with the new one
-		String sqlUpdate = "update configurationdatatranslations set crosswalkId = " + cwId + ", updatedByImport = 1 where crosswalkId = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and configId = " + configId;
-		messagetypemanager.executeSQLStatement(sqlUpdate);
 
-		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 129 and configId = " + configId;
-		messagetypemanager.executeSQLStatement(sqlUpdate);
+            if(addNewCW) {
+                Crosswalks cw = new Crosswalks();
 
-		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 160 and configId = " + configId;
-		messagetypemanager.executeSQLStatement(sqlUpdate);
+                String cwName = strArrayValues[2].trim();
+                Integer cwId = 0;
+                boolean newCW = false;
+                boolean checkForExistingCW = true;
 
-		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 177 and configId = " + configId;
-		messagetypemanager.executeSQLStatement(sqlUpdate);
+                cw.setFileDelimiter(Integer.parseInt(strArrayValues[3]));
+                cw.setFileName(strArrayValues[4]);
 
-		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 195 and configId = " + configId;
-		messagetypemanager.executeSQLStatement(sqlUpdate);
+                if(Integer.parseInt(strArrayValues[5]) > 0) {
+                    if(cwName.contains("_")) {
+                        String[] cwNameArray = cwName.split("\\_");
+                        cw.setName(configId+"_"+cwNameArray[1]);
+                        checkForExistingCW = false;
+                    }
+                    else {
+                        cw.setName(configId+"_"+cwName);
+                        cwName = configId+"_"+cwName;
+                    }
+                    cw.setOrgId(orgId);
+                }
+                else {
+                    orgId = 0;
+                    cw.setOrgId(orgId);
+                    cw.setName(cwName);
+                }
 
-		sqlUpdate = "update configurationdatatranslations set constant2 = " + cwId + ", updatedByImport = 1 where constant2 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 199 and configId = " + configId;
-		messagetypemanager.executeSQLStatement(sqlUpdate);
-		
-		sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 201 and configId = " + configId;
-		messagetypemanager.executeSQLStatement(sqlUpdate);
-	    }
-	}
+                if(checkForExistingCW) {
+                    //Need to check if the generic CW already exists
+                    Crosswalks cwDetails = messagetypemanager.getCrosswalkByNameAndOrg(cwName,orgId,strArrayValues[4].trim());
+
+                    if(cwDetails != null) {
+                        if(cwDetails.getId() > 0) {
+                            cwId = cwDetails.getId();
+                        }
+                    }
+                }
+
+                if(cwId == 0) {
+                    newCW = true;
+                    try {
+                        cwId = messagetypemanager.createCrosswalk(cw);
+                        returnCWids = strArrayValues[1] + "-" + cwId;
+                    }
+                    catch (Exception cwEx) {
+                        cwEx.printStackTrace();
+                    }
+                }
+
+                if(newCW) {
+                    CrosswalkData cwData = new CrosswalkData();
+                    cwData.setCrosswalkId(cwId);
+                    cwData.setSourceValue(strArrayValues[6]);
+                    cwData.setTargetValue(strArrayValues[7]);
+                    cwData.setDescValue(strArrayValues[8]);
+                    messagetypemanager.saveCrosswalkData(cwData);
+                }
+
+                if(cwId > 0) {
+                    //Update all DTS that has the old crosswalk id with the new one
+                    String sqlUpdate = "update configurationdatatranslations set crosswalkId = " + cwId + ", updatedByImport = 1 where crosswalkId = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and configId = " + configId;
+                    messagetypemanager.executeSQLStatement(sqlUpdate);
+
+                    sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 129 and configId = " + configId;
+                    messagetypemanager.executeSQLStatement(sqlUpdate);
+
+                    sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 160 and configId = " + configId;
+                    messagetypemanager.executeSQLStatement(sqlUpdate);
+
+                    sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 177 and configId = " + configId;
+                    messagetypemanager.executeSQLStatement(sqlUpdate);
+
+                    sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 195 and configId = " + configId;
+                    messagetypemanager.executeSQLStatement(sqlUpdate);
+
+                    sqlUpdate = "update configurationdatatranslations set constant2 = " + cwId + ", updatedByImport = 1 where constant2 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 199 and configId = " + configId;
+                    messagetypemanager.executeSQLStatement(sqlUpdate);
+
+                    sqlUpdate = "update configurationdatatranslations set constant1 = " + cwId + ", updatedByImport = 1 where constant1 = " + Integer.parseInt(strArrayValues[1]) + " and updatedByImport = 0 and macroId = 201 and configId = " + configId;
+                    messagetypemanager.executeSQLStatement(sqlUpdate);
+                }
+            }
+        }
 	
 	return returnCWids;
     }
