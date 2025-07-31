@@ -2277,15 +2277,6 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		while(cwIterator.hasNext()) {
 		    Object[] cwData = cwIterator.next();
 		    
-		    fileWriter.write(cwData[0].toString());
-
-		    if("tab".equals(delimChar)) {
-			fileWriter.write("\t");
-		    }
-		    else {
-			fileWriter.write(delimChar);
-		    }
-
 		    fileWriter.write(cwData[1].toString());
 
 		    if("tab".equals(delimChar)) {
@@ -2296,6 +2287,15 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		    }
 
 		    fileWriter.write(cwData[2].toString());
+
+		    if("tab".equals(delimChar)) {
+			fileWriter.write("\t");
+		    }
+		    else {
+			fileWriter.write(delimChar);
+		    }
+
+		    fileWriter.write(cwData[3].toString());
 
 		    if(cwIterator.hasNext()) {
 			fileWriter.write(System.getProperty( "line.separator" ));
