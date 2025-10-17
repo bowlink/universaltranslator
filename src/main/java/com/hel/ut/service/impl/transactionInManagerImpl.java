@@ -1086,28 +1086,28 @@ public class transactionInManagerImpl implements transactionInManager {
                                     }
 
                                     //Check to see if the batch already exists (RESET)
-                                    batchUploads batchDetails = transactionInDAO.getBatchDetailsByOriginalFileName(fileName);
+                                    batchUploads findBatch = transactionInDAO.getBatchDetailsByOriginalFileName(fileName);
 
                                     Integer batchId = 0;
                                     boolean newBatchRecord = true;
 
-                                    if(batchDetails != null) {
+                                    if(findBatch != null) {
 
-                                        if(batchDetails.getStatusId() == 35) {
+                                        if(findBatch.getStatusId() == 35) {
                                             newBatchRecord = false;
 
-                                            batchId = batchDetails.getId();
+                                            batchId = findBatch.getId();
 
                                             //Delete old archive file
-                                            if(!"".equals(batchDetails.getUtBatchName())) {
-                                                File oldArchiveFile = new File(rootPath + orgDetails.getcleanURL() + "/input files/encoded_"+batchDetails.getUtBatchName() + fileName.substring(fileName.lastIndexOf(".")));
+                                            if(!"".equals(findBatch.getUtBatchName())) {
+                                                File oldArchiveFile = new File(rootPath + orgDetails.getcleanURL() + "/input files/encoded_"+findBatch.getUtBatchName() + fileName.substring(fileName.lastIndexOf(".")));
 
                                                 if(oldArchiveFile.exists()) {
                                                     oldArchiveFile.delete();
 
                                                     //log user activity
                                                     batchuploadactivity ba = new batchuploadactivity();
-                                                    ba.setActivity("Old archive file (encoded_" +batchDetails.getUtBatchName() + fileName.substring(fileName.lastIndexOf(".")) + ") was removed.");
+                                                    ba.setActivity("Old archive file (encoded_" +findBatch.getUtBatchName() + fileName.substring(fileName.lastIndexOf(".")) + ") was removed.");
                                                     ba.setBatchUploadId(batchId);
                                                     transactionInDAO.submitBatchActivityLog(ba);
                                                 }
@@ -1115,13 +1115,12 @@ public class transactionInManagerImpl implements transactionInManager {
 
                                             //log user activity
                                             batchuploadactivity ba = new batchuploadactivity();
-                                            ba.setActivity("New utBatchName: " + batchName + " was set for reset batchId: "+batchDetails.getId());
+                                            ba.setActivity("New utBatchName: " + batchName + " was set for reset batchId: "+findBatch.getId());
                                             ba.setBatchUploadId(batchId);
                                             transactionInDAO.submitBatchActivityLog(ba);
 
-                                            batchDetails.setUtBatchName(batchName);
-                                            transactionInDAO.submitBatchUploadChanges(batchDetails);
-
+                                            findBatch.setUtBatchName(batchName);
+                                            transactionInDAO.submitBatchUploadChanges(findBatch);
                                         }
                                     }
                                     if(newBatchRecord) {
@@ -1172,7 +1171,7 @@ public class transactionInManagerImpl implements transactionInManager {
                                     //figure out if files has distinct delimiters
                                     List<configurationTransport> transports = configurationtransportmanager.getConfigTransportForFileExtAndPath(fileExt, transportMethodId, 1, transportId);
 
-                                    batchDetails = transactionInDAO.getBatchDetails(batchId);
+                                    batchUploads batchDetails = transactionInDAO.getBatchDetails(batchId);
 
                                     String newFileName = "";
 
