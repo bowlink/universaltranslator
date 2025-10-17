@@ -1543,7 +1543,7 @@ public class transactionInManagerImpl implements transactionInManager {
                                                     //for bill rate two files (Demo and Service) are uploaded together
                                                     //and this seems to be an issue.
                                                     if(statusId == 42) {
-                                                        loadMassBatches();
+                                                        //loadMassBatches();
                                                     }
                                                 }
                                             }
