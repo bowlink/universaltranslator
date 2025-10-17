@@ -1537,6 +1537,11 @@ public class transactionInManagerImpl implements transactionInManager {
                                                 }
                                                 else {
                                                     //Quick Processing Update
+                                                    //10-17-2025
+                                                    //CM: Turned this feature off, it seemed to be causing lock issues
+                                                    //on the batchUploads table when more bill rate files are submitted
+                                                    //for bill rate two files (Demo and Service) are uploaded together
+                                                    //and this seems to be an issue.
                                                     if(statusId == 42) {
                                                         loadMassBatches();
                                                     }
