@@ -2813,8 +2813,14 @@ public class transactionInManagerImpl implements transactionInManager {
 			if ("f".equals(delimChar)) {
 			    delimChar = "|";
 			}
+                        
+                        boolean containsHeaderRow = batch.isContainsHeaderRow();
+                        
+                        if(!containsHeaderRow && configSpecs.isContainsHeaderRow()) {
+                            containsHeaderRow = true;
+                        }
 			
-			int errorHere = insertLoadData(batch.getId(), batch.getConfigId(), delimChar, actualFileName, "transactionInRecords_" + batch.getId(), batch.isContainsHeaderRow(), totalHeaderRows, lineTerminator);
+			int errorHere = insertLoadData(batch.getId(), batch.getConfigId(), delimChar, actualFileName, "transactionInRecords_" + batch.getId(), containsHeaderRow, totalHeaderRows, lineTerminator);
 
 			if (errorHere > 0) {
                             
@@ -2864,7 +2870,7 @@ public class transactionInManagerImpl implements transactionInManager {
                                 ba.setBatchUploadId(batchId);
                                 transactionInDAO.submitBatchActivityLog(ba);
                                 
-                                errorHere = insertLoadData(batch.getId(), batch.getConfigId(), delimChar, actualFileName, "transactionInRecords_" + batch.getId(), batch.isContainsHeaderRow(), totalHeaderRows, lineTerminator);
+                                errorHere = insertLoadData(batch.getId(), batch.getConfigId(), delimChar, actualFileName, "transactionInRecords_" + batch.getId(), containsHeaderRow, totalHeaderRows, lineTerminator);
                                 
                                 if (errorHere > 0) {
                             
