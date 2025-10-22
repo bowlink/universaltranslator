@@ -1297,6 +1297,9 @@ public class transactionInDAOImpl implements transactionInDAO {
 		    }
 		}
 	    }
+            
+            System.out.println(totalHeaderRows);
+            System.out.println(ignoreSyntax);
 	   
 	    List<configurationFormFields> configFormFields = configurationtransportmanager.getConfigurationFields(configId, 0);
 
@@ -1348,6 +1351,8 @@ public class transactionInDAOImpl implements transactionInDAO {
 	    
 	    String sql = ("LOAD DATA LOCAL INFILE '" + fileWithPath + "' INTO TABLE " + loadTableName + " fields terminated by '" + delimChar + "' "
 	    + " optionally ENCLOSED BY '\"' ESCAPED BY '\\b' LINES TERMINATED BY '" + lineTerminator + "'  " + ignoreSyntax  + " (");
+            
+            System.out.println(sql);
 	    
 	    String fieldSql = "";
 	    for (int i = 1; i <= totalFields; i++) {
