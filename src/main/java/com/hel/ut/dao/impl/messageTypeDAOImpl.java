@@ -372,9 +372,10 @@ public class messageTypeDAOImpl implements messageTypeDAO {
             sql += "where a.orgId = ";
 	}	  
         else {
-            sql += "where a.id not in (select crosswalkId from configurationdatatranslations where configId = :configId) ";
-            sql += "and a.id not in (select constant1 from configurationdatatranslations where macroId in (129,160,177,195,199,201) and configId = :configId) ";
-            sql += "and a.orgId = ";
+            //sql += "where a.id not in (select crosswalkId from configurationdatatranslations where configId = :configId) ";
+            //sql += "and a.id not in (select constant1 from configurationdatatranslations where macroId in (129,160,177,195,199,201) and configId = :configId) ";
+            //sql += "and a.orgId = ";
+            sql += "where a.orgId = ";
         }
 	
 	if(orgId > 0) {
