@@ -15,8 +15,9 @@
     <name>UT</name>
   
     <properties>
-	<org.springframework.version>6.2.8</org.springframework.version>
-	<org.spring.security.version>6.5.1</org.spring.security.version>
+	<org.springframework.version>6.2.11</org.springframework.version>
+        <org.springWebMVC.version>6.2.10</org.springWebMVC.version>
+	<org.spring.security.version>6.5.4</org.spring.security.version>
 	<hibernate-core.version>6.1.7.Final</hibernate-core.version>
 	<hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
 	<junit.version>4.13.2</junit.version>
@@ -90,7 +91,7 @@
 	<dependency>
 	    <groupId>org.springframework</groupId>
 	    <artifactId>spring-webmvc</artifactId>
-	    <version>${org.springframework.version}</version>
+	    <version>${org.springWebMVC.version}</version>
 	</dependency>
        
 	<dependency>
@@ -166,7 +167,7 @@
         
 	<!-- Hibernate -->
 	<dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate-core.version}</version>
         </dependency>
@@ -178,7 +179,7 @@
         </dependency>
 	
 	<dependency>
-	    <groupId>org.hibernate</groupId>
+	    <groupId>org.hibernate.validator</groupId>
 	    <artifactId>hibernate-validator</artifactId>
 	    <version>${hibernate-validator.version}</version>
 	</dependency>
