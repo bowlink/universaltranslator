@@ -2146,14 +2146,14 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
 		Object cwDatarow[] = (Object[]) cwDataIt.next();
 		
 		sb.append("[crosswalks|");
-		sb.append(cwDatarow[0]).append("|");
 		sb.append(cwDatarow[1]).append("|");
 		sb.append(cwDatarow[2]).append("|");
 		sb.append(cwDatarow[3]).append("|");
 		sb.append(cwDatarow[4]).append("|");
 		sb.append(cwDatarow[5]).append("|");
 		sb.append(cwDatarow[6]).append("|");
-		sb.append(cwDatarow[7].toString().trim());
+		sb.append(cwDatarow[7]).append("|");
+		sb.append(cwDatarow[8].toString().trim());
 		sb.append("]");
 		
 		if(cwDataIt.hasNext()) {
