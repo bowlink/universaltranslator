@@ -17,6 +17,7 @@
         <intercept-url pattern="/dspResources/**" access="permitAll" />
         <intercept-url pattern="/scheduleTask/*"  access="permitAll" />
         <intercept-url pattern="/login" access="permitAll" />
+        <intercept-url pattern="/" access="permitAll" />
         <intercept-url pattern="/loginfailed" access="permitAll" />
         <intercept-url pattern="/logout" access="permitAll" />
         <intercept-url pattern="/userlogout" access="permitAll" />
@@ -28,7 +29,7 @@
         <intercept-url pattern="/disableUser*" access="permitAll" />
         <logout invalidate-session="true" delete-cookies="JSESSIONID" logout-success-url="/login"></logout>
         <form-login 
-            default-target-url="/"
+            default-target-url="/administrator"
 	    authentication-success-handler-ref="authenticationSuccessRedirecthandler" 
 	    authentication-failure-url="/loginfailed" 
 	    authentication-details-source-ref="customWebAuthenticationDetails"
