@@ -1,10 +1,8 @@
 package com.hel.ut.controller;
 
-import com.hel.ut.dao.transactionOutDAO;
 import com.hel.ut.model.utUser;
 import com.hel.ut.model.mailMessage;
 import com.hel.ut.model.utUserActivity;
-import com.hel.ut.restAPI.directManager;
 import com.hel.ut.service.emailMessageManager;
 import com.hel.ut.service.userManager;
 import com.registryKit.messenger.emailManager;
@@ -50,12 +48,6 @@ public class mainController {
     private emailMessageManager emailMessageManager;
     
     @Autowired
-    private directManager directManager;
-    
-    @Autowired
-    private transactionOutDAO transactionOutDAO;
-    
-    @Autowired
     private emailManager emailmanager;
     
     
@@ -65,7 +57,7 @@ public class mainController {
      * @return	the login page view
      * @throws Exception
      */
-    @RequestMapping(value = {"/", "/login"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"","/", "/login"}, method = RequestMethod.GET)
     public ModelAndView login() throws Exception {
          
         ModelAndView mav = new ModelAndView();
@@ -192,8 +184,7 @@ public class mainController {
 	usermanager.updateUser(userDetails);
 
 	mailMessage messageDetails = new mailMessage();
-
-	messageDetails.setToEmailAddress(userDetails.getEmail());
+        messageDetails.setToEmailAddress(userDetails.getEmail());
 	messageDetails.setMessageSubject("Health-e-Link Universal Translator Reset Password");
 
 	String resetURL = request.getRequestURL().toString().replace("sendPassword.do", "resetPassword?b=");

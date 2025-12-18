@@ -43,9 +43,17 @@ public class emailMessageManagerImpl implements emailMessageManager {
         
             Transport transport = session.getTransport("smtp");
             transport.connect(myProps.getProperty("mailserver.host"), myProps.getProperty("mailserver.username"), myProps.getProperty("mailserver.password"));
-
+            
+           
             emailMessage emailmessage = new emailMessage();
-            emailmessage.settoEmailAddress(myProps.getProperty("admin.email"));
+            
+            if(!messageDetails.getToEmailAddress().equals(myProps.getProperty("admin.email"))) {
+                emailmessage.settoEmailAddress(messageDetails.getToEmailAddress());
+            }
+            else {
+                emailmessage.settoEmailAddress(myProps.getProperty("admin.email"));
+            }
+            
             emailmessage.setfromEmailAddress("helpdesk@health-e-link.net");
             
             if(!messageDetails.getMessageSubject().equals("")) {
