@@ -5349,8 +5349,12 @@ public class adminConfigController {
 	else {
 	    newConfigTransport.setZipped(false);
 	}
-	newConfigTransport.setZipType(Integer.parseInt(strArrayValues[21]));
-	
+	if("null".equals(strArrayValues[21])) {
+	    newConfigTransport.setZipType(0);
+	}
+        else {
+            newConfigTransport.setZipType(Integer.parseInt(strArrayValues[21]));
+        }
 	if(!"null".equals(strArrayValues[22])) {
 	    newConfigTransport.setRestAPIURL(strArrayValues[22]);
 	}
