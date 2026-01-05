@@ -2135,7 +2135,12 @@ public class transactionInManagerImpl implements transactionInManager {
 	
 	//first thing we do is get details, then we set it to  38
 	batchUploads batch = getBatchDetails(batchId);
-	
+	utConfiguration utConfig = configurationManager.getConfigurationById(batch.getConfigId());
+        if (utConfig != null) {
+            batch.setConfigName(utConfig.getConfigname());
+        }
+        
+        
 	//Get a full list of macros
 	List<Macros> macroList = configurationManager.getMacros();
 
@@ -2478,7 +2483,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			    
 			    updateBatchStatus(batchId, 7, "endDateTime");
 			    insertProcessingError(22, null, batchId, null, null, null, null, false, false, "XML format is invalid.");
-			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load xml Batch Failed");
+			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Config Name -  " + batch.getConfigName() + "<br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load xml Batch Failed");
 			}
 			else {
 			    //log batch activity
@@ -2511,7 +2516,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			    
 			    updateBatchStatus(batchId, 39, "endDateTime");
 			    insertProcessingError(5, null, batchId, null, null, null, null, false, false, "Error at applying jar template");
-			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load .hr Batch Failed");
+			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Config Name -  " + batch.getConfigName() + "<br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load .hr Batch Failed");
 			}
 			else {
 			    //log batch activity
@@ -2536,8 +2541,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			else if (processFileName.endsWith(".xls")) {
 			    newfilename = xlstotxt.TranslateXLStoTxt(decodedFilePath, decodedFileName, batch);
 			}
-			
-			if (newfilename.equals("ERRORERRORERROR")) {
+                        if (newfilename.equals("ERRORERRORERROR")) {
 			    
 			    //log batch activity
 			    ba = new batchuploadactivity();
@@ -2557,7 +2561,7 @@ public class transactionInManagerImpl implements transactionInManager {
                                 transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                             }
                             
-			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load Excel Batch Failed");
+			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Config Name -  " + batch.getConfigName() + "<br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load Excel Batch Failed");
 			} 
 			
 			else if (newfilename.equals("FILE IS NOT excel ERROR")) {
@@ -2580,7 +2584,7 @@ public class transactionInManagerImpl implements transactionInManager {
                                 transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                             }
                             
-			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load Excel Batch Failed");
+			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Config Name -  " + batch.getConfigName() + "<br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load Excel Batch Failed");
 			}
                         else if (newfilename.contains("Formula error in")) {
 				
@@ -2691,7 +2695,7 @@ public class transactionInManagerImpl implements transactionInManager {
 			    
 			    updateBatchStatus(batchId, 7, "endDateTime");
 			    insertProcessingError(22, null, batchId, null, null, null, null, false, false, "JSON format is invalid.");
-			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load xml Batch Failed");
+			    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed. <br/>Config Name -  " + batch.getConfigName() + " <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), "Load xml Batch Failed");
 			}
 			else {
 			    //log batch activity
@@ -2734,7 +2738,7 @@ public class transactionInManagerImpl implements transactionInManager {
                                         transactionInDAO.updateRRImportStatus(batch, 39, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                                     }
                                     
-				    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), " txt fixed length parsing failed.");
+				    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed. <br/>Config Name -  " + batch.getConfigName() + " <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), " txt fixed length parsing failed.");
 				} 
 				else if (newfilename.equals("FILE IS NOT TXT ERROR")) {
 				    ba = new batchuploadactivity();
@@ -2754,7 +2758,7 @@ public class transactionInManagerImpl implements transactionInManager {
                                         transactionInDAO.updateRRImportStatus(batch, 7, HELRRSchemaName, batch.getOriginalFileName().substring(0, batch.getOriginalFileName().lastIndexOf('.')));
                                     }
                                     
-				    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), " txt fixed length parsing failed.");
+				    sendEmailToAdmin((new Date() + "<br/>Please login and review. Load batch failed.  <br/>Config Name -  " + batch.getConfigName() + "<br/>Batch Id -  " + batch.getId() + "<br/> UT Batch Name " + batch.getUtBatchName() + " <br/>Original batch file name - " + batch.getOriginalFileName()), " txt fixed length parsing failed.");
 				}
 				else {
 				    ba = new batchuploadactivity();
@@ -2834,7 +2838,7 @@ public class transactionInManagerImpl implements transactionInManager {
                             
 			    insertProcessingError(7, null, batchId, null, null, null, null, false, false, "insertLoadData, please login and check logs.");
 			    try {
-				sendEmailToAdmin(("load error for batch - " + batch.getOriginalFileName() + " - " + batch.getUtBatchName()), "insertLoadData Error");
+				sendEmailToAdmin(("<br/>Config Name -  " + batch.getConfigName() + "<br/>load error for batch - " + batch.getOriginalFileName() + " - " + batch.getUtBatchName()), "insertLoadData Error");
 			    } catch (Exception ex) {
 				ex.printStackTrace();
 			    }
@@ -2884,7 +2888,7 @@ public class transactionInManagerImpl implements transactionInManager {
 
                                     insertProcessingError(7, null, batchId, null, null, null, null, false, false, "insertLoadData, please login and check logs.");
                                     try {
-                                        sendEmailToAdmin(("load error for batch - " + batch.getOriginalFileName() + " - " + batch.getUtBatchName()), "insertLoadData Error");
+                                        sendEmailToAdmin(("<br/>Config Name -  " + batch.getConfigName() + "<br/>load error for batch - " + batch.getOriginalFileName() + " - " + batch.getUtBatchName()), "insertLoadData Error");
                                     } catch (Exception ex) {
                                         ex.printStackTrace();
                                     }
