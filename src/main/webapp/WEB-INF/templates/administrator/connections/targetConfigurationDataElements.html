@@ -24,11 +24,11 @@
 		</td>
 		<td class="center-text">
 		    <div th:id="matchField+${fields.fieldNo}" class="form-group">
-			<select th:fieldNo="${fields.fieldNo}" th:fieldDesc="${fields.fieldDesc}" th:copyErrorField="${showErrorField ? 'yes' : 'no'}" class="form-control matchField">
-                            <option value="0">- Blank Value -</option>
-                            <option th:if="${fields.defaultValue != ''}" th:value="${'0~'+fields.defaultValue}" selected="selected" th:text="${'- Default Value ('+fields.defaultValue+') -'}"></option>
+                        <select th:fieldNo="${fields.fieldNo}" th:fieldDesc="${fields.fieldDesc}" th:copyErrorField="${showErrorField ? 'yes' : 'no'}" class="form-control matchField">
+                            <option value="0" th:selected="${fields.selectedConnectionDefaultValue == null}">- Blank Value -</option>
+                            <option th:if="${fields.defaultValue != ''}" th:value="${'0~'+fields.defaultValue}" th:selected="${(fields.defaultValue != '' && fields.required) || (fields.defaultValue == fields.selectedConnectionDefaultValue) ? 'true' : 'false'}" th:text="${'- Default Value ('+fields.defaultValue+') -'}"></option>
                             <th:block th:each="sourceFields : ${sourceconfigurationDataElements}">
-                                <option th:if="${sourceFields.useField == true}" th:value="${sourceFields.fieldNo}" th:selected="*{sourceFields.fieldNo == fields.mappedToField ? 'true' : 'false'}" th:text="${sourceFields.fieldDesc + ' - ' + sourceFields.fieldNo}"></option>
+                                <option th:if="${sourceFields.useField == true}" th:value="${sourceFields.fieldNo}" th:selected="${sourceFields.fieldNo == fields.mappedToField ? 'true' : 'false'}" th:text="${sourceFields.fieldDesc + ' - ' + sourceFields.fieldNo}"></option>
                             </th:block>
 			</select>
 		    </div>
