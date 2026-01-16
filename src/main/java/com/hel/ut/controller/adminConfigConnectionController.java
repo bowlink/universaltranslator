@@ -706,6 +706,7 @@ public class adminConfigConnectionController {
 			    if(fieldMapping.getFieldNo() == tgtDataElements.getFieldNo()) {
 				tgtDataElements.setMappedErrorField(fieldMapping.getPopulateErrorFieldNo());
 				tgtDataElements.setMappedToField(fieldMapping.getAssociatedFieldNo());
+                                tgtDataElements.setSelectedConnectionDefaultValue(fieldMapping.getDefaultValue());
 			    }
 			}
 		    }

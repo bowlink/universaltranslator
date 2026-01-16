@@ -15,7 +15,7 @@ import org.hibernate.annotations.GenericGenerator;
 public class configurationFormFields {
 
     @Transient
-    private String fieldValue = null, associatedFieldDetails;
+    private String fieldValue = null, associatedFieldDetails, selectedConnectionDefaultValue;
     
     @Transient
     private Integer copiedId = 0, mappedToField = 0, mappedErrorField = 0;
@@ -194,5 +194,13 @@ public class configurationFormFields {
 
     public void setSampleData(String sampleData) {
         this.sampleData = sampleData;
+    }
+
+    public String getSelectedConnectionDefaultValue() {
+        return selectedConnectionDefaultValue;
+    }
+
+    public void setSelectedConnectionDefaultValue(String selectedConnectionDefaultValue) {
+        this.selectedConnectionDefaultValue = selectedConnectionDefaultValue;
     }
 }
