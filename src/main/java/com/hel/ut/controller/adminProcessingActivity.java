@@ -4188,7 +4188,7 @@ public class adminProcessingActivity {
 				    currentRow.createCell(cellNum).setCellValue(errorsRow[5].toString());
 				    cellNum++;
 				     
-				    if(errorsRow[5] != null) {
+				    if(errorsRow[6] != null) {
 				       currentRow.createCell(cellNum).setCellValue(errorsRow[6].toString());
 				    }
 				    else {
@@ -4196,7 +4196,7 @@ public class adminProcessingActivity {
 				    }
 				    cellNum++;
 				     
-				    if(errorsRow[6] != null) {
+				    if(errorsRow[7] != null) {
 				       currentRow.createCell(cellNum).setCellValue(errorsRow[7].toString());
 				    }
 				    else {
@@ -4204,7 +4204,7 @@ public class adminProcessingActivity {
 				    }
 				    cellNum++;
 
-				    if(errorsRow[7] != null) {
+				    if(errorsRow[8] != null) {
 				       currentRow.createCell(cellNum).setCellValue(errorsRow[8].toString());
 				    }
 				    else {
@@ -4212,7 +4212,7 @@ public class adminProcessingActivity {
 				    }
 				    cellNum++;
 				     
-				    if(errorsRow[8] != null) {
+				    if(errorsRow[9] != null) {
 				       currentRow.createCell(cellNum).setCellValue(errorsRow[9].toString());
 				    }
 				    else {
@@ -4220,7 +4220,7 @@ public class adminProcessingActivity {
 				    }
 				    cellNum++;
 				     
-				    if(errorsRow[9] != null) {
+				    if(errorsRow[10] != null) {
 				       currentRow.createCell(cellNum).setCellValue(errorsRow[10].toString());
 				    }
 				    else {
@@ -4302,7 +4302,7 @@ public class adminProcessingActivity {
 				     currentRow.createCell(cellNum).setCellValue(errorsRow[5].toString());
 				     cellNum++;
 				     
-				     if(errorsRow[5] != null) {
+				     if(errorsRow[6] != null) {
 					currentRow.createCell(cellNum).setCellValue(errorsRow[6].toString());
 				     }
 				     else {
@@ -4310,7 +4310,7 @@ public class adminProcessingActivity {
 				     }
 				     cellNum++;
 				     
-				     if(errorsRow[6] != null) {
+				     if(errorsRow[7] != null) {
 					currentRow.createCell(cellNum).setCellValue(errorsRow[7].toString());
 				     }
 				     else {
@@ -4318,7 +4318,7 @@ public class adminProcessingActivity {
 				     }
 				     cellNum++;
 				     
-				     if(errorsRow[7] != null) {
+				     if(errorsRow[8] != null) {
 					currentRow.createCell(cellNum).setCellValue(errorsRow[8].toString());
 				     }
 				     else {
@@ -4326,7 +4326,7 @@ public class adminProcessingActivity {
 				     }
 				     cellNum++;
 				     
-				     if(errorsRow[8] != null) {
+				     if(errorsRow[9] != null) {
 					currentRow.createCell(cellNum).setCellValue(errorsRow[9].toString());
 				     }
 				     else {
@@ -4334,7 +4334,7 @@ public class adminProcessingActivity {
 				     }
 				     cellNum++;
 				     
-				     if(errorsRow[9] != null) {
+				     if(errorsRow[10] != null) {
 					currentRow.createCell(cellNum).setCellValue(errorsRow[10].toString());
 				     }
 				     else {
