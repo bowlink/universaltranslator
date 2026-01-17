@@ -3870,13 +3870,13 @@ public class transactionInDAOImpl implements transactionInDAO {
 	
 	try {
 	    String sql = "select count(e.id) as totalErrors, e.errorId, 0 as fromOutboundConfig,"
-            + "(select displayText from lu_errorcodes where id = e.errorId) as errroDisplayText "               
+            + "(select displayText from lu_errorcodes where id = e.errorId) as errorDisplayText "               
             + "from transactioninerrors_"+batchId+" e "
             + "where e.batchUploadId = :batchId group by e.errorId";
 	    
 	    if("outbound".equals(inboundOutbound.toLowerCase())) {
 		sql = "select count(e.id) as totalErrors, e.errorId, 0 as fromOutboundConfig, "
-                + "(select displayText from lu_errorcodes where id = e.errorId) as errroDisplayText "         
+                + "(select displayText from lu_errorcodes where id = e.errorId) as errorDisplayText "         
                 + "from transactionouterrors_"+batchId+" e "
                 + "where e.batchDownloadId = :batchId group by e.errorId";
 	    }
