@@ -519,13 +519,6 @@ public class messageTypeDAOImpl implements messageTypeDAO {
 	+ "where a.orgId > 0 and a.orgId != :newOrgId order by a.name asc";
 	
 	Query query = sessionFactory.getCurrentSession().createNativeQuery(sql,Crosswalks.class)
-	.addScalar("id", StandardBasicTypes.INTEGER)
-	.addScalar("orgId", StandardBasicTypes.INTEGER)
-	.addScalar("fileDelimiter", StandardBasicTypes.INTEGER)	
-	.addScalar("name", StandardBasicTypes.STRING)
-	.addScalar("fileName", StandardBasicTypes.STRING)	
-	.addScalar("dateCreated", StandardBasicTypes.TIMESTAMP)
-	.addScalar("lastUpdated", StandardBasicTypes.TIMESTAMP)	
 	.setParameter("configId", configId)
 	.setParameter("newOrgId", newOrgId);
 	
