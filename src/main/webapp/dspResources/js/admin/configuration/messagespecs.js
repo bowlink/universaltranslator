@@ -1,7 +1,17 @@
 
 jQuery(function ($) {
     
+    var formUpdated = false;
+    
     $(document).ready(function () {
+        if ($('.configWasUpdated').length > 0) {
+           printAfterSnapshot($('#configIdForSnapshot').val(),$('.configWasUpdated').data('module'));
+        }
+        
+        //Log a change happened
+        $('#messageSpecs :input').on('change input', function () {
+            formUpdated = true;
+        });
         
         var hasHeaderRow = $('.containsHeaderRow').val();
         if(hasHeaderRow == 1) {
@@ -61,7 +71,17 @@ jQuery(function ($) {
             hasErrors = checkFormFields();
 
             if (hasErrors == 0) {
-                $('#messageSpecs').submit();
+                if(formUpdated) {
+                    $('body').overlay({
+                        glyphicon : 'floppy-disk',
+                        message : 'Saving Changes'
+                    });
+                    $('.overlay').css('display','block');
+                    printBeforeSnapshot($('#configIdForSnapshot').val(),'messageSpecs','Message Specs',null);
+                }
+                else {
+                    $("#messageSpecs").submit();
+                }
             }
         });
 
@@ -72,7 +92,17 @@ jQuery(function ($) {
             hasErrors = checkFormFields();
 
             if (hasErrors == 0) {
-                $('#messageSpecs').submit();
+                if(formUpdated) {
+                    $('body').overlay({
+                        glyphicon : 'floppy-disk',
+                        message : 'Saving Changes'
+                    });
+                    $('.overlay').css('display','block');
+                    printBeforeSnapshot($('#configIdForSnapshot').val(),'messageSpecs','Message Specs',null);
+                }
+                else {
+                    $("#messageSpecs").submit();
+                }
             }
         });
     });

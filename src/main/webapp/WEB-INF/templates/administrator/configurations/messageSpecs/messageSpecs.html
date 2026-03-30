@@ -15,8 +15,8 @@
                             <span th:text="${templateError}"></span>
                         </div>
                         <div class="alert alert-success" role="alert" th:if="${savedStatus != null}">  
-                            <p th:if="${savedStatus == 'transportupdated'}">The configuration transport details have been successfully updated!</p>
-                            <p th:if="${savedStatus == 'updated'}">The configuration message specs have been successfully updated!</p>
+                            <p th:if="${savedStatus == 'transportupdated'}" class="configWasUpdated" data-module="Transport">The configuration transport details have been successfully updated!</p>
+                            <p th:if="${savedStatus == 'updated'}" class="configWasUpdated"  data-module="Message Specs">The configuration message specs have been successfully updated!</p>
                         </div>
                         <div class="alert alert-danger" role="alert" th:if="${error != null}">
                             <span>The selected file was not found.</span>
@@ -38,7 +38,7 @@
                         <form id="messageSpecs" th:action="${'/administrator/configurations/messagespecs'}" th:object="${messageSpecs}" enctype="multipart/form-data" method="post" role="form">
                             <input type="hidden" id="action" name="action" value="save" />
                             <input type="hidden" th:field="*{id}" id="id" />
-                            <input type="hidden" th:field="*{configId}" />
+                            <input type="hidden" th:field="*{configId}" id="configIdForSnapshot" />
                             <input type="hidden" th:field="*{hasHeader}" value="0"/>
                             <input type="hidden" th:field="*{fileLayout}" value="1" /> 
                             <input type="hidden" th:field="*{excelstartrow}" />
@@ -241,6 +241,7 @@
             <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
             <script th:src="@{/dspResources/js/overlay.js}"></script>    
             <script th:src="@{/dspResources/js/admin/configuration/mainConfigFunctions.js}"></script>
+            <script th:src="@{/dspResources/js/admin/configuration/configurationSnapshot.js}"></script>
             <script th:src="@{/dspResources/js/admin/configuration/messagespecs.js}"></script>
         </th:block>
     </body>

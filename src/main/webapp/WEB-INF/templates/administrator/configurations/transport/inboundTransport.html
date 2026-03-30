@@ -12,8 +12,8 @@
                     <div class="col-md-12">
                         <div class="alert alert-success" role="alert"  th:if="${savedStatus != null}">
                             <strong>Success!</strong> 
-                            <p th:if="${savedStatus == 'detailsupdated'}">The configuration details has been successfully updated!</p>
-                            <p th:if="${savedStatus == 'updated'}">The configuration transport details has been successfully updated!</p>
+                            <p th:if="${savedStatus == 'detailsupdated'}" class="configWasUpdated" data-module="Details">The configuration details has been successfully updated!</p>
+                            <p th:if="${savedStatus == 'updated'}" class="configWasUpdated" data-module="Transport">The configuration transport details has been successfully updated!</p>
                         </div>
                         <section class="panel panel-info">
                             <div class="panel-heading">
@@ -438,6 +438,7 @@
             <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
             <script th:src="@{/dspResources/js/overlay.js}"></script>    
             <script th:src="@{/dspResources/js/admin/configuration/mainConfigFunctions.js}"></script>
+            <script th:src="@{/dspResources/js/admin/configuration/configurationSnapshot.js}"></script>
             <script th:src="@{/dspResources/js/admin/configuration/inbound/transport.js}"></script>
         </th:block>
     </body>

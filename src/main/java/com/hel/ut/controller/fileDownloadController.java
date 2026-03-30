@@ -144,10 +144,16 @@ public class fileDownloadController {
                     else if ("input files".equals(foldername)) {
                          directory = myProps.getProperty("ut.directory.utRootDir") + cleanURL + "/input files/";
                     }
+                    else if ("configurationAuditLog".equals(foldername)) {
+                         directory = myProps.getProperty("ut.directory.utRootDir") + cleanURL + "/configurationUpdates/";
+                    }
                     else {
                         directory = myProps.getProperty("ut.directory.utRootDir") + foldername + "/";
                     }
                 } 
+                else if (fromPage.equals("configurationAuditLog")) {
+                    directory = filename;
+                }
                 else {
                     directory = myProps.getProperty("ut.directory.utRootDir") + foldername + "/";
                 }
