@@ -15,7 +15,7 @@
                             <p th:if="${savedStatus == 'updated'}">The configuration note has been successfully updated!</p>
                             <p th:if="${savedStatus == 'created'}">The configuration note has been successfully created!</p>
                             <p th:if="${savedStatus == 'deleted'}">The configuration note has been successfully removed!</p>
-                            <p th:if="${savedStatus == 'scheduleupdated'}">The configuration schedule has been successfully updated!</p>
+                            <p th:if="${savedStatus == 'scheduleupdated'}" class="configWasUpdated" data-module="Schedule" th:data-configidforsnapshot="${configurationDetails.id}">The configuration schedule has been successfully updated!</p>
                         </div>
                         <div class="alert alert-success" role="alert" th:if="${param.msg != null}">
                             <strong>Success!</strong> 
@@ -108,6 +108,7 @@
             <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
             <script th:src="@{/dspResources/js/overlay.js}"></script>    
             <script th:src="@{/dspResources/js/admin/configuration/mainConfigFunctions.js}"></script>
+            <script th:src="@{/dspResources/js/admin/configuration/configurationSnapshot.js}"></script>
             <script th:src="@{/dspResources/js/admin/configuration/notes/list.js}"></script>
         </th:block>
     </body>

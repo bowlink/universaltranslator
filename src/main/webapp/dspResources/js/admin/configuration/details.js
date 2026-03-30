@@ -3,6 +3,21 @@
 
 jQuery(function ($) {
     
+     var formUpdated = false;
+    
+    //Check to see the page was updated so you can create the after snapshot
+    $(document).ready(function () {
+
+        if ($('.configWasUpdated').length > 0) {
+            printAfterSnapshot($('#configIdForSnapshot').val(),'Details');
+        }
+        
+        //Log a change happened
+        $('#configuration :input').on('change input', function () {
+            formUpdated = true;
+        });
+    });
+    
    //Hide the Configuration Type if a target configuration type
    $('.type').change(function(event) {
 
@@ -15,26 +30,45 @@ jQuery(function ($) {
    });
 
 
-   $('#saveDetails').click(function (event) {
-       $('#action').val('save');
-       var hasErrors = 0;
-       hasErrors = checkform();
-       if (hasErrors == 0) {
-           $("#configuration").submit();
+    $('#saveDetails').click(function (event) {
+        $('#action').val('save');
+        var hasErrors = 0;
+        hasErrors = checkform();
+        if (hasErrors == 0) {
+            if(formUpdated) {
+                $('body').overlay({
+                   glyphicon : 'floppy-disk',
+                   message : 'Saving Changes'
+                });
+                $('.overlay').css('display','block');
+                printBeforeSnapshot($('#configIdForSnapshot').val(),'configuration','Details',null);
+            }
+            else {
+                $("#configuration").submit();
+            }
        }
+    });
 
-   });
-
-   $('#next').click(function (event) {
+    $('#next').click(function (event) {
        $('#action').val('next');
        var hasErrors = 0;
        hasErrors = checkform();
        if (hasErrors == 0) {
-           $("#configuration").submit();
+            if(formUpdated) {
+                $('body').overlay({
+                   glyphicon : 'floppy-disk',
+                   message : 'Saving Changes'
+                });
+                $('.overlay').css('display','block');
+                printBeforeSnapshot($('#configIdForSnapshot').val(),'configuration','Details',null);
+            }
+            else {
+                $("#configuration").submit();
+            }
        }
-   });
+    });
    
-   function populateHELRegistryConfigs(helRegistryId,helRegistrySchemaName) {
+    function populateHELRegistryConfigs(helRegistryId,helRegistrySchemaName) {
         $('#messageTypeDiv').hide();
 
         $.ajax({

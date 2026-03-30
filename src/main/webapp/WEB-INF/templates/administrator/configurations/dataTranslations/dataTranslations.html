@@ -15,8 +15,8 @@
                     <div class="col-md-12">
                         <div class="alert alert-success" role="alert" th:if="${savedStatus != null and savedStatus != 'error'}">
                             <strong>Success!</strong> 
-                            <p th:if="${savedStatus == 'updated'}">The configuration data translations have been successfully updated!</p>
-                            <p th:if="${savedStatus == 'created'}">The crosswalk has been successfully created!</p>
+                            <p th:if="${savedStatus == 'updated'}" class="configWasUpdated">The configuration data translations have been successfully updated!</p>
+                            <p th:if="${savedStatus == 'created'}" class="configWasUpdated">The crosswalk has been successfully created!</p>
                         </div>
                         <div class="alert alert-danger" role="alert"  th:if="${savedStatus != null and savedStatus == 'error'}">
                             <strong>Error!</strong> 
@@ -24,11 +24,11 @@
                         </div>
                         <div class="alert alert-success" role="alert" th:if="${param.savedStatus != null}">
                             <strong>Success!</strong> 
-                            <p>The configuration fields have been successfully updated!</p>
+                            <p class="configWasUpdated" data-module="Available Fields">The configuration fields have been successfully updated!</p>
                         </div>
                         <div class="alert alert-success" role="alert" th:if="${param.msg != null}">
                             <strong>Success!</strong> 
-                            <p>The data translations have been successfully updated!</p>
+                            <p class="configWasUpdated" data-module="Data Translations">The data translations have been successfully updated!</p>
                         </div>
                         <div class="alert alert-danger" role="alert" th:if="${error != null}">
                             <strong>File Not Found!</strong> 
@@ -197,6 +197,7 @@
             <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
             <script th:src="@{/dspResources/js/overlay.js}"></script>    
             <script th:src="@{/dspResources/js/admin/configuration/mainConfigFunctions.js}"></script>
+            <script th:src="@{/dspResources/js/admin/configuration/configurationSnapshot.js}"></script>
             <script th:src="@{/dspResources/js/admin/configuration/dataTranslations.js}"></script>
         </th:block>
     </body>

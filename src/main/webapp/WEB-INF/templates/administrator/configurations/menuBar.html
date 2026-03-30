@@ -22,6 +22,9 @@
 	    <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'notes' ? 'active' : '')+(configurationDetails.id > 0 ? '' : 'disabled')}">
                 <a  class="nav-link" th:classappend="${actionPage == 'notes' ? 'active' : ''}" th:href="${configurationDetails.id > 0 ? 'notes' : '#'}" title="Configuration Notes">Configuration Notes</a>
             </li>
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'audit' ? 'active' : '')+(configurationDetails.id > 0 ? '' : 'disabled')}">
+                <a  class="nav-link" th:classappend="${actionPage == 'audit' ? 'active' : ''}" th:href="${configurationDetails.id > 0 ? 'audit' : '#'}" title="Configuration Audit Logs">Audit Logs</a>
+            </li>
         </ul>
     </nav>
 </aside>

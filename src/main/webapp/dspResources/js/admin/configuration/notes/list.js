@@ -4,7 +4,10 @@
 jQuery(function ($) {
     
     $(document).ready(function () {
-    
+        if ($('.configWasUpdated').length > 0) {
+           printAfterSnapshot($('.configWasUpdated').data('configidforsnapshot'),$('.configWasUpdated').data('module'));
+        }
+        
         $('#configurationnotes').dataTable({
            "bAutoWidth": false,
             "bStateSave": false,
@@ -29,8 +32,6 @@ jQuery(function ($) {
             ],
            "aaSorting" : [[2, "desc"]]
         });
-    
-        
     
         //This function will launch the new configuration note overlay with a blank form
         $(document).on('click', '#createNewNote', function () {

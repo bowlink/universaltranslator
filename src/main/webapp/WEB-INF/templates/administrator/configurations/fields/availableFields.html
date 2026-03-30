@@ -11,12 +11,12 @@
                 <div class="row-fluid">
                     <div class="col-md-12">
                         <div class="alert alert-success" role="alert" th:if="${savedStatus != null}">  
-                            <p th:if="${savedStatus == 'specsupdated'}">The configuration message specs have been successfully updated!</p>
-                            <p th:if="${savedStatus == 'updated'}">The configuration message specs have been successfully updated!</p>
+                            <p th:if="${savedStatus == 'specsupdated'}" class="configWasUpdated" data-module="Message Specs">The configuration message specs have been successfully updated!</p>
+                            <p th:if="${savedStatus == 'updated'}" class="configWasUpdated" data-module="Message Specs">The configuration message specs have been successfully updated!</p>
                         </div>
                         <div class="alert alert-success fieldsUpdated" style="display:none;">
                             <strong>Success!</strong> 
-                            The fields have been successfully updated!
+                            <p class="configWasUpdated" data-module="Available Fields">The fields have been successfully updated!</p>
                         </div>
                         <div id="saveMsgDiv" class="alert alert-danger" style="display:none;">
                             <strong>You must click SAVE above to submit the mapping changes!</strong>
@@ -52,6 +52,7 @@
                                 <div class="form-container">
                                     <form id="formFields" th:object="${transportDetails}" method="post" role="form">
                                         <input type="hidden" id="action" name="action" value="save" />
+                                        <input type="hidden" id="configIdForSnapshot" th:value="${configurationDetails.id}" />
                                         <input type="hidden" id="seltransportMethod" name="transportMethod" th:value="${selTransportMethod}" />
                                         <input type="hidden" name="errorHandling" th:value="${transportDetails.errorHandling}" />
                                         <div style="height: 600px; overflow: auto;">
@@ -119,6 +120,7 @@
             <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>    
             <script th:src="@{/dspResources/js/overlay.js}"></script>    
             <script th:src="@{/dspResources/js/admin/configuration/mainConfigFunctions.js}"></script>
+            <script th:src="@{/dspResources/js/admin/configuration/configurationSnapshot.js}"></script>
             <script th:src="@{/dspResources/js/admin/configuration/availableFields.js}"></script>
         </th:block>
     </body>

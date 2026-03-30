@@ -15,7 +15,6 @@ public class fileSystem {
     //Get the operating system
     String os = System.getProperty("os.name").toLowerCase();
 
-
     public void deleteOrgDirectories(String directory) {
 
         try {
@@ -25,7 +24,6 @@ public class fileSystem {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
     
     public void creatFTPDirectory(String ftpDirectory) {
@@ -64,6 +62,7 @@ public class fileSystem {
 		new File(orgDirectory + "/templates").mkdirs();
 		new File(orgDirectory + "/attachments").mkdirs();
 		new File(orgDirectory + "/certificates").mkdirs();
+                new File(orgDirectory + "/configurationUpdates").mkdirs();
 	    }
 	    else {
 		directory = new File(orgDirectory + "/crosswalks");
@@ -90,19 +89,22 @@ public class fileSystem {
 		if (!directory.exists()) {
 		     directory.mkdir();
 		}
+                directory = new File(orgDirectory + "/configurationUpdates");
+		if (!directory.exists()) {
+		     directory.mkdir();
+		}
 	    }
         } 
 	catch (Exception e) {
-        	System.out.println(String.valueOf(os) + " is os. ERROR AT creatOrgDirectories " + new Date());
+            System.out.println(String.valueOf(os) + " is os. ERROR AT creatOrgDirectories " + new Date());
             e.printStackTrace();
             try {
             	throw new Exception((new Date() + " os" + String.valueOf(os) + " Error creating directories for path " + orgDirectory), e);
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+            } catch (Exception e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
         }
-
     }
 
     public static void delete(File file) throws IOException {
@@ -260,8 +262,7 @@ public class fileSystem {
         byte[] bytes = new byte[(int) length];
         int offset = 0;
         int numRead = 0;
-        while (offset < bytes.length
-                && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
+        while (offset < bytes.length && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
             offset += numRead;
         }
 
@@ -280,7 +281,6 @@ public class fileSystem {
 		directory.mkdir();
 	    }
         } catch (Exception e) {
-	    System.out.println(e.getMessage());
             e.printStackTrace();
         }
     }
@@ -295,5 +295,24 @@ public class fileSystem {
             e.printStackTrace();
         }
 
+    }
+    
+    public void creatOrgConfigUpdateFolder(String orgDirectory, Integer configurationId) {
+
+        try {
+            File directory = new File(orgDirectory);
+            
+            directory = new File(orgDirectory + "/"+configurationId.toString());
+            if (!directory.exists()) {
+                 directory.mkdirs();
+            }
+        } 
+	catch (Exception e) {
+            try {
+            	throw new Exception((new Date() + " os" + String.valueOf(os) + " Error creating the org config update folder for path " + orgDirectory), e);
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+        }
     }
 }

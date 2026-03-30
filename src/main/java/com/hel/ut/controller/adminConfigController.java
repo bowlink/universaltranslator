@@ -50,6 +50,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import com.hel.ut.model.configurationWebServiceFields;
 import com.hel.ut.model.configurationconnectionfieldmappings;
+import com.hel.ut.model.custom.configAuditLogs;
 import com.hel.ut.model.hisps;
 import com.hel.ut.model.mailMessage;
 import com.hel.ut.model.organizationDirectDetails;
@@ -98,6 +99,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Objects;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -500,6 +505,14 @@ public class adminConfigController {
         mav.addObject("HL7", session.getAttribute("configHL7"));
         mav.addObject("CCD", session.getAttribute("configCCD"));
 	mav.addObject("showAllConfigOptions", session.getAttribute("showAllConfigOptions"));
+        
+        //Need to make sure the conifiguration folder is created in the new org -> configuration updates folder
+        Organization configOrgDetails = organizationmanager.getOrganizationById(configurationDetails.getOrgId());
+        
+        if(configOrgDetails != null) {
+            fileSystem dir = new fileSystem();
+            dir.creatOrgConfigUpdateFolder(myProps.getProperty("ut.directory.utRootDir") + configOrgDetails.getcleanURL() + "/configurationUpdates",configurationDetails.getId());
+        }
 
         return mav;
     }
@@ -1081,7 +1094,7 @@ public class adminConfigController {
 		}
 	    }
 	}
-	
+        
         // need to get file drop info if any has been entered 
 	if (!transportDetails.getFileDropFields().isEmpty()) {
 	    fileSystem dir = new fileSystem();
@@ -3986,7 +3999,6 @@ public class adminConfigController {
         }
     } 
     
-    
     /**
      * The 'createNewFieldSettingsTemplateVertical.do' method will create a new template file from fields that are saved (Vertical column format).
      * @param configId
@@ -6021,4 +6033,204 @@ public class adminConfigController {
     String checkIfCWInUse(@RequestParam(value = "cwId", required = true) Integer cwId) throws Exception {
 	return messagetypemanager.checkIfCWIsInUse(cwId);
     }
+    
+    /**
+     * The 'createConfigPrintPDFForSnapshot.do' method will copy the selected utConfiguration for a before and after snapshot.
+     * @param configId
+     * @param snapShotType
+     * @param module
+     * @param authentication
+     * @return 
+     * @throws java.lang.Exception
+     */
+    @RequestMapping(value = "/createConfigPrintPDFForSnapshot.do", method = RequestMethod.GET)
+    @ResponseBody
+    public String createConfigPrintPDFForSnapshot(@RequestParam int configId, @RequestParam String snapShotType, @RequestParam String module, Authentication authentication) throws Exception {
+        
+        utConfiguration configDetails = utconfigurationmanager.getConfigurationById(configId);
+        Organization orgDetails = organizationmanager.getOrganizationById(configDetails.getOrgId());
+        
+        utUser userDetails = userManager.getUserByUserName(authentication.getName());
+        
+        //If snapShotType = "After" need to make sure an existing before is made
+        boolean makeFile = false;
+        
+        LocalDateTime now = LocalDateTime.now();
+        
+        if(snapShotType.equals("before")) {
+            makeFile = true;
+        }
+        else {
+            DateTimeFormatter findFormatter = DateTimeFormatter.ofPattern("MMddyyyyHHmm");
+            
+            String formatted = now.format(findFormatter);
+            
+            File dir = new File(myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/" + "configurationUpdates/" + configId + "/");
+            
+            String partialName = "before-"+module+"-"+userDetails.getFirstName()+" "+userDetails.getLastName()+ "-"+formatted;
+            
+            File[] files = dir.listFiles();
+
+            boolean found = false;
+
+            if (files != null) {
+                for (File f : files) {
+                    if (f.getName().contains(partialName)) {
+                        found = true;
+                        makeFile = true;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if(makeFile) {
+
+            now = LocalDateTime.now();
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMddyyyyHHmmss");
+
+            String formatted = now.format(formatter);
+
+            String configDetailFile = myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/" + "configurationUpdates/" + configId + "/" + snapShotType + "-" + module + "-" + userDetails.getFirstName() + " " + userDetails.getLastName() + "-" + formatted+".txt";
+            String configPrintFile = myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/" + "configurationUpdates/" + configId + "/" + snapShotType + "-" + module + "-" + userDetails.getFirstName() + " " + userDetails.getLastName() + "-" + formatted+".pdf";
+
+            File detailsFile = new File(configDetailFile);
+            detailsFile.delete();
+
+            File printFile = new File(configPrintFile);
+            printFile.delete();
+
+            Document document = new Document(PageSize.A4);
+
+            StringBuffer reportBody = new StringBuffer();
+
+            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(configDetailFile, true)));
+            out.println("<html><body>");
+
+            reportBody.append(utconfigurationmanager.printDetailsSection(configDetails,orgDetails,siteTimeZone));
+            reportBody.append(utconfigurationmanager.printTransportMethodSection(configDetails));
+            reportBody.append(utconfigurationmanager.printMessageSpecsSection(configDetails));
+            reportBody.append(utconfigurationmanager.printFieldSettingsSection(configDetails));
+            reportBody.append(utconfigurationmanager.printDataTranslationsSection(configDetails,siteTimeZone));
+
+            out.println(reportBody.toString());
+
+            out.println("</body></html>");
+
+            out.close();
+
+            FileOutputStream os =  new FileOutputStream(configPrintFile);
+            PdfWriter pdfWriter = PdfWriter.getInstance(document, os);
+
+            document.open();
+
+            XMLWorkerHelper worker = XMLWorkerHelper.getInstance();
+
+            //replace with actual code to generate html info
+            //we get image location here 
+            FileInputStream fis = new FileInputStream(configDetailFile);
+            worker.parseXHtml(pdfWriter, document, fis);
+
+            fis.close();
+            document.close();
+            pdfWriter.close();
+            os.close();
+
+            File configDetailsFile = new File(configDetailFile);
+            configDetailsFile.delete();
+        }
+        
+        return "saved";
+    }
+    
+    /**
+     * The '/auditLogs' GET request will display all the saved audit logs
+     *
+     * @param session
+     * @return	The utConfiguration note list
+     *
+     * @Objects	(1) An object containing all the found configuration notes
+     *
+     * @throws Exception
+     */
+    @RequestMapping(value = "/audit", method = RequestMethod.GET)
+    public ModelAndView configurationAuditLogs(HttpSession session) throws Exception {
+
+        ModelAndView mav = new ModelAndView();
+	
+	Integer configId = 0;
+	
+	if(session.getAttribute("manageconfigId") == null){  
+	    mav = new ModelAndView(new RedirectView("list"));
+            return mav;
+	}
+	else {
+	    configId = (Integer) session.getAttribute("manageconfigId");
+	}
+	
+        mav.setViewName("administrator/configurations/auditLogs/list");
+        mav.addObject("pageId", "configuration-auditLogs");
+        mav.addObject("pageSection", "section-configurations");
+        mav.addObject("sect","config");
+        mav.addObject("actionPage","audit");
+
+        //Get the utConfiguration details for the selected config
+        utConfiguration configurationDetails = utconfigurationmanager.getConfigurationById(configId);
+	
+        // Get organization directory name
+        Organization orgDetails = organizationmanager.getOrganizationById(configurationDetails.getOrgId());
+	
+	mav.addObject("configurationDetails", configurationDetails);
+        mav.addObject("orgDetails", orgDetails);
+	mav.addObject("id", configId);
+        
+        File[] files = new File(myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/" + "configurationUpdates/" + configId + "/").listFiles();
+        Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed());
+        
+        List<configAuditLogs> auditLogs = new ArrayList<>();
+        
+        TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
+	DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	requiredFormat.setTimeZone(timeZone);
+	String dateinTZ = "";
+       
+        if(files == null || files.length == 0) {}
+        else {
+            
+            String fileName = "";
+            String snapShotType = "";
+            String updatedBy = "";
+            String module = "";
+            Date updatedOn = new Date();
+            
+            for(File file : files) {
+                
+                if(file.getAbsoluteFile().toString().contains(".pdf")) {
+                    configAuditLogs log = new configAuditLogs();
+
+                    fileName = file.getName();
+                    snapShotType = file.getName().split("-")[0];
+                    module = file.getName().split("-")[1];
+                    updatedBy = file.getName().split("-")[2];
+                    updatedOn = new Date(file.lastModified());
+                    dateinTZ = requiredFormat.format(updatedOn);
+
+                    log.setModuleName(module.substring(0, 1).toUpperCase() + module.substring(1));
+                    log.setSnapShotType(snapShotType.substring(0, 1).toUpperCase() + snapShotType.substring(1));
+                    log.setUpdatedBy(updatedBy);
+                    log.setDateUpdated(dft.parse(dateinTZ));
+                    log.setFileName(configId+"/"+file.getName());
+
+                    auditLogs.add(log);
+                }
+            }
+        }
+        
+        mav.addObject("auditLogs", auditLogs);
+	
+        return mav;
+    }
+
 }

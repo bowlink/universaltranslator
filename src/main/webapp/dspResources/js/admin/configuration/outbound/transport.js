@@ -3,7 +3,17 @@
 
 jQuery(function ($) {
     
+    var formUpdated = false;
+    
     $(document).ready(function () {
+        if ($('.configWasUpdated').length > 0) {
+           printAfterSnapshot($('#configId').val(),$('.configWasUpdated').data('module'));
+        }
+        
+        //Log a change happened
+        $('#transportDetails :input').on('change input', function () {
+            formUpdated = true;
+        });
     
         //Selected transport method
         var transportMethod = $('#transportMethod').val();
@@ -87,7 +97,17 @@ jQuery(function ($) {
             hasErrors = checkFormFields();
 
             if (hasErrors == 0) {
-                $('#transportDetails').submit();
+                if(formUpdated) {
+                    $('body').overlay({
+                        glyphicon : 'floppy-disk',
+                        message : 'Saving Changes'
+                    });
+                    $('.overlay').css('display','block');
+                    printBeforeSnapshot($('#configId').val(),'transportDetails','Transport',null);
+                }
+                else {
+                    $("#transportDetails").submit();
+                }
             }
         });
 
@@ -98,7 +118,17 @@ jQuery(function ($) {
             hasErrors = checkFormFields();
 
             if (hasErrors == 0) {
-                $('#transportDetails').submit();
+                if(formUpdated) {
+                    $('body').overlay({
+                        glyphicon : 'floppy-disk',
+                        message : 'Saving Changes'
+                    });
+                    $('.overlay').css('display','block');
+                    printBeforeSnapshot($('#configId').val(),'transportDetails','Transport',null);
+                }
+                else {
+                    $("#transportDetails").submit();
+                }
             }
         });
 

@@ -3,7 +3,17 @@
 
 jQuery(function ($) {
     
+     var formUpdated = false;
+    
     $(document).ready(function () {
+        if ($('.configWasUpdated').length > 0) {
+           printAfterSnapshot($('#configIdForSnapshot').val(),$('.configWasUpdated').data('module'));
+        }
+        
+        //Log a change happened
+        $('#formFields :input').on('change input', function () {
+            formUpdated = true;
+        });
     
         //If any field changes need to show the message in red that nothign
         //will be saved unless teh "Saved" button is pressed
@@ -40,22 +50,30 @@ jQuery(function ($) {
             $('.alert-danger').hide();
 
             if (hasErrors == 0) {
+                if(formUpdated) {
+                    $('body').overlay({
+                        glyphicon : 'floppy-disk',
+                        message : 'Saving Changes'
+                    });
+                    $('.overlay').css('display','block');
+                    printBeforeSnapshot($('#configIdForSnapshot').val(),'formFields','Available Fields',null);
+                }
+                else {
+                   var formData = $("#formFields").serialize();
 
-                var formData = $("#formFields").serialize();
-
-                $.ajax({
-                    url: '/administrator/configurations/saveFields',
-                    data: formData,
-                    type: "POST",
-                    async: false,
-                    success: function (data) {
-                        $('.fieldsUpdated').show();
-                        $('.alert').delay(2000).fadeOut(1000);
-                    }
-                });
-                event.preventDefault();
-                return false;
-
+                    $.ajax({
+                        url: '/administrator/configurations/saveFields',
+                        data: formData,
+                        type: "POST",
+                        async: false,
+                        success: function (data) {
+                            $('.fieldsUpdated').show();
+                            $('.alert').delay(2000).fadeOut(1000);
+                        }
+                    });
+                    event.preventDefault();
+                    return false;
+                }
             }
         });
 
@@ -66,19 +84,29 @@ jQuery(function ($) {
             var hasErrors = 0;
 
             if (hasErrors == 0) {
-                var formData = $("#formFields").serialize();
+                if(formUpdated) {
+                    $('body').overlay({
+                        glyphicon : 'floppy-disk',
+                        message : 'Saving Changes'
+                    });
+                    $('.overlay').css('display','block');
+                    printBeforeSnapshot($('#configIdForSnapshot').val(),'formFieldsNext','Available Fields',null);
+                }
+                else {
+                   var formData = $("#formFields").serialize();
 
-                $.ajax({
-                    url: 'saveFields',
-                    data: formData,
-                    type: "POST",
-                    async: false,
-                    success: function (data) {
-                        window.location.href = 'translations?savedStatus=fieldsupdated';
-                    }
-                });
-                event.preventDefault();
-                return false;
+                    $.ajax({
+                        url: 'saveFields',
+                        data: formData,
+                        type: "POST",
+                        async: false,
+                        success: function (data) {
+                            window.location.href = 'translations?savedStatus=fieldsupdated';
+                        }
+                    });
+                    event.preventDefault();
+                    return false;
+                }
             }
         });
 

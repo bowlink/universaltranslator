@@ -2,7 +2,21 @@
 
 jQuery(function ($) {
     
+    var formUpdated = false;
+    
     $(document).ready(function () {
+        if ($('.configWasUpdated').length > 0) {
+           printAfterSnapshot($('#configIdForSnapshot').val(),$('.configWasUpdated').data('module'));
+        }
+        
+        //Log a change happened
+        $('#schedulingSpecs :input').on('change input', function () {
+            formUpdated = true;
+        });
+        
+        $('.processMethod').on('change input', function () {
+            formUpdated = true;
+        });
         
         showScheduleForm();
 
@@ -37,12 +51,34 @@ jQuery(function ($) {
 
         //This function will save the schedule mappings
         $('#saveDetails').click(function () {
-            $('#schedulingSpecs').submit();
+            
+            if(formUpdated) {
+                $('body').overlay({
+                    glyphicon : 'floppy-disk',
+                    message : 'Saving Changes'
+                });
+                $('.overlay').css('display','block');
+                printBeforeSnapshot($('#configIdForSnapshot').val(),'schedulingSpecs','schedule',null);
+            }
+            else {
+               $('#schedulingSpecs').submit();
+            }
         });
 
         $('#next').click(function () {
             $('#action').val("next");
-            $('#schedulingSpecs').submit();
+            
+            if(formUpdated) {
+                $('body').overlay({
+                    glyphicon : 'floppy-disk',
+                    message : 'Saving Changes'
+                });
+                $('.overlay').css('display','block');
+                printBeforeSnapshot($('#configIdForSnapshot').val(),'schedulingSpecs','schedule',null);
+            }
+            else {
+               $('#schedulingSpecs').submit();
+            }
         });
     });
 })

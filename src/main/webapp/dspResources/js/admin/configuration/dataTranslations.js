@@ -2,8 +2,13 @@
 
 jQuery(function ($) {
     
-    $(document).ready(function () {
+    var formUpdated = false;
     
+    $(document).ready(function () {
+        if ($('.configWasUpdated').length > 0) {
+           printAfterSnapshot($('#configId').val(),$('.configWasUpdated').data('module'));
+        }
+      
         populateCrosswalks(1,1);
         populateExistingTranslations();
 
@@ -290,7 +295,6 @@ jQuery(function ($) {
                 $('#dataTranslationsModal').modal('toggle');
                 $('#dataTranslationsModal').modal('hide'); 
             }
-
         });
 
         //This function will get the next/prev page for the crosswalk list
@@ -330,6 +334,13 @@ jQuery(function ($) {
             if(!$(this).hasClass("disabled")) {
                 $('#next').addClass( "disabled" );
                 $('#saveDetails').addClass( "disabled" );
+                
+                $('body').overlay({
+                   glyphicon : 'floppy-disk',
+                   message : 'Saving Changes'
+               });
+               $('.overlay').css('display','block');
+               
                 $.ajax({
                     url: 'translations',
                     type: "POST",
@@ -352,6 +363,13 @@ jQuery(function ($) {
             if(!$(this).hasClass("disabled")) {
                 $('#saveDetails').addClass( "disabled" );
                 $('#next').addClass( "disabled" );
+                
+                $('body').overlay({
+                   glyphicon : 'floppy-disk',
+                   message : 'Saving Changes'
+                });
+                $('.overlay').css('display','block');
+                
                 $.ajax({
                     url: 'translations',
                     type: "POST",
@@ -482,37 +500,41 @@ jQuery(function ($) {
                 return false;
             }
             else {
+                
+                printBeforeSnapshot($('#configId').val(),'dataTranslations', 'Crosswalk',function() {
 
-                //check and submit form
-                var form = $('#crosswalkdetailsform')[0];
-                var formData = new FormData(form);
-                $.ajax({
-                    url: '/administrator/configurations/'+actionValue+'Crosswalk',
-                    type: "POST",
-                    enctype: 'multipart/form-data',
-                    processData: false,  // Important!
-                    contentType: false,
-                    cache: false,
-                    data: formData,
-                    success: function(data) {
-                       if(data > 0) {
-                           $.ajax({
-                                url: 'viewCrosswalk?i=' + data,
-                                type: "GET",
-                                success: function(data) {
-                                    data = data.replace('btnCloseCW', 'cwClose');
-                                    data = data.replace('uploadSuccess" role="alert" style="display:none;"', 'uploadSuccess" role="alert" style="display:block;"');
-                                    $("#modalContent").html(data);
-                                }
-                            });
-                       }
-                       else if(data < 0) {
-                           $('.uploadDupError').show();
-                       }
-                       else {
-                           $('.uploadError').show();
-                       }
-                    }
+                    //check and submit form
+                    var form = $('#crosswalkdetailsform')[0];
+                    var formData = new FormData(form);
+                    $.ajax({
+                        url: '/administrator/configurations/'+actionValue+'Crosswalk',
+                        type: "POST",
+                        enctype: 'multipart/form-data',
+                        processData: false,  // Important!
+                        contentType: false,
+                        cache: false,
+                        data: formData,
+                        success: function(data) {
+                           if(data > 0) {
+                                $.ajax({
+                                    url: 'viewCrosswalk?i=' + data,
+                                    type: "GET",
+                                    success: function(data) {
+                                        data = data.replace('btnCloseCW', 'cwClose');
+                                        data = data.replace('uploadSuccess" role="alert" style="display:none;"', 'uploadSuccess" role="alert" style="display:block;"');
+                                        $("#modalContent").html(data);
+                                        printAfterSnapshot($('#configId').val(),'Crosswalk');
+                                    }
+                                });
+                           }
+                           else if(data < 0) {
+                               $('.uploadDupError').show();
+                           }
+                           else {
+                               $('.uploadError').show();
+                           }
+                        }
+                    });
                 });
             }
         });
@@ -602,26 +624,36 @@ jQuery(function ($) {
                 if(selectedMacro === '') {
                     selectedMacro = 0;
                 }
+                
+               $('body').overlay({
+                   glyphicon : 'floppy-disk',
+                   message : 'Saving Changes'
+               });
+               $('.overlay').css('display','block');
+               
+               printBeforeSnapshot($('#configId').val(),'dataTranslations', 'Data Translations',function() {
 
-                $.ajax({
-                    url: "setTranslations",
-                    type: "GET",
-                    data: {
-                        'f': selectedField, 
-                        'fText': selectedFieldText, 
-                        'cw': selectedCW, 
-                        'CWText': selectedCWText, 
-                        'macroId': selectedMacro, 
-                        'macroName': selectedMacroText, 
-                        'fieldA': $('#fieldA').val(), 
-                        'fieldB': $('#fieldB').val(), 
-                        'constant1': $('#constant1').val(), 
-                        'constant2': $('#constant2').val(),
-                        'passClear': $('.passclear:checked').val()
-                    },
-                    success: function (data) {
-                        location.reload();
-                    }
+                    $.ajax({
+                        url: "setTranslations",
+                        type: "GET",
+                        data: {
+                            'f': selectedField, 
+                            'fText': selectedFieldText, 
+                            'cw': selectedCW, 
+                            'CWText': selectedCWText, 
+                            'macroId': selectedMacro, 
+                            'macroName': selectedMacroText, 
+                            'fieldA': $('#fieldA').val(), 
+                            'fieldB': $('#fieldB').val(), 
+                            'constant1': $('#constant1').val(), 
+                            'constant2': $('#constant2').val(),
+                            'passClear': $('.passclear:checked').val()
+                        },
+                        success: function (data) {
+                            printAfterSnapshot($('#configId').val(),'Data Translations');
+                            location.reload();
+                        }
+                    });
                 });
             }
         });
@@ -637,17 +669,27 @@ jQuery(function ($) {
 
             if(confirm("Are you sure you want to move this configuration translation process position?")) {
                 
-               $.ajax({
-                    url: 'updateTranslationProcessOrder.do',
-                    type: "POST",
-                    data: {
-                        'newProcessOrder': newDspPos,
-                        'translationId': translationId
-                    },
-                    success: function (data) {
-                         location.reload();
-                    }
-                });
+               $('body').overlay({
+                   glyphicon : 'floppy-disk',
+                   message : 'Saving Changes'
+               });
+               $('.overlay').css('display','block');
+               
+               printBeforeSnapshot($('#configId').val(),'dataTranslations', 'Data Translations',function() {
+                   
+                    $.ajax({
+                        url: 'updateTranslationProcessOrder.do',
+                        type: "POST",
+                        data: {
+                            'newProcessOrder': newDspPos,
+                            'translationId': translationId
+                        },
+                        success: function (data) {
+                            printAfterSnapshot($('#configId').val(),'Data Translations');
+                            location.reload();
+                        }
+                    });
+               });
             }
         });
 
@@ -658,17 +700,27 @@ jQuery(function ($) {
             var translationId = $(this).data('id');
 
             if(confirm("Are you sure you want to remove this configuration translation?")) {
-                //Need to remove the translation
-                $.ajax({
-                    url: 'removeTranslations.do',
-                    type: "POST",
-                    data: {
-                        'translationId': translationId
-                    },
-                    success: function (data) {
-                        location.reload();
-                    }
+                
+                $('body').overlay({
+                   glyphicon : 'floppy-disk',
+                   message : 'Saving Changes'
                 });
+                $('.overlay').css('display','block');
+               
+                printBeforeSnapshot($('#configId').val(),'dataTranslations', 'Data Translations',function() {
+                    //Need to remove the translation
+                    $.ajax({
+                        url: 'removeTranslations.do',
+                        type: "POST",
+                        data: {
+                            'translationId': translationId
+                        },
+                        success: function (data) {
+                            printAfterSnapshot($('#configId').val(),'Data Translations');
+                            location.reload();
+                        }
+                    });
+                });   
             }
         });
 
