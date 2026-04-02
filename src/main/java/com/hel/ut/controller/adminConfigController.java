@@ -54,6 +54,7 @@ import com.hel.ut.model.custom.configAuditLogs;
 import com.hel.ut.model.hisps;
 import com.hel.ut.model.mailMessage;
 import com.hel.ut.model.organizationDirectDetails;
+import com.hel.ut.model.utSettings;
 import com.hel.ut.model.validationType;
 import com.hel.ut.service.emailMessageManager;
 import com.hel.ut.service.hispManager;
@@ -513,6 +514,11 @@ public class adminConfigController {
             fileSystem dir = new fileSystem();
             dir.creatOrgConfigUpdateFolder(myProps.getProperty("ut.directory.utRootDir") + configOrgDetails.getcleanURL() + "/configurationUpdates",configurationDetails.getId());
         }
+        
+        //Check the print config snapshot settings
+        utSettings settings = sysAdminManager.getSystemSettings();
+        session.removeAttribute("configSnapshot");
+        session.setAttribute("configSnapshot",settings.getConfigSnapshot());
 
         return mav;
     }
@@ -6050,95 +6056,100 @@ public class adminConfigController {
         utConfiguration configDetails = utconfigurationmanager.getConfigurationById(configId);
         Organization orgDetails = organizationmanager.getOrganizationById(configDetails.getOrgId());
         
-        utUser userDetails = userManager.getUserByUserName(authentication.getName());
+        utSettings settings = sysAdminManager.getSystemSettings();
         
-        //If snapShotType = "After" need to make sure an existing before is made
-        boolean makeFile = false;
+        if(settings.getConfigSnapshot()) {
         
-        LocalDateTime now = LocalDateTime.now();
-        
-        if(snapShotType.equals("before")) {
-            makeFile = true;
-        }
-        else {
-            DateTimeFormatter findFormatter = DateTimeFormatter.ofPattern("MMddyyyyHHmm");
-            
-            String formatted = now.format(findFormatter);
-            
-            File dir = new File(myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/" + "configurationUpdates/" + configId + "/");
-            
-            String partialName = "before-"+module+"-"+userDetails.getFirstName()+" "+userDetails.getLastName()+ "-"+formatted;
-            
-            File[] files = dir.listFiles();
+            utUser userDetails = userManager.getUserByUserName(authentication.getName());
 
-            boolean found = false;
+            //If snapShotType = "After" need to make sure an existing before is made
+            boolean makeFile = false;
 
-            if (files != null) {
-                for (File f : files) {
-                    if (f.getName().contains(partialName)) {
-                        found = true;
-                        makeFile = true;
-                        break;
+            LocalDateTime now = LocalDateTime.now();
+
+            if(snapShotType.equals("before")) {
+                makeFile = true;
+            }
+            else {
+                DateTimeFormatter findFormatter = DateTimeFormatter.ofPattern("MMddyyyyHHmm");
+
+                String formatted = now.format(findFormatter);
+
+                File dir = new File(myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/" + "configurationUpdates/" + configId + "/");
+
+                String partialName = "before-"+module+"-"+userDetails.getFirstName()+" "+userDetails.getLastName()+ "-"+formatted;
+
+                File[] files = dir.listFiles();
+
+                boolean found = false;
+
+                if (files != null) {
+                    for (File f : files) {
+                        if (f.getName().contains(partialName)) {
+                            found = true;
+                            makeFile = true;
+                            break;
+                        }
                     }
                 }
             }
-        }
-        
-        if(makeFile) {
 
-            now = LocalDateTime.now();
+            if(makeFile) {
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMddyyyyHHmmss");
+                now = LocalDateTime.now();
 
-            String formatted = now.format(formatter);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMddyyyyHHmmss");
 
-            String configDetailFile = myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/" + "configurationUpdates/" + configId + "/" + snapShotType + "-" + module + "-" + userDetails.getFirstName() + " " + userDetails.getLastName() + "-" + formatted+".txt";
-            String configPrintFile = myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/" + "configurationUpdates/" + configId + "/" + snapShotType + "-" + module + "-" + userDetails.getFirstName() + " " + userDetails.getLastName() + "-" + formatted+".pdf";
+                String formatted = now.format(formatter);
 
-            File detailsFile = new File(configDetailFile);
-            detailsFile.delete();
+                String configDetailFile = myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/" + "configurationUpdates/" + configId + "/" + snapShotType + "-" + module + "-" + userDetails.getFirstName() + " " + userDetails.getLastName() + "-" + formatted+".txt";
+                String configPrintFile = myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/" + "configurationUpdates/" + configId + "/" + snapShotType + "-" + module + "-" + userDetails.getFirstName() + " " + userDetails.getLastName() + "-" + formatted+".pdf";
 
-            File printFile = new File(configPrintFile);
-            printFile.delete();
+                File detailsFile = new File(configDetailFile);
+                detailsFile.delete();
 
-            Document document = new Document(PageSize.A4);
+                File printFile = new File(configPrintFile);
+                printFile.delete();
 
-            StringBuffer reportBody = new StringBuffer();
+                Document document = new Document(PageSize.A4);
 
-            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(configDetailFile, true)));
-            out.println("<html><body>");
+                StringBuffer reportBody = new StringBuffer();
 
-            reportBody.append(utconfigurationmanager.printDetailsSection(configDetails,orgDetails,siteTimeZone));
-            reportBody.append(utconfigurationmanager.printTransportMethodSection(configDetails));
-            reportBody.append(utconfigurationmanager.printMessageSpecsSection(configDetails));
-            reportBody.append(utconfigurationmanager.printFieldSettingsSection(configDetails));
-            reportBody.append(utconfigurationmanager.printDataTranslationsSection(configDetails,siteTimeZone));
+                PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(configDetailFile, true)));
+                out.println("<html><body>");
 
-            out.println(reportBody.toString());
+                reportBody.append(utconfigurationmanager.printDetailsSection(configDetails,orgDetails,siteTimeZone));
+                reportBody.append(utconfigurationmanager.printTransportMethodSection(configDetails));
+                reportBody.append(utconfigurationmanager.printMessageSpecsSection(configDetails));
+                reportBody.append(utconfigurationmanager.printFieldSettingsSection(configDetails));
+                reportBody.append(utconfigurationmanager.printDataTranslationsSection(configDetails,siteTimeZone));
 
-            out.println("</body></html>");
+                out.println(reportBody.toString());
 
-            out.close();
+                out.println("</body></html>");
 
-            FileOutputStream os =  new FileOutputStream(configPrintFile);
-            PdfWriter pdfWriter = PdfWriter.getInstance(document, os);
+                out.close();
 
-            document.open();
+                FileOutputStream os =  new FileOutputStream(configPrintFile);
+                PdfWriter pdfWriter = PdfWriter.getInstance(document, os);
 
-            XMLWorkerHelper worker = XMLWorkerHelper.getInstance();
+                document.open();
 
-            //replace with actual code to generate html info
-            //we get image location here 
-            FileInputStream fis = new FileInputStream(configDetailFile);
-            worker.parseXHtml(pdfWriter, document, fis);
+                XMLWorkerHelper worker = XMLWorkerHelper.getInstance();
 
-            fis.close();
-            document.close();
-            pdfWriter.close();
-            os.close();
+                //replace with actual code to generate html info
+                //we get image location here 
+                FileInputStream fis = new FileInputStream(configDetailFile);
+                worker.parseXHtml(pdfWriter, document, fis);
 
-            File configDetailsFile = new File(configDetailFile);
-            configDetailsFile.delete();
+                fis.close();
+                document.close();
+                pdfWriter.close();
+                os.close();
+
+                File configDetailsFile = new File(configDetailFile);
+                configDetailsFile.delete();
+            }
         }
         
         return "saved";
@@ -6204,26 +6215,47 @@ public class adminConfigController {
             String updatedBy = "";
             String module = "";
             Date updatedOn = new Date();
+            List<String> fileNamesForLog = new ArrayList<>();
+            
+            configAuditLogs log = null;
+            
+            Integer fileCounter = 0;
             
             for(File file : files) {
                 
                 if(file.getAbsoluteFile().toString().contains(".pdf")) {
-                    configAuditLogs log = new configAuditLogs();
-
+                    
+                    fileCounter++;
+                    
                     fileName = file.getName();
                     snapShotType = file.getName().split("-")[0];
                     module = file.getName().split("-")[1];
                     updatedBy = file.getName().split("-")[2];
                     updatedOn = new Date(file.lastModified());
                     dateinTZ = requiredFormat.format(updatedOn);
+                    
+                    if(fileCounter == 1) {
+                        fileNamesForLog = new ArrayList<>();
+                        log = new configAuditLogs();
 
-                    log.setModuleName(module.substring(0, 1).toUpperCase() + module.substring(1));
-                    log.setSnapShotType(snapShotType.substring(0, 1).toUpperCase() + snapShotType.substring(1));
-                    log.setUpdatedBy(updatedBy);
-                    log.setDateUpdated(dft.parse(dateinTZ));
-                    log.setFileName(configId+"/"+file.getName());
-
-                    auditLogs.add(log);
+                        log.setModuleName(module.substring(0, 1).toUpperCase() + module.substring(1));
+                        log.setSnapShotType(snapShotType.substring(0, 1).toUpperCase() + snapShotType.substring(1));
+                        log.setUpdatedBy(updatedBy);
+                        log.setDateUpdated(dft.parse(dateinTZ));
+                        //log.setFileName(configId+"/"+file.getName());
+                        
+                        fileNamesForLog.add(configId+"/"+file.getName());
+                        
+                    }
+                    else if(fileCounter == 2) {
+                        
+                        fileNamesForLog.add(configId+"/"+file.getName());
+                        
+                        log.setFileNames(fileNamesForLog);
+                        
+                        auditLogs.add(log);
+                        fileCounter = 0;
+                    }
                 }
             }
         }

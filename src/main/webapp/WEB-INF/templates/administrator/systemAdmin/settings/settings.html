@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/loggedInLayout}">
+    <head>
+        <title>Health-e-Link UT System Settings</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div th:insert="~{administrator/systemAdmin/actionBar :: actionBar}"></div>
+            <div th:insert="~{administrator/systemAdmin/menuBar :: menuBar}"></div>
+            <div class="main clearfix" role="main">
+                <div class="col-md-12">
+                    <div class="alert alert-success" role="alert" th:if="${param.msg != null}">
+                        <strong>Success!</strong> 
+                        <p th:if="${param.msg[0] == 'updated'}">The settings has been successfully updated!</p>
+                    </div>
+                    <section class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">System Settings</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="col-md-12">
+                                <form id="settingsform" action="/administrator/sysadmin/systemSettings" th:object="${settings}" method="post" role="form">
+                                    <input type="hidden" id="id" th:field="*{id}"/>
+                                    <div class="form-container">
+                                        <div class="row col-lg-12">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label class="control-label" for="configSnapshot">Config Snapshot</label>
+                                                    <p>
+                                                        This setting if turned on will create a before configuration print page and a after
+                                                        configuration print page everytime a form is saved for a configuration.
+                                                    </p>
+                                                    <select th:field="*{configSnapshot}" class="form-control" id="configSnapshot">
+                                                        <option value="1">Yes, create snapshots</option>
+                                                        <option value="0">No, do not create snapshots</option> 
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div> 
+                                    </div>
+                                </form>
+                            </div> 
+                        </div>
+                    </section>
+                </div>
+            </div>		
+        </div>
+        <th:block layout:fragment="script">
+            <script th:src="@{/dspResources/js/vendor/sprintf.js}"></script>
+            <script th:src="@{/dspResources/js/admin/sysadmin/settings/settings.js}"></script>
+            <script th:src="@{/dspResources/js/admin/sysadmin/mainAdminFunctions.js}"></script>
+        </th:block>
+    </body>
+</html>

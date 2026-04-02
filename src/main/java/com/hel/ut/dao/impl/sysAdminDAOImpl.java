@@ -19,6 +19,7 @@ import com.hel.ut.model.MoveFilesLog;
 import com.hel.ut.model.mainHL7Details;
 import com.hel.ut.model.mainHL7Elements;
 import com.hel.ut.model.mainHL7Segments;
+import com.hel.ut.model.utSettings;
 import jakarta.annotation.Resource;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -605,5 +606,22 @@ public class sysAdminDAOImpl implements sysAdminDAO {
         criteria.where(whereClause);
         
         return sessionFactory.getCurrentSession().createQuery(criteria).getResultList();
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public utSettings getSystemSettings() throws Exception {
+        
+        CriteriaBuilder builder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<utSettings> criteria = builder.createQuery(utSettings.class);
+        Root<utSettings> root = criteria.from(utSettings.class);
+        
+        return sessionFactory.getCurrentSession().createQuery(criteria).uniqueResult();
+    }
+    
+    @Override
+    @Transactional(readOnly = false)
+    public void saveSystemSettings(utSettings Settings) throws Exception {
+	sessionFactory.getCurrentSession().merge(Settings);
     }
 }

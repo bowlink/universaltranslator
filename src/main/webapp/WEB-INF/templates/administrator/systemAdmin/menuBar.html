@@ -21,6 +21,9 @@
             <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'systemadmins' ? 'active' : '')}">
                 <a class="nav-link" th:classappend="${actionPage == 'systemadmins' ? 'active' : ''}" href="/administrator/sysadmin/systemAdmins" title="UT Admin Logins">System Administrators</a>
             </li>
+            <li style="width:100%" role="menuitem" class="nav-item" th:classappend="${(actionPage == 'systemsettings' ? 'active' : '')}">
+                <a class="nav-link" th:classappend="${actionPage == 'systemsettings' ? 'active' : ''}" href="/administrator/sysadmin/systemSettings" title="UT System Settings">System Settings</a>
+            </li>
         </ul>
     </nav>
 </aside>

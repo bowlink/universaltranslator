@@ -10,6 +10,7 @@ import com.hel.ut.model.MoveFilesLog;
 import com.hel.ut.model.mainHL7Details;
 import com.hel.ut.model.mainHL7Elements;
 import com.hel.ut.model.mainHL7Segments;
+import com.hel.ut.model.utSettings;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -82,4 +83,8 @@ public interface sysAdminDAO {
     Long findTotalStandardCrosswalks() throws Exception;
     
     List<Crosswalks> getStandardCrosswalks() throws Exception;
+    
+    utSettings getSystemSettings() throws Exception;
+    
+    void saveSystemSettings(utSettings Settings) throws Exception;
 }
