@@ -9,6 +9,7 @@
                 <span th:if="${actionPage == 'crosswalks'}">Standard System Crosswalks</span>
                 <span th:if="${actionPage == 'hisps'}">Manage HISPS</span>
                 <span th:if="${actionPage == 'systemadmins'}">Manage System Administrators</span>
+                <span th:if="${actionPage == 'systemsettings'}">UT System Settings</span>
             </h1>
         </div>
         <ul class="nav navbar-nav navbar-right navbar-actions" role="menu">
@@ -53,6 +54,13 @@
                     <a href="#adminModal" data-bs-toggle="modal" class="createNewSystemAdministrator" title="Create New System Administrator" role="button">
                         <span class="glyphicon glyphicon-plus icon-stacked"></span> 
                         New System Administrator
+                    </a>
+                </li>
+            </th:block>
+             <th:block th:if="${actionPage == 'systemsettings'}">
+                <li>
+                    <a href="#" id="saveDetails" title="Save System Settings" role="button">
+                        <span class="glyphicon glyphicon-ok icon-stacked"></span> Save 
                     </a>
                 </li>
             </th:block>

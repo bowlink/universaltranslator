@@ -4,7 +4,9 @@
  */
 package com.hel.ut.model.custom;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -15,6 +17,8 @@ public class configAuditLogs {
     private String moduleName = "", updatedBy = "", snapShotType = "", fileName = "";
     
     private Date dateUpdated = new Date();
+    
+    private List<String> fileNames = new ArrayList<>();
 
     public String getModuleName() {
         return moduleName;
@@ -54,5 +58,13 @@ public class configAuditLogs {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public List<String> getFileNames() {
+        return fileNames;
+    }
+
+    public void setFileNames(List<String> fileNames) {
+        this.fileNames = fileNames;
     }
 }

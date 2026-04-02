@@ -20,6 +20,7 @@ import com.hel.ut.model.MoveFilesLog;
 import com.hel.ut.model.mainHL7Details;
 import com.hel.ut.model.mainHL7Elements;
 import com.hel.ut.model.mainHL7Segments;
+import com.hel.ut.model.utSettings;
 import com.hel.ut.service.sysAdminManager;
 
 @Service
@@ -271,5 +272,15 @@ public class sysAdminManagerImpl implements sysAdminManager {
     @Override
     public List<Crosswalks> getStandardCrosswalks() throws Exception {
 	return sysAdminDAO.getStandardCrosswalks();
+    }
+    
+    @Override
+    public utSettings getSystemSettings() throws Exception {
+	return sysAdminDAO.getSystemSettings();
+    }
+    
+    @Override
+    public void saveSystemSettings(utSettings Settings) throws Exception {
+	sysAdminDAO.saveSystemSettings(Settings);
     }
 }

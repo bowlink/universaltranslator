@@ -22,10 +22,9 @@ jQuery(function ($) {
                         '</select>'
             },
            "aoColumns" : [
+                { "sWidth": "40%", "bSortable":false },
                 { "sWidth": "30%", "bSortable":false },
-                { "sWidth": "30%", "bSortable":false },
-                { "sWidth": "20%", "bSortable":false },
-                { "sWidth": "15%", "sType": "date" },
+                { "sWidth": "25%", "sType": "date" },
                 { "sWidth": "5%", "bSortable":false}
             ],
            "aaSorting" : [[3, "desc"]]

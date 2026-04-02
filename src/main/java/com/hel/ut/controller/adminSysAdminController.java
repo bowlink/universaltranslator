@@ -21,6 +21,7 @@ import com.hel.ut.model.custom.TableData;
 import com.hel.ut.model.hisps;
 import com.hel.ut.model.lutables.lu_ProcessStatus;
 import com.hel.ut.model.mailMessage;
+import com.hel.ut.model.utSettings;
 import com.hel.ut.model.utUserLogin;
 import com.hel.ut.service.emailMessageManager;
 import com.hel.ut.service.hispManager;
@@ -1068,5 +1069,32 @@ public class adminSysAdminController {
 	}
 	  
 	return returnVal;
+    }
+    
+    @RequestMapping(value = "/systemSettings", method = RequestMethod.GET)
+    public ModelAndView systemSettings() throws Exception {
+
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("pageId", "sysadmin-settings");
+        mav.addObject("pageSection", "section-sysadmin");
+        mav.addObject("sect","sysadmin");
+        mav.addObject("actionPage","systemsettings");
+        mav.addObject("eahUT",eahUT);
+        mav.setViewName("administrator/systemAdmin/settings/settings");
+
+        //Return a list of available macros
+        utSettings settings = sysAdminManager.getSystemSettings();
+        mav.addObject("settings", settings);
+
+        return mav;
+    }
+    
+    @RequestMapping(value = "/systemSettings", method = RequestMethod.POST)
+    public ModelAndView saveSystemSettings(@Valid @ModelAttribute(value = "settings") utSettings settings) throws Exception {
+
+        //now we save
+        sysAdminManager.saveSystemSettings(settings);
+        ModelAndView mav = new ModelAndView(new RedirectView("/administrator/sysadmin/systemSettings?msg=updated"));
+        return mav;
     }
 }
