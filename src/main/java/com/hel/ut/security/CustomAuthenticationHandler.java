@@ -21,6 +21,8 @@ import jakarta.servlet.http.HttpSession;
 import com.hel.ut.service.utConfigurationManager;
 import com.registryKit.messenger.emailManager;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CustomAuthenticationHandler extends SimpleUrlAuthenticationSuccessHandler {
 
@@ -113,6 +115,14 @@ public class CustomAuthenticationHandler extends SimpleUrlAuthenticationSuccessH
             session.setAttribute("userDetails", userDetails);
             
             usermanager.setLastLogin(userDetails.getUsername());
+            
+            //Send email to show someone logged in
+            try {
+                emailmanager.sendLogInNotification(userDetails.getEmail(),"UT",request);
+            }
+            catch (Exception ex) {
+                Logger.getLogger(CustomAuthenticationHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
 	    
             getRedirectStrategy().sendRedirect(request, response, adminTargetUrl);
         } 
@@ -151,6 +161,13 @@ public class CustomAuthenticationHandler extends SimpleUrlAuthenticationSuccessH
             
             /* Need to store the search session object */
             session.setAttribute("searchParameters", searchParameters);
+            
+            try {
+                emailmanager.sendLogInNotification(userDetails.getEmail(),"UT",request);
+            }
+            catch (Exception ex) {
+                Logger.getLogger(CustomAuthenticationHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
             
             getRedirectStrategy().sendRedirect(request, response, userTargetUrl);
 	}
