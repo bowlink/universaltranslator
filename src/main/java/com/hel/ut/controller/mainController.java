@@ -57,7 +57,7 @@ public class mainController {
      * @return	the login page view
      * @throws Exception
      */
-    @RequestMapping(value = {"/", "/login"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"/", "/login"}, method = {RequestMethod.GET, RequestMethod.POST})
     public ModelAndView login() throws Exception {
          
         ModelAndView mav = new ModelAndView();
