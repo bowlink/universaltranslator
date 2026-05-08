@@ -1410,52 +1410,52 @@ public class utConfigurationManagerImpl implements utConfigurationManager {
                     Object[] cwData = cwIterator.next();
                     
                     if("".equals(cwname) || !cwname.equals(cwData[0])) {
-                    if(!"".equals(cwname)) {
-                         reportBody.append("</tbody></table></div><br />");
-                    }
-                    cwname = cwData[0].toString();
-                    if(Integer.parseInt(cwData[6].toString()) == 1) {
-                        delim = "comma";
-                    }
-                    else if(Integer.parseInt(cwData[6].toString()) == 2) {
-                        delim = "pipe";
-                    }
-                    else if(Integer.parseInt(cwData[6].toString()) == 3) {
-                        delim = "colon";
-                    }
-                    else if(Integer.parseInt(cwData[6].toString()) == 11) {
-                        delim = "semi-colon";
-                    }
-                    else if(Integer.parseInt(cwData[6].toString()) == 12) {
-                        delim = "tab";
-                    }
+                        if(!"".equals(cwname)) {
+                             reportBody.append("</tbody></table></div><br />");
+                        }
+                        cwname = cwData[0].toString();
+                        if(Integer.parseInt(cwData[6].toString()) == 1) {
+                            delim = "comma";
+                        }
+                        else if(Integer.parseInt(cwData[6].toString()) == 2) {
+                            delim = "pipe";
+                        }
+                        else if(Integer.parseInt(cwData[6].toString()) == 3) {
+                            delim = "colon";
+                        }
+                        else if(Integer.parseInt(cwData[6].toString()) == 11) {
+                            delim = "semi-colon";
+                        }
+                        else if(Integer.parseInt(cwData[6].toString()) == 12) {
+                            delim = "tab";
+                        }
 
-                    dateCreated = cwData[7].toString();
-                    lastUpdated = cwData[8].toString();
+                        dateCreated = cwData[7].toString();
+                        lastUpdated = cwData[8].toString();
 
-                    TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
-                    DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    requiredFormat.setTimeZone(timeZone);
+                        TimeZone timeZone = TimeZone.getTimeZone(siteTimeZone);
+                        DateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        DateFormat dft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        requiredFormat.setTimeZone(timeZone);
 
-                    Date createDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateCreated);
-                    Date lastUpdateDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(lastUpdated);
+                        Date createDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateCreated);
+                        Date lastUpdateDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(lastUpdated);
 
-                    reportBody.append("<div><span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>CW Name: "+cwname+" (ID=" + cwData[4].toString() + ")</strong></span><br />");
-                    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Date Created: " + new SimpleDateFormat("M/dd/yyyy").format(createDate) + "</strong></span><br />");
-                    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Last Updated: " + new SimpleDateFormat("M/dd/yyyy").format(lastUpdateDate) + "</strong></span><br />");
-                    reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Delimiter Used: " + delim+ "</strong></span><br />");
-                    reportBody.append("<table border='1' cellpadding='1' cellspacing='1' width='100%'>");
-                    reportBody.append("<thead><tr><th style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Source Value</th><th style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Target Value</th><th style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Desc</th>");
-                    reportBody.append("</tr></thead><tbody>");
+                        reportBody.append("<div><span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>CW Name: "+cwname+" (ID=" + cwData[4].toString() + ")</strong></span><br />");
+                        reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Date Created: " + new SimpleDateFormat("M/dd/yyyy").format(createDate) + "</strong></span><br />");
+                        reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Last Updated: " + new SimpleDateFormat("M/dd/yyyy").format(lastUpdateDate) + "</strong></span><br />");
+                        reportBody.append("<span style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 14px;'><strong>Delimiter Used: " + delim+ "</strong></span><br />");
+                        reportBody.append("<table border='1' cellpadding='1' cellspacing='1' width='100%'>");
+                        reportBody.append("<thead><tr><th style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Source Value</th><th style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Target Value</th><th style='font-family: Franklin Gothic Medium, Franklin Gothic; font-size: 12px;'>Desc</th>");
+                        reportBody.append("</tr></thead><tbody>");
                     }
 
                     reportBody.append("<tr><td>")
-                    .append(escapeHtml(cwData[1].toString()))
-                    .append("</td><td>")
                     .append(escapeHtml(cwData[2].toString()))
                     .append("</td><td>")
                     .append(escapeHtml(cwData[3].toString()))
+                    .append("</td><td>")
+                    .append(escapeHtml(cwData[4].toString()))
                     .append("</td></tr>");
                 }
 

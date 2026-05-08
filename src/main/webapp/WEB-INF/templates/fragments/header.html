@@ -30,7 +30,7 @@
                         <a th:href="@{/administrator/configurations/connections}" title="Configuration Connection Manager">Connections</a>
                         <span th:if="${sect == 'connect'}" class="indicator-active arrow-up"></span></li>
                     <li th:if="${session.userDetails.roleId == 3}" role="menuitem" th:class="${sect == 'dash' ? 'active' : 'none'}">
-                        <a th:href="@{/administrator}" title="Dashboard">Dashboard</a><c:if test="${param['sect'] == 'dash'}">
+                        <a th:href="@{/administrator}" title="Dashboard">Dashboard</a>
                         <span th:if="${sect == 'dash'}" class="indicator-active arrow-up"></span>
                     </li>
                     <li role="menuitem" th:class="${sect == 'activity' ? 'active' : 'none'}">
