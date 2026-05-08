@@ -3730,7 +3730,6 @@ public class adminConfigController {
 		}
 	    }
 	    catch (Exception ex) {
-		System.out.println(ex.getMessage());
 		return "";
 	    }
 	}
