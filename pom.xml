@@ -15,8 +15,8 @@
     <name>UT</name>
   
     <properties>
-	<org.springframework.version>6.2.17</org.springframework.version>
-        <org.springWebMVC.version>6.2.17</org.springWebMVC.version>
+	<org.springframework.version>6.2.18</org.springframework.version>
+        <org.springWebMVC.version>6.2.18</org.springWebMVC.version>
 	<org.spring.security.version>6.5.10</org.spring.security.version>
 	<hibernate-core.version>6.1.7.Final</hibernate-core.version>
 	<hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
