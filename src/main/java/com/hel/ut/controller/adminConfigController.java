@@ -5366,7 +5366,7 @@ public class adminConfigController {
 	else {
 	    newConfigTransport.setZipped(false);
 	}
-	if("null".equals(strArrayValues[21])) {
+        if("null".equals(strArrayValues[21]) || "".equals(strArrayValues[21])) {
 	    newConfigTransport.setZipType(0);
 	}
         else {
@@ -5393,7 +5393,13 @@ public class adminConfigController {
 	else {
 	    newConfigTransport.setWaitForResponse(false);
 	}
-	newConfigTransport.setRestAPIFunctionId(Integer.parseInt(strArrayValues[27]));
+        
+        if("null".equals(strArrayValues[27]) || "".equals(strArrayValues[27])) {
+	    newConfigTransport.setRestAPIFunctionId(0);
+	}
+	else {
+	    newConfigTransport.setRestAPIFunctionId(Integer.parseInt(strArrayValues[27]));
+	}
 	newConfigTransport.setJsonWrapperElement(strArrayValues[28]);
 	newConfigTransport.setLineTerminator(strArrayValues[29]);
 	if(!"null".equals(strArrayValues[30])) {
@@ -6075,6 +6081,10 @@ public class adminConfigController {
                 String formatted = now.format(findFormatter);
 
                 File dir = new File(myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/" + "configurationUpdates/" + configId + "/");
+                
+                if(!dir.exists()) {
+                    dir.mkdirs();
+                }
 
                 String partialName = "before-"+module+"-"+userDetails.getFirstName()+" "+userDetails.getLastName()+ "-"+formatted;
 
@@ -6092,7 +6102,7 @@ public class adminConfigController {
                     }
                 }
             }
-
+            
             if(makeFile) {
 
                 now = LocalDateTime.now();
@@ -6100,6 +6110,12 @@ public class adminConfigController {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMddyyyyHHmmss");
 
                 String formatted = now.format(formatter);
+                
+                File configUpdateDir = new File(myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/" + "configurationUpdates/" + configId);
+               
+                if(!configUpdateDir.exists()) {
+                    configUpdateDir.mkdirs();
+                }
 
                 String configDetailFile = myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/" + "configurationUpdates/" + configId + "/" + snapShotType + "-" + module + "-" + userDetails.getFirstName() + " " + userDetails.getLastName() + "-" + formatted+".txt";
                 String configPrintFile = myProps.getProperty("ut.directory.utRootDir") + orgDetails.getcleanURL() + "/" + "configurationUpdates/" + configId + "/" + snapShotType + "-" + module + "-" + userDetails.getFirstName() + " " + userDetails.getLastName() + "-" + formatted+".pdf";
